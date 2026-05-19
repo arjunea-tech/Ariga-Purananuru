@@ -20,12 +20,15 @@ export class SafeHtmlPipe implements PipeTransform {
 
 import { ContentService, ContentData, Attachment } from '../../services/content';
 import { ChapterService, ChapterData } from '../../services/chapter';
+import EditorJS from '@editorjs/editorjs';
+import { ActivityBlock } from '../../editor-plugins/activity-block';
+import { ActivityRenderer } from '../activity-engine/activity-renderer';
 
 import {
   McvInputField,
   McvToggleField
 } from 'mcv-ui-toolkit';
-import { EditorComponent } from '@tinymce/tinymce-angular';
+
 @Component({
   selector: 'app-content',
   standalone: true,
@@ -36,8 +39,8 @@ import { EditorComponent } from '@tinymce/tinymce-angular';
     McvInputField,
     McvToggleField,
     TranslateModule,
-    EditorComponent,
-    SafeHtmlPipe
+    SafeHtmlPipe,
+    ActivityRenderer
   ],
   templateUrl: './content.html',
   styleUrls: ['./content.css'],
@@ -46,8 +49,6 @@ export class Content implements OnInit {
   private fb = inject(FormBuilder);
   private contentService = inject(ContentService);
   private chapterService = inject(ChapterService);
-
-
 
   contentForm: FormGroup;
   contents = signal<ContentData[]>([]);
@@ -59,23 +60,7 @@ export class Content implements OnInit {
   feedbackMessage = signal<{ type: 'success' | 'error', text: string } | null>(null);
   previewContent = signal<ContentData | null>(null);
 
-  editorConfig = {
-    base_url: '/tinymce',
-    suffix: '.min',
-    height: 500,
-    menubar: 'file edit view insert format tools table help',
-    plugins: [
-      'advlist autolink lists link image charmap print preview anchor',
-      'searchreplace visualblocks code fullscreen',
-      'insertdatetime media table paste code help wordcount'
-    ],
-    toolbar:
-      'undo redo | formatselect | bold italic backcolor | ' +
-      'alignleft aligncenter alignright alignjustify | ' +
-      'bullist numlist outdent indent | removeformat | help',
-    skin: 'oxide',
-    content_css: 'default'
-  };
+  private editorjsInstance: EditorJS | null = null;
 
 
 
@@ -155,9 +140,31 @@ export class Content implements OnInit {
 
 
 
+  initializeEditorJS(initialData?: any): void {
+    if (this.editorjsInstance) {
+      this.editorjsInstance.destroy();
+      this.editorjsInstance = null;
+    }
+
+    setTimeout(() => {
+      this.editorjsInstance = new EditorJS({
+        holder: 'editorjs',
+        data: initialData || {},
+        tools: {
+          activity: {
+            class: ActivityBlock,
+            inlineToolbar: true
+          }
+        },
+        placeholder: 'Start writing your lesson content... Press Tab or type "/" for interactive activities!'
+      });
+    }, 100);
+  }
+
   showCreateForm(): void {
     this.resetForm();
     this.isFormVisible.set(true);
+    this.initializeEditorJS({});
   }
 
   onMultipleFileChange(event: any): void {
@@ -203,6 +210,21 @@ export class Content implements OnInit {
       return;
     }
 
+    if (this.editorjsInstance) {
+      this.editorjsInstance.save().then((outputData) => {
+        const jsonStr = JSON.stringify(outputData);
+        this.contentForm.patchValue({ text_content: jsonStr });
+        this.submitPayload();
+      }).catch((error) => {
+        console.error('Saving failed: ', error);
+        this.showFeedback('error', 'Failed to save block editor content.');
+      });
+    } else {
+      this.submitPayload();
+    }
+  }
+
+  submitPayload(): void {
     const contentData = {
       ...this.contentForm.value,
       attachments: this.attachmentsToSave(),
@@ -247,6 +269,16 @@ export class Content implements OnInit {
       is_active: content.is_active,
       text_content: content.text_content,
     });
+
+    // Detect if content is EditorJS block JSON
+    let parsedJson: any = {};
+    try {
+      if (content.text_content && content.text_content.trim().startsWith('{')) {
+        parsedJson = JSON.parse(content.text_content);
+      }
+    } catch(e) {}
+
+    this.initializeEditorJS(parsedJson);
     
     // Patch URLs
     const urlArray = this.contentForm.get('urls') as FormArray;
@@ -279,6 +311,11 @@ export class Content implements OnInit {
   }
 
   resetForm(): void {
+    if (this.editorjsInstance) {
+      this.editorjsInstance.destroy();
+      this.editorjsInstance = null;
+    }
+
     this.contentForm.reset({ is_active: true, sort_order: 0 });
     const urlArray = this.contentForm.get('urls') as FormArray;
     urlArray.clear();
@@ -289,6 +326,22 @@ export class Content implements OnInit {
     
     this.isEditMode.set(false);
     this.currentContentId.set(null);
+  }
+
+  isPreviewJsonContent(text?: string): boolean {
+    if (!text) return false;
+    const trimmed = text.trim();
+    return trimmed.startsWith('{') && trimmed.endsWith('}');
+  }
+
+  getParsedPreviewBlocks(text?: string): any[] {
+    if (!text) return [];
+    try {
+      const data = JSON.parse(text);
+      return data.blocks || [];
+    } catch (e) {
+      return [];
+    }
   }
 
   showPreview(content: ContentData): void {

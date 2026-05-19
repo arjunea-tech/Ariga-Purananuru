@@ -116,8 +116,10 @@
           </div>
 
           <div class="col-12">
-            <label class="form-label small text-secondary fw-semibold">{{ 'CONTENT.TEXT_CONTENT' | translate }}</label>
-            <editor formControlName="text_content" [init]="editorConfig"></editor>
+            <label class="form-label small text-secondary fw-semibold mb-2">{{ 'CONTENT.TEXT_CONTENT' | translate }}</label>
+            <div class="editorjs-wrapper border rounded-4 bg-white p-4 shadow-sm" style="min-height: 450px;">
+              <div id="editorjs"></div>
+            </div>
           </div>
 
           <!-- Attachments Section -->
@@ -336,7 +338,29 @@
           <button type="button" class="btn-close shadow-none" (click)="closePreview()"></button>
         </div>
         <div class="modal-body p-4 p-lg-5 bg-white">
-          <div class="content-render mb-4" [innerHTML]="content.text_content | safeHtml"></div>
+          @if (isPreviewJsonContent(content.text_content)) {
+            <div class="editorjs-blocks">
+              @for (block of getParsedPreviewBlocks(content.text_content); track $index) {
+                @if (block.type === 'paragraph') {
+                  <p class="mb-3 fs-5 text-dark" [innerHTML]="block.data.text"></p>
+                } @else if (block.type === 'header') {
+                  @if (block.data.level === 1) {
+                    <h1 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h1>
+                  } @else if (block.data.level === 2) {
+                    <h2 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h2>
+                  } @else {
+                    <h3 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h3>
+                  }
+                } @else if (block.type === 'activity') {
+                  <app-activity-renderer [activity]="block.data" [showFeedback]="true"></app-activity-renderer>
+                } @else {
+                  <div class="mb-3 text-dark" [innerHTML]="block.data.text || ''"></div>
+                }
+              }
+            </div>
+          } @else {
+            <div class="content-render mb-4" [innerHTML]="content.text_content | safeHtml"></div>
+          }
           
           <!-- Attachments Preview -->
           @if (content.attachments && content.attachments.length > 0) {

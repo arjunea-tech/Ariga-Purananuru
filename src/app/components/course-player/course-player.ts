@@ -38,11 +38,13 @@ interface CourseStructure {
 }
 
 import { McvDatatree, McvDatatreeNode } from 'mcv-ui-toolkit';
+import { RouterModule } from '@angular/router';
+import { ActivityRenderer } from '../activity-engine/activity-renderer';
 
 @Component({
   selector: 'app-course-player',
   standalone: true,
-  imports: [CommonModule, McvDatatree],
+  imports: [CommonModule, McvDatatree, RouterModule, ActivityRenderer],
   templateUrl: './course-player.html',
   styleUrls: ['./course-player.css']
 })
@@ -89,6 +91,25 @@ export class CoursePlayer implements OnInit {
       }
     }
     return null;
+  });
+
+  isJsonContent = computed(() => {
+    const content = this.activeContent();
+    if (!content || !content.text_content) return false;
+    const trimmed = content.text_content.trim();
+    return trimmed.startsWith('{') && trimmed.endsWith('}');
+  });
+
+  parsedBlocks = computed(() => {
+    const content = this.activeContent();
+    if (!content || !content.text_content) return [];
+    try {
+      const data = JSON.parse(content.text_content);
+      return data.blocks || [];
+    } catch (e) {
+      console.warn('Failed to parse text_content as JSON blocks, rendering as HTML instead.');
+      return [];
+    }
   });
 
   ngOnInit(): void {

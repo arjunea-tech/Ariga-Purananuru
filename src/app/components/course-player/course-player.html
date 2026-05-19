@@ -38,7 +38,29 @@
         <!-- Full Content Body -->
         <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white">
           <!-- Text Content -->
-          <div class="prose max-w-none text-dark fs-5 mb-4" [innerHTML]="content.text_content"></div>
+          @if (isJsonContent()) {
+            <div class="editorjs-blocks">
+              @for (block of parsedBlocks(); track $index) {
+                @if (block.type === 'paragraph') {
+                  <p class="mb-3 fs-5 text-dark" [innerHTML]="block.data.text"></p>
+                } @else if (block.type === 'header') {
+                  @if (block.data.level === 1) {
+                    <h1 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h1>
+                  } @else if (block.data.level === 2) {
+                    <h2 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h2>
+                  } @else {
+                    <h3 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h3>
+                  }
+                } @else if (block.type === 'activity') {
+                  <app-activity-renderer [activity]="block.data" [showFeedback]="true"></app-activity-renderer>
+                } @else {
+                  <div class="mb-3 text-dark" [innerHTML]="block.data.text || ''"></div>
+                }
+              }
+            </div>
+          } @else {
+            <div class="prose max-w-none text-dark fs-5 mb-4" [innerHTML]="content.text_content"></div>
+          }
 
           <!-- Attachments (Media & Files) -->
           @if (content.attachments && content.attachments.length > 0) {
@@ -119,10 +141,10 @@
               <div class="card border-0 shadow-sm rounded-4 h-100 p-4 transition-all hover-scale bg-white">
                 <h5 class="fw-bold mb-2">{{ assessment.name }}</h5>
                 <p class="text-secondary small mb-4 flex-grow-1">{{ assessment.description || 'Take this assessment to test your knowledge.' }}</p>
-                <button class="btn btn-primary w-100 rounded-3 py-2 fw-bold">
+                <a [routerLink]="['/assessments/play', assessment.id]" class="btn btn-primary w-100 rounded-3 py-2 fw-bold text-decoration-none d-block text-center">
                   Start Assessment
                   <i class="bi bi-arrow-right ms-2"></i>
-                </button>
+                </a>
               </div>
             </div>
             }
