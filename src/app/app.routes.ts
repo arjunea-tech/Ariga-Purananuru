@@ -11,7 +11,7 @@ import { Assessment } from './components/assessment/assessment';
 
 import { LearningMode } from './components/learning-mode/learning-mode';
 import { CoursePlayer } from './components/course-player/course-player';
-import { AssessmentPlayerComponent } from './components/activity-engine/assessment-player';
+import { AssessmentPlayerComponent } from './components/activity-engine/assessment-player/assessment-player';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'tenants', pathMatch: 'full' },

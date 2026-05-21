@@ -39,7 +39,7 @@ interface CourseStructure {
 
 import { McvDatatree, McvDatatreeNode } from 'mcv-ui-toolkit';
 import { RouterModule } from '@angular/router';
-import { ActivityRenderer } from '../activity-engine/activity-renderer';
+import { ActivityRenderer } from '../activity-engine/activity-renderer/activity-renderer';
 
 @Component({
   selector: 'app-course-player',

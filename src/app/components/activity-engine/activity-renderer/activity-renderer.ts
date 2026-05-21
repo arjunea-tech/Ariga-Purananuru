@@ -1,12 +1,14 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MCQComponent } from './mcq';
-import { FillBlanksComponent } from './fill-blanks';
-import { FlashcardComponent } from './flashcard';
-import { MatchComponent } from './match';
+import { MCQComponent, MCQData } from '../mcq/mcq';
+import { FillBlanksComponent, FillBlanksData } from '../fill-blanks/fill-blanks';
+import { FlashcardComponent, FlashcardData } from '../flashcard/flashcard';
+import { MatchComponent, MatchData } from '../match/match';
+import { CrosswordComponent, CrosswordData, CrosswordWord } from '../crossword/crossword';
+import { WordArrangeComponent, WordArrangeData } from '../word-arrange/word-arrange';
 
 export interface NormalizedActivity {
-  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match';
+  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange';
   question?: string;
   text?: string;
   front?: string;
@@ -14,6 +16,8 @@ export interface NormalizedActivity {
   explanation?: string;
   options?: any[];
   pairs?: any[];
+  gridSize?: number;
+  words?: any[];
 }
 
 @Component({
@@ -24,50 +28,12 @@ export interface NormalizedActivity {
     MCQComponent,
     FillBlanksComponent,
     FlashcardComponent,
-    MatchComponent
+    MatchComponent,
+    CrosswordComponent,
+    WordArrangeComponent
   ],
-  template: `
-    @if (normalizedActivity(); as data) {
-      <div class="activity-renderer-container">
-        @switch (data.type) {
-          @case ('mcq') {
-            <app-activity-mcq 
-              [activity]="data" 
-              [showFeedback]="showFeedback"
-              (answered)="onMCQAnswered($event)">
-            </app-activity-mcq>
-          }
-          @case ('fill_blanks') {
-            <app-activity-fill-blanks 
-              [activity]="data" 
-              [showFeedback]="showFeedback"
-              (answered)="onBlanksAnswered($event)">
-            </app-activity-fill-blanks>
-          }
-          @case ('flashcard') {
-            <app-activity-flashcard 
-              [activity]="data" 
-              [showFeedback]="showFeedback"
-              (answered)="onFlashcardAnswered($event)">
-            </app-activity-flashcard>
-          }
-          @case ('match') {
-            <app-activity-match 
-              [activity]="data" 
-              [showFeedback]="showFeedback"
-              (answered)="onMatchAnswered($event)">
-            </app-activity-match>
-          }
-        }
-      </div>
-    }
-  `,
-  styles: [`
-    .activity-renderer-container {
-      width: 100%;
-      margin: 1.25rem 0;
-    }
-  `]
+  templateUrl: './activity-renderer.html',
+  styleUrls: ['./activity-renderer.css']
 })
 export class ActivityRenderer implements OnChanges {
   @Input() activity: any = null;
@@ -93,7 +59,7 @@ export class ActivityRenderer implements OnChanges {
     
     // 1. Determine type
     let typeInput = raw.type || raw.question_type || 'mcq';
-    let type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' = 'mcq';
+    let type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' = 'mcq';
 
     if (['multiple_choice', 'mcq', 'multiple-choice', 'multiplechoice'].includes(typeInput.toLowerCase())) {
       type = 'mcq';
@@ -103,6 +69,10 @@ export class ActivityRenderer implements OnChanges {
       type = 'flashcard';
     } else if (['match_following', 'match', 'match-following', 'matchfollowing'].includes(typeInput.toLowerCase())) {
       type = 'match';
+    } else if (['crossword', 'crossword_puzzle'].includes(typeInput.toLowerCase())) {
+      type = 'crossword';
+    } else if (['word_arrange', 'word-arrange', 'wordarrange', 'sentence_unscramble', 'sentence-unscramble'].includes(typeInput.toLowerCase())) {
+      type = 'word_arrange';
     }
 
     // 2. Extract explanation & options
@@ -129,6 +99,12 @@ export class ActivityRenderer implements OnChanges {
       normalized.back = raw.back || additional.back || '';
     } else if (type === 'match') {
       normalized.pairs = raw.pairs || additional.pairs || [];
+    } else if (type === 'crossword') {
+      normalized.gridSize = raw.gridSize || additional.gridSize || 10;
+      normalized.words = raw.words || additional.words || [];
+    } else if (type === 'word_arrange') {
+      normalized.text = raw.text || additional.text || raw.question_text || '';
+      normalized.question = raw.question || raw.question_text || '';
     }
 
     this.normalizedActivity.set(normalized);
@@ -164,6 +140,22 @@ export class ActivityRenderer implements OnChanges {
     this.answered.emit({
       questionId: this.activity?.id,
       type: 'match',
+      ...event
+    });
+  }
+
+  onCrosswordAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'crossword',
+      ...event
+    });
+  }
+
+  onWordArrangeAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'word_arrange',
       ...event
     });
   }

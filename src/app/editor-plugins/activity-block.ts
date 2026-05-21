@@ -3,6 +3,8 @@
  * 
  * Provides interactive form builders directly inside the lesson editor to configure low-stakes practices.
  */
+import { CrosswordGenerator } from '../services/crossword-generator.service';
+
 export class ActivityBlock {
   private data: any;
   private api: any;
@@ -31,6 +33,10 @@ export class ActivityBlock {
       pairs: data?.pairs || [
         { left: '', right: '' }
       ],
+      gridSize: data?.gridSize || 10,
+      words: data?.words || [
+        { word: '', clue: '', row: 1, col: 1, direction: 'across' }
+      ],
       explanation: data?.explanation || ''
     };
     this.api = api;
@@ -40,7 +46,7 @@ export class ActivityBlock {
   render(): HTMLElement {
     const wrapper = document.createElement('div');
     wrapper.classList.add('editorjs-activity-block');
-    
+
     // Add CSS styles inline to keep it self-contained
     const styleId = 'editorjs-activity-block-styles';
     if (!document.getElementById(styleId)) {
@@ -165,6 +171,8 @@ export class ActivityBlock {
       <option value="fill_blanks" ${this.data.type === 'fill_blanks' ? 'selected' : ''}>Fill in the Blanks</option>
       <option value="flashcard" ${this.data.type === 'flashcard' ? 'selected' : ''}>3D Vocabulary Flashcard</option>
       <option value="match" ${this.data.type === 'match' ? 'selected' : ''}>Match the Following Pairs</option>
+      <option value="crossword" ${this.data.type === 'crossword' ? 'selected' : ''}>Dynamic Crossword Puzzle</option>
+      <option value="word_arrange" ${this.data.type === 'word_arrange' ? 'selected' : ''}>Word Arrangement</option>
     `;
 
     select.addEventListener('change', (e: any) => {
@@ -188,6 +196,10 @@ export class ActivityBlock {
       this.renderFlashcardForm(formContainer);
     } else if (this.data.type === 'match') {
       this.renderMatchForm(formContainer);
+    } else if (this.data.type === 'crossword') {
+      this.renderCrosswordForm(formContainer);
+    } else if (this.data.type === 'word_arrange') {
+      this.renderWordArrangeForm(formContainer);
     }
 
     this.container.appendChild(formContainer);
@@ -206,7 +218,7 @@ export class ActivityBlock {
     // 2. Options list
     const optionsGroup = document.createElement('div');
     optionsGroup.classList.add('activity-form-group');
-    
+
     const optionsLabel = document.createElement('label');
     optionsLabel.classList.add('activity-editor-label');
     optionsLabel.textContent = 'Answer Options (Select correct answer radio)';
@@ -323,7 +335,7 @@ export class ActivityBlock {
   private renderMatchForm(parent: HTMLDivElement): void {
     const pairsGroup = document.createElement('div');
     pairsGroup.classList.add('activity-form-group');
-    
+
     const label = document.createElement('label');
     label.classList.add('activity-editor-label');
     label.textContent = 'Word Matches Pairs (Left & Right Column Pairing)';
@@ -395,6 +407,152 @@ export class ActivityBlock {
     this.renderExplanationInput(parent);
   }
 
+  private renderCrosswordForm(parent: HTMLDivElement): void {
+    // 1. Instructions and Info
+    const infoGroup = document.createElement('div');
+    infoGroup.style.marginBottom = '1.5rem';
+    infoGroup.innerHTML = `
+      <div style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 1rem; border-radius: 0.5rem; color: #1e3a8a;">
+        <strong>Auto-Generated Crossword:</strong> Add your words and clues below. We will automatically calculate the best intersections and grid size.
+      </div>
+    `;
+    parent.appendChild(infoGroup);
+
+    // 2. Words list
+    const wordsGroup = document.createElement('div');
+    wordsGroup.classList.add('activity-form-group');
+
+    const wordsLabel = document.createElement('label');
+    wordsLabel.classList.add('activity-editor-label');
+    wordsLabel.textContent = 'Crossword Words & Clues';
+    wordsGroup.appendChild(wordsLabel);
+
+    const rowsContainer = document.createElement('div');
+    rowsContainer.classList.add('crossword-rows-container');
+
+    const renderWordRows = () => {
+      rowsContainer.innerHTML = '';
+      this.data.words.forEach((w: any, idx: number) => {
+        const row = document.createElement('div');
+        row.style.background = '#f8fafc';
+        row.style.border = '1px solid #e2e8f0';
+        row.style.borderRadius = '0.5rem';
+        row.style.padding = '1rem';
+        row.style.marginBottom = '1rem';
+
+        row.innerHTML = `
+          <div style="display: flex; gap: 0.75rem; margin-bottom: 0.5rem;">
+            <input type="text" class="activity-input-text cw-word" placeholder="Word (e.g. HELLO)" value="${w.word || ''}" style="flex: 1; text-transform: uppercase;">
+            <button type="button" class="activity-btn activity-btn-danger cw-del" style="flex-shrink: 0;">&times; Remove</button>
+          </div>
+          <input type="text" class="activity-input-text cw-clue" placeholder="Clue (e.g. A common greeting)" value="${w.clue || ''}" style="width: 100%;">
+        `;
+
+        // Bind events
+        const wordInput = row.querySelector('.cw-word') as HTMLInputElement;
+        const clueInput = row.querySelector('.cw-clue') as HTMLInputElement;
+        const delBtn = row.querySelector('.cw-del') as HTMLButtonElement;
+
+        wordInput.addEventListener('input', (e: any) => { w.word = e.target.value.toUpperCase(); });
+        clueInput.addEventListener('input', (e: any) => { w.clue = e.target.value; });
+
+        delBtn.addEventListener('click', () => {
+          if (this.data.words.length > 1) {
+            this.data.words.splice(idx, 1);
+            renderWordRows();
+          }
+        });
+
+        rowsContainer.appendChild(row);
+      });
+    };
+
+    renderWordRows();
+    wordsGroup.appendChild(rowsContainer);
+
+    // Add row button
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.classList.add('activity-btn', 'activity-btn-primary', 'mt-2');
+    addBtn.innerHTML = `+ Add Word`;
+    addBtn.addEventListener('click', () => {
+      this.data.words.push({ word: '', clue: '' }); // Simplified payload for auto-gen
+      renderWordRows();
+    });
+    wordsGroup.appendChild(addBtn);
+    parent.appendChild(wordsGroup);
+
+    // 3. Auto Generate Action Button
+    const genGroup = document.createElement('div');
+    genGroup.style.marginTop = '2rem';
+    genGroup.style.paddingTop = '1rem';
+    genGroup.style.borderTop = '1px solid #e2e8f0';
+
+    const genBtn = document.createElement('button');
+    genBtn.type = 'button';
+    genBtn.classList.add('activity-btn');
+    genBtn.style.background = '#10b981';
+    genBtn.style.color = 'white';
+    genBtn.innerHTML = `Generate`;
+
+    const statusText = document.createElement('div');
+    statusText.style.marginTop = '0.75rem';
+    statusText.style.fontSize = '0.85rem';
+    statusText.style.color = '#64748b';
+
+    genBtn.addEventListener('click', () => {
+      try {
+        const result = CrosswordGenerator.generate(this.data.words);
+        this.data.gridSize = result.gridSize;
+
+        // We overwrite this.data.words with the fully calculated placed words array
+        // It now contains row, col, and direction natively.
+        // But we must preserve unplaced words in the UI so the admin can fix them.
+        this.data.words = [...result.words, ...result.unplaced];
+
+        let msg = 'Success! Generated ' + result.gridSize + 'x' + result.gridSize + ' grid fitting ' + result.words.length + ' words.';
+        if (result.unplaced.length > 0) {
+          msg += ' <strong style="color:#ef4444;">Could not fit ' + result.unplaced.length + ' words (No intersections).</strong>';
+        }
+        statusText.innerHTML = msg;
+
+        // We re-render the rows so the UI persists their existence (or we could visualize the preview here)
+        renderWordRows();
+      } catch (err) {
+        statusText.innerHTML = '<span style="color:#ef4444;">Generation error occurred. Please ensure words have valid characters.</span>';
+      }
+    });
+
+    genGroup.appendChild(genBtn);
+    genGroup.appendChild(statusText);
+    parent.appendChild(genGroup);
+
+    this.renderExplanationInput(parent);
+  }
+
+  private renderWordArrangeForm(parent: HTMLDivElement): void {
+    const qGroup = document.createElement('div');
+    qGroup.classList.add('activity-form-group');
+    qGroup.innerHTML = `
+      <label class="activity-editor-label">Question Text</label>
+      <input type="text" class="activity-input-text word-arrange-question" value="${this.data.question || 'Arrange the words to form a correct sentence:'}" placeholder="E.g., Arrange the words to form a correct sentence:">
+    `;
+    parent.appendChild(qGroup);
+
+    const txtGroup = document.createElement('div');
+    txtGroup.classList.add('activity-form-group');
+    txtGroup.innerHTML = `
+      <label class="activity-editor-label">Correct Sentence (Words separated by space or '/')</label>
+      <input type="text" class="activity-input-text word-arrange-text" value="${this.data.text || ''}" placeholder="E.g., he is playing OR he/is/playing">
+      <small class="activity-helper-text">
+        Enter the words in correct order. You can separate them by spaces or slashes.
+      </small>
+    `;
+    parent.appendChild(txtGroup);
+
+    this.renderExplanationInput(parent);
+  }
+
   private renderExplanationInput(parent: HTMLDivElement): void {
     const group = document.createElement('div');
     group.classList.add('activity-form-group');
@@ -425,11 +583,16 @@ export class ActivityBlock {
     } else if (type === 'fill_blanks') {
       const txtTextarea = blockContent.querySelector('.fill-blanks-text') as HTMLTextAreaElement;
       savedData.text = txtTextarea ? txtTextarea.value : '';
+    } else if (type === 'word_arrange') {
+      const qInput = blockContent.querySelector('.word-arrange-question') as HTMLInputElement;
+      const txtInput = blockContent.querySelector('.word-arrange-text') as HTMLInputElement;
+      savedData.question = qInput ? qInput.value : '';
+      savedData.text = txtInput ? txtInput.value : '';
     } else if (type === 'flashcard') {
       const frontInput = blockContent.querySelector('.flashcard-front') as HTMLInputElement;
       const backInput = blockContent.querySelector('.flashcard-back') as HTMLInputElement;
       const audioInput = blockContent.querySelector('.flashcard-audio') as HTMLInputElement;
-      
+
       savedData.front = frontInput ? frontInput.value : '';
       savedData.back = backInput ? backInput.value : '';
       savedData.audioUrl = audioInput ? audioInput.value : '';
@@ -439,6 +602,32 @@ export class ActivityBlock {
       savedData.pairs = this.data.pairs.map((p: any) => ({
         left: p.left,
         right: p.right
+      }));
+    } else if (type === 'crossword') {
+      // The generation logic modifies this.data directly and sets row/col/direction.
+      // We only save words that were successfully placed by the algorithm (they have row & col).
+      // If the admin clicks save without generating, we automatically run generation here as a fallback.
+      let finalWords = this.data.words;
+      let finalSize = this.data.gridSize;
+
+      // Check if they forgot to generate
+      const needsGeneration = finalWords.some((w: any) => !w.row || !w.direction);
+      if (needsGeneration) {
+        const result = CrosswordGenerator.generate(finalWords);
+        finalWords = result.words;
+        finalSize = result.gridSize;
+      }
+
+      // Filter out any unplaced words
+      const successfullyPlaced = finalWords.filter((w: any) => w.row && w.col && w.direction);
+
+      savedData.gridSize = finalSize || 10;
+      savedData.words = successfullyPlaced.map((w: any) => ({
+        word: w.word,
+        clue: w.clue,
+        row: w.row,
+        col: w.col,
+        direction: w.direction
       }));
     }
 

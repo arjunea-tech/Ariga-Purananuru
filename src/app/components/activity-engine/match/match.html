@@ -1,0 +1,60 @@
+    <div class="match-container mb-4 glass-card">
+      <div class="header mb-4">
+        <span class="badge bg-purple bg-opacity-10 text-purple rounded-pill px-3 py-2 text-uppercase fw-bold d-inline-block" style="letter-spacing: 0.05em; font-size: 0.75rem; color: #8b5cf6; background-color: rgba(139, 92, 246, 0.1);">Match the Following</span>
+      </div>
+
+      <div class="row g-4 mb-3">
+        <!-- Left Column -->
+        <div class="col-12 col-sm-6 d-flex flex-column gap-2">
+          <span class="text-uppercase fw-bold text-secondary pb-2 border-bottom border-light" style="font-size: 0.8rem; letter-spacing: 0.08em;">English</span>
+          @for (item of leftItems(); track item.id) {
+            <button
+              type="button"
+              class="match-btn w-100 d-flex align-items-center justify-content-between border rounded-3 p-3 bg-white bg-opacity-95"
+              [class.selected]="selectedLeftId() === item.id"
+              [class.matched]="isItemMatched(item.id)"
+              [class.incorrect-shake]="shakeLeftId() === item.id"
+              [style.background]="getMatchedColorStyle(item.id)"
+              [disabled]="isItemMatched(item.id)"
+              (click)="selectLeft(item)">
+              <span class="item-text fw-medium text-secondary">{{ item.text }}</span>
+              <span class="badge-check fs-5 d-flex align-items-center text-success" *ngIf="isItemMatched(item.id)">
+                <i class="bi bi-check-circle-fill"></i>
+              </span>
+            </button>
+          }
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-12 col-sm-6 d-flex flex-column gap-2">
+          <span class="text-uppercase fw-bold text-secondary pb-2 border-bottom border-light" style="font-size: 0.8rem; letter-spacing: 0.08em;">Tamil</span>
+          @for (item of rightItems(); track item.id) {
+            <button
+              type="button"
+              class="match-btn w-100 d-flex align-items-center justify-content-between border rounded-3 p-3 bg-white bg-opacity-95"
+              [class.selected]="selectedRightId() === item.id"
+              [class.matched]="isItemMatched(item.id)"
+              [class.incorrect-shake]="shakeRightId() === item.id"
+              [style.background]="getMatchedColorStyle(item.id)"
+              [disabled]="isItemMatched(item.id)"
+              (click)="selectRight(item)">
+              <span class="item-text fw-medium text-secondary">{{ item.text }}</span>
+              <span class="badge-check fs-5 d-flex align-items-center text-success" *ngIf="isItemMatched(item.id)">
+                <i class="bi bi-check-circle-fill"></i>
+              </span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Explanation Box -->
+      @if (showFeedback && isComplete() && activity?.explanation) {
+        <div class="explanation-box animate-fade-in mt-4 rounded-3 p-4 bg-warning bg-opacity-10 border-start border-4 border-warning">
+          <div class="d-flex align-items-center gap-2 fw-bold text-warning mb-2" style="font-size: 0.9rem;">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Explanation</span>
+          </div>
+          <p class="m-0" style="color: #451a03; font-size: 0.925rem; line-height: 1.5;">{{ activity?.explanation }}</p>
+        </div>
+      }
+    </div>

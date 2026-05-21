@@ -22,7 +22,7 @@ import { ContentService, ContentData, Attachment } from '../../services/content'
 import { ChapterService, ChapterData } from '../../services/chapter';
 import EditorJS from '@editorjs/editorjs';
 import { ActivityBlock } from '../../editor-plugins/activity-block';
-import { ActivityRenderer } from '../activity-engine/activity-renderer';
+import { ActivityRenderer } from '../activity-engine/activity-renderer/activity-renderer';
 
 import {
   McvInputField,

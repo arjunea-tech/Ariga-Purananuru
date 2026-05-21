@@ -1,0 +1,66 @@
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+  border-radius: 1.25rem;
+  padding: 2rem;
+  transition: all 0.3s ease;
+}
+
+.match-btn {
+  border-color: #e2e8f0;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.match-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: #8b5cf6;
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1);
+}
+.match-btn.selected {
+  border-color: #8b5cf6 !important;
+  background: rgba(139, 92, 246, 0.05) !important;
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+}
+.match-btn.matched {
+  cursor: not-allowed;
+  border-color: transparent !important;
+  color: #1e293b;
+  font-weight: 600;
+}
+.match-btn.matched .item-text {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+/* Lock pair colors styling (distinct premium pastel glass colors) */
+.color-pair-0 { background: rgba(59, 130, 246, 0.15) !important; border: 1.5px solid #3b82f6 !important; }
+.color-pair-1 { background: rgba(16, 185, 129, 0.15) !important; border: 1.5px solid #10b981 !important; }
+.color-pair-2 { background: rgba(245, 158, 11, 0.15) !important; border: 1.5px solid #f59e0b !important; }
+.color-pair-3 { background: rgba(236, 72, 153, 0.15) !important; border: 1.5px solid #ec4899 !important; }
+.color-pair-4 { background: rgba(139, 92, 246, 0.15) !important; border: 1.5px solid #8b5cf6 !important; }
+.color-pair-5 { background: rgba(20, 184, 166, 0.15) !important; border: 1.5px solid #14b8a6 !important; }
+
+/* Shakes & Animations */
+@keyframes horizontal-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+}
+.incorrect-shake {
+  animation: horizontal-shake 0.3s ease-in-out;
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
