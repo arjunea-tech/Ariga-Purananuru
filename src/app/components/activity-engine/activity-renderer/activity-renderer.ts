@@ -18,6 +18,11 @@ export interface NormalizedActivity {
   pairs?: any[];
   gridSize?: number;
   words?: any[];
+  matchMode?: 'drag_drop' | 'click_match';
+  theme?: 'cloud' | 'standard';
+  allowDragDrop?: boolean;
+  allowClickMatch?: boolean;
+  enableAudio?: boolean;
 }
 
 @Component({
@@ -67,7 +72,7 @@ export class ActivityRenderer implements OnChanges {
       type = 'fill_blanks';
     } else if (['flashcard', 'flashcards'].includes(typeInput.toLowerCase())) {
       type = 'flashcard';
-    } else if (['match_following', 'match', 'match-following', 'matchfollowing'].includes(typeInput.toLowerCase())) {
+    } else if (['match_following', 'match', 'match-following', 'matchfollowing', 'cloud_match', 'cloud-match', 'cloudmatch'].includes(typeInput.toLowerCase())) {
       type = 'match';
     } else if (['crossword', 'crossword_puzzle'].includes(typeInput.toLowerCase())) {
       type = 'crossword';
@@ -99,6 +104,14 @@ export class ActivityRenderer implements OnChanges {
       normalized.back = raw.back || additional.back || '';
     } else if (type === 'match') {
       normalized.pairs = raw.pairs || additional.pairs || [];
+      // If it is originally a cloud_match, default the theme to 'cloud' for backwards compatibility
+      normalized.theme = raw.theme ?? additional.theme ?? (typeInput.toLowerCase().includes('cloud') ? 'cloud' : 'standard');
+      
+      const rawMode = raw.matchMode ?? additional.matchMode;
+      normalized.allowDragDrop = !!(raw.allowDragDrop ?? additional.allowDragDrop ?? (rawMode !== 'click_match'));
+      normalized.allowClickMatch = !!(raw.allowClickMatch ?? additional.allowClickMatch ?? (rawMode !== 'drag_drop'));
+      
+      normalized.enableAudio = !!(raw.enableAudio ?? additional.enableAudio ?? false);
     } else if (type === 'crossword') {
       normalized.gridSize = raw.gridSize || additional.gridSize || 10;
       normalized.words = raw.words || additional.words || [];
@@ -112,7 +125,6 @@ export class ActivityRenderer implements OnChanges {
 
   // Event forwarders
   onMCQAnswered(event: any): void {
-    // Forward response to parent component
     this.answered.emit({
       questionId: this.activity?.id,
       type: 'mcq',

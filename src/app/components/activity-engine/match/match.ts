@@ -1,14 +1,19 @@
-import { Component, Input, Output, EventEmitter, OnInit, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface MatchPair {
   left: string;
-  right: string;
+  right?: string;
+  rightImage?: string;
 }
 
 export interface MatchData {
   id?: number;
   pairs: MatchPair[];
+  theme?: 'cloud' | 'standard';
+  allowDragDrop?: boolean;
+  allowClickMatch?: boolean;
+  enableAudio?: boolean;
   explanation?: string;
 }
 
@@ -16,12 +21,13 @@ interface ShuffledItem {
   id: string; // "left-0", "right-2", etc.
   text: string;
   originalIndex: number;
+  rightImage?: string;
 }
 
 interface MatchedPair {
   leftId: string;
   rightId: string;
-  colorClass: string;
+  colorIndex: number;
 }
 
 @Component({
@@ -31,7 +37,7 @@ interface MatchedPair {
   templateUrl: './match.html',
   styleUrls: ['./match.css']
 })
-export class MatchComponent implements OnInit {
+export class MatchComponent implements OnInit, OnChanges {
   @Input() activity: MatchData | null = null;
   @Input() showFeedback: boolean = true;
 
@@ -49,32 +55,33 @@ export class MatchComponent implements OnInit {
   shakeRightId = signal<string | null>(null);
 
   isComplete = signal<boolean>(false);
+  
+  theme = signal<'cloud' | 'standard'>('standard');
+  allowDragDrop = signal<boolean>(true);
+  allowClickMatch = signal<boolean>(true);
+  enableAudio = signal<boolean>(false);
 
-  // Curated pastel glass colors for matched connections
-  private pastelColors = [
-    'rgba(59, 130, 246, 0.15)',  // Blue
-    'rgba(16, 185, 129, 0.15)',  // Emerald
-    'rgba(245, 158, 11, 0.15)',   // Amber
-    'rgba(236, 72, 153, 0.15)',  // Pink
-    'rgba(139, 92, 246, 0.15)',  // Purple
-    'rgba(20, 184, 166, 0.15)',   // Teal
-  ];
-
-  private borderColors = [
-    '#3b82f6',
-    '#10b981',
-    '#f59e0b',
-    '#ec4899',
-    '#8b5cf6',
-    '#14b8a6'
-  ];
+  // Multi-color palette for matched pairs (CSS classes color-pair-0 to color-pair-5)
+  private colorPairsCount = 6;
 
   ngOnInit(): void {
     this.initializeMatchGame();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['activity']) {
+      this.initializeMatchGame();
+    }
+  }
+
   initializeMatchGame(): void {
     if (!this.activity || !this.activity.pairs) return;
+
+    // Apply configuration inputs or defaults
+    this.theme.set(this.activity.theme || 'standard');
+    this.allowDragDrop.set(this.activity.allowDragDrop !== false);
+    this.allowClickMatch.set(this.activity.allowClickMatch !== false);
+    this.enableAudio.set(!!this.activity.enableAudio);
 
     const left: ShuffledItem[] = [];
     const right: ShuffledItem[] = [];
@@ -87,15 +94,28 @@ export class MatchComponent implements OnInit {
       });
       right.push({
         id: `right-${idx}`,
-        text: pair.right,
-        originalIndex: idx
+        text: pair.right || '',
+        originalIndex: idx,
+        rightImage: pair.rightImage
       });
     });
 
-    // Shuffle separately
-    this.leftItems.set(this.shuffleArray(left));
-    this.rightItems.set(this.shuffleArray(right));
+    // Scramble right column until no item aligns directly with its left pair (if pairs.length > 1)
+    let shuffledRight = this.shuffleArray(right);
+    if (right.length > 1) {
+      let attempts = 0;
+      while (attempts < 100 && shuffledRight.some((item, idx) => item.originalIndex === idx)) {
+        shuffledRight = this.shuffleArray(right);
+        attempts++;
+      }
+    }
+
+    this.leftItems.set(left); // Keep left column in original order
+    this.rightItems.set(shuffledRight); // Scramble right column to prevent straight matches
+    
     this.matchedPairs.set([]);
+    this.selectedLeftId.set(null);
+    this.selectedRightId.set(null);
     this.isComplete.set(false);
   }
 
@@ -108,16 +128,37 @@ export class MatchComponent implements OnInit {
     return copy;
   }
 
+  // Speak left word using browser TTS API
+  speak(text: string): void {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel(); // cancel any active speech
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 0.9;
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
+  // --- Click to Match Logic ---
   selectLeft(item: ShuffledItem): void {
-    if (this.isItemMatched(item.id)) return;
-    this.selectedLeftId.set(item.id);
-    this.checkMatch();
+    if (this.isItemMatched(item.id) || this.isComplete()) return;
+    
+    // Play speech if enabled (works for click mode on click, or speaker icon click)
+    if (this.enableAudio()) {
+      this.speak(item.text);
+    }
+
+    if (this.allowClickMatch()) {
+      this.selectedLeftId.set(item.id);
+      this.checkMatch();
+    }
   }
 
   selectRight(item: ShuffledItem): void {
-    if (this.isItemMatched(item.id)) return;
-    this.selectedRightId.set(item.id);
-    this.checkMatch();
+    if (this.isItemMatched(item.id) || this.isComplete()) return;
+    if (this.allowClickMatch()) {
+      this.selectedRightId.set(item.id);
+      this.checkMatch();
+    }
   }
 
   checkMatch(): void {
@@ -126,24 +167,23 @@ export class MatchComponent implements OnInit {
 
     if (!leftId || !rightId) return;
 
-    // Resolve index
     const leftItem = this.leftItems().find(i => i.id === leftId);
     const rightItem = this.rightItems().find(i => i.id === rightId);
 
     if (leftItem && rightItem) {
       if (leftItem.originalIndex === rightItem.originalIndex) {
         // MATCH DETECTED!
-        const nextColorIdx = this.matchedPairs().length % this.pastelColors.length;
+        const nextColorIdx = this.matchedPairs().length % this.colorPairsCount;
         
         this.matchedPairs.update(pairs => [
           ...pairs,
-          { leftId, rightId, colorClass: `color-pair-${nextColorIdx}` }
+          { leftId, rightId, colorIndex: nextColorIdx }
         ]);
 
         this.selectedLeftId.set(null);
         this.selectedRightId.set(null);
 
-        // Check if all matched
+        // Check completion
         if (this.matchedPairs().length === this.activity?.pairs.length) {
           this.isComplete.set(true);
           this.answered.emit({ isCorrect: true });
@@ -153,34 +193,88 @@ export class MatchComponent implements OnInit {
         this.shakeLeftId.set(leftId);
         this.shakeRightId.set(rightId);
 
-        // Reset shake after duration
         const currentLeft = leftId;
         const currentRight = rightId;
+        
         setTimeout(() => {
           if (this.shakeLeftId() === currentLeft) this.shakeLeftId.set(null);
           if (this.shakeRightId() === currentRight) this.shakeRightId.set(null);
           
           this.selectedLeftId.set(null);
           this.selectedRightId.set(null);
-        }, 3000);
+        }, 1200);
       }
     }
   }
 
+  // --- Drag and Drop Logic ---
+  onDragStart(event: DragEvent, item: ShuffledItem): void {
+    if (this.isItemMatched(item.id) || !this.allowDragDrop() || this.isComplete()) {
+      event.preventDefault();
+      return;
+    }
+    
+    // Play speech if enabled
+    if (this.enableAudio()) {
+      this.speak(item.text);
+    }
+
+    event.dataTransfer?.setData('text/plain', item.id);
+    this.selectedLeftId.set(item.id);
+  }
+
+  onDragOver(event: DragEvent): void {
+    if (!this.allowDragDrop() || this.isComplete()) return;
+    event.preventDefault(); // Required to allow drop
+  }
+
+  onDrop(event: DragEvent, targetItem: ShuffledItem): void {
+    if (!this.allowDragDrop() || this.isComplete()) return;
+    event.preventDefault();
+
+    const draggedId = event.dataTransfer?.getData('text/plain');
+    if (!draggedId) return;
+
+    if (draggedId.startsWith('left-') && targetItem.id.startsWith('right-')) {
+      if (this.isItemMatched(targetItem.id)) return;
+      this.selectedLeftId.set(draggedId);
+      this.selectedRightId.set(targetItem.id);
+      this.checkMatch();
+    } else {
+      this.selectedLeftId.set(null);
+      this.selectedRightId.set(null);
+    }
+  }
+
+  // Helper status checkers
   isItemMatched(itemId: string): boolean {
     return this.matchedPairs().some(p => p.leftId === itemId || p.rightId === itemId);
   }
 
-  getMatchedColorStyle(itemId: string): string {
+  getMatchedColorClass(itemId: string): string {
     const pair = this.matchedPairs().find(p => p.leftId === itemId || p.rightId === itemId);
     if (!pair) return '';
+    return `color-pair-${pair.colorIndex}`;
+  }
 
-    // Extract index from pair.colorClass ("color-pair-X")
-    const index = parseInt(pair.colorClass.replace('color-pair-', ''), 10);
-    const bgColor = this.pastelColors[index];
-    const borderColor = this.borderColors[index];
-    
-    return bgColor;
+  getLeftItemText(id: string): string {
+    return this.leftItems().find(i => i.id === id)?.text || '';
+  }
+
+  getRightItemText(id: string): string {
+    return this.rightItems().find(i => i.id === id)?.text || '';
+  }
+
+  getRightItemImage(id: string): string {
+    return this.rightItems().find(i => i.id === id)?.rightImage || '';
+  }
+
+  isAllLeftMatched(): boolean {
+    return this.leftItems().length > 0 && this.leftItems().every(item => this.isItemMatched(item.id));
+  }
+
+  isAllRightMatched(): boolean {
+    return this.rightItems().length > 0 && this.rightItems().every(item => this.isItemMatched(item.id));
   }
 
   reset(): void {
