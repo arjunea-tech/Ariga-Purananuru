@@ -38,7 +38,6 @@ export class WordArrangeComponent implements OnInit, OnChanges {
 
   initPuzzle(): void {
     if (!this.activity) return;
-
     let text = this.activity.text || '';
     let words: string[] = [];
 
