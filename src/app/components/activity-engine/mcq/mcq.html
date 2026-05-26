@@ -1,6 +1,24 @@
     <div class="mb-4 glass-card">
       <div class="mb-4">
-        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 text-uppercase fw-bold mb-3 d-inline-block" style="letter-spacing: 0.05em; font-size: 0.75rem;">Multiple Choice</span>
+        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+          <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 text-uppercase fw-bold" style="letter-spacing: 0.05em; font-size: 0.75rem;">Multiple Choice</span>
+          
+          @if (activity?.audioUrl) {
+            <button type="button" 
+                    class="btn btn-primary d-flex align-items-center gap-2 rounded-pill px-4 py-2 border-0 shadow-sm text-white font-semibold"
+                    style="transition: all 0.3s ease; background: linear-gradient(135deg, #6366f1, #3b82f6); font-size: 0.85rem;"
+                    [class.opacity-75]="isPlaying()"
+                    (click)="playAudio()">
+              @if (isPlaying()) {
+                <span class="spinner-grow spinner-grow-sm text-white" role="status" aria-hidden="true" style="width: 0.8rem; height: 0.8rem;"></span>
+                <span>Playing...</span>
+              } @else {
+                <i class="bi bi-volume-up-fill text-white fs-6"></i>
+                <span>Listen Audio</span>
+              }
+            </button>
+          }
+        </div>
         <h4 class="fw-bold text-dark m-0" style="line-height: 1.4;" [innerHTML]="activity?.question"></h4>
       </div>
 

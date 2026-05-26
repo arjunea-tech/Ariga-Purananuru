@@ -1,0 +1,99 @@
+<div class="mb-4 glass-card sequencing-container">
+  <div class="mb-3 d-flex align-items-center justify-content-between">
+    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2 text-uppercase fw-bold" style="letter-spacing: 0.05em; font-size: 0.75rem;">Sequencing Task</span>
+    
+    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" [disabled]="hasSubmitted() && isCorrect()" (click)="reset()">
+      <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+    </button>
+  </div>
+
+  <h5 class="text-dark fw-bold mb-4" [innerHTML]="activity?.question || 'Arrange the following events in the correct chronological order:'"></h5>
+
+  <!-- List of Scrambled Events -->
+  <div class="d-flex flex-column gap-2 mb-4">
+    @for (event of scrambledEvents(); track $index; let idx = $index; let total = $index) {
+      <div class="event-card d-flex align-items-center border bg-white rounded-4 p-3 shadow-sm"
+           [class.border-success]="showFeedback && hasSubmitted() && isCorrect()"
+           [class.correct-highlight]="showFeedback && hasSubmitted() && event.originalIndex === idx"
+           [class.incorrect-highlight]="showFeedback && hasSubmitted() && event.originalIndex !== idx">
+        
+        <!-- Step Number Indicator -->
+        <div class="step-badge rounded-circle bg-light border text-secondary fw-bold d-flex align-items-center justify-content-center me-3" style="width: 2.2rem; height: 2.2rem; flex-shrink: 0;">
+          {{ idx + 1 }}
+        </div>
+
+        <!-- Event Text -->
+        <span class="flex-grow-1 fw-medium text-secondary" style="font-size: 0.95rem;">{{ event.text }}</span>
+
+        <!-- Reorder Arrow Buttons -->
+        @if (!hasSubmitted()) {
+          <div class="d-flex flex-column gap-1">
+            <button type="button" 
+                    class="btn btn-sm btn-light border p-1 d-flex align-items-center justify-content-center rounded-2"
+                    [disabled]="idx === 0"
+                    (click)="moveUp(idx)"
+                    style="width: 28px; height: 28px;">
+              <i class="bi bi-chevron-up text-secondary" style="font-size: 0.75rem;"></i>
+            </button>
+            <button type="button" 
+                    class="btn btn-sm btn-light border p-1 d-flex align-items-center justify-content-center rounded-2"
+                    [disabled]="idx === scrambledEvents().length - 1"
+                    (click)="moveDown(idx)"
+                    style="width: 28px; height: 28px;">
+              <i class="bi bi-chevron-down text-secondary" style="font-size: 0.75rem;"></i>
+            </button>
+          </div>
+        } @else {
+          <!-- Inline Correct/Incorrect Status Icon -->
+          <div class="ms-3 fs-5">
+            @if (event.originalIndex === idx) {
+              <i class="bi bi-check-circle-fill text-success"></i>
+            } @else {
+              <i class="bi bi-x-circle-fill text-danger"></i>
+            }
+          </div>
+        }
+
+      </div>
+    }
+  </div>
+
+  <!-- Check Sequence Action Button -->
+  @if (!hasSubmitted()) {
+    <button type="button" 
+            class="btn btn-primary w-100 rounded-pill py-3 fw-bold text-white shadow-sm border-0" 
+            style="background: linear-gradient(135deg, #6366f1, #4f46e5); transition: all 0.2s;"
+            (click)="checkAnswer()">
+      Check Order
+    </button>
+  }
+
+  <!-- Correct Sequence Model Answer Panel -->
+  @if (showFeedback && hasSubmitted() && !isCorrect() && activity?.events) {
+    <div class="animate-fade-in card border-0 bg-success bg-opacity-5 rounded-4 p-4 mt-3">
+      <div class="d-flex align-items-center gap-2 text-success fw-bold mb-3" style="font-size: 0.9rem;">
+        <i class="bi bi-check-circle-fill"></i>
+        <span>Correct Sequence:</span>
+      </div>
+      <div class="d-flex flex-column gap-2 text-secondary fw-semibold" style="font-size: 0.925rem;">
+        @for (correctEvent of activity?.events; track correctEvent; let cIdx = $index) {
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success bg-opacity-10 text-success rounded-circle p-1" style="width: 20px; height: 20px; display: inline-flex; justify-content: center; align-items: center; font-size: 0.7rem;">{{ cIdx + 1 }}</span>
+            <span>{{ correctEvent }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Explanation box -->
+  @if (showFeedback && hasSubmitted() && activity?.explanation) {
+    <div class="animate-fade-in mt-4 rounded-3 p-4 bg-warning bg-opacity-10 border-start border-4 border-warning">
+      <div class="d-flex align-items-center gap-2 fw-bold text-warning mb-2" style="font-size: 0.9rem;">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>Explanation</span>
+      </div>
+      <p class="m-0" style="color: #451a03; font-size: 0.925rem; line-height: 1.5;">{{ activity?.explanation }}</p>
+    </div>
+  }
+</div>

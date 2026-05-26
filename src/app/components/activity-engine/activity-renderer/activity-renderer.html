@@ -43,6 +43,48 @@
               (answered)="onWordArrangeAnswered($event)">
             </app-activity-word-arrange>
           }
+          @case ('speaking') {
+            <app-activity-speaking
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onSpeakingAnswered($event)">
+            </app-activity-speaking>
+          }
+          @case ('role_play') {
+            <app-activity-role-play
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onRolePlayAnswered($event)">
+            </app-activity-role-play>
+          }
+          @case ('sequencing') {
+            <app-activity-sequencing
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onSequencingAnswered($event)">
+            </app-activity-sequencing>
+          }
+          @case ('parts_of_speech') {
+            <app-activity-parts-of-speech
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onPartsOfSpeechAnswered($event)">
+            </app-activity-parts-of-speech>
+          }
+          @case ('mind_map') {
+            <app-activity-mind-map
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onMindMapAnswered($event)">
+            </app-activity-mind-map>
+          }
+          @case ('writing') {
+            <app-activity-writing
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onWritingAnswered($event)">
+            </app-activity-writing>
+          }
         }
       </div>
     }

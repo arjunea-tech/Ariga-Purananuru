@@ -12,6 +12,7 @@ export interface MCQData {
   question: string;
   options: MCQOption[];
   explanation?: string;
+  audioUrl?: string;
 }
 
 @Component({
@@ -29,6 +30,8 @@ export class MCQComponent {
 
   selectedOptionId = signal<number | null>(null);
   hasSubmitted = signal<boolean>(false);
+  isPlaying = signal<boolean>(false);
+  private currentAudio: HTMLAudioElement | null = null;
 
   selectOption(option: MCQOption): void {
     if (this.showFeedback && this.hasSubmitted()) return;
@@ -45,6 +48,36 @@ export class MCQComponent {
     });
   }
 
+  playAudio(): void {
+    if (!this.activity || !this.activity.audioUrl) return;
+
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.isPlaying.set(false);
+      this.currentAudio = null;
+      return;
+    }
+
+    this.isPlaying.set(true);
+    this.currentAudio = new Audio(this.activity.audioUrl);
+    
+    this.currentAudio.onended = () => {
+      this.isPlaying.set(false);
+      this.currentAudio = null;
+    };
+    
+    this.currentAudio.onerror = () => {
+      this.isPlaying.set(false);
+      this.currentAudio = null;
+    };
+
+    this.currentAudio.play().catch(err => {
+      console.error('Audio playback failed:', err);
+      this.isPlaying.set(false);
+      this.currentAudio = null;
+    });
+  }
+
   getLetter(index: number): string {
     return String.fromCharCode(65 + index); // A, B, C, D...
   }
@@ -52,5 +85,10 @@ export class MCQComponent {
   reset(): void {
     this.selectedOptionId.set(null);
     this.hasSubmitted.set(false);
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio = null;
+    }
+    this.isPlaying.set(false);
   }
 }

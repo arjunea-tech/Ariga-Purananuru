@@ -6,11 +6,14 @@ export interface FillBlanksData {
   id?: number;
   text: string; // "The [cat] is on the [mat]."
   explanation?: string;
+  audioUrl?: string;
+  imageUrl?: string;
 }
 
 interface Segment {
-  type: 'text' | 'blank';
+  type: 'text' | 'blank' | 'dropdown';
   value: string; // Text content or correct answer
+  options?: string[]; // Options for dropdown
   blankIndex?: number;
 }
 
@@ -30,6 +33,8 @@ export class FillBlanksComponent implements OnInit {
   segments: Segment[] = [];
   userAnswers = signal<string[]>([]);
   hasSubmitted = signal<boolean>(false);
+  isPlaying = signal<boolean>(false);
+  private currentAudio: HTMLAudioElement | null = null;
 
   ngOnInit(): void {
     this.parseSentence();
@@ -58,10 +63,22 @@ export class FillBlanksComponent implements OnInit {
         });
       }
 
-      // Add blank segment
+      // Check if dropdown or normal blank
+      let segmentType: 'blank' | 'dropdown' = 'blank';
+      let dropdownOptions: string[] = [];
+      let correctVal = answerValue;
+
+      if (answerValue.includes('|') || answerValue.includes('/')) {
+        segmentType = 'dropdown';
+        dropdownOptions = answerValue.split(/[|\/]/).map(o => o.trim()).filter(Boolean);
+        correctVal = dropdownOptions[0]; // first option is correct
+      }
+
+      // Add blank or dropdown segment
       tempSegments.push({
-        type: 'blank',
-        value: answerValue,
+        type: segmentType,
+        value: correctVal,
+        options: dropdownOptions,
         blankIndex: blankCounter
       });
 
@@ -101,11 +118,38 @@ export class FillBlanksComponent implements OnInit {
   }
 
   isCorrect(blankIndex: number): boolean {
-    const blank = this.segments.find(s => s.type === 'blank' && s.blankIndex === blankIndex);
+    const blank = this.segments.find(s => (s.type === 'blank' || s.type === 'dropdown') && s.blankIndex === blankIndex);
     if (!blank) return false;
     const correct = blank.value.trim().toLowerCase();
     const user = (this.userAnswers()[blankIndex] || '').trim().toLowerCase();
     return correct === user;
+  }
+
+  playAudio(): void {
+    if (!this.activity || !this.activity.audioUrl) return;
+
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.isPlaying.set(false);
+      this.currentAudio = null;
+      return;
+    }
+
+    this.isPlaying.set(true);
+    this.currentAudio = new Audio(this.activity.audioUrl);
+    this.currentAudio.onended = () => {
+      this.isPlaying.set(false);
+      this.currentAudio = null;
+    };
+    this.currentAudio.onerror = () => {
+      this.isPlaying.set(false);
+      this.currentAudio = null;
+    };
+    this.currentAudio.play().catch(err => {
+      console.error(err);
+      this.isPlaying.set(false);
+      this.currentAudio = null;
+    });
   }
 
   checkAnswers(): void {
@@ -117,7 +161,7 @@ export class FillBlanksComponent implements OnInit {
 
   emitProgress(): void {
     const answersList = this.userAnswers();
-    const blanks = this.segments.filter(s => s.type === 'blank');
+    const blanks = this.segments.filter(s => s.type === 'blank' || s.type === 'dropdown');
     const allCorrect = blanks.every(b => {
       const correctVal = b.value.trim().toLowerCase();
       const userVal = (answersList[b.blankIndex!] || '').trim().toLowerCase();
@@ -133,5 +177,10 @@ export class FillBlanksComponent implements OnInit {
   reset(): void {
     this.userAnswers.set(new Array(this.userAnswers().length).fill(''));
     this.hasSubmitted.set(false);
+    if (this.currentAudio) {
+      this.currentAudio.pause();
+      this.currentAudio = null;
+    }
+    this.isPlaying.set(false);
   }
 }

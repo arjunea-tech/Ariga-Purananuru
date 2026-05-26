@@ -1,0 +1,69 @@
+.mindmap-container {
+  overflow: hidden;
+}
+
+.mindmap-node {
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+.mindmap-node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+}
+
+/* Connecting Stems */
+.connector-stem {
+  position: absolute;
+  bottom: -40px;
+  left: 50%;
+  width: 2px;
+  height: 40px;
+  background-color: #cbd5e1;
+  transform: translateX(-50%);
+}
+
+.connector-branch-stem {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  width: 2px;
+  height: 24px;
+  background-color: #cbd5e1;
+  transform: translateX(-50%);
+}
+
+/* Input Fields styling */
+.mindmap-node input {
+  font-size: 0.9rem;
+  color: #334155;
+  transition: all 0.2s;
+}
+
+.mindmap-node input:focus {
+  outline: none;
+  box-shadow: none;
+  border-color: #6366f1 !important;
+}
+
+.mindmap-node input.is-invalid {
+  border-color: #ef4444 !important;
+  color: #ef4444 !important;
+}
+
+.mindmap-node input.is-valid {
+  border-color: #10b981 !important;
+  color: #10b981 !important;
+}
+
+.root-node {
+  background-color: #fff;
+}
+
+.branch-node {
+  background-color: #fff;
+}
+
+.leaf-node {
+  background-color: #fff;
+}

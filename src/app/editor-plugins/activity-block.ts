@@ -46,7 +46,28 @@ export class ActivityBlock {
       allowDragDrop: !!(data?.allowDragDrop ?? (data?.matchMode !== 'click_match')),
       allowClickMatch: !!(data?.allowClickMatch ?? (data?.matchMode !== 'drag_drop')),
       enableAudio: !!(data?.enableAudio ?? false),
-      explanation: data?.explanation || ''
+      explanation: data?.explanation || '',
+
+      // New properties for LSRW activity types
+      imageUrl: data?.imageUrl || data?.media_url || '',
+      targetText: data?.targetText || '',
+      dialogue: data?.dialogue || [
+        { role: 'system', name: 'Interviewer', text: '' },
+        { role: 'student', name: 'Student', text: '' }
+      ],
+      events: data?.events || ['', '', ''],
+      parts: data?.parts || [
+        { word: '', tag: 'Noun' }
+      ],
+      nodes: data?.nodes || [
+        { id: 'root', label: 'Main Idea', isPlaceholder: false, parentId: '' },
+        { id: 'branch1', label: '', isPlaceholder: true, parentId: 'root' },
+        { id: 'leaf1', label: '', isPlaceholder: true, parentId: 'branch1' }
+      ],
+      starterText: data?.starterText || '',
+      modelAnswer: data?.modelAnswer || '',
+      minWords: data?.minWords || 1,
+      maxWords: data?.maxWords || 1000
     };
     this.api = api;
     this.readOnly = readOnly;
@@ -152,77 +173,406 @@ export class ActivityBlock {
           accent-color: #3b82f6;
           cursor: pointer;
         }
+        .activity-preview-card {
+          background: #ffffff;
+          border: 1.5px solid #e2e8f0;
+          border-radius: 0.75rem;
+          padding: 1.25rem;
+          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .activity-preview-card:hover {
+          border-color: #cbd5e1;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+        .activity-preview-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 0.75rem;
+        }
+        .activity-preview-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          background: #f1f5f9;
+          padding: 0.35rem 0.75rem;
+          border-radius: 9999px;
+          font-size: 0.85rem;
+          font-weight: 600;
+          color: #334155;
+        }
+        .badge-icon i {
+          color: #3b82f6;
+          font-size: 0.95rem;
+          display: inline-flex;
+        }
+        .activity-preview-edit-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: #3b82f6;
+          color: white;
+          border: none;
+          border-radius: 50%;
+          width: 2.2rem;
+          height: 2.2rem;
+          font-size: 0.95rem;
+          cursor: pointer;
+          transition: background-color 0.15s, transform 0.15s;
+        }
+        .activity-preview-edit-btn:hover {
+          background: #2563eb;
+          transform: scale(1.05);
+        }
+        .activity-preview-body {
+          color: #475569;
+        }
+        .activity-preview-title {
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: #64748b;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          margin: 0 0 0.25rem 0;
+        }
+        .activity-preview-desc {
+          font-size: 0.95rem;
+          font-weight: 500;
+          color: #0f172a;
+          margin: 0 0 0.5rem 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .activity-modal-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100vw;
+          height: 100vh;
+          background: rgba(15, 23, 42, 0.4);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 99999;
+          animation: fadeIn 0.2s ease-out;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .activity-modal-content {
+          background: white;
+          border-radius: 1rem;
+          width: 90%;
+          max-width: 650px;
+          max-height: 85vh;
+          display: flex;
+          flex-direction: column;
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+          animation: slideUp 0.2s ease-out;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          overflow: hidden;
+        }
+        @keyframes slideUp {
+          from { transform: translateY(15px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
+        }
+        .activity-modal-header {
+          padding: 1.25rem 1.5rem;
+          border-bottom: 1px solid #e2e8f0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background: #f8fafc;
+        }
+        .activity-modal-body {
+          padding: 1.5rem;
+          overflow-y: auto;
+          flex-grow: 1;
+        }
+        .activity-modal-footer {
+          padding: 1rem 1.5rem;
+          border-top: 1px solid #e2e8f0;
+          display: flex;
+          justify-content: flex-end;
+          gap: 0.75rem;
+          background: #f8fafc;
+        }
       `;
       document.head.appendChild(style);
     }
 
     this.container = wrapper as HTMLDivElement;
-    this.buildUI();
+    this.updatePreview();
 
     return wrapper;
   }
 
-  private buildUI(): void {
-    if (!this.container) return;
+  private getPreviewDetails() {
+    const type = this.data.type;
+    let typeLabel = 'Activity';
+    let icon = 'bi-controller';
+    let details = '';
 
-    this.container.innerHTML = '';
-
-    // Label & Select Drodown
-    const label = document.createElement('label');
-    label.classList.add('activity-editor-label');
-    label.textContent = 'Practice Activity Type';
-    this.container.appendChild(label);
-
-    const select = document.createElement('select');
-    select.classList.add('activity-editor-select');
-    select.innerHTML = `
-      <option value="mcq" ${this.data.type === 'mcq' ? 'selected' : ''}>Multiple Choice Question (MCQ)</option>
-      <option value="fill_blanks" ${this.data.type === 'fill_blanks' ? 'selected' : ''}>Fill in the Blanks</option>
-      <option value="flashcard" ${this.data.type === 'flashcard' ? 'selected' : ''}>3D Vocabulary Flashcard</option>
-      <option value="match" ${this.data.type === 'match' ? 'selected' : ''}>Match It </option>
-      <option value="crossword" ${this.data.type === 'crossword' ? 'selected' : ''}>Dynamic Crossword Puzzle</option>
-      <option value="word_arrange" ${this.data.type === 'word_arrange' ? 'selected' : ''}>Word Arrangement</option>
-    `;
-
-    select.addEventListener('change', (e: any) => {
-      // Save current states as much as possible then switch type
-      this.data.type = e.target.value;
-      this.buildUI();
-    });
-
-    this.container.appendChild(select);
-
-    // Form Container
-    const formContainer = document.createElement('div');
-    formContainer.classList.add('activity-form-container');
-
-    // Dynamic Render depending on Selected Type
-    if (this.data.type === 'mcq') {
-      this.renderMCQForm(formContainer);
-    } else if (this.data.type === 'fill_blanks') {
-      this.renderBlanksForm(formContainer);
-    } else if (this.data.type === 'flashcard') {
-      this.renderFlashcardForm(formContainer);
-    } else if (this.data.type === 'match') {
-      this.renderMatchForm(formContainer);
-    } else if (this.data.type === 'crossword') {
-      this.renderCrosswordForm(formContainer);
-    } else if (this.data.type === 'word_arrange') {
-      this.renderWordArrangeForm(formContainer);
+    switch (type) {
+      case 'mcq':
+        typeLabel = 'Multiple Choice';
+        icon = 'bi-record-circle';
+        details = `Question: "${this.data.question || '(No Question)'}" | Options: ${this.data.options?.length || 0}`;
+        break;
+      case 'fill_blanks':
+        typeLabel = 'Fill in the Blanks';
+        icon = 'bi-input-cursor-text';
+        details = `Text: "${this.data.text || '(No Text)'}"`;
+        break;
+      case 'flashcard':
+        typeLabel = '3D Flashcard';
+        icon = 'bi-square-half';
+        details = `Front: "${this.data.front || ''}" | Back: "${this.data.back || ''}"`;
+        break;
+      case 'match':
+        typeLabel = 'Match It';
+        icon = 'bi-puzzle';
+        details = `Pairs: ${this.data.pairs?.length || 0} | Theme: ${this.data.theme || 'standard'}`;
+        break;
+      case 'crossword':
+        typeLabel = 'Crossword Puzzle';
+        icon = 'bi-grid-3x3';
+        details = `Words: ${this.data.words?.length || 0} | Grid: ${this.data.gridSize}x${this.data.gridSize}`;
+        break;
+      case 'word_arrange':
+        typeLabel = 'Word Arrangement';
+        icon = 'bi-sort-alpha-down';
+        details = `Sentence: "${this.data.text || ''}"`;
+        break;
+      case 'speaking':
+        typeLabel = 'Speaking Practice';
+        icon = 'bi-mic';
+        details = `Target: "${this.data.targetText || ''}"`;
+        break;
+      case 'role_play':
+        typeLabel = 'Role Play Conversation';
+        icon = 'bi-chat-quote';
+        details = `Dialogue: ${this.data.dialogue?.length || 0} lines`;
+        break;
+      case 'sequencing':
+        typeLabel = 'Sequencing (Ordering)';
+        icon = 'bi-list-ol';
+        details = `Events: ${this.data.events?.length || 0}`;
+        break;
+      case 'parts_of_speech':
+        typeLabel = 'Parts of Speech Tagger';
+        icon = 'bi-tags';
+        details = `Sentence: "${this.data.text || ''}" | Tagged: ${this.data.parts?.length || 0}`;
+        break;
+      case 'mind_map':
+        typeLabel = 'Mind Mapping Diagram';
+        icon = 'bi-diagram-3';
+        details = `Nodes: ${this.data.nodes?.length || 0}`;
+        break;
+      case 'writing':
+        typeLabel = 'Writing Practice';
+        icon = 'bi-pencil-square';
+        details = `Prompt: "${this.data.text || ''}"`;
+        break;
     }
-
-    this.container.appendChild(formContainer);
+    return { typeLabel, icon, details };
   }
 
-  private renderMCQForm(parent: HTMLDivElement): void {
+  private updatePreview(): void {
+    if (!this.container) return;
+    this.container.innerHTML = '';
+
+    const { typeLabel, icon, details } = this.getPreviewDetails();
+
+    const previewCard = document.createElement('div');
+    previewCard.classList.add('activity-preview-card');
+    previewCard.innerHTML = `
+      <div class="activity-preview-header">
+        <div class="activity-preview-badge">
+          <span class="badge-icon"><i class="bi ${icon}"></i></span>
+          <span class="badge-text">${typeLabel}</span>
+        </div>
+        <button class="activity-preview-edit-btn" type="button" title="Edit Activity">
+          <i class="bi bi-pencil-square"></i>
+        </button>
+      </div>
+      <div class="activity-preview-body">
+        <h4 class="activity-preview-title">Configuration Summary</h4>
+        <div class="activity-preview-desc" title="${details.replace(/"/g, '&quot;')}">${details}</div>
+      </div>
+    `;
+
+    const editBtn = previewCard.querySelector('.activity-preview-edit-btn') as HTMLButtonElement;
+    editBtn.addEventListener('click', () => {
+      this.openModal();
+    });
+
+    this.container.appendChild(previewCard);
+  }
+
+  private openModal(): void {
+    const tempData = JSON.parse(JSON.stringify(this.data));
+
+    const modalOverlay = document.createElement('div');
+    modalOverlay.classList.add('activity-modal-overlay');
+
+    modalOverlay.innerHTML = `
+      <div class="activity-modal-content">
+        <div class="activity-modal-header">
+          <h3 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: #0f172a;">Configure Activity</h3>
+          <button class="activity-modal-close-x" style="background: none; border: none; font-size: 1.5rem; color: #64748b; cursor: pointer; padding: 0.25rem;">&times;</button>
+        </div>
+        <div class="activity-modal-body">
+          <label class="activity-editor-label">Practice Activity Type</label>
+          <select class="activity-editor-select modal-activity-select">
+            <option value="mcq" ${tempData.type === 'mcq' ? 'selected' : ''}>Multiple Choice Question (MCQ)</option>
+            <option value="fill_blanks" ${tempData.type === 'fill_blanks' ? 'selected' : ''}>Fill in the Blanks</option>
+            <option value="flashcard" ${tempData.type === 'flashcard' ? 'selected' : ''}>3D Vocabulary Flashcard</option>
+            <option value="match" ${tempData.type === 'match' ? 'selected' : ''}>Match It</option>
+            <option value="crossword" ${tempData.type === 'crossword' ? 'selected' : ''}>Dynamic Crossword Puzzle</option>
+            <option value="word_arrange" ${tempData.type === 'word_arrange' ? 'selected' : ''}>Word Arrangement</option>
+            <option value="speaking" ${tempData.type === 'speaking' ? 'selected' : ''}>Speaking (Voice Record)</option>
+            <option value="role_play" ${tempData.type === 'role_play' ? 'selected' : ''}>Role Play Conversation Dialogue</option>
+            <option value="sequencing" ${tempData.type === 'sequencing' ? 'selected' : ''}>Sequencing (Event Ordering)</option>
+            <option value="parts_of_speech" ${tempData.type === 'parts_of_speech' ? 'selected' : ''}>Parts of Speech Tagger</option>
+            <option value="mind_map" ${tempData.type === 'mind_map' ? 'selected' : ''}>Mind Mapping Diagram</option>
+            <option value="writing" ${tempData.type === 'writing' ? 'selected' : ''}>Paragraph / Story Writing</option>
+          </select>
+          <div class="modal-form-container"></div>
+        </div>
+        <div class="activity-modal-footer">
+          <button class="activity-btn activity-modal-cancel" style="background: #e2e8f0; color: #334155;">Cancel</button>
+          <button class="activity-btn activity-btn-primary activity-modal-save">Save Changes</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modalOverlay);
+
+    const closeX = modalOverlay.querySelector('.activity-modal-close-x') as HTMLButtonElement;
+    const cancelBtn = modalOverlay.querySelector('.activity-modal-cancel') as HTMLButtonElement;
+    const saveBtn = modalOverlay.querySelector('.activity-modal-save') as HTMLButtonElement;
+    const typeSelect = modalOverlay.querySelector('.modal-activity-select') as HTMLSelectElement;
+    const formContainer = modalOverlay.querySelector('.modal-form-container') as HTMLDivElement;
+
+    const renderForm = () => {
+      formContainer.innerHTML = '';
+      const type = tempData.type;
+      if (type === 'mcq') {
+        this.renderMCQForm(formContainer, tempData);
+      } else if (type === 'fill_blanks') {
+        this.renderBlanksForm(formContainer, tempData);
+      } else if (type === 'flashcard') {
+        this.renderFlashcardForm(formContainer, tempData);
+      } else if (type === 'match') {
+        this.renderMatchForm(formContainer, tempData);
+      } else if (type === 'crossword') {
+        this.renderCrosswordForm(formContainer, tempData);
+      } else if (type === 'word_arrange') {
+        this.renderWordArrangeForm(formContainer, tempData);
+      } else if (type === 'speaking') {
+        this.renderSpeakingForm(formContainer, tempData);
+      } else if (type === 'role_play') {
+        this.renderRolePlayForm(formContainer, tempData);
+      } else if (type === 'sequencing') {
+        this.renderSequencingForm(formContainer, tempData);
+      } else if (type === 'parts_of_speech') {
+        this.renderPartsOfSpeechForm(formContainer, tempData);
+      } else if (type === 'mind_map') {
+        this.renderMindMapForm(formContainer, tempData);
+      } else if (type === 'writing') {
+        this.renderWritingForm(formContainer, tempData);
+      }
+    };
+
+    renderForm();
+
+    typeSelect.addEventListener('change', (e: any) => {
+      tempData.type = e.target.value;
+      if (tempData.type === 'mcq' && !tempData.options) {
+        tempData.options = [{ text: '', isCorrect: true }, { text: '', isCorrect: false }];
+      }
+      if (tempData.type === 'match' && !tempData.pairs) {
+        tempData.pairs = [{ left: '', right: '', rightImage: '' }];
+      }
+      if (tempData.type === 'crossword' && !tempData.words) {
+        tempData.words = [{ word: '', clue: '', row: 1, col: 1, direction: 'across' }];
+      }
+      if (tempData.type === 'role_play' && !tempData.dialogue) {
+        tempData.dialogue = [{ role: 'system', name: 'Interviewer', text: '' }, { role: 'student', name: 'Student', text: '' }];
+      }
+      if (tempData.type === 'sequencing' && !tempData.events) {
+        tempData.events = ['', '', ''];
+      }
+      if (tempData.type === 'parts_of_speech' && !tempData.parts) {
+        tempData.parts = [{ word: '', tag: 'Noun' }];
+      }
+      if (tempData.type === 'mind_map' && !tempData.nodes) {
+        tempData.nodes = [
+          { id: 'root', label: 'Main Idea', isPlaceholder: false, parentId: '' },
+          { id: 'branch1', label: '', isPlaceholder: true, parentId: 'root' },
+          { id: 'leaf1', label: '', isPlaceholder: true, parentId: 'branch1' }
+        ];
+      }
+      renderForm();
+    });
+
+    const closeModal = () => {
+      document.body.removeChild(modalOverlay);
+    };
+
+    closeX.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
+
+    saveBtn.addEventListener('click', () => {
+      if (tempData.type === 'crossword') {
+        const needsGeneration = tempData.words.some((w: any) => !w.row || !w.direction);
+        if (needsGeneration) {
+          try {
+            const result = CrosswordGenerator.generate(tempData.words);
+            tempData.gridSize = result.gridSize;
+            tempData.words = [...result.words, ...result.unplaced];
+          } catch (err) {
+            console.error("Autogen fail on save", err);
+          }
+        }
+      }
+
+      this.data = tempData;
+      this.updatePreview();
+      closeModal();
+    });
+  }
+
+  private renderMCQForm(parent: HTMLDivElement, data: any): void {
     // 1. Question input
     const qGroup = document.createElement('div');
     qGroup.classList.add('activity-form-group');
     qGroup.innerHTML = `
       <label class="activity-editor-label">Question Text</label>
-      <input type="text" class="activity-input-text mcq-question" value="${this.data.question || ''}" placeholder="E.g., What is the translation of 'Welcome'?">
+      <input type="text" class="activity-input-text mcq-question" value="${data.question || ''}" placeholder="E.g., What is the translation of 'Welcome'?">
     `;
     parent.appendChild(qGroup);
+
+    const qInput = qGroup.querySelector('.mcq-question') as HTMLInputElement;
+    qInput.addEventListener('input', (e: any) => { data.question = e.target.value; });
+
+    // 1b. Audio URL input
+    const audioGroup = document.createElement('div');
+    audioGroup.classList.add('activity-form-group');
+    audioGroup.innerHTML = `
+      <label class="activity-editor-label">Pronunciation Audio URL (Optional)</label>
+      <input type="text" class="activity-input-text mcq-audio" value="${data.audioUrl || ''}" placeholder="E.g., https://example.com/audio/pronounce.mp3">
+    `;
+    parent.appendChild(audioGroup);
+
+    const audioInput = audioGroup.querySelector('.mcq-audio') as HTMLInputElement;
+    audioInput.addEventListener('input', (e: any) => { data.audioUrl = e.target.value; });
 
     // 2. Options list
     const optionsGroup = document.createElement('div');
@@ -238,7 +588,7 @@ export class ActivityBlock {
 
     const renderOptionRows = () => {
       rowsContainer.innerHTML = '';
-      this.data.options.forEach((opt: any, idx: number) => {
+      data.options.forEach((opt: any, idx: number) => {
         const row = document.createElement('div');
         row.classList.add('activity-row');
 
@@ -248,7 +598,7 @@ export class ActivityBlock {
         radio.classList.add('activity-radio');
         radio.checked = !!opt.isCorrect;
         radio.addEventListener('change', () => {
-          this.data.options.forEach((o: any, i: number) => o.isCorrect = i === idx);
+          data.options.forEach((o: any, i: number) => o.isCorrect = i === idx);
         });
 
         const input = document.createElement('input');
@@ -266,8 +616,8 @@ export class ActivityBlock {
         deleteBtn.classList.add('activity-btn', 'activity-btn-danger');
         deleteBtn.innerHTML = `&times; Delete`;
         deleteBtn.addEventListener('click', () => {
-          if (this.data.options.length > 1) {
-            this.data.options.splice(idx, 1);
+          if (data.options.length > 1) {
+            data.options.splice(idx, 1);
             renderOptionRows();
           }
         });
@@ -288,7 +638,7 @@ export class ActivityBlock {
     addBtn.classList.add('activity-btn', 'activity-btn-primary', 'mt-2');
     addBtn.innerHTML = `+ Add Option`;
     addBtn.addEventListener('click', () => {
-      this.data.options.push({ text: '', isCorrect: false });
+      data.options.push({ text: '', isCorrect: false });
       renderOptionRows();
     });
     optionsGroup.appendChild(addBtn);
@@ -296,52 +646,92 @@ export class ActivityBlock {
     parent.appendChild(optionsGroup);
 
     // 3. Explanation
-    this.renderExplanationInput(parent);
+    this.renderExplanationInput(parent, data);
   }
 
-  private renderBlanksForm(parent: HTMLDivElement): void {
+  private renderBlanksForm(parent: HTMLDivElement, data: any): void {
     const group = document.createElement('div');
     group.classList.add('activity-form-group');
     group.innerHTML = `
       <label class="activity-editor-label">Text Sentence (With Bracketed Blanks)</label>
-      <textarea class="activity-textarea fill-blanks-text" rows="3" placeholder="E.g., The [cat] is sleeping on the [mat].">${this.data.text || ''}</textarea>
+      <textarea class="activity-textarea fill-blanks-text" rows="3" placeholder="E.g., The [cat] is sleeping on the [mat].">${data.text || ''}</textarea>
       <small class="activity-helper-text">
-        Use brackets <strong>[correctAnswer]</strong> around target words (E.g. The [dog] barked).
+        Use brackets <strong>[correctAnswer]</strong> or inline options <strong>[correct|incorrect]</strong> (E.g. The [dog|cat] barked).
       </small>
     `;
     parent.appendChild(group);
 
-    this.renderExplanationInput(parent);
+    const txtTextarea = group.querySelector('.fill-blanks-text') as HTMLTextAreaElement;
+    txtTextarea.addEventListener('input', (e: any) => { data.text = e.target.value; });
+
+    // Image URL input
+    const imgGroup = document.createElement('div');
+    imgGroup.classList.add('activity-form-group');
+    imgGroup.innerHTML = `
+      <label class="activity-editor-label">Question Image URL (Optional)</label>
+      <input type="text" class="activity-input-text fill-blanks-image" value="${data.imageUrl || ''}" placeholder="E.g., https://example.com/images/fox.jpg">
+    `;
+    parent.appendChild(imgGroup);
+
+    const imgInput = imgGroup.querySelector('.fill-blanks-image') as HTMLInputElement;
+    imgInput.addEventListener('input', (e: any) => {
+      data.imageUrl = e.target.value;
+      if (!data.additional_data) data.additional_data = {};
+      data.additional_data.imageUrl = e.target.value;
+    });
+
+    // Audio URL input
+    const audioGroup = document.createElement('div');
+    audioGroup.classList.add('activity-form-group');
+    audioGroup.innerHTML = `
+      <label class="activity-editor-label">Question Audio URL (Optional)</label>
+      <input type="text" class="activity-input-text fill-blanks-audio" value="${data.audioUrl || ''}" placeholder="E.g., https://example.com/audio/sentence.mp3">
+    `;
+    parent.appendChild(audioGroup);
+
+    const audioInput = audioGroup.querySelector('.fill-blanks-audio') as HTMLInputElement;
+    audioInput.addEventListener('input', (e: any) => { data.audioUrl = e.target.value; });
+
+    this.renderExplanationInput(parent, data);
   }
 
-  private renderFlashcardForm(parent: HTMLDivElement): void {
+  private renderFlashcardForm(parent: HTMLDivElement, data: any): void {
     const groupFront = document.createElement('div');
     groupFront.classList.add('activity-form-group');
     groupFront.innerHTML = `
       <label class="activity-editor-label">Front Word (Foreign Term)</label>
-      <input type="text" class="activity-input-text flashcard-front" value="${this.data.front || ''}" placeholder="E.g., வணக்கம்">
+      <input type="text" class="activity-input-text flashcard-front" value="${data.front || ''}" placeholder="E.g., வணக்கம்">
     `;
     parent.appendChild(groupFront);
+
+    const frontInput = groupFront.querySelector('.flashcard-front') as HTMLInputElement;
+    frontInput.addEventListener('input', (e: any) => { data.front = e.target.value; });
 
     const groupBack = document.createElement('div');
     groupBack.classList.add('activity-form-group');
     groupBack.innerHTML = `
       <label class="activity-editor-label">Back Word (Native Translation)</label>
-      <input type="text" class="activity-input-text flashcard-back" value="${this.data.back || ''}" placeholder="E.g., Hello / Welcome">
+      <input type="text" class="activity-input-text flashcard-back" value="${data.back || ''}" placeholder="E.g., Hello / Welcome">
     `;
     parent.appendChild(groupBack);
+
+    const backInput = groupBack.querySelector('.flashcard-back') as HTMLInputElement;
+    backInput.addEventListener('input', (e: any) => { data.back = e.target.value; });
 
     const groupAudio = document.createElement('div');
     groupAudio.classList.add('activity-form-group');
     groupAudio.innerHTML = `
       <label class="activity-editor-label">Pronunciation Audio URL (Optional)</label>
-      <input type="text" class="activity-input-text flashcard-audio" value="${this.data.audioUrl || ''}" placeholder="E.g., https://example.com/audio/hello.mp3">
+      <input type="text" class="activity-input-text flashcard-audio" value="${data.audioUrl || ''}" placeholder="E.g., https://example.com/audio/hello.mp3">
       <small class="activity-helper-text">If left empty, browser native SpeechSynthesis will vocalize front word.</small>
     `;
     parent.appendChild(groupAudio);
+
+    const audioInput = groupAudio.querySelector('.flashcard-audio') as HTMLInputElement;
+    audioInput.addEventListener('input', (e: any) => { data.audioUrl = e.target.value; });
   }
 
-  private renderMatchForm(parent: HTMLDivElement): void {
+  private renderMatchForm(parent: HTMLDivElement, data: any): void {
     // 1. Config Section (Theme, Mode, Audio)
     const configGroup = document.createElement('div');
     configGroup.classList.add('activity-form-group');
@@ -357,25 +747,25 @@ export class ActivityBlock {
     configGroup.innerHTML = `
       <div style="display: flex; flex-direction: column; justify-content: center;">
         <label class="activity-editor-label" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-bottom: 0;">
-          <input type="checkbox" class="match-cloud-theme" ${this.data.theme === 'cloud' ? 'checked' : ''} style="width: 1.15rem; height: 1.15rem;">
+          <input type="checkbox" class="match-cloud-theme" ${data.theme === 'cloud' ? 'checked' : ''} style="width: 1.15rem; height: 1.15rem;">
           Cloud Layout
         </label>
       </div>
       <div style="display: flex; flex-direction: column; justify-content: center;">
         <label class="activity-editor-label" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-bottom: 0;">
-          <input type="checkbox" class="match-drag-drop" ${this.data.allowDragDrop ? 'checked' : ''} style="width: 1.15rem; height: 1.15rem;">
+          <input type="checkbox" class="match-drag-drop" ${data.allowDragDrop ? 'checked' : ''} style="width: 1.15rem; height: 1.15rem;">
           Drag & Drop
         </label>
       </div>
       <div style="display: flex; flex-direction: column; justify-content: center;">
         <label class="activity-editor-label" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-bottom: 0;">
-          <input type="checkbox" class="match-click-match" ${this.data.allowClickMatch ? 'checked' : ''} style="width: 1.15rem; height: 1.15rem;">
+          <input type="checkbox" class="match-click-match" ${data.allowClickMatch ? 'checked' : ''} style="width: 1.15rem; height: 1.15rem;">
           Click to Match
         </label>
       </div>
       <div style="display: flex; flex-direction: column; justify-content: center;">
         <label class="activity-editor-label" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer; margin-bottom: 0;">
-          <input type="checkbox" class="match-enable-audio" ${this.data.enableAudio ? 'checked' : ''} style="width: 1.15rem; height: 1.15rem;">
+          <input type="checkbox" class="match-enable-audio" ${data.enableAudio ? 'checked' : ''} style="width: 1.15rem; height: 1.15rem;">
           Audio
         </label>
       </div>
@@ -387,10 +777,10 @@ export class ActivityBlock {
     const clickMatchCheckbox = configGroup.querySelector('.match-click-match') as HTMLInputElement;
     const audioCheckbox = configGroup.querySelector('.match-enable-audio') as HTMLInputElement;
 
-    cloudThemeCheckbox.addEventListener('change', (e: any) => { this.data.theme = e.target.checked ? 'cloud' : 'standard'; });
-    dragDropCheckbox.addEventListener('change', (e: any) => { this.data.allowDragDrop = e.target.checked; });
-    clickMatchCheckbox.addEventListener('change', (e: any) => { this.data.allowClickMatch = e.target.checked; });
-    audioCheckbox.addEventListener('change', (e: any) => { this.data.enableAudio = e.target.checked; });
+    cloudThemeCheckbox.addEventListener('change', (e: any) => { data.theme = e.target.checked ? 'cloud' : 'standard'; });
+    dragDropCheckbox.addEventListener('change', (e: any) => { data.allowDragDrop = e.target.checked; });
+    clickMatchCheckbox.addEventListener('change', (e: any) => { data.allowClickMatch = e.target.checked; });
+    audioCheckbox.addEventListener('change', (e: any) => { data.enableAudio = e.target.checked; });
 
     parent.appendChild(configGroup);
 
@@ -408,7 +798,7 @@ export class ActivityBlock {
 
     const renderPairRows = () => {
       rowsContainer.innerHTML = '';
-      this.data.pairs.forEach((pair: any, idx: number) => {
+      data.pairs.forEach((pair: any, idx: number) => {
         const row = document.createElement('div');
         row.style.background = '#f8fafc';
         row.style.border = '1px solid #e2e8f0';
@@ -479,14 +869,14 @@ export class ActivityBlock {
             body: formData
           })
             .then(res => res.json())
-            .then(data => {
+            .then(uploadResult => {
               rightImgVal.disabled = false;
               rightImgVal.placeholder = "Right Image URL (E.g. https://example.com/img.jpg)";
 
-              if (data && data.url) {
-                pair.rightImage = data.url;
-                rightImgVal.value = data.url;
-                previewImg.src = data.url;
+              if (uploadResult && uploadResult.url) {
+                pair.rightImage = uploadResult.url;
+                rightImgVal.value = uploadResult.url;
+                previewImg.src = uploadResult.url;
                 previewContainer.style.display = 'flex';
               } else {
                 alert("Upload failed. Invalid response from server.");
@@ -507,8 +897,8 @@ export class ActivityBlock {
         });
 
         delBtn.addEventListener('click', () => {
-          if (this.data.pairs.length > 1) {
-            this.data.pairs.splice(idx, 1);
+          if (data.pairs.length > 1) {
+            data.pairs.splice(idx, 1);
             renderPairRows();
           }
         });
@@ -526,17 +916,17 @@ export class ActivityBlock {
     addBtn.classList.add('activity-btn', 'activity-btn-primary', 'mt-1');
     addBtn.innerHTML = `+ Add Pair`;
     addBtn.addEventListener('click', () => {
-      this.data.pairs.push({ left: '', right: '', rightImage: '' });
+      data.pairs.push({ left: '', right: '', rightImage: '' });
       renderPairRows();
     });
     pairsGroup.appendChild(addBtn);
 
     parent.appendChild(pairsGroup);
 
-    this.renderExplanationInput(parent);
+    this.renderExplanationInput(parent, data);
   }
 
-  private renderCrosswordForm(parent: HTMLDivElement): void {
+  private renderCrosswordForm(parent: HTMLDivElement, data: any): void {
     // 1. Instructions and Info
     const infoGroup = document.createElement('div');
     infoGroup.style.marginBottom = '1.5rem';
@@ -561,7 +951,7 @@ export class ActivityBlock {
 
     const renderWordRows = () => {
       rowsContainer.innerHTML = '';
-      this.data.words.forEach((w: any, idx: number) => {
+      data.words.forEach((w: any, idx: number) => {
         const row = document.createElement('div');
         row.style.background = '#f8fafc';
         row.style.border = '1px solid #e2e8f0';
@@ -586,8 +976,8 @@ export class ActivityBlock {
         clueInput.addEventListener('input', (e: any) => { w.clue = e.target.value; });
 
         delBtn.addEventListener('click', () => {
-          if (this.data.words.length > 1) {
-            this.data.words.splice(idx, 1);
+          if (data.words.length > 1) {
+            data.words.splice(idx, 1);
             renderWordRows();
           }
         });
@@ -605,7 +995,7 @@ export class ActivityBlock {
     addBtn.classList.add('activity-btn', 'activity-btn-primary', 'mt-2');
     addBtn.innerHTML = `+ Add Word`;
     addBtn.addEventListener('click', () => {
-      this.data.words.push({ word: '', clue: '' }); // Simplified payload for auto-gen
+      data.words.push({ word: '', clue: '' }); // Simplified payload for auto-gen
       renderWordRows();
     });
     wordsGroup.appendChild(addBtn);
@@ -631,13 +1021,13 @@ export class ActivityBlock {
 
     genBtn.addEventListener('click', () => {
       try {
-        const result = CrosswordGenerator.generate(this.data.words);
-        this.data.gridSize = result.gridSize;
+        const result = CrosswordGenerator.generate(data.words);
+        data.gridSize = result.gridSize;
 
-        // We overwrite this.data.words with the fully calculated placed words array
+        // We overwrite data.words with the fully calculated placed words array
         // It now contains row, col, and direction natively.
         // But we must preserve unplaced words in the UI so the admin can fix them.
-        this.data.words = [...result.words, ...result.unplaced];
+        data.words = [...result.words, ...result.unplaced];
 
         let msg = 'Success! Generated ' + result.gridSize + 'x' + result.gridSize + ' grid fitting ' + result.words.length + ' words.';
         if (result.unplaced.length > 0) {
@@ -656,75 +1046,520 @@ export class ActivityBlock {
     genGroup.appendChild(statusText);
     parent.appendChild(genGroup);
 
-    this.renderExplanationInput(parent);
+    this.renderExplanationInput(parent, data);
   }
 
-  private renderWordArrangeForm(parent: HTMLDivElement): void {
+  private renderWordArrangeForm(parent: HTMLDivElement, data: any): void {
     const qGroup = document.createElement('div');
     qGroup.classList.add('activity-form-group');
     qGroup.innerHTML = `
       <label class="activity-editor-label">Question Text</label>
-      <input type="text" class="activity-input-text word-arrange-question" value="${this.data.question || 'Arrange the words to form a correct sentence:'}" placeholder="E.g., Arrange the words to form a correct sentence:">
+      <input type="text" class="activity-input-text word-arrange-question" value="${data.question || 'Arrange the words to form a correct sentence:'}" placeholder="E.g., Arrange the words to form a correct sentence:">
     `;
     parent.appendChild(qGroup);
+
+    const qInput = qGroup.querySelector('.word-arrange-question') as HTMLInputElement;
+    qInput.addEventListener('input', (e: any) => { data.question = e.target.value; });
 
     const txtGroup = document.createElement('div');
     txtGroup.classList.add('activity-form-group');
     txtGroup.innerHTML = `
       <label class="activity-editor-label">Correct Sentence (Words separated by space or '/')</label>
-      <input type="text" class="activity-input-text word-arrange-text" value="${this.data.text || ''}" placeholder="E.g., he is playing OR he/is/playing">
+      <input type="text" class="activity-input-text word-arrange-text" value="${data.text || ''}" placeholder="E.g., he is playing OR he/is/playing">
       <small class="activity-helper-text">
         Enter the words in correct order. You can separate them by spaces or slashes.
       </small>
     `;
     parent.appendChild(txtGroup);
 
-    this.renderExplanationInput(parent);
+    const txtInput = txtGroup.querySelector('.word-arrange-text') as HTMLInputElement;
+    txtInput.addEventListener('input', (e: any) => { data.text = e.target.value; });
+
+    this.renderExplanationInput(parent, data);
   }
 
-  private renderExplanationInput(parent: HTMLDivElement): void {
+  private renderExplanationInput(parent: HTMLDivElement, data: any): void {
     const group = document.createElement('div');
     group.classList.add('activity-form-group');
     group.innerHTML = `
       <label class="activity-editor-label">Incorrect Explanation Feedback</label>
-      <textarea class="activity-textarea activity-explanation" rows="2" placeholder="Explain the rationale behind the correct choice...">${this.data.explanation || ''}</textarea>
+      <textarea class="activity-textarea activity-explanation" rows="2" placeholder="Explain the rationale behind the correct choice...">${data.explanation || ''}</textarea>
     `;
     parent.appendChild(group);
+
+    const explanationTextarea = group.querySelector('.activity-explanation') as HTMLTextAreaElement;
+    explanationTextarea.addEventListener('input', (e: any) => { data.explanation = e.target.value; });
+  }
+
+  private renderSpeakingForm(parent: HTMLDivElement, data: any): void {
+    const qGroup = document.createElement('div');
+    qGroup.classList.add('activity-form-group');
+    qGroup.innerHTML = `
+      <label class="activity-editor-label">Question Instructions</label>
+      <input type="text" class="activity-input-text speaking-question" value="${data.question || 'Listen and repeat the sentence:'}" placeholder="Instructions for student">
+    `;
+    parent.appendChild(qGroup);
+
+    const qInput = qGroup.querySelector('.speaking-question') as HTMLInputElement;
+    qInput.addEventListener('input', (e: any) => { data.question = e.target.value; });
+
+    const txtGroup = document.createElement('div');
+    txtGroup.classList.add('activity-form-group');
+    txtGroup.innerHTML = `
+      <label class="activity-editor-label">Sentence / Target Text to Speak</label>
+      <input type="text" class="activity-input-text speaking-target" value="${data.targetText || ''}" placeholder="E.g. She sells seashells by the seashore.">
+    `;
+    parent.appendChild(txtGroup);
+
+    const targetInput = txtGroup.querySelector('.speaking-target') as HTMLInputElement;
+    targetInput.addEventListener('input', (e: any) => {
+      data.targetText = e.target.value;
+      data.text = e.target.value;
+    });
+
+    const imgGroup = document.createElement('div');
+    imgGroup.classList.add('activity-form-group');
+    imgGroup.innerHTML = `
+      <label class="activity-editor-label">Image URL / Picture Description (Optional)</label>
+      <input type="text" class="activity-input-text speaking-image" value="${data.imageUrl || ''}" placeholder="E.g. https://example.com/images/landscape.jpg">
+    `;
+    parent.appendChild(imgGroup);
+
+    const imgInput = imgGroup.querySelector('.speaking-image') as HTMLInputElement;
+    imgInput.addEventListener('input', (e: any) => { data.imageUrl = e.target.value; });
+
+    this.renderExplanationInput(parent, data);
+  }
+
+  private renderRolePlayForm(parent: HTMLDivElement, data: any): void {
+    const qGroup = document.createElement('div');
+    qGroup.classList.add('activity-form-group');
+    qGroup.innerHTML = `
+      <label class="activity-editor-label">Question Instructions</label>
+      <input type="text" class="activity-input-text rp-question" value="${data.question || 'Complete the following role play conversation:'}" placeholder="Instructions for student">
+    `;
+    parent.appendChild(qGroup);
+
+    const qInput = qGroup.querySelector('.rp-question') as HTMLInputElement;
+    qInput.addEventListener('input', (e: any) => { data.question = e.target.value; });
+
+    const dialogueGroup = document.createElement('div');
+    dialogueGroup.classList.add('activity-form-group');
+
+    const label = document.createElement('label');
+    label.classList.add('activity-editor-label');
+    label.textContent = 'Dialogue Lines';
+    dialogueGroup.appendChild(label);
+
+    const rowsContainer = document.createElement('div');
+    rowsContainer.classList.add('rp-rows-container');
+
+    const renderRPRows = () => {
+      rowsContainer.innerHTML = '';
+      data.dialogue.forEach((line: any, idx: number) => {
+        const row = document.createElement('div');
+        row.style.background = '#f8fafc';
+        row.style.border = '1px solid #e2e8f0';
+        row.style.borderRadius = '0.5rem';
+        row.style.padding = '0.75rem';
+        row.style.marginBottom = '0.5rem';
+
+        row.innerHTML = `
+          <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+            <select class="activity-editor-select rp-role" style="width: 110px; margin-bottom: 0; padding: 0.4rem;">
+              <option value="system" ${line.role === 'system' ? 'selected' : ''}>Interviewer</option>
+              <option value="student" ${line.role === 'student' ? 'selected' : ''}>Student</option>
+            </select>
+            <input type="text" class="activity-input-text rp-name" placeholder="Name" value="${line.name || ''}" style="width: 100px; margin-bottom: 0;">
+            <input type="text" class="activity-input-text rp-text" placeholder="Line content / Target text to say" value="${line.text || ''}" style="flex: 1; margin-bottom: 0;">
+            <button type="button" class="activity-btn activity-btn-danger rp-del" style="padding: 0.4rem 0.6rem; margin-bottom: 0;">&times;</button>
+          </div>
+        `;
+
+        const roleSelect = row.querySelector('.rp-role') as HTMLSelectElement;
+        const nameInput = row.querySelector('.rp-name') as HTMLInputElement;
+        const textInput = row.querySelector('.rp-text') as HTMLInputElement;
+        const delBtn = row.querySelector('.rp-del') as HTMLButtonElement;
+
+        roleSelect.addEventListener('change', (e: any) => { line.role = e.target.value; });
+        nameInput.addEventListener('input', (e: any) => { line.name = e.target.value; });
+        textInput.addEventListener('input', (e: any) => { line.text = e.target.value; });
+        delBtn.addEventListener('click', () => {
+          if (data.dialogue.length > 1) {
+            data.dialogue.splice(idx, 1);
+            renderRPRows();
+          }
+        });
+
+        rowsContainer.appendChild(row);
+      });
+    };
+
+    renderRPRows();
+    dialogueGroup.appendChild(rowsContainer);
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.classList.add('activity-btn', 'activity-btn-primary', 'mt-1');
+    addBtn.innerHTML = `+ Add Line`;
+    addBtn.addEventListener('click', () => {
+      const lastLine = data.dialogue[data.dialogue.length - 1];
+      const nextRole = lastLine?.role === 'system' ? 'student' : 'system';
+      const nextName = nextRole === 'system' ? 'Interviewer' : 'Student';
+      data.dialogue.push({ role: nextRole, name: nextName, text: '' });
+      renderRPRows();
+    });
+    dialogueGroup.appendChild(addBtn);
+
+    parent.appendChild(dialogueGroup);
+    this.renderExplanationInput(parent, data);
+  }
+
+  private renderSequencingForm(parent: HTMLDivElement, data: any): void {
+    const qGroup = document.createElement('div');
+    qGroup.classList.add('activity-form-group');
+    qGroup.innerHTML = `
+      <label class="activity-editor-label">Question Instructions</label>
+      <input type="text" class="activity-input-text seq-question" value="${data.question || 'Arrange the events in correct chronological order:'}" placeholder="Instructions for student">
+    `;
+    parent.appendChild(qGroup);
+
+    const qInput = qGroup.querySelector('.seq-question') as HTMLInputElement;
+    qInput.addEventListener('input', (e: any) => { data.question = e.target.value; });
+
+    const eventsGroup = document.createElement('div');
+    eventsGroup.classList.add('activity-form-group');
+
+    const label = document.createElement('label');
+    label.classList.add('activity-editor-label');
+    label.textContent = 'Events in Correct Chronological Order';
+    eventsGroup.appendChild(label);
+
+    const rowsContainer = document.createElement('div');
+    rowsContainer.classList.add('seq-rows-container');
+
+    const renderSeqRows = () => {
+      rowsContainer.innerHTML = '';
+      data.events.forEach((evt: string, idx: number) => {
+        const row = document.createElement('div');
+        row.classList.add('activity-row');
+        row.innerHTML = `
+          <span style="font-weight: bold; color: #475569; width: 25px;">${idx + 1}.</span>
+          <input type="text" class="activity-input-text seq-text" value="${evt || ''}" placeholder="Event summary..." style="flex: 1; margin-bottom: 0;">
+          <button type="button" class="activity-btn activity-btn-danger seq-del" style="margin-bottom: 0;">&times; Remove</button>
+        `;
+
+        const txtInput = row.querySelector('.seq-text') as HTMLInputElement;
+        const delBtn = row.querySelector('.seq-del') as HTMLButtonElement;
+
+        txtInput.addEventListener('input', (e: any) => { data.events[idx] = e.target.value; });
+        delBtn.addEventListener('click', () => {
+          if (data.events.length > 1) {
+            data.events.splice(idx, 1);
+            renderSeqRows();
+          }
+        });
+
+        rowsContainer.appendChild(row);
+      });
+    };
+
+    renderSeqRows();
+    eventsGroup.appendChild(rowsContainer);
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.classList.add('activity-btn', 'activity-btn-primary', 'mt-1');
+    addBtn.innerHTML = `+ Add Event`;
+    addBtn.addEventListener('click', () => {
+      data.events.push('');
+      renderSeqRows();
+    });
+    eventsGroup.appendChild(addBtn);
+
+    parent.appendChild(eventsGroup);
+    this.renderExplanationInput(parent, data);
+  }
+
+  private renderPartsOfSpeechForm(parent: HTMLDivElement, data: any): void {
+    const qGroup = document.createElement('div');
+    qGroup.classList.add('activity-form-group');
+    qGroup.innerHTML = `
+      <label class="activity-editor-label">Question Instructions</label>
+      <input type="text" class="activity-input-text pos-question" value="${data.question || 'Identify the parts of speech for the highlighted words:'}" placeholder="Instructions for student">
+    `;
+    parent.appendChild(qGroup);
+
+    const qInput = qGroup.querySelector('.pos-question') as HTMLInputElement;
+    qInput.addEventListener('input', (e: any) => { data.question = e.target.value; });
+
+    const sentenceGroup = document.createElement('div');
+    sentenceGroup.classList.add('activity-form-group');
+    sentenceGroup.innerHTML = `
+      <label class="activity-editor-label">Full Sentence</label>
+      <input type="text" class="activity-input-text pos-text" value="${data.text || ''}" placeholder="E.g. The dog ran very fast.">
+    `;
+    parent.appendChild(sentenceGroup);
+
+    const txtInput = sentenceGroup.querySelector('.pos-text') as HTMLInputElement;
+    txtInput.addEventListener('input', (e: any) => { data.text = e.target.value; });
+
+    const partsGroup = document.createElement('div');
+    partsGroup.classList.add('activity-form-group');
+
+    const label = document.createElement('label');
+    label.classList.add('activity-editor-label');
+    label.textContent = 'Word Tags Mapping';
+    partsGroup.appendChild(label);
+
+    const rowsContainer = document.createElement('div');
+    rowsContainer.classList.add('pos-rows-container');
+
+    const renderPOSRows = () => {
+      rowsContainer.innerHTML = '';
+      data.parts.forEach((p: any, idx: number) => {
+        const row = document.createElement('div');
+        row.classList.add('activity-row');
+        row.innerHTML = `
+          <input type="text" class="activity-input-text pos-word" placeholder="Word (e.g. dog)" value="${p.word || ''}" style="flex: 1; margin-bottom: 0;">
+          <select class="activity-editor-select pos-tag" style="flex: 1; margin-bottom: 0; padding: 0.5rem;">
+            <option value="Noun" ${p.tag === 'Noun' ? 'selected' : ''}>Noun</option>
+            <option value="Pronoun" ${p.tag === 'Pronoun' ? 'selected' : ''}>Pronoun</option>
+            <option value="Verb" ${p.tag === 'Verb' ? 'selected' : ''}>Verb</option>
+            <option value="Be verb" ${p.tag === 'Be verb' ? 'selected' : ''}>Be verb</option>
+            <option value="Main verb" ${p.tag === 'Main verb' ? 'selected' : ''}>Main verb</option>
+            <option value="Adjective" ${p.tag === 'Adjective' ? 'selected' : ''}>Adjective</option>
+            <option value="Adverb" ${p.tag === 'Adverb' ? 'selected' : ''}>Adverb</option>
+            <option value="Preposition" ${p.tag === 'Preposition' ? 'selected' : ''}>Preposition</option>
+            <option value="Conjunction" ${p.tag === 'Conjunction' ? 'selected' : ''}>Conjunction</option>
+            <option value="Article" ${p.tag === 'Article' ? 'selected' : ''}>Article</option>
+          </select>
+          <button type="button" class="activity-btn activity-btn-danger pos-del" style="margin-bottom: 0;">&times;</button>
+        `;
+
+        const wordInput = row.querySelector('.pos-word') as HTMLInputElement;
+        const tagSelect = row.querySelector('.pos-tag') as HTMLSelectElement;
+        const delBtn = row.querySelector('.pos-del') as HTMLButtonElement;
+
+        wordInput.addEventListener('input', (e: any) => { p.word = e.target.value; });
+        tagSelect.addEventListener('change', (e: any) => { p.tag = e.target.value; });
+        delBtn.addEventListener('click', () => {
+          if (data.parts.length > 1) {
+            data.parts.splice(idx, 1);
+            renderPOSRows();
+          }
+        });
+
+        rowsContainer.appendChild(row);
+      });
+    };
+
+    renderPOSRows();
+    partsGroup.appendChild(rowsContainer);
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.classList.add('activity-btn', 'activity-btn-primary', 'mt-1');
+    addBtn.innerHTML = `+ Add Tag`;
+    addBtn.addEventListener('click', () => {
+      data.parts.push({ word: '', tag: 'Noun' });
+      renderPOSRows();
+    });
+    partsGroup.appendChild(addBtn);
+
+    parent.appendChild(partsGroup);
+    this.renderExplanationInput(parent, data);
+  }
+
+  private renderMindMapForm(parent: HTMLDivElement, data: any): void {
+    const qGroup = document.createElement('div');
+    qGroup.classList.add('activity-form-group');
+    qGroup.innerHTML = `
+      <label class="activity-editor-label">Question Instructions</label>
+      <input type="text" class="activity-input-text mm-question" value="${data.question || 'Complete the mind map by filling in the details:'}" placeholder="Instructions for student">
+    `;
+    parent.appendChild(qGroup);
+
+    const qInput = qGroup.querySelector('.mm-question') as HTMLInputElement;
+    qInput.addEventListener('input', (e: any) => { data.question = e.target.value; });
+
+    const nodesGroup = document.createElement('div');
+    nodesGroup.classList.add('activity-form-group');
+
+    const label = document.createElement('label');
+    label.classList.add('activity-editor-label');
+    label.textContent = 'Mind Map Structure Nodes';
+    nodesGroup.appendChild(label);
+
+    const rowsContainer = document.createElement('div');
+    rowsContainer.classList.add('mm-rows-container');
+
+    const renderMMRows = () => {
+      rowsContainer.innerHTML = '';
+      data.nodes.forEach((n: any, idx: number) => {
+        const row = document.createElement('div');
+        row.style.background = '#f8fafc';
+        row.style.border = '1px solid #e2e8f0';
+        row.style.borderRadius = '0.5rem';
+        row.style.padding = '0.75rem';
+        row.style.marginBottom = '0.5rem';
+
+        row.innerHTML = `
+          <div style="display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem;">
+            <input type="text" class="activity-input-text mm-node-id" placeholder="Node ID" value="${n.id || ''}" style="width: 80px; margin-bottom: 0;" disabled>
+            <input type="text" class="activity-input-text mm-node-parent" placeholder="Parent ID" value="${n.parentId || ''}" style="width: 80px; margin-bottom: 0;">
+            <input type="text" class="activity-input-text mm-node-label" placeholder="Pre-filled Label" value="${n.label || ''}" style="flex: 1; margin-bottom: 0;">
+            <label style="display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; font-weight: bold; margin-bottom: 0; white-space: nowrap;">
+              <input type="checkbox" class="mm-node-placeholder" ${n.isPlaceholder ? 'checked' : ''}>
+              Blank Node
+            </label>
+            <button type="button" class="activity-btn activity-btn-danger mm-del" style="padding: 0.45rem 0.6rem; margin-bottom: 0;">&times;</button>
+          </div>
+          <div class="mm-correct-val-container" style="display: ${n.isPlaceholder ? 'block' : 'none'};">
+            <input type="text" class="activity-input-text mm-node-correct" placeholder="Expected Correct Answer" value="${n.correctValue || ''}" style="margin-bottom: 0;">
+          </div>
+        `;
+
+        const parentInput = row.querySelector('.mm-node-parent') as HTMLInputElement;
+        const labelInput = row.querySelector('.mm-node-label') as HTMLInputElement;
+        const placeCheckbox = row.querySelector('.mm-node-placeholder') as HTMLInputElement;
+        const correctInput = row.querySelector('.mm-node-correct') as HTMLInputElement;
+        const correctContainer = row.querySelector('.mm-correct-val-container') as HTMLDivElement;
+        const delBtn = row.querySelector('.mm-del') as HTMLButtonElement;
+
+        parentInput.addEventListener('input', (e: any) => { n.parentId = e.target.value; });
+        labelInput.addEventListener('input', (e: any) => { n.label = e.target.value; });
+        placeCheckbox.addEventListener('change', (e: any) => {
+          n.isPlaceholder = e.target.checked;
+          correctContainer.style.display = n.isPlaceholder ? 'block' : 'none';
+        });
+        correctInput.addEventListener('input', (e: any) => { n.correctValue = e.target.value; });
+        delBtn.addEventListener('click', () => {
+          if (data.nodes.length > 1) {
+            data.nodes.splice(idx, 1);
+            renderMMRows();
+          }
+        });
+
+        rowsContainer.appendChild(row);
+      });
+    };
+
+    renderMMRows();
+    nodesGroup.appendChild(rowsContainer);
+
+    const addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.classList.add('activity-btn', 'activity-btn-primary', 'mt-1');
+    addBtn.innerHTML = `+ Add Node`;
+    addBtn.addEventListener('click', () => {
+      const newId = `node_${Date.now().toString().slice(-4)}`;
+      data.nodes.push({ id: newId, parentId: 'root', label: '', isPlaceholder: true, correctValue: '' });
+      renderMMRows();
+    });
+    nodesGroup.appendChild(addBtn);
+
+    parent.appendChild(nodesGroup);
+    this.renderExplanationInput(parent, data);
+  }
+
+  private renderWritingForm(parent: HTMLDivElement, data: any): void {
+    const qGroup = document.createElement('div');
+    qGroup.classList.add('activity-form-group');
+    qGroup.innerHTML = `
+      <label class="activity-editor-label">Question Instructions</label>
+      <input type="text" class="activity-input-text writing-question" value="${data.question || 'Write a short story about the following prompt:'}" placeholder="Instructions for student">
+    `;
+    parent.appendChild(qGroup);
+
+    const qInput = qGroup.querySelector('.writing-question') as HTMLInputElement;
+    qInput.addEventListener('input', (e: any) => { data.question = e.target.value; });
+
+    const promptGroup = document.createElement('div');
+    promptGroup.classList.add('activity-form-group');
+    promptGroup.innerHTML = `
+      <label class="activity-editor-label">Writing Prompt / Passage / Hints (Separate hints by newlines)</label>
+      <textarea class="activity-textarea writing-text" rows="3" placeholder="Hints or details to display...">${data.text || ''}</textarea>
+    `;
+    parent.appendChild(promptGroup);
+
+    const promptTextarea = promptGroup.querySelector('.writing-text') as HTMLTextAreaElement;
+    promptTextarea.addEventListener('input', (e: any) => { data.text = e.target.value; });
+
+    const starterGroup = document.createElement('div');
+    starterGroup.classList.add('activity-form-group');
+    starterGroup.innerHTML = `
+      <label class="activity-editor-label">Starter Sentence (Optional)</label>
+      <input type="text" class="activity-input-text writing-starter" value="${data.starterText || ''}" placeholder="E.g. Once upon a time...">
+    `;
+    parent.appendChild(starterGroup);
+
+    const starterInput = starterGroup.querySelector('.writing-starter') as HTMLInputElement;
+    starterInput.addEventListener('input', (e: any) => { data.starterText = e.target.value; });
+
+    const limitGroup = document.createElement('div');
+    limitGroup.classList.add('activity-form-group');
+    limitGroup.style.display = 'flex';
+    limitGroup.style.gap = '1rem';
+    limitGroup.innerHTML = `
+      <div style="flex: 1;">
+        <label class="activity-editor-label">Min Word Limit</label>
+        <input type="number" class="activity-input-text writing-min-words" value="${data.minWords || 1}">
+      </div>
+      <div style="flex: 1;">
+        <label class="activity-editor-label">Max Word Limit</label>
+        <input type="number" class="activity-input-text writing-max-words" value="${data.maxWords || 1000}">
+      </div>
+    `;
+    parent.appendChild(limitGroup);
+
+    const minInput = limitGroup.querySelector('.writing-min-words') as HTMLInputElement;
+    const maxInput = limitGroup.querySelector('.writing-max-words') as HTMLInputElement;
+    minInput.addEventListener('input', (e: any) => { data.minWords = parseInt(e.target.value) || 1; });
+    maxInput.addEventListener('input', (e: any) => { data.maxWords = parseInt(e.target.value) || 1000; });
+
+    const modelGroup = document.createElement('div');
+    modelGroup.classList.add('activity-form-group');
+    modelGroup.innerHTML = `
+      <label class="activity-editor-label">Model Reference Answer / Example Response</label>
+      <textarea class="activity-textarea writing-model" rows="3" placeholder="Display this response after the student submits...">${data.modelAnswer || ''}</textarea>
+    `;
+    parent.appendChild(modelGroup);
+
+    const modelTextarea = modelGroup.querySelector('.writing-model') as HTMLTextAreaElement;
+    modelTextarea.addEventListener('input', (e: any) => { data.modelAnswer = e.target.value; });
+
+    this.renderExplanationInput(parent, data);
   }
 
   save(blockContent: HTMLElement): any {
     const type = this.data.type;
-    const explanationTextarea = blockContent.querySelector('.activity-explanation') as HTMLTextAreaElement;
-    const explanation = explanationTextarea ? explanationTextarea.value : (this.data.explanation || '');
-
     const savedData: any = {
       type,
-      explanation
+      explanation: this.data.explanation || ''
     };
 
     if (type === 'mcq') {
-      const qInput = blockContent.querySelector('.mcq-question') as HTMLInputElement;
-      savedData.question = qInput ? qInput.value : '';
-      savedData.options = this.data.options.map((opt: any) => ({
-        text: opt.text,
+      savedData.question = this.data.question || '';
+      savedData.audioUrl = this.data.audioUrl || '';
+      savedData.options = (this.data.options || []).map((opt: any) => ({
+        text: opt.text || '',
         isCorrect: !!opt.isCorrect
       }));
     } else if (type === 'fill_blanks') {
-      const txtTextarea = blockContent.querySelector('.fill-blanks-text') as HTMLTextAreaElement;
-      savedData.text = txtTextarea ? txtTextarea.value : '';
+      savedData.text = this.data.text || '';
+      savedData.imageUrl = this.data.imageUrl || '';
+      savedData.audioUrl = this.data.audioUrl || '';
+      savedData.additional_data = {
+        imageUrl: this.data.imageUrl || ''
+      };
     } else if (type === 'word_arrange') {
-      const qInput = blockContent.querySelector('.word-arrange-question') as HTMLInputElement;
-      const txtInput = blockContent.querySelector('.word-arrange-text') as HTMLInputElement;
-      savedData.question = qInput ? qInput.value : '';
-      savedData.text = txtInput ? txtInput.value : '';
+      savedData.question = this.data.question || '';
+      savedData.text = this.data.text || '';
     } else if (type === 'flashcard') {
-      const frontInput = blockContent.querySelector('.flashcard-front') as HTMLInputElement;
-      const backInput = blockContent.querySelector('.flashcard-back') as HTMLInputElement;
-      const audioInput = blockContent.querySelector('.flashcard-audio') as HTMLInputElement;
-
-      savedData.front = frontInput ? frontInput.value : '';
-      savedData.back = backInput ? backInput.value : '';
-      savedData.audioUrl = audioInput ? audioInput.value : '';
+      savedData.front = this.data.front || '';
+      savedData.back = this.data.back || '';
+      savedData.audioUrl = this.data.audioUrl || '';
       // Exclude explanation for flashcard
       delete savedData.explanation;
     } else if (type === 'match') {
@@ -732,24 +1567,23 @@ export class ActivityBlock {
       savedData.allowDragDrop = !!this.data.allowDragDrop;
       savedData.allowClickMatch = !!this.data.allowClickMatch;
       savedData.enableAudio = !!this.data.enableAudio;
-      savedData.pairs = this.data.pairs.map((p: any) => ({
-        left: p.left,
+      savedData.pairs = (this.data.pairs || []).map((p: any) => ({
+        left: p.left || '',
         right: p.right || '',
         rightImage: p.rightImage || ''
       }));
     } else if (type === 'crossword') {
-      // The generation logic modifies this.data directly and sets row/col/direction.
-      // We only save words that were successfully placed by the algorithm (they have row & col).
-      // If the admin clicks save without generating, we automatically run generation here as a fallback.
-      let finalWords = this.data.words;
+      let finalWords = this.data.words || [];
       let finalSize = this.data.gridSize;
 
       // Check if they forgot to generate
       const needsGeneration = finalWords.some((w: any) => !w.row || !w.direction);
       if (needsGeneration) {
-        const result = CrosswordGenerator.generate(finalWords);
-        finalWords = result.words;
-        finalSize = result.gridSize;
+        try {
+          const result = CrosswordGenerator.generate(finalWords);
+          finalWords = result.words;
+          finalSize = result.gridSize;
+        } catch (e) { }
       }
 
       // Filter out any unplaced words
@@ -757,12 +1591,49 @@ export class ActivityBlock {
 
       savedData.gridSize = finalSize || 10;
       savedData.words = successfullyPlaced.map((w: any) => ({
-        word: w.word,
-        clue: w.clue,
+        word: w.word || '',
+        clue: w.clue || '',
         row: w.row,
         col: w.col,
         direction: w.direction
       }));
+    } else if (type === 'speaking') {
+      savedData.question = this.data.question || '';
+      savedData.text = this.data.text || this.data.targetText || '';
+      savedData.media_url = this.data.imageUrl || '';
+    } else if (type === 'role_play') {
+      savedData.question = this.data.question || '';
+      savedData.dialogue = (this.data.dialogue || []).map((line: any) => ({
+        role: line.role || 'system',
+        name: line.name || '',
+        text: line.text || ''
+      }));
+    } else if (type === 'sequencing') {
+      savedData.question = this.data.question || '';
+      savedData.events = (this.data.events || []).filter((e: string) => e.trim().length > 0);
+    } else if (type === 'parts_of_speech') {
+      savedData.question = this.data.question || '';
+      savedData.text = this.data.text || '';
+      savedData.parts = (this.data.parts || []).map((p: any) => ({
+        word: p.word || '',
+        tag: p.tag || 'Noun'
+      }));
+    } else if (type === 'mind_map') {
+      savedData.question = this.data.question || '';
+      savedData.nodes = (this.data.nodes || []).map((n: any) => ({
+        id: n.id || '',
+        parentId: n.parentId || '',
+        label: n.label || '',
+        isPlaceholder: !!n.isPlaceholder,
+        correctValue: n.correctValue || ''
+      }));
+    } else if (type === 'writing') {
+      savedData.question = this.data.question || '';
+      savedData.text = this.data.text || '';
+      savedData.starterText = this.data.starterText || '';
+      savedData.minWords = parseInt(this.data.minWords) || 1;
+      savedData.maxWords = parseInt(this.data.maxWords) || 1000;
+      savedData.modelAnswer = this.data.modelAnswer || '';
     }
 
     return savedData;

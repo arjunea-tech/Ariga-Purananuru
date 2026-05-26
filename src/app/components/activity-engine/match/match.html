@@ -3,7 +3,7 @@
   <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
     <div>
       <span class="badge rounded-pill px-3 py-2 text-uppercase fw-bold d-inline-block match-badge">
-        🎯 {{ theme() === 'cloud' ? 'Cloud Match' : 'Match It' }}
+        <i class="bi bi-controller me-1"></i> {{ theme() === 'cloud' ? 'Cloud Match' : 'Match It' }}
       </span>
       <p class="text-muted small mt-1 mb-0">
         @if (allowDragDrop() && allowClickMatch()) {
@@ -18,168 +18,45 @@
   </div>
 
   @if (theme() === 'cloud') {
-    <!-- CLOUD THEME LAYOUT -->
-    <div class="sky-board p-4 rounded-4 position-relative overflow-hidden mb-3">
-      <div class="bg-cloud bg-cloud-1"></div>
-      <div class="bg-cloud bg-cloud-2"></div>
-      <div class="bg-cloud bg-cloud-3"></div>
-
-      <div class="row g-5 position-relative z-index-1 mt-2">
-        <!-- Left Column (Source Words inside Big Cloud) -->
-        <div class="col-12 col-md-6 d-flex flex-column align-items-center">
-          <span class="column-header text-uppercase fw-bold pb-2 text-white border-bottom border-white border-opacity-25 w-75 text-center mb-4">
-            Left Column
-          </span>
-
-          <div class="big-cloud-wrapper">
-            <div class="big-cloud-container">
-              @for (item of leftItems(); track item.id; let idx = $index) {
-                @if (!isItemMatched(item.id)) {
-                  <div
-                    [id]="item.id"
-                    class="word-bubble d-flex align-items-center gap-2"
-                    [class.draggable]="allowDragDrop()"
-                    [class.selected]="selectedLeftId() === item.id"
-                    [class.incorrect-shake]="shakeLeftId() === item.id"
-                    [draggable]="allowDragDrop()"
-                    (dragstart)="onDragStart($event, item)"
-                    (click)="selectLeft(item)">
-                    
-                    {{ item.text }}
-                    
-                    @if (enableAudio()) {
-                      <button type="button" class="btn-speaker-mini" (click)="speak(item.text); $event.stopPropagation();">
-                        🔊
-                      </button>
-                    }
-                  </div>
-                }
-              }
-              @if (isAllLeftMatched()) {
-                <div class="text-success small py-3 fw-bold animate-fade-in text-center w-100">
-                  ☁️ All words matched!
-                </div>
-              }
-            </div>
-          </div>
-        </div>
-
-        <!-- Right Column (Target Words/Images inside Big Cloud) -->
-        <div class="col-12 col-md-6 d-flex flex-column align-items-center">
-          <span class="column-header text-uppercase fw-bold pb-2 text-white border-bottom border-white border-opacity-25 w-75 text-center mb-4">
-            Right Column
-          </span>
-
-          <div class="big-cloud-wrapper">
-            <div class="big-cloud-container">
-              @for (item of rightItems(); track item.id) {
-                @if (!isItemMatched(item.id)) {
-                  <div
-                    [id]="item.id"
-                    class="word-bubble"
-                    [class.selected]="selectedRightId() === item.id"
-                    [class.incorrect-shake]="shakeRightId() === item.id"
-                    (dragover)="onDragOver($event)"
-                    (drop)="onDrop($event, item)"
-                    (click)="selectRight(item)">
-                    
-                    @if (item.rightImage) {
-                      <img [src]="item.rightImage" alt="Match Target" class="cloud-match-image" />
-                    } @else {
-                      {{ item.text }}
-                    }
-                  </div>
-                }
-              }
-              @if (isAllRightMatched()) {
-                <div class="text-success small py-3 fw-bold animate-fade-in text-center w-100">
-                  ☁️ All matched!
-                </div>
-              }
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <app-match-cloud
+      [leftItems]="leftItems()"
+      [rightItems]="rightItems()"
+      [selectedLeftId]="selectedLeftId()"
+      [selectedRightId]="selectedRightId()"
+      [shakeLeftId]="shakeLeftId()"
+      [shakeRightId]="shakeRightId()"
+      [allowDragDrop]="allowDragDrop()"
+      [enableAudio]="enableAudio()"
+      [matchedPairs]="matchedPairs()"
+      (leftSelected)="selectLeft($event)"
+      (rightSelected)="selectRight($event)"
+      (dragStarted)="onDragStart($event.event, $event.item)"
+      (dropped)="onDrop($event.event, $event.item)"
+      (speakRequested)="speak($event)">
+    </app-match-cloud>
   } @else {
-    <!-- STANDARD THEME LAYOUT -->
-    <div class="standard-board p-4 rounded-4 bg-light border border-light-subtle mb-3">
-      <div class="row g-4">
-        <!-- Left Column -->
-        <div class="col-12 col-md-6 d-flex flex-column gap-3">
-          <span class="text-uppercase fw-bold text-secondary pb-2 border-bottom border-secondary border-opacity-10 text-center" style="font-size: 0.8rem; letter-spacing: 0.08em;">
-            Left Column
-          </span>
-          
-          @for (item of leftItems(); track item.id) {
-            <div
-              [id]="item.id"
-              class="standard-card d-flex align-items-center justify-content-between p-3 rounded-3"
-              [class.draggable]="allowDragDrop() && !isItemMatched(item.id)"
-              [class.selected]="selectedLeftId() === item.id"
-              [class.matched]="isItemMatched(item.id)"
-              [class.incorrect-shake]="shakeLeftId() === item.id"
-              [ngClass]="getMatchedColorClass(item.id)"
-              [draggable]="allowDragDrop() && !isItemMatched(item.id)"
-              (dragstart)="onDragStart($event, item)"
-              (click)="selectLeft(item)">
-              
-              <div class="d-flex align-items-center gap-2">
-                @if (enableAudio() && !isItemMatched(item.id)) {
-                  <button type="button" class="btn-speaker-mini" (click)="speak(item.text); $event.stopPropagation();">
-                    🔊
-                  </button>
-                }
-                <span class="fw-bold">{{ item.text }}</span>
-              </div>
-              
-              @if (isItemMatched(item.id)) {
-                <span class="badge-check fs-5 text-success">✓</span>
-              }
-            </div>
-          }
-        </div>
-
-        <!-- Right Column -->
-        <div class="col-12 col-md-6 d-flex flex-column gap-3">
-          <span class="text-uppercase fw-bold text-secondary pb-2 border-bottom border-secondary border-opacity-10 text-center" style="font-size: 0.8rem; letter-spacing: 0.08em;">
-            Right Column
-          </span>
-          
-          @for (item of rightItems(); track item.id) {
-            <div
-              [id]="item.id"
-              class="standard-card d-flex align-items-center justify-content-between p-3 rounded-3"
-              [class.selected]="selectedRightId() === item.id"
-              [class.matched]="isItemMatched(item.id)"
-              [class.incorrect-shake]="shakeRightId() === item.id"
-              [ngClass]="getMatchedColorClass(item.id)"
-              (dragover)="onDragOver($event)"
-              (drop)="onDrop($event, item)"
-              (click)="selectRight(item)">
-              
-              <div class="d-flex align-items-center justify-content-center w-100">
-                @if (item.rightImage) {
-                  <img [src]="item.rightImage" alt="Match Target" class="standard-match-image" />
-                } @else {
-                  <span class="fw-bold">{{ item.text }}</span>
-                }
-              </div>
-              
-              @if (isItemMatched(item.id)) {
-                <span class="badge-check fs-5 text-success">✓</span>
-              }
-            </div>
-          }
-        </div>
-      </div>
-    </div>
+    <app-match-standard
+      [leftItems]="leftItems()"
+      [rightItems]="rightItems()"
+      [selectedLeftId]="selectedLeftId()"
+      [selectedRightId]="selectedRightId()"
+      [shakeLeftId]="shakeLeftId()"
+      [shakeRightId]="shakeRightId()"
+      [allowDragDrop]="allowDragDrop()"
+      [enableAudio]="enableAudio()"
+      [matchedPairs]="matchedPairs()"
+      (leftSelected)="selectLeft($event)"
+      (rightSelected)="selectRight($event)"
+      (dragStarted)="onDragStart($event.event, $event.item)"
+      (dropped)="onDrop($event.event, $event.item)"
+      (speakRequested)="speak($event)">
+    </app-match-standard>
   }
 
   <!-- Matched Pairs Checklist (Answers display below) -->
   <div class="matched-pairs-section mt-4 mb-4 p-4 bg-white border border-light rounded-4 shadow-sm">
     <h6 class="text-secondary text-uppercase fw-bold mb-3 d-flex align-items-center gap-2" style="font-size: 0.85rem; letter-spacing: 0.05em;">
-      ✨ Matches Made
+      <i class="bi bi-stars text-warning"></i> Matches Made
     </h6>
     <div class="d-flex flex-wrap justify-content-center gap-3">
       @for (pair of matchedPairs(); track $index) {
@@ -189,7 +66,7 @@
         
         <div class="matched-pair-card color-pair-{{ pair.colorIndex }} d-flex align-items-center gap-3 px-4 py-2 rounded-pill shadow-sm border">
           <span class="matched-word fw-bold">{{ leftText }}</span>
-          <span class="matched-separator text-secondary opacity-75">🤝</span>
+          <span class="matched-separator text-secondary opacity-75"><i class="bi bi-arrow-left-right text-muted"></i></span>
           
           @if (rightImg) {
             <img [src]="rightImg" alt="Matched" class="matched-img-mini" />
@@ -217,7 +94,7 @@
       type="button" 
       class="btn btn-light btn-sm text-secondary fw-bold px-3 border shadow-sm"
       (click)="reset()">
-      🔄 Reset
+      <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
     </button>
   </div>
 

@@ -1,5 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { MatchCloudComponent } from './match-cloud/match-cloud';
+import { MatchStandardComponent } from './match-standard/match-standard';
 
 export interface MatchPair {
   left: string;
@@ -33,7 +35,7 @@ interface MatchedPair {
 @Component({
   selector: 'app-activity-match',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatchCloudComponent, MatchStandardComponent],
   templateUrl: './match.html',
   styleUrls: ['./match.css']
 })
@@ -251,12 +253,6 @@ export class MatchComponent implements OnInit, OnChanges {
     return this.matchedPairs().some(p => p.leftId === itemId || p.rightId === itemId);
   }
 
-  getMatchedColorClass(itemId: string): string {
-    const pair = this.matchedPairs().find(p => p.leftId === itemId || p.rightId === itemId);
-    if (!pair) return '';
-    return `color-pair-${pair.colorIndex}`;
-  }
-
   getLeftItemText(id: string): string {
     return this.leftItems().find(i => i.id === id)?.text || '';
   }
@@ -267,14 +263,6 @@ export class MatchComponent implements OnInit, OnChanges {
 
   getRightItemImage(id: string): string {
     return this.rightItems().find(i => i.id === id)?.rightImage || '';
-  }
-
-  isAllLeftMatched(): boolean {
-    return this.leftItems().length > 0 && this.leftItems().every(item => this.isItemMatched(item.id));
-  }
-
-  isAllRightMatched(): boolean {
-    return this.rightItems().length > 0 && this.rightItems().every(item => this.isItemMatched(item.id));
   }
 
   reset(): void {

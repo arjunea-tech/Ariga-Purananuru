@@ -6,9 +6,15 @@ import { FlashcardComponent, FlashcardData } from '../flashcard/flashcard';
 import { MatchComponent, MatchData } from '../match/match';
 import { CrosswordComponent, CrosswordData, CrosswordWord } from '../crossword/crossword';
 import { WordArrangeComponent, WordArrangeData } from '../word-arrange/word-arrange';
+import { SpeakingComponent, SpeakingData } from '../speaking/speaking';
+import { RolePlayComponent, RolePlayData } from '../role-play/role-play';
+import { SequencingComponent, SequencingData } from '../sequencing/sequencing';
+import { PartsOfSpeechComponent, PartsOfSpeechData } from '../parts-of-speech/parts-of-speech';
+import { MindMapComponent, MindMapData } from '../mind-map/mind-map';
+import { WritingComponent, WritingData } from '../writing/writing';
 
 export interface NormalizedActivity {
-  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange';
+  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing';
   question?: string;
   text?: string;
   front?: string;
@@ -23,6 +29,31 @@ export interface NormalizedActivity {
   allowDragDrop?: boolean;
   allowClickMatch?: boolean;
   enableAudio?: boolean;
+  
+  // MCQ and Fill Blanks enhancements
+  audioUrl?: string;
+  imageUrl?: string;
+
+  // Speaking properties
+  targetText?: string;
+
+  // Role Play properties
+  dialogue?: any[];
+
+  // Sequencing properties
+  events?: string[];
+
+  // Parts of Speech properties
+  parts?: any[];
+
+  // Mind Map properties
+  nodes?: any[];
+
+  // Writing properties
+  starterText?: string;
+  modelAnswer?: string;
+  minWords?: number;
+  maxWords?: number;
 }
 
 @Component({
@@ -35,7 +66,13 @@ export interface NormalizedActivity {
     FlashcardComponent,
     MatchComponent,
     CrosswordComponent,
-    WordArrangeComponent
+    WordArrangeComponent,
+    SpeakingComponent,
+    RolePlayComponent,
+    SequencingComponent,
+    PartsOfSpeechComponent,
+    MindMapComponent,
+    WritingComponent
   ],
   templateUrl: './activity-renderer.html',
   styleUrls: ['./activity-renderer.css']
@@ -64,7 +101,7 @@ export class ActivityRenderer implements OnChanges {
     
     // 1. Determine type
     let typeInput = raw.type || raw.question_type || 'mcq';
-    let type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' = 'mcq';
+    let type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' = 'mcq';
 
     if (['multiple_choice', 'mcq', 'multiple-choice', 'multiplechoice'].includes(typeInput.toLowerCase())) {
       type = 'mcq';
@@ -78,6 +115,18 @@ export class ActivityRenderer implements OnChanges {
       type = 'crossword';
     } else if (['word_arrange', 'word-arrange', 'wordarrange', 'sentence_unscramble', 'sentence-unscramble'].includes(typeInput.toLowerCase())) {
       type = 'word_arrange';
+    } else if (['speaking', 'voice-recorder', 'voice_recorder', 'pronunciation'].includes(typeInput.toLowerCase())) {
+      type = 'speaking';
+    } else if (['role_play', 'role-play', 'dialogue', 'conversation'].includes(typeInput.toLowerCase())) {
+      type = 'role_play';
+    } else if (['sequencing', 'ordering', 'sequence'].includes(typeInput.toLowerCase())) {
+      type = 'sequencing';
+    } else if (['parts_of_speech', 'parts-of-speech', 'tagging', 'sentence_tagging'].includes(typeInput.toLowerCase())) {
+      type = 'parts_of_speech';
+    } else if (['mind_map', 'mind-map', 'concept_map'].includes(typeInput.toLowerCase())) {
+      type = 'mind_map';
+    } else if (['writing', 'essay', 'paragraph_writing', 'story_writing'].includes(typeInput.toLowerCase())) {
+      type = 'writing';
     }
 
     // 2. Extract explanation & options
@@ -91,6 +140,7 @@ export class ActivityRenderer implements OnChanges {
 
     if (type === 'mcq') {
       normalized.question = raw.question || raw.question_text || '';
+      normalized.audioUrl = raw.media_url || additional.audioUrl || '';
       const rawOptions = raw.options || additional.options || [];
       normalized.options = rawOptions.map((opt: any, idx: number) => ({
         id: opt.id ?? idx,
@@ -99,12 +149,13 @@ export class ActivityRenderer implements OnChanges {
       }));
     } else if (type === 'fill_blanks') {
       normalized.text = raw.text || raw.question_text || '';
+      normalized.audioUrl = raw.media_url || additional.audioUrl || '';
+      normalized.imageUrl = additional.imageUrl || '';
     } else if (type === 'flashcard') {
       normalized.front = raw.front || additional.front || raw.question_text || '';
       normalized.back = raw.back || additional.back || '';
     } else if (type === 'match') {
       normalized.pairs = raw.pairs || additional.pairs || [];
-      // If it is originally a cloud_match, default the theme to 'cloud' for backwards compatibility
       normalized.theme = raw.theme ?? additional.theme ?? (typeInput.toLowerCase().includes('cloud') ? 'cloud' : 'standard');
       
       const rawMode = raw.matchMode ?? additional.matchMode;
@@ -118,6 +169,30 @@ export class ActivityRenderer implements OnChanges {
     } else if (type === 'word_arrange') {
       normalized.text = raw.text || additional.text || raw.question_text || '';
       normalized.question = raw.question || raw.question_text || '';
+    } else if (type === 'speaking') {
+      normalized.question = raw.question || raw.question_text || '';
+      normalized.targetText = raw.text || additional.targetText || '';
+      normalized.imageUrl = raw.media_url || additional.imageUrl || '';
+    } else if (type === 'role_play') {
+      normalized.question = raw.question || raw.question_text || '';
+      normalized.dialogue = raw.dialogue || additional.dialogue || [];
+    } else if (type === 'sequencing') {
+      normalized.question = raw.question || raw.question_text || '';
+      normalized.events = raw.events || additional.events || [];
+    } else if (type === 'parts_of_speech') {
+      normalized.question = raw.question || raw.question_text || '';
+      normalized.text = raw.text || raw.question_text || '';
+      normalized.parts = raw.parts || additional.parts || [];
+    } else if (type === 'mind_map') {
+      normalized.question = raw.question || raw.question_text || '';
+      normalized.nodes = raw.nodes || additional.nodes || [];
+    } else if (type === 'writing') {
+      normalized.question = raw.question || raw.question_text || '';
+      normalized.text = raw.text || additional.text || ''; // hints
+      normalized.starterText = raw.starterText || additional.starterText || '';
+      normalized.modelAnswer = raw.modelAnswer || additional.modelAnswer || '';
+      normalized.minWords = raw.minWords || additional.minWords || 1;
+      normalized.maxWords = raw.maxWords || additional.maxWords || 1000;
     }
 
     this.normalizedActivity.set(normalized);
@@ -171,4 +246,53 @@ export class ActivityRenderer implements OnChanges {
       ...event
     });
   }
+
+  onSpeakingAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'speaking',
+      ...event
+    });
+  }
+
+  onRolePlayAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'role_play',
+      ...event
+    });
+  }
+
+  onSequencingAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'sequencing',
+      ...event
+    });
+  }
+
+  onPartsOfSpeechAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'parts_of_speech',
+      ...event
+    });
+  }
+
+  onMindMapAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'mind_map',
+      ...event
+    });
+  }
+
+  onWritingAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'writing',
+      ...event
+    });
+  }
 }
+
