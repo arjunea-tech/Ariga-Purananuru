@@ -5,11 +5,15 @@ import { TranslateModule } from '@ngx-translate/core';
 import { AssessmentService, AssessmentData } from '../../services/assessment';
 import { LevelService, LevelData } from '../../services/level';
 import { ChapterService, ChapterData } from '../../services/chapter';
+import EditorJS from '@editorjs/editorjs';
+import { CustomList as List } from '../../editor-plugins/custom-list';
+import Table from '@editorjs/table';
+
 import {
   McvInputField,
   McvToggleField
 } from 'mcv-ui-toolkit';
-import { EditorComponent } from '@tinymce/tinymce-angular';
+
 @Component({
   selector: 'app-assessment',
   standalone: true,
@@ -18,8 +22,7 @@ import { EditorComponent } from '@tinymce/tinymce-angular';
     ReactiveFormsModule,
     McvInputField,
     McvToggleField,
-    TranslateModule,
-    EditorComponent
+    TranslateModule
   ],
   templateUrl: './assessment.html',
   styleUrls: ['./assessment.css'],
@@ -40,24 +43,8 @@ export class Assessment implements OnInit {
   currentAssessmentId = signal<number | null>(null);
   feedbackMessage = signal<{ type: 'success' | 'error', text: string } | null>(null);
 
-  editorConfig = {
-    base_url: '/tinymce',
-    suffix: '.min',
-    height: 300,
-    menubar: 'file edit view insert format tools table help',
-    plugins: [
-      'advlist autolink lists link image charmap print preview anchor',
-      'searchreplace visualblocks code fullscreen',
-      'insertdatetime media table paste code help wordcount'
-    ],
-    toolbar:
-      'undo redo | formatselect | bold italic backcolor | ' +
-      'alignleft aligncenter alignright alignjustify | ' +
-      'bullist numlist outdent indent | removeformat | help',
-    skin: 'oxide',
-    content_css: 'default'
-  };
-
+  private preludeEditor: EditorJS | null = null;
+  private questionEditors = new Map<string, EditorJS>();
 
   constructor() {
     this.assessmentForm = this.fb.group({
@@ -108,8 +95,72 @@ export class Assessment implements OnInit {
     });
   }
 
+  private generateEditorId(): string {
+    return 'q_editor_' + Math.random().toString(36).substring(2, 9);
+  }
+
+  initializePreludeEditor(initialData?: any): void {
+    if (this.preludeEditor) {
+      this.preludeEditor.destroy();
+      this.preludeEditor = null;
+    }
+    setTimeout(() => {
+      this.preludeEditor = new EditorJS({
+        holder: 'prelude-editor',
+        data: initialData || {},
+        tools: {
+          list: {
+            class: List as any,
+            inlineToolbar: true,
+            config: {
+              defaultStyle: 'unordered'
+            }
+          },
+          table: {
+            class: Table as any,
+            inlineToolbar: true
+          }
+        },
+        placeholder: 'Enter prelude content...'
+      });
+    }, 100);
+  }
+
+  initializeQuestionEditor(editorId: string, initialData?: any): void {
+    if (this.questionEditors.has(editorId)) {
+      const existing = this.questionEditors.get(editorId);
+      if (existing) {
+        try { existing.destroy(); } catch (e) {}
+      }
+      this.questionEditors.delete(editorId);
+    }
+    setTimeout(() => {
+      const editor = new EditorJS({
+        holder: editorId,
+        data: initialData || {},
+        tools: {
+          list: {
+            class: List as any,
+            inlineToolbar: true,
+            config: {
+              defaultStyle: 'unordered'
+            }
+          },
+          table: {
+            class: Table as any,
+            inlineToolbar: true
+          }
+        },
+        placeholder: 'Enter question text...'
+      });
+      this.questionEditors.set(editorId, editor);
+    }, 100);
+  }
+
   addQuestion() {
+    const editorId = this.generateEditorId();
     const questionForm = this.fb.group({
+      _editorId: [editorId],
       question_text: ['', Validators.required],
       sort_order: [this.questions.length],
       question_type: ['multiple_choice', Validators.required],
@@ -121,7 +172,6 @@ export class Assessment implements OnInit {
       ])
     });
 
-    // Handle initial option count for non-MCQ types if needed
     questionForm.get('question_type')?.valueChanges.subscribe(type => {
       const options = questionForm.get('options') as FormArray;
       if (type && ['fill_in_the_blank', 'audio_type_text'].includes(type) && options.length === 0) {
@@ -130,6 +180,7 @@ export class Assessment implements OnInit {
     });
 
     this.questions.push(questionForm);
+    this.initializeQuestionEditor(editorId, {});
   }
 
   createOption(isCorrect: boolean = false) {
@@ -153,6 +204,15 @@ export class Assessment implements OnInit {
   }
 
   removeQuestion(index: number) {
+    const questionGroup = this.questions.at(index);
+    const editorId = questionGroup.get('_editorId')?.value;
+    if (editorId && this.questionEditors.has(editorId)) {
+      const editor = this.questionEditors.get(editorId);
+      if (editor) {
+        try { editor.destroy(); } catch (e) {}
+      }
+      this.questionEditors.delete(editorId);
+    }
     this.questions.removeAt(index);
   }
 
@@ -166,6 +226,7 @@ export class Assessment implements OnInit {
   showCreateForm(): void {
     this.resetForm();
     this.isFormVisible.set(true);
+    this.initializePreludeEditor({});
     this.addQuestion();
   }
 
@@ -176,39 +237,71 @@ export class Assessment implements OnInit {
       return;
     }
 
-    const assessmentData: AssessmentData = this.assessmentForm.value;
+    const savePromises: Promise<any>[] = [];
 
-    if (this.isEditMode()) {
-      const id = this.currentAssessmentId();
-      if (id) {
-        this.assessmentService.update(id, assessmentData).subscribe({
-          next: () => {
-            this.showFeedback('success', 'Assessment updated successfully');
-            this.isFormVisible.set(false);
-            this.loadAssessments();
-          },
-          error: (err) => this.showFeedback('error', err.error?.message || 'Failed to update assessment'),
+    if (this.preludeEditor) {
+      const preludePromise = this.preludeEditor.save().then(data => {
+        this.assessmentForm.patchValue({ prelude_content: JSON.stringify(data) });
+      });
+      savePromises.push(preludePromise);
+    }
+
+    this.questions.controls.forEach((control) => {
+      const editorId = control.get('_editorId')?.value;
+      if (editorId && this.questionEditors.has(editorId)) {
+        const editor = this.questionEditors.get(editorId);
+        if (editor) {
+          const qPromise = editor.save().then(data => {
+            control.get('question_text')?.setValue(JSON.stringify(data));
+          });
+          savePromises.push(qPromise);
+        }
+      }
+    });
+
+    Promise.all(savePromises).then(() => {
+      const assessmentData = JSON.parse(JSON.stringify(this.assessmentForm.value));
+      if (assessmentData.questions) {
+        assessmentData.questions.forEach((q: any) => {
+          delete q._editorId;
         });
       }
-    } else {
-      this.assessmentService.create(assessmentData).subscribe({
-        next: () => {
-          this.showFeedback('success', 'Assessment created successfully');
-          this.isFormVisible.set(false);
-          this.loadAssessments();
-        },
-        error: (err) => this.showFeedback('error', err.error?.message || 'Failed to create assessment'),
-      });
-    }
+
+      if (this.isEditMode()) {
+        const id = this.currentAssessmentId();
+        if (id) {
+          this.assessmentService.update(id, assessmentData).subscribe({
+            next: () => {
+              this.showFeedback('success', 'Assessment updated successfully');
+              this.isFormVisible.set(false);
+              this.loadAssessments();
+              this.resetForm();
+            },
+            error: (err) => this.showFeedback('error', err.error?.message || 'Failed to update assessment'),
+          });
+        }
+      } else {
+        this.assessmentService.create(assessmentData).subscribe({
+          next: () => {
+            this.showFeedback('success', 'Assessment created successfully');
+            this.isFormVisible.set(false);
+            this.loadAssessments();
+            this.resetForm();
+          },
+          error: (err) => this.showFeedback('error', err.error?.message || 'Failed to create assessment'),
+        });
+      }
+    }).catch(error => {
+      console.error('Saving editors failed: ', error);
+      this.showFeedback('error', 'Failed to save rich text content.');
+    });
   }
 
   editAssessment(assessment: AssessmentData): void {
     this.isEditMode.set(true);
     this.currentAssessmentId.set(assessment.id!);
 
-    while (this.questions.length !== 0) {
-      this.questions.removeAt(0);
-    }
+    this.resetForm();
 
     this.assessmentForm.patchValue({
       level_id: assessment.level_id,
@@ -225,10 +318,28 @@ export class Assessment implements OnInit {
       is_active: assessment.is_active,
     });
 
+    let parsedPrelude: any = {};
+    try {
+      if (assessment.prelude_content && assessment.prelude_content.trim().startsWith('{')) {
+        parsedPrelude = JSON.parse(assessment.prelude_content);
+      } else if (assessment.prelude_content) {
+        parsedPrelude = {
+          blocks: [{
+            type: 'paragraph',
+            data: { text: assessment.prelude_content }
+          }]
+        };
+      }
+    } catch(e) {}
+
+    this.initializePreludeEditor(parsedPrelude);
+
     if (assessment.questions) {
       assessment.questions.forEach(q => {
+        const editorId = this.generateEditorId();
         const qGroup = this.fb.group({
           id: [q.id],
+          _editorId: [editorId],
           question_text: [q.question_text, Validators.required],
           sort_order: [q.sort_order],
           question_type: [q.question_type || 'multiple_choice', Validators.required],
@@ -250,6 +361,22 @@ export class Assessment implements OnInit {
         }
 
         this.questions.push(qGroup);
+
+        let parsedQuestion: any = {};
+        try {
+          if (q.question_text && q.question_text.trim().startsWith('{')) {
+            parsedQuestion = JSON.parse(q.question_text);
+          } else if (q.question_text) {
+            parsedQuestion = {
+              blocks: [{
+                type: 'paragraph',
+                data: { text: q.question_text }
+              }]
+            };
+          }
+        } catch(e) {}
+
+        this.initializeQuestionEditor(editorId, parsedQuestion);
       });
     }
 
@@ -270,6 +397,15 @@ export class Assessment implements OnInit {
   }
 
   resetForm(): void {
+    if (this.preludeEditor) {
+      try { this.preludeEditor.destroy(); } catch(e) {}
+      this.preludeEditor = null;
+    }
+    this.questionEditors.forEach((editor) => {
+      try { editor.destroy(); } catch(e) {}
+    });
+    this.questionEditors.clear();
+
     this.assessmentForm.reset({
       is_active: true,
       pass_percentage: 70,

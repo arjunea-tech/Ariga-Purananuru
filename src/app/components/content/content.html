@@ -351,6 +351,53 @@
                   } @else {
                     <h3 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h3>
                   }
+                } @else if (block.type === 'list') {
+                  @if (block.data.style === 'ordered') {
+                    <ol class="mb-3 text-dark fs-5">
+                      @for (item of block.data.items; track $index) {
+                        <li [innerHTML]="item"></li>
+                      }
+                    </ol>
+                  } @else {
+                    <ul class="mb-3 text-dark fs-5">
+                      @for (item of block.data.items; track $index) {
+                        <li [innerHTML]="item"></li>
+                      }
+                    </ul>
+                  }
+                } @else if (block.type === 'table') {
+                  <div class="table-responsive mb-3">
+                    <table class="table table-bordered align-middle text-dark">
+                      @if (block.data.withHeadings && block.data.content && block.data.content.length > 0) {
+                        <thead>
+                          <tr class="bg-light">
+                            @for (headerCell of block.data.content[0]; track $index) {
+                              <th [innerHTML]="headerCell"></th>
+                            }
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (row of block.data.content.slice(1); track $index) {
+                            <tr>
+                              @for (cell of row; track $index) {
+                                <td [innerHTML]="cell"></td>
+                              }
+                            </tr>
+                          }
+                        </tbody>
+                      } @else if (block.data.content) {
+                        <tbody>
+                          @for (row of block.data.content; track $index) {
+                            <tr>
+                              @for (cell of row; track $index) {
+                                <td [innerHTML]="cell"></td>
+                              }
+                            </tr>
+                          }
+                        </tbody>
+                      }
+                    </table>
+                  </div>
                 } @else if (block.type === 'activity') {
                   <app-activity-renderer [activity]="block.data" [showFeedback]="true"></app-activity-renderer>
                 } @else {

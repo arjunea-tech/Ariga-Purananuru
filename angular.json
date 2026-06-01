@@ -23,19 +23,12 @@
               {
                 "glob": "**/*",
                 "input": "public"
-              },
-              {
-                "glob": "**/*",
-                "input": "node_modules/tinymce",
-                "output": "/tinymce"
               }
             ],
             "styles": [
               "src/styles.css"
             ],
-            "scripts": [
-              "node_modules/tinymce/tinymce.min.js"
-            ]
+            "scripts": []
           },
           "configurations": {
             "production": {

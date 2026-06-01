@@ -91,6 +91,58 @@ export class ActivityRenderer implements OnChanges {
     }
   }
 
+  convertEditorJsToHtml(jsonStr: string): string {
+    if (!jsonStr) return '';
+    const trimmed = jsonStr.trim();
+    if (!(trimmed.startsWith('{') && trimmed.endsWith('}'))) {
+      return jsonStr;
+    }
+    try {
+      const data = JSON.parse(jsonStr);
+      if (!data.blocks || !Array.isArray(data.blocks)) {
+        return jsonStr;
+      }
+      return data.blocks.map((block: any) => {
+        if (block.type === 'paragraph') {
+          return `<p class="mb-3">${block.data.text || ''}</p>`;
+        } else if (block.type === 'header') {
+          return `<h${block.data.level} class="fw-bold mb-3">${block.data.text || ''}</h${block.data.level}>`;
+        } else if (block.type === 'list') {
+          const items = (block.data.items || []).map((item: string) => `<li>${item}</li>`).join('');
+          return block.data.style === 'ordered' ? `<ol>${items}</ol>` : `<ul>${items}</ul>`;
+        } else if (block.type === 'table') {
+          const withHeadings = !!block.data.withHeadings;
+          const rows = block.data.content || [];
+          let tableHtml = '<div class="table-responsive mb-3"><table class="table table-bordered align-middle">';
+          if (rows.length > 0) {
+            if (withHeadings) {
+              const headerCells = rows[0].map((cell: string) => `<th>${cell}</th>`).join('');
+              tableHtml += `<thead><tr class="bg-light">${headerCells}</tr></thead>`;
+              tableHtml += '<tbody>';
+              for (let i = 1; i < rows.length; i++) {
+                const bodyCells = rows[i].map((cell: string) => `<td>${cell}</td>`).join('');
+                tableHtml += `<tr>${bodyCells}</tr>`;
+              }
+              tableHtml += '</tbody>';
+            } else {
+              tableHtml += '<tbody>';
+              rows.forEach((row: any) => {
+                const bodyCells = row.map((cell: string) => `<td>${cell}</td>`).join('');
+                tableHtml += `<tr>${bodyCells}</tr>`;
+              });
+              tableHtml += '</tbody>';
+            }
+          }
+          tableHtml += '</table></div>';
+          return tableHtml;
+        }
+        return block.data.text || '';
+      }).join('\n');
+    } catch (e) {
+      return jsonStr;
+    }
+  }
+
   private normalizeInput(): void {
     if (!this.activity) {
       this.normalizedActivity.set(null);
@@ -131,7 +183,7 @@ export class ActivityRenderer implements OnChanges {
 
     // 2. Extract explanation & options
     const additional = raw.additional_data || {};
-    const explanation = raw.explanation || additional.explanation || '';
+    const explanation = this.convertEditorJsToHtml(raw.explanation || additional.explanation || '');
 
     const normalized: NormalizedActivity = {
       type,
@@ -139,7 +191,7 @@ export class ActivityRenderer implements OnChanges {
     };
 
     if (type === 'mcq') {
-      normalized.question = raw.question || raw.question_text || '';
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.audioUrl = raw.media_url || additional.audioUrl || '';
       const rawOptions = raw.options || additional.options || [];
       normalized.options = rawOptions.map((opt: any, idx: number) => ({
@@ -148,12 +200,12 @@ export class ActivityRenderer implements OnChanges {
         isCorrect: !!(opt.is_correct ?? opt.isCorrect ?? false)
       }));
     } else if (type === 'fill_blanks') {
-      normalized.text = raw.text || raw.question_text || '';
+      normalized.text = this.convertEditorJsToHtml(raw.text || raw.question_text || '');
       normalized.audioUrl = raw.media_url || additional.audioUrl || '';
       normalized.imageUrl = additional.imageUrl || '';
     } else if (type === 'flashcard') {
-      normalized.front = raw.front || additional.front || raw.question_text || '';
-      normalized.back = raw.back || additional.back || '';
+      normalized.front = this.convertEditorJsToHtml(raw.front || additional.front || raw.question_text || '');
+      normalized.back = this.convertEditorJsToHtml(raw.back || additional.back || '');
     } else if (type === 'match') {
       normalized.pairs = raw.pairs || additional.pairs || [];
       normalized.theme = raw.theme ?? additional.theme ?? (typeInput.toLowerCase().includes('cloud') ? 'cloud' : 'standard');
@@ -167,28 +219,28 @@ export class ActivityRenderer implements OnChanges {
       normalized.gridSize = raw.gridSize || additional.gridSize || 10;
       normalized.words = raw.words || additional.words || [];
     } else if (type === 'word_arrange') {
-      normalized.text = raw.text || additional.text || raw.question_text || '';
-      normalized.question = raw.question || raw.question_text || '';
+      normalized.text = this.convertEditorJsToHtml(raw.text || additional.text || raw.question_text || '');
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
     } else if (type === 'speaking') {
-      normalized.question = raw.question || raw.question_text || '';
-      normalized.targetText = raw.text || additional.targetText || '';
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.targetText = this.convertEditorJsToHtml(raw.text || additional.targetText || '');
       normalized.imageUrl = raw.media_url || additional.imageUrl || '';
     } else if (type === 'role_play') {
-      normalized.question = raw.question || raw.question_text || '';
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.dialogue = raw.dialogue || additional.dialogue || [];
     } else if (type === 'sequencing') {
-      normalized.question = raw.question || raw.question_text || '';
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.events = raw.events || additional.events || [];
     } else if (type === 'parts_of_speech') {
-      normalized.question = raw.question || raw.question_text || '';
-      normalized.text = raw.text || raw.question_text || '';
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.text = this.convertEditorJsToHtml(raw.text || raw.question_text || '');
       normalized.parts = raw.parts || additional.parts || [];
     } else if (type === 'mind_map') {
-      normalized.question = raw.question || raw.question_text || '';
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.nodes = raw.nodes || additional.nodes || [];
     } else if (type === 'writing') {
-      normalized.question = raw.question || raw.question_text || '';
-      normalized.text = raw.text || additional.text || ''; // hints
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.text = this.convertEditorJsToHtml(raw.text || additional.text || ''); // hints
       normalized.starterText = raw.starterText || additional.starterText || '';
       normalized.modelAnswer = raw.modelAnswer || additional.modelAnswer || '';
       normalized.minWords = raw.minWords || additional.minWords || 1;
@@ -295,4 +347,3 @@ export class ActivityRenderer implements OnChanges {
     });
   }
 }
-

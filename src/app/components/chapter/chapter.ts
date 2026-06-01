@@ -5,12 +5,15 @@ import { TranslateModule } from '@ngx-translate/core';
 import { ChapterService, ChapterData } from '../../services/chapter';
 import { LevelService, LevelData } from '../../services/level';
 import { LevelChapterService } from '../../services/level-chapter';
+import EditorJS from '@editorjs/editorjs';
+import { CustomList as List } from '../../editor-plugins/custom-list';
+import Table from '@editorjs/table';
 
 import {
   McvInputField,
   McvToggleField
 } from 'mcv-ui-toolkit';
-import { EditorComponent } from '@tinymce/tinymce-angular';
+
 @Component({
   selector: 'app-chapter',
   standalone: true,
@@ -19,8 +22,7 @@ import { EditorComponent } from '@tinymce/tinymce-angular';
     ReactiveFormsModule,
     McvInputField,
     McvToggleField,
-    TranslateModule,
-    EditorComponent
+    TranslateModule
   ],
   templateUrl: './chapter.html',
   styleUrls: ['./chapter.css'],
@@ -43,24 +45,7 @@ export class Chapter implements OnInit {
   feedbackMessage = signal<{ type: 'success' | 'error', text: string } | null>(null);
   levelSearchQuery = signal('');
 
-  editorConfig = {
-    base_url: '/tinymce',
-    suffix: '.min',
-    height: 300,
-    menubar: 'file edit view insert format tools table help',
-    plugins: [
-      'advlist autolink lists link image charmap print preview anchor',
-      'searchreplace visualblocks code fullscreen',
-      'insertdatetime media table paste code help wordcount'
-    ],
-    toolbar:
-      'undo redo | formatselect | bold italic backcolor | ' +
-      'alignleft aligncenter alignright alignjustify | ' +
-      'bullist numlist outdent indent | removeformat | help',
-    skin: 'oxide',
-    content_css: 'default'
-  };
-
+  private descriptionEditor: EditorJS | null = null;
 
   filteredLevels = computed(() => {
     const query = this.levelSearchQuery().toLowerCase().trim();
@@ -82,7 +67,6 @@ export class Chapter implements OnInit {
   }
 
   constructor() {
-
     this.chapterForm = this.fb.group({
       name: ['', Validators.required],
       code: ['', Validators.required],
@@ -111,9 +95,38 @@ export class Chapter implements OnInit {
     });
   }
 
+  initializeEditorJS(initialData?: any): void {
+    if (this.descriptionEditor) {
+      this.descriptionEditor.destroy();
+      this.descriptionEditor = null;
+    }
+
+    setTimeout(() => {
+      this.descriptionEditor = new EditorJS({
+        holder: 'chapter-description-editor',
+        data: initialData || {},
+        tools: {
+          list: {
+            class: List as any,
+            inlineToolbar: true,
+            config: {
+              defaultStyle: 'unordered'
+            }
+          },
+          table: {
+            class: Table as any,
+            inlineToolbar: true
+          }
+        },
+        placeholder: 'Enter chapter description...'
+      });
+    }, 100);
+  }
+
   showCreateForm(): void {
     this.resetForm();
     this.isFormVisible.set(true);
+    this.initializeEditorJS({});
   }
 
   generateCode(): void {
@@ -137,34 +150,50 @@ export class Chapter implements OnInit {
       return;
     }
 
-    const chapterData: ChapterData = this.chapterForm.value;
-    const levelIds = this.selectedLevelIds();
+    const submitPayload = () => {
+      const chapterData: ChapterData = this.chapterForm.value;
+      const levelIds = this.selectedLevelIds();
 
-    if (this.isEditMode()) {
-      const id = this.currentChapterId();
-      if (id) {
-        this.chapterService.update(id, chapterData).subscribe({
-          next: () => {
-            this.syncLevelMappings(id, levelIds);
-            this.showFeedback('success', 'Chapter updated successfully');
+      if (this.isEditMode()) {
+        const id = this.currentChapterId();
+        if (id) {
+          this.chapterService.update(id, chapterData).subscribe({
+            next: () => {
+              this.syncLevelMappings(id, levelIds);
+              this.showFeedback('success', 'Chapter updated successfully');
+              this.isFormVisible.set(false);
+              this.loadChapters();
+              this.resetForm();
+            },
+            error: (err) => this.showFeedback('error', err.error?.message || 'Failed to update chapter'),
+          });
+        }
+      } else {
+        this.chapterService.create(chapterData).subscribe({
+          next: (newChapter) => {
+            if (newChapter.id) {
+              this.syncLevelMappings(newChapter.id, levelIds);
+            }
+            this.showFeedback('success', 'Chapter created successfully');
             this.isFormVisible.set(false);
             this.loadChapters();
+            this.resetForm();
           },
-          error: (err) => this.showFeedback('error', err.error?.message || 'Failed to update chapter'),
+          error: (err) => this.showFeedback('error', err.error?.message || 'Failed to create chapter'),
         });
       }
-    } else {
-      this.chapterService.create(chapterData).subscribe({
-        next: (newChapter) => {
-          if (newChapter.id) {
-            this.syncLevelMappings(newChapter.id, levelIds);
-          }
-          this.showFeedback('success', 'Chapter created successfully');
-          this.isFormVisible.set(false);
-          this.loadChapters();
-        },
-        error: (err) => this.showFeedback('error', err.error?.message || 'Failed to create chapter'),
+    };
+
+    if (this.descriptionEditor) {
+      this.descriptionEditor.save().then((outputData) => {
+        this.chapterForm.patchValue({ description: JSON.stringify(outputData) });
+        submitPayload();
+      }).catch((error) => {
+        console.error('Saving failed: ', error);
+        this.showFeedback('error', 'Failed to save description editor content.');
       });
+    } else {
+      submitPayload();
     }
   }
 
@@ -184,6 +213,22 @@ export class Chapter implements OnInit {
       sort_order: chapter.sort_order,
       is_active: chapter.is_active,
     });
+
+    let parsedJson: any = {};
+    try {
+      if (chapter.description && chapter.description.trim().startsWith('{')) {
+        parsedJson = JSON.parse(chapter.description);
+      } else if (chapter.description) {
+        parsedJson = {
+          blocks: [{
+            type: 'paragraph',
+            data: { text: chapter.description }
+          }]
+        };
+      }
+    } catch(e) {}
+
+    this.initializeEditorJS(parsedJson);
 
     // Load mapped levels
     this.levelChapterService.getMappedLevels(chapter.id!).subscribe({
@@ -209,6 +254,10 @@ export class Chapter implements OnInit {
   }
 
   resetForm(): void {
+    if (this.descriptionEditor) {
+      this.descriptionEditor.destroy();
+      this.descriptionEditor = null;
+    }
     this.chapterForm.reset({ is_active: true, sort_order: 0 });
     this.selectedLevelIds.set([]);
     this.isEditMode.set(false);

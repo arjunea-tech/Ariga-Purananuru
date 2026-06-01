@@ -150,9 +150,8 @@
 
           <div class="col-12">
             <label class="form-label small fw-bold text-secondary">{{ 'ASSESSMENT.PRELUDE' | translate }}</label>
-            <editor formControlName="prelude_content" [init]="editorConfig"></editor>
+            <div id="prelude-editor" class="editorjs-container border rounded bg-white p-3" style="min-height: 150px;"></div>
           </div>
-
           <div class="col-12">
             <div class="p-3 bg-light rounded-4 d-flex flex-wrap gap-4 border border-light">
               <mcv-toggle-field [label]="'ASSESSMENT.MANDATORY' | translate" formControlName="is_mandatory"></mcv-toggle-field>
@@ -194,9 +193,8 @@
                 <div class="row g-4">
                   <div class="col-md-8">
                     <label class="form-label small fw-bold text-secondary">{{ 'ASSESSMENT.QUESTION_TEXT' | translate }}</label>
-                    <editor formControlName="question_text" [init]="{ ...editorConfig, height: 200 }"></editor>
-                  </div>
-                  <div class="col-md-4">
+                    <div [id]="question.get('_editorId')?.value" class="editorjs-container border rounded bg-white p-3" style="min-height: 120px;"></div>
+                  </div>                  <div class="col-md-4">
                     <label class="form-label small fw-bold text-secondary">{{ 'ASSESSMENT.QUESTION_TYPE' | translate }}</label>
                     <select formControlName="question_type" class="form-select border-light shadow-none cursor-pointer">
                       <option value="multiple_choice">{{ 'ASSESSMENT.MCQ' | translate }}</option>

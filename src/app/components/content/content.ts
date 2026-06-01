@@ -22,6 +22,8 @@ import { ContentService, ContentData, Attachment } from '../../services/content'
 import { ChapterService, ChapterData } from '../../services/chapter';
 import EditorJS from '@editorjs/editorjs';
 import { ActivityBlock } from '../../editor-plugins/activity-block';
+import { CustomList as List } from '../../editor-plugins/custom-list';
+import Table from '@editorjs/table';
 import { ActivityRenderer } from '../activity-engine/activity-renderer/activity-renderer';
 
 import {
@@ -153,6 +155,17 @@ export class Content implements OnInit {
         tools: {
           activity: {
             class: ActivityBlock,
+            inlineToolbar: true
+          },
+          list: {
+            class: List as any,
+            inlineToolbar: true,
+            config: {
+              defaultStyle: 'unordered'
+            }
+          },
+          table: {
+            class: Table as any,
             inlineToolbar: true
           }
         },

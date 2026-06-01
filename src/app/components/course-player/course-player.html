@@ -51,6 +51,53 @@
                   } @else {
                     <h3 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h3>
                   }
+                } @else if (block.type === 'list') {
+                  @if (block.data.style === 'ordered') {
+                    <ol class="mb-3 fs-5 text-dark">
+                      @for (item of block.data.items; track item) {
+                        <li [innerHTML]="item"></li>
+                      }
+                    </ol>
+                  } @else {
+                    <ul class="mb-3 fs-5 text-dark">
+                      @for (item of block.data.items; track item) {
+                        <li [innerHTML]="item"></li>
+                      }
+                    </ul>
+                  }
+                } @else if (block.type === 'table') {
+                  <div class="table-responsive mb-3">
+                    <table class="table table-bordered table-striped align-middle">
+                      @if (block.data.withHeadings && block.data.content.length > 0) {
+                        <thead>
+                          <tr>
+                            @for (cell of block.data.content[0]; track cell) {
+                              <th [innerHTML]="cell"></th>
+                            }
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (row of block.data.content.slice(1); track row) {
+                            <tr>
+                              @for (cell of row; track cell) {
+                                <td [innerHTML]="cell"></td>
+                              }
+                            </tr>
+                          }
+                        </tbody>
+                      } @else {
+                        <tbody>
+                          @for (row of block.data.content; track row) {
+                            <tr>
+                              @for (cell of row; track cell) {
+                                <td [innerHTML]="cell"></td>
+                              }
+                            </tr>
+                          }
+                        </tbody>
+                      }
+                    </table>
+                  </div>
                 } @else if (block.type === 'activity') {
                   <app-activity-renderer [activity]="block.data" [showFeedback]="true"></app-activity-renderer>
                 } @else {
