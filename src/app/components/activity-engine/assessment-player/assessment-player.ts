@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ActivityRenderer, NormalizedActivity } from '../activity-renderer/activity-renderer';
+import { AuthService } from '../../../services/auth';
 
 interface Option {
   id: number;
@@ -38,6 +39,7 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private authService = inject(AuthService);
 
   assessmentId = signal<number | null>(null);
   assessment = signal<AssessmentData | null>(null);
@@ -166,8 +168,11 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
       };
     });
 
+    const user = this.authService.getUser();
+    const userId = user ? user.id : 1;
+
     const body = {
-      user_id: 1, // Simulated current authenticated student ID
+      user_id: userId,
       answers: answersPayload
     };
 

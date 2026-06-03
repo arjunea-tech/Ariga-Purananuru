@@ -15,6 +15,9 @@ class Tenant extends Model
         'phone',
         'address',
         'is_active',
+        'logo_path',
+        'primary_color',
+        'secondary_color',
     ];
 
     protected $casts = [

@@ -1,0 +1,59 @@
+.avatar-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--primary-color, #7c3aed) 0%, var(--secondary-color, #db2777) 100%);
+  color: white;
+  font-weight: 700;
+  font-size: 16px;
+  border-radius: 50%;
+  text-transform: uppercase;
+  box-shadow: 0 4px 10px rgba(124, 58, 237, 0.2);
+}
+
+.cursor-pointer {
+  cursor: pointer !important;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1040;
+  background-color: rgba(9, 13, 22, 0.6);
+  backdrop-filter: blur(8px);
+}
+
+.modal {
+  z-index: 1050;
+}
+
+.font-monospace {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}
+
+code {
+  background: rgba(34, 197, 94, 0.1);
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+@keyframes slideInFromTop {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-in {
+  animation: slideInFromTop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

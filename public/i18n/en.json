@@ -1,5 +1,8 @@
 {
   "SIDEBAR": {
+    "LEARNING_PORTAL": "Learning Portal",
+    "ACADEMY_MANAGER": "Academy Manager",
+    "STUDENTS": "Students",
     "SYSTEM_ADMIN": "System Admin",
     "TENANTS": "Tenants",
     "PROPERTIES": "Properties",
@@ -199,5 +202,51 @@
     "UPLOAD_XLSX": "Upload XLSX (Excel)",
     "UPLOAD_PPT": "Upload PPT (PowerPoint)",
     "EXTERNAL_URL": "External URL"
+  },
+  "STUDENT": {
+    "DASHBOARD": "Dashboard",
+    "LANGUAGE": "Language",
+    "LOGOUT": "Logout",
+    "WELCOME": "வணக்கம் (Welcome) Learner!",
+    "SUBTITLE": "Track your progress, unlock achievements, and resume your learning journey.",
+    "SYLLABUS_PROGRESS": "Syllabus Progress",
+    "CHAPTERS_COMPLETED": "Chapters Completed",
+    "QUIZ_SUBMISSIONS": "Quiz Submissions",
+    "PASSED": "Passed",
+    "QUIZ_SUBTITLE": "Keep attempting to improve your stats!",
+    "AVG_SCORE": "Average Test Score",
+    "AVG_SUBTITLE": "Target 80%+ to unlock rewards!",
+    "ACHIEVEMENTS": "Achievements & Badges",
+    "BACK_TO_DASHBOARD": "Back to Dashboard",
+    "COURSE_CONTENT": "Course Content",
+    "LESSON_TOPIC": "Lesson Topic",
+    "LEARNING_COURSES": "Your Learning Courses",
+    "ACTIVE_COURSE": "Active Course",
+    "OPEN_PATH": "Open Learning Path",
+    "NO_COURSES": "No courses mapped to your profile. Please contact your administrator.",
+    "MARK_COMPLETED": "Mark Chapter as Completed",
+    "COMPLETED": "Chapter Completed"
+  },
+  "BADGES": {
+    "first_step": {
+      "TITLE": "First Step",
+      "DESC": "Completed your first lesson topic"
+    },
+    "bookworm": {
+      "TITLE": "Bookworm",
+      "DESC": "Read and finished 5+ lesson topics"
+    },
+    "scholar": {
+      "TITLE": "Scholar",
+      "DESC": "Scored a perfect 100% on any chapter test"
+    },
+    "chapter_champ": {
+      "TITLE": "Chapter Champion",
+      "DESC": "Passed 3 or more assessments"
+    },
+    "graduation": {
+      "TITLE": "Ultimate Graduation",
+      "DESC": "Achieved 100% syllabus completion"
+    }
   }
 }

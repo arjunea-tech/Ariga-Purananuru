@@ -48,13 +48,15 @@
 }
 
 :host ::ng-deep mcv-datatree .tree-node-content {
-  padding: 10px 15px !important;
+  padding: 10px 14px !important;
   border: none !important;
-  border-bottom: 1px solid #f8f9fa !important;
   display: flex !important;
   align-items: center !important;
-  gap: 12px !important;
+  gap: 10px !important;
   cursor: pointer !important;
+  border-radius: 8px !important;
+  margin: 4px 10px !important;
+  transition: all 0.2s ease-in-out !important;
 }
 
 :host ::ng-deep mcv-datatree .tree-node-content i,
@@ -67,35 +69,253 @@
   outline: none !important;
 }
 
-:host ::ng-deep mcv-datatree .tree-node-content {
-  padding: 8px 12px !important;
-  border-bottom: 1px solid #f8f9fa !important;
+:host ::ng-deep mcv-datatree .tree-node-content:hover {
+  background-color: #f1f5f9 !important;
 }
 
 :host ::ng-deep mcv-datatree .tree-node-content i {
-  color: #adb5bd !important;
-  font-size: 0.85rem !important;
-  margin-right: 10px !important;
+  color: #64748b !important;
+  font-size: 0.9rem !important;
+  margin-right: 4px !important;
 }
 
 :host ::ng-deep mcv-datatree .tree-node-label {
-  font-size: 0.85rem !important;
+  font-size: 0.88rem !important;
   font-weight: 500 !important;
-  color: #495057 !important;
+  color: #334155 !important;
 }
 
 :host ::ng-deep mcv-datatree .tree-children {
-  padding-left: 20px !important;
-  border-left: 1px dashed #dee2e6 !important;
-  margin-left: 15px !important;
+  padding-left: 18px !important;
+  border-left: 1px dashed #cbd5e1 !important;
+  margin-left: 22px !important;
 }
 
 :host ::ng-deep mcv-datatree .active-node {
-  background-color: #e7f1ff !important;
-  color: #0d6efd !important;
+  background-color: #e0e7ff !important;
+  color: #4f46e5 !important;
+}
+
+:host ::ng-deep mcv-datatree .active-node .tree-node-label {
+  color: #4f46e5 !important;
+  font-weight: 600 !important;
+}
+
+:host ::ng-deep mcv-datatree .active-node i {
+  color: #4f46e5 !important;
 }
 
 /* Hide the toolkit's default header/buttons area if still present */
 :host ::ng-deep mcv-datatree .tree-header {
   display: none !important;
+}
+
+/* Gamified Student Dashboard styles */
+.max-w-5xl {
+  max-width: 1024px;
+}
+
+.avatar-circle-lg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--primary-color, #7c3aed) 0%, var(--secondary-color, #db2777) 100%);
+  color: white;
+  font-size: 28px;
+  border-radius: 50%;
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.25);
+}
+
+.active-dashboard-tab {
+  background-color: #f1f5f9 !important;
+  color: var(--primary-color, #0d6efd) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+.badge-card {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background: #ffffff;
+}
+
+.badge-card.unlocked {
+  border-color: rgba(34, 197, 94, 0.3) !important;
+  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.08);
+}
+
+.badge-card.unlocked .badge-icon-wrap {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+  filter: none;
+}
+
+.badge-card.locked {
+  opacity: 0.6;
+  border-color: #e2e8f0 !important;
+}
+
+.badge-card.locked .badge-icon-wrap {
+  background: #f1f5f9;
+  filter: grayscale(1);
+}
+
+.badge-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  font-size: 24px;
+}
+
+.badge-card:hover {
+  transform: translateY(-2px);
+}
+
+.badge-card.unlocked:hover {
+  box-shadow: 0 8px 25px rgba(34, 197, 94, 0.15);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* AI Tutor Chat Styles */
+.ai-tutor-fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 1050;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 25px rgba(124, 58, 237, 0.4);
+}
+
+.ai-tutor-fab:hover {
+  transform: scale(1.1);
+}
+
+.ai-tutor-fab.active {
+  transform: rotate(90deg);
+  background: #334155;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.ai-chat-panel {
+  position: fixed;
+  bottom: 6rem;
+  right: 2rem;
+  width: 380px;
+  height: 550px;
+  max-height: calc(100vh - 8rem);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 1040;
+  transform: translateY(20px) scale(0.95);
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: bottom right;
+}
+
+.ai-chat-panel.open {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.ai-chat-header {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+}
+
+.ai-chat-body {
+  background-color: #f8fafc;
+}
+
+.chat-bubble {
+  display: inline-block;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.user-bubble {
+  background-color: #4f46e5;
+  color: white;
+  border: 1px solid #4338ca;
+}
+
+.user-bubble .text-dark {
+  color: white !important;
+}
+
+.ai-bubble {
+  background-color: white;
+  color: #334155;
+  border: 1px solid #e2e8f0;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0;
+}
+
+.typing-indicator span {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #94a3b8;
+  animation: typing 1.4s infinite ease-in-out both;
+}
+
+.typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+.typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typing {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+/* AI Quiz Styles */
+.ai-quiz-card {
+  border: 1px solid rgba(124, 58, 237, 0.15) !important;
+  background: linear-gradient(180deg, #ffffff 0%, #fcfbfe 100%);
+  position: relative;
+}
+.ai-quiz-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(to bottom, #4f46e5, #db2777);
+  border-top-left-radius: inherit;
+  border-bottom-left-radius: inherit;
 }

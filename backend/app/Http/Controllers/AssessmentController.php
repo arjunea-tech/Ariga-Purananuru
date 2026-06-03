@@ -12,7 +12,7 @@ class AssessmentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Assessment::with(['level.course', 'chapter', 'questions.options']);
+        $query = Assessment::with(['level', 'chapter', 'questions.options']);
 
         if ($request->has('level_id')) {
             $query->where('level_id', $request->level_id);
@@ -89,12 +89,12 @@ class AssessmentController extends Controller
             }
         }
 
-        return response()->json($assessment->load(['level.course', 'chapter', 'questions.options']), 201);
+        return response()->json($assessment->load(['level', 'chapter', 'questions.options']), 201);
     }
 
     public function show(Assessment $assessment)
     {
-        return response()->json($assessment->load(['level.course', 'chapter', 'questions.options']));
+        return response()->json($assessment->load(['level', 'chapter', 'questions.options']));
     }
 
     public function update(Request $request, Assessment $assessment)
@@ -162,7 +162,7 @@ class AssessmentController extends Controller
             }
         }
 
-        return response()->json($assessment->load(['level.course', 'chapter', 'questions.options']));
+        return response()->json($assessment->load(['level', 'chapter', 'questions.options']));
     }
 
     public function destroy(Assessment $assessment)

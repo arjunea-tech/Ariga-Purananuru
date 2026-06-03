@@ -1,0 +1,130 @@
+<div class="login-container">
+  <div class="login-glass-card">
+    
+    <!-- Branding Header -->
+    <div class="login-header">
+      <div class="logo-badge">
+        @if (tenantBranding?.logo_url) {
+          <img [src]="tenantBranding.logo_url" alt="Logo" class="school-logo-img" />
+        } @else {
+          அ
+        }
+      </div>
+      <h1>{{ tenantBranding?.tenant_name || 'அறிக புறநானூறு' }}</h1>
+      <p>{{ tenantBranding ? 'School Portal' : 'Ariga Purananuru LMS Portal' }}</p>
+    </div>
+
+    <!-- Portal Login Switcher Tabs -->
+    <div class="login-tabs">
+      <button 
+        type="button" 
+        class="tab-btn" 
+        [class.active]="activeTab === 'school'" 
+        (click)="setTab('school')"
+      >
+        🏫 School Portal
+      </button>
+      <button 
+        type="button" 
+        class="tab-btn" 
+        [class.active]="activeTab === 'admin'" 
+        (click)="setTab('admin')"
+      >
+        👑 Admin Portal
+      </button>
+    </div>
+
+    <!-- Alert Messages -->
+    @if (errorMessage) {
+      <div class="alert alert-danger">
+        <span class="alert-icon">⚠️</span>
+        <span class="alert-text">{{ errorMessage }}</span>
+      </div>
+    }
+
+    @if (successMessage) {
+      <div class="alert alert-success">
+        <span class="alert-icon">✓</span>
+        <span class="alert-text">{{ successMessage }}</span>
+      </div>
+    }
+
+    <!-- Login Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      
+      <!-- School / Institution Code (Only shown for School Portal) -->
+      @if (activeTab === 'school') {
+        <div class="form-group">
+          <label for="tenant_code">School Code / Institution ID</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🏫</span>
+            <input
+              id="tenant_code"
+              type="text"
+              formControlName="tenant_code"
+              placeholder="e.g. SCH-001"
+              autocomplete="off"
+              [class.invalid]="loginForm.get('tenant_code')?.touched && loginForm.get('tenant_code')?.invalid"
+              (blur)="onSchoolCodeBlur()"
+              (input)="onSchoolCodeInput($event)"
+            />
+          </div>
+          @if (loginForm.get('tenant_code')?.touched && loginForm.get('tenant_code')?.invalid) {
+            <small class="error-msg">School Code is required for student/staff login.</small>
+          }
+        </div>
+      }
+
+      <!-- Username / Roll No / Email -->
+      <div class="form-group">
+        <label for="login">Username / Roll No. / Email</label>
+        <div class="input-wrapper">
+          <span class="input-icon">👤</span>
+          <input
+            id="login"
+            type="text"
+            formControlName="login"
+            placeholder="Enter Username, Roll Number or Email"
+            [class.invalid]="loginForm.get('login')?.touched && loginForm.get('login')?.invalid"
+          />
+        </div>
+        @if (loginForm.get('login')?.touched && loginForm.get('login')?.invalid) {
+          <small class="error-msg">Identifier is required (min 3 chars).</small>
+        }
+      </div>
+
+      <!-- Password -->
+      <div class="form-group">
+        <label for="password">Password</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔑</span>
+          <input
+            id="password"
+            type="password"
+            formControlName="password"
+            placeholder="••••••••"
+            [class.invalid]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
+          />
+        </div>
+        @if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
+          <small class="error-msg">Password is required (min 4 chars).</small>
+        }
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" [disabled]="loading || loginForm.invalid" class="btn-submit">
+        @if (loading) {
+          <span class="spinner"></span> Logging in...
+        } @else {
+          Sign In
+        }
+      </button>
+
+    </form>
+    
+    <div class="login-footer">
+      <p>© 2026 Ariga Purananuru. All rights reserved.</p>
+    </div>
+
+  </div>
+</div>

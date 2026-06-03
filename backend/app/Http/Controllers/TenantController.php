@@ -7,8 +7,11 @@ use Illuminate\Http\Request;
 
 class TenantController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->user() && $request->user()->role !== 'super_admin') {
+            return Tenant::where('id', $request->user()->tenant_id)->get();
+        }
         return Tenant::orderBy('created_at', 'desc')->get();
     }
 
@@ -22,7 +25,15 @@ class TenantController extends Controller
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'is_active' => 'boolean',
+            'logo_path' => 'nullable|string',
+            'primary_color' => 'nullable|string|max:10',
+            'secondary_color' => 'nullable|string|max:10',
         ]);
+
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('logos', 'public');
+            $validated['logo_path'] = asset('storage/' . $path);
+        }
 
         return Tenant::create($validated);
     }
@@ -42,7 +53,15 @@ class TenantController extends Controller
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string',
             'is_active' => 'boolean',
+            'logo_path' => 'nullable|string',
+            'primary_color' => 'nullable|string|max:10',
+            'secondary_color' => 'nullable|string|max:10',
         ]);
+
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('logos', 'public');
+            $validated['logo_path'] = asset('storage/' . $path);
+        }
 
         $tenant->update($validated);
         return $tenant;
@@ -52,5 +71,26 @@ class TenantController extends Controller
     {
         $tenant->delete();
         return response()->noContent();
+    }
+
+    /**
+     * Public endpoint to fetch tenant colors and logo URL by school/tenant code.
+     */
+    public function getBranding(string $code)
+    {
+        $tenant = Tenant::where('tenant_code', $code)
+                        ->where('is_active', true)
+                        ->first();
+
+        if (!$tenant) {
+            return response()->json(['error' => 'Institution code not found.'], 404);
+        }
+
+        return response()->json([
+            'tenant_name' => $tenant->tenant_name,
+            'logo_url' => $tenant->logo_path,
+            'primary_color' => $tenant->primary_color ?: '#7c3aed',
+            'secondary_color' => $tenant->secondary_color ?: '#db2777',
+        ]);
     }
 }

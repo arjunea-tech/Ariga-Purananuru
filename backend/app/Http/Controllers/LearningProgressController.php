@@ -81,4 +81,42 @@ class LearningProgressController extends Controller
         // Keep existing or use service
         return response()->json(['is_unlocked' => true]);
     }
+
+    /**
+     * Mark a specific chapter as completed for the authenticated user.
+     */
+    public function completeChapter(Request $request, $chapterId)
+    {
+        $user = $request->user();
+        $chapter = Chapter::findOrFail($chapterId);
+
+        // Find level mapping
+        $levelChapter = \DB::table('level_chapter')->where('chapter_id', $chapterId)->first();
+        $levelId = $levelChapter ? $levelChapter->level_id : null;
+
+        // Find course mapping
+        $courseId = 0;
+        if ($levelId) {
+            $coursePackageLevel = \DB::table('course_package_levels')->where('level_id', $levelId)->first();
+            $courseId = $coursePackageLevel ? $coursePackageLevel->course_id : 0;
+        }
+
+        \App\Models\UserCourseProgress::updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'level_id' => $levelId,
+                'chapter_id' => $chapterId,
+            ],
+            [
+                'course_id' => $courseId,
+                'status' => 'completed',
+                'completed_at' => now(),
+            ]
+        );
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Chapter marked as completed successfully'
+        ]);
+    }
 }

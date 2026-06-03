@@ -1,8 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\TenantController;
 use App\Http\Controllers\PropertyController;
@@ -13,45 +12,139 @@ use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\LearningProgressController;
 use App\Http\Controllers\LearningModeController;
 use App\Http\Controllers\ContentController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AITutorController;
 
-// Existing resources
-Route::apiResource('packages', PackageController::class);
-Route::apiResource('tenants', TenantController::class);
-Route::apiResource('properties', PropertyController::class);
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::get('/tenants/brand/{code}', [TenantController::class, 'getBranding']);
 
-// New resources
-Route::apiResource('courses', CourseController::class);
-Route::get('courses/{course}/player-structure', [CourseController::class, 'getPlayerStructure']);
-Route::apiResource('levels', LevelController::class);
-Route::apiResource('chapters', ChapterController::class);
-Route::post('contents/upload', [ContentController::class, 'upload']);
-Route::apiResource('contents', ContentController::class);
-Route::apiResource('assessments', AssessmentController::class);
-Route::apiResource('learning-modes', LearningModeController::class);
+/*
+|--------------------------------------------------------------------------
+| Protected & Tenant-Scoped Routes
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth:sanctum', 'identify.tenant'])->group(function () {
+    
+    // Auth profile endpoints
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::get('/me', [AuthController::class, 'me']);
 
-// Course-Package-Level mapping (Consolidated in PackageController)
-Route::get('packages/{packageId}/levels', [PackageController::class, 'getLevels']);
-Route::post('packages/{packageId}/levels', [PackageController::class, 'mapLevels']);
-Route::delete('packages/{packageId}/levels/{levelId}', [PackageController::class, 'unmapLevel']);
+    /*
+     * 👑 Super Admin Only Modifiers
+     */
+    Route::middleware(['role:super_admin'])->group(function () {
+        Route::post('tenants', [TenantController::class, 'store']);
+        Route::put('tenants/{tenant}', [TenantController::class, 'update']);
+        Route::delete('tenants/{tenant}', [TenantController::class, 'destroy']);
 
-// Assessment submission
-Route::post('assessments/{assessmentId}/submit', [AssessmentController::class, 'submitAttempt']);
+        Route::post('packages', [PackageController::class, 'store']);
+        Route::put('packages/{package}', [PackageController::class, 'update']);
+        Route::delete('packages/{package}', [PackageController::class, 'destroy']);
+    });
 
-// Learning progress (strict mode)
-Route::get('users/{userId}/courses/{courseId}/progress', [LearningProgressController::class, 'getUserProgress']);
-Route::get('users/{userId}/levels/{levelId}/access', [LearningProgressController::class, 'getLevelAccess']);
-Route::get('users/{userId}/levels/{levelId}/chapters/progress', [LearningProgressController::class, 'getChapterProgress']);
+    /*
+     * 🏢 Tenant Admin and Super Admin Resources
+     */
+    Route::middleware(['role:super_admin,tenant_admin'])->group(function () {
+        Route::get('tenants', [TenantController::class, 'index']);
+        Route::get('tenants/{tenant}', [TenantController::class, 'show']);
 
-// Level-Chapter mapping (Consolidated in LevelController)
-Route::get('levels/{levelId}/chapters', [LevelController::class, 'getChapters']);
-Route::post('levels/{levelId}/chapters', [LevelController::class, 'mapChapters']);
-Route::delete('levels/{levelId}/chapters/{chapterId}', [LevelController::class, 'unmapChapter']);
-Route::post('levels/{levelId}/chapters/reorder', [LevelController::class, 'reorderChapters']);
+        Route::get('packages', [PackageController::class, 'index']);
+        Route::get('packages/{package}', [PackageController::class, 'show']);
 
-// Chapter-Level mapping (Consolidated in ChapterController)
-Route::get('chapters/{chapterId}/levels', [ChapterController::class, 'getLevels']);
-Route::post('chapters/{chapterId}/levels', [ChapterController::class, 'mapLevels']);
+        Route::apiResource('properties', PropertyController::class);
+        
+        // Course-Package-Level mapping (Consolidated in PackageController)
+        Route::post('packages/{packageId}/levels', [PackageController::class, 'mapLevels']);
+        Route::delete('packages/{packageId}/levels/{levelId}', [PackageController::class, 'unmapLevel']);
+    });
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+    /*
+     * 🏫 Staff (Super Admin, Tenant Admin, Property Manager) Resources
+     */
+    Route::middleware(['role:super_admin,tenant_admin,property_manager'])->group(function () {
+        Route::post('courses', [CourseController::class, 'store']);
+        Route::put('courses/{course}', [CourseController::class, 'update']);
+        Route::delete('courses/{course}', [CourseController::class, 'destroy']);
+        Route::post('users/import', [AuthController::class, 'batchImport']);
+        Route::get('users/students', [AuthController::class, 'getStudents']);
+        
+        Route::post('levels', [LevelController::class, 'store']);
+        Route::put('levels/{level}', [LevelController::class, 'update']);
+        Route::delete('levels/{level}', [LevelController::class, 'destroy']);
+
+        Route::post('chapters', [ChapterController::class, 'store']);
+        Route::put('chapters/{chapter}', [ChapterController::class, 'update']);
+        Route::delete('chapters/{chapter}', [ChapterController::class, 'destroy']);
+
+        Route::post('contents', [ContentController::class, 'store']);
+        Route::put('contents/{content}', [ContentController::class, 'update']);
+        Route::delete('contents/{content}', [ContentController::class, 'destroy']);
+        Route::post('contents/upload', [ContentController::class, 'upload']);
+
+        Route::post('assessments', [AssessmentController::class, 'store']);
+        Route::put('assessments/{assessment}', [AssessmentController::class, 'update']);
+        Route::delete('assessments/{assessment}', [AssessmentController::class, 'destroy']);
+
+        Route::post('learning-modes', [LearningModeController::class, 'store']);
+        Route::put('learning-modes/{learning_mode}', [LearningModeController::class, 'update']);
+        Route::delete('learning-modes/{learning_mode}', [LearningModeController::class, 'destroy']);
+
+        // Level-Chapter mapping (Consolidated in LevelController)
+        Route::post('levels/{levelId}/chapters', [LevelController::class, 'mapChapters']);
+        Route::delete('levels/{levelId}/chapters/{chapterId}', [LevelController::class, 'unmapChapter']);
+        Route::post('levels/{levelId}/chapters/reorder', [LevelController::class, 'reorderChapters']);
+
+        // Chapter-Level mapping (Consolidated in ChapterController)
+        Route::post('chapters/{chapterId}/levels', [ChapterController::class, 'mapLevels']);
+    });
+
+    /*
+     * 🎓 Shared/Student Access Resources
+     */
+    // Course player structure is read-only for players
+    Route::get('courses', [CourseController::class, 'index']);
+    Route::get('courses/{course}', [CourseController::class, 'show']);
+    Route::get('courses/{course}/player-structure', [CourseController::class, 'getPlayerStructure']);
+
+    Route::get('levels', [LevelController::class, 'index']);
+    Route::get('levels/{level}', [LevelController::class, 'show']);
+    Route::get('levels/{levelId}/chapters', [LevelController::class, 'getChapters']);
+
+    Route::get('chapters', [ChapterController::class, 'index']);
+    Route::get('chapters/{chapter}', [ChapterController::class, 'show']);
+    Route::get('chapters/{chapterId}/levels', [ChapterController::class, 'getLevels']);
+
+    Route::get('contents', [ContentController::class, 'index']);
+    Route::get('contents/{content}', [ContentController::class, 'show']);
+
+    Route::get('assessments', [AssessmentController::class, 'index']);
+    Route::get('assessments/{assessment}', [AssessmentController::class, 'show']);
+
+    Route::get('learning-modes', [LearningModeController::class, 'index']);
+    Route::get('learning-modes/{learning_mode}', [LearningModeController::class, 'show']);
+
+    Route::get('packages/{packageId}/levels', [PackageController::class, 'getLevels']);
+
+    // Assessment submission
+    Route::post('assessments/{assessmentId}/submit', [AssessmentController::class, 'submitAttempt']);
+
+    // Student Dashboard stats
+    Route::get('student/dashboard', [DashboardController::class, 'getStudentStats']);
+
+    // Learning progress tracking
+    Route::get('users/{userId}/courses/{courseId}/progress', [LearningProgressController::class, 'getUserProgress']);
+    Route::get('users/{userId}/levels/{levelId}/access', [LearningProgressController::class, 'getLevelAccess']);
+    Route::get('users/{userId}/levels/{levelId}/chapters/progress', [LearningProgressController::class, 'getChapterProgress']);
+    Route::post('chapters/{chapterId}/complete', [LearningProgressController::class, 'completeChapter']);
+    
+    // AI Tutor
+    Route::post('ai-tutor/chat', [AITutorController::class, 'chat']);
+    Route::post('ai-tutor/generate-quiz', [AITutorController::class, 'generateQuiz']);
+});
