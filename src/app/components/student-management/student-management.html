@@ -180,54 +180,44 @@
               </div>
 
               <!-- Name Field -->
-              <div class="mb-3">
-                <label for="new_name" class="form-label fw-semibold text-secondary mb-1">Full Name</label>
-                <input 
-                  id="new_name"
-                  type="text" 
-                  formControlName="name" 
-                  class="form-control border-0 shadow-sm py-2" 
-                  placeholder="e.g. John Doe"
-                  [class.is-invalid]="addUserForm.get('name')?.touched && addUserForm.get('name')?.invalid"
-                />
-                @if (addUserForm.get('name')?.touched && addUserForm.get('name')?.invalid) {
-                  <small class="text-danger mt-1 d-block">Full name (min 3 chars) is required.</small>
-                }
-              </div>
+              @if (addUserForm.get('role')?.value !== 'property_manager') {
+                <div class="mb-3">
+                  <label for="new_name" class="form-label fw-semibold text-secondary mb-1">Full Name</label>
+                  <input 
+                    id="new_name"
+                    type="text" 
+                    formControlName="name" 
+                    class="form-control border-0 shadow-sm py-2" 
+                    placeholder="e.g. John Doe"
+                    [class.is-invalid]="addUserForm.get('name')?.touched && addUserForm.get('name')?.invalid"
+                  />
+                  @if (addUserForm.get('name')?.touched && addUserForm.get('name')?.invalid) {
+                    <small class="text-danger mt-1 d-block">Full name (min 3 chars) is required.</small>
+                  }
+                </div>
+              }
 
               <!-- Username Field -->
               <div class="mb-3">
-                <label for="new_login" class="form-label fw-semibold text-secondary mb-1">Username / Roll No.</label>
+                <label for="new_login" class="form-label fw-semibold text-secondary mb-1">
+                  {{ addUserForm.get('role')?.value === 'property_manager' ? 'Property Code (Username)' : 'Username / Roll No.' }}
+                </label>
                 <input 
                   id="new_login"
                   type="text" 
                   formControlName="login" 
                   class="form-control border-0 shadow-sm py-2 font-monospace" 
-                  placeholder="e.g. john_doe"
+                  [placeholder]="addUserForm.get('role')?.value === 'property_manager' ? 'e.g. PROP-001' : 'e.g. john_doe'"
                   [class.is-invalid]="addUserForm.get('login')?.touched && addUserForm.get('login')?.invalid"
                 />
                 @if (addUserForm.get('login')?.touched && addUserForm.get('login')?.invalid) {
-                  <small class="text-danger mt-1 d-block">Username / Roll number (min 3 chars) is required.</small>
+                  <small class="text-danger mt-1 d-block">
+                    {{ addUserForm.get('role')?.value === 'property_manager' ? 'Property Code (min 3 chars) is required.' : 'Username / Roll number (min 3 chars) is required.' }}
+                  </small>
                 }
               </div>
 
-              <!-- Tenant/School Code Field (Visible only to Super Admin) -->
-              @if (authService.getUserRole() === 'super_admin') {
-                <div class="mb-3">
-                  <label for="new_tenant_code" class="form-label fw-semibold text-secondary mb-1">School Code</label>
-                  <input 
-                    id="new_tenant_code"
-                    type="text" 
-                    formControlName="tenant_code" 
-                    class="form-control border-0 shadow-sm py-2" 
-                    placeholder="e.g. SCH-001"
-                    [class.is-invalid]="addUserForm.get('tenant_code')?.touched && addUserForm.get('tenant_code')?.invalid"
-                  />
-                  @if (addUserForm.get('tenant_code')?.touched && addUserForm.get('tenant_code')?.invalid) {
-                    <small class="text-danger mt-1 d-block">Valid School Code is required.</small>
-                  }
-                </div>
-              }
+
 
               <!-- Password Field -->
               <div class="row">

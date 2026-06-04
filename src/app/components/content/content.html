@@ -195,8 +195,14 @@
 
           <!-- External URLs Section -->
           <div class="col-12 mt-4" formArrayName="urls">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h6 class="fw-bold text-dark mb-0">External URLs</h6>
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+              <div>
+                <h6 class="fw-bold text-dark mb-1">External URLs</h6>
+                <p class="text-secondary small mb-0">
+                  <i class="bi bi-info-circle text-primary me-1"></i>
+                  Tip: Add a YouTube link or a local video path (e.g. <code>assets/videos/video_name.mp4</code>) here to show a video player at the top of the student lesson page.
+                </p>
+              </div>
               <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm d-flex align-items-center gap-2 hover-scale" (click)="addUrlField()">
                 <i class="bi bi-plus-lg"></i> Add URL
               </button>

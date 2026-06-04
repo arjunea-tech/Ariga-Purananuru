@@ -164,11 +164,13 @@
 
         <!-- 🚪 Logout Button (Always placed at the bottom) -->
         <hr class="mt-auto mb-2 border-light opacity-25">
-        <button (click)="logout()"
-          class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-danger border-0 bg-transparent transition-all w-100 text-start">
-          <i class="bi bi-box-arrow-right fs-5"></i>
-          <span>Logout</span>
-        </button>
+        <div class="px-3 pb-3">
+          <button (click)="logout(); $event.stopPropagation()"
+            class="btn btn-logout-custom btn-sm w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2 fw-semibold">
+            <i class="bi bi-box-arrow-right fs-5"></i>
+            <span>Logout</span>
+          </button>
+        </div>
 
       </nav>
     </aside>

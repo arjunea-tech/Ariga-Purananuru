@@ -20,10 +20,27 @@ class AuthController extends Controller
             'login' => 'required|string|max:255', // email or username
             'password' => 'required|string|min:6|confirmed',
             'role' => 'required|string|in:tenant_admin,property_manager,student',
-            'tenant_code' => 'required|string|exists:tenants,tenant_code',
+            'tenant_code' => 'nullable|string|exists:tenants,tenant_code',
         ]);
 
-        $tenant = Tenant::where('tenant_code', $validated['tenant_code'])->first();
+        $tenant = null;
+        if (!empty($validated['tenant_code'])) {
+            $tenant = Tenant::where('tenant_code', $validated['tenant_code'])->first();
+        } else {
+            // Automatically resolve tenant based on logged-in user or first active tenant
+            $currentUser = $request->user();
+            if ($currentUser && $currentUser->tenant_id) {
+                $tenant = Tenant::find($currentUser->tenant_id);
+            } else {
+                $tenant = Tenant::where('is_active', true)->first();
+            }
+        }
+
+        if (!$tenant) {
+            throw ValidationException::withMessages([
+                'tenant_code' => ['A valid tenant could not be resolved. Please seed or create a tenant first.'],
+            ]);
+        }
 
         $isEmail = filter_var($validated['login'], FILTER_VALIDATE_EMAIL);
         $email = $isEmail ? $validated['login'] : null;
@@ -70,46 +87,49 @@ class AuthController extends Controller
         $validated = $request->validate([
             'login' => 'required|string', // username or email
             'password' => 'required|string',
-            'tenant_code' => 'nullable|string', // optional for Super Admin, required for others
+            'tenant_code' => 'nullable|string',
         ]);
 
         $isEmail = filter_var($validated['login'], FILTER_VALIDATE_EMAIL);
         $field = $isEmail ? 'email' : 'username';
 
-        // Check if tenant_code is provided
-        if (empty($validated['tenant_code'])) {
-            // Super Admin login (global user with no tenant_id)
-            $user = User::where($field, $validated['login'])
-                        ->whereNull('tenant_id')
-                        ->where('role', 'super_admin')
-                        ->first();
+        // Find user globally by email or username
+        $user = User::where($field, $validated['login'])->first();
 
-            if (!$user || !Hash::check($validated['password'], $user->password)) {
+        if (!$user) {
+            throw ValidationException::withMessages([
+                'login' => ['Invalid credentials.'],
+            ]);
+        }
+
+        // If user is tenant-scoped, check if tenant is active
+        if ($user->tenant_id) {
+            $tenant = Tenant::find($user->tenant_id);
+            if (!$tenant || !$tenant->is_active) {
                 throw ValidationException::withMessages([
-                    'login' => ['Invalid global administrator credentials.'],
+                    'login' => ['Specified school/tenant is invalid or inactive.'],
                 ]);
             }
-        } else {
-            // Tenant-scoped user login
-            $tenant = Tenant::where('tenant_code', $validated['tenant_code'])
-                            ->where('is_active', true)
-                            ->first();
+        }
 
-            if (!$tenant) {
+        // If user is a property manager, verify they are associated with an active property
+        if ($user->role === 'property_manager') {
+            $propertyExists = \App\Models\Property::where('tenant_id', $user->tenant_id)
+                ->where('property_code', $user->username)
+                ->where('is_active', true)
+                ->exists();
+            if (!$propertyExists) {
                 throw ValidationException::withMessages([
-                    'tenant_code' => ['Specified school/tenant is invalid or inactive.'],
+                    'login' => ['This coordinator is not associated with any active property code.'],
                 ]);
             }
+        }
 
-            $user = User::where($field, $validated['login'])
-                        ->where('tenant_id', $tenant->id)
-                        ->first();
-
-            if (!$user || !Hash::check($validated['password'], $user->password)) {
-                throw ValidationException::withMessages([
-                    'login' => ['Invalid credentials for the specified school/tenant.'],
-                ]);
-            }
+        // Verify password
+        if (!Hash::check($validated['password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'login' => ['Invalid credentials.'],
+            ]);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 interface Content {
   id: number;
@@ -62,6 +63,7 @@ export class CoursePlayer implements OnInit {
   private route = inject(ActivatedRoute);
   protected authService = inject(AuthService);
   private translate = inject(TranslateService);
+  private sanitizer = inject(DomSanitizer);
 
   currentLang = signal('en');
 
@@ -73,21 +75,112 @@ export class CoursePlayer implements OnInit {
   activeContentId = signal<number | null>(null);
   fullContent = signal<Content | null>(null);
 
+  // Learning navigation steps
+  activeStep = signal<'lesson' | 'activity' | 'ai' | 'assessment'>('lesson');
+  currentActivityIndex = signal<number>(0);
+
+  lessonBlocks = computed(() => {
+    return this.parsedBlocks().filter((b: any) => b.type !== 'activity');
+  });
+
+  activityBlocks = computed(() => {
+    return this.parsedBlocks().filter((b: any) => b.type === 'activity');
+  });
+
   // Student dashboard signals
   stats = signal<any>(null);
   courses = signal<any[]>([]);
+  isProfileDropdownOpen = signal<boolean>(false);
 
   // AI Tutor signals
   isChatOpen = signal<boolean>(false);
-  chatMessages = signal<{role: 'user' | 'ai', text: string}[]>([]);
+  chatMessages = signal<{ role: 'user' | 'ai', text: string }[]>([]);
   isAiTyping = signal<boolean>(false);
   chatInput = signal<string>('');
+
+  //Voice Signals
+  isListening = signal<boolean>(false);
+  speechRecognition: any = null;
 
   // AI Quiz signals
   isGeneratingQuiz = signal<boolean>(false);
   aiQuizData = signal<AiQuizQuestion[]>([]);
-  aiQuizAnswers = signal<{[key: number]: number}>({}); // Maps question index to selected option index
-  aiQuizScore = signal<{score: number, total: number} | null>(null);
+  aiQuizAnswers = signal<{ [key: number]: number }>({}); // Maps question index to selected option index
+  aiQuizScore = signal<{ score: number, total: number } | null>(null);
+
+  videoUrl = computed(() => {
+    const content = this.activeContent();
+    if (!content || !content.external_url) return null;
+
+    // Find the first URL that is either a video or a YouTube URL
+    for (const url of content.external_url) {
+      if (typeof url === 'string') {
+        let cleanedUrl = url.replace(/\\/g, '/'); // replace backslashes with forward slashes
+
+        // Check if it's a local absolute path
+        const publicIndex = cleanedUrl.indexOf('/public/');
+        if (publicIndex !== -1) {
+          cleanedUrl = cleanedUrl.substring(publicIndex + 8); // remove "/public/" prefix
+        } else if (cleanedUrl.includes('public/assets/')) {
+          cleanedUrl = cleanedUrl.substring(cleanedUrl.indexOf('public/') + 7); // remove "public/" prefix
+        } else if (/^[A-Za-z]:\//.test(cleanedUrl)) { // e.g. D:/... or C:/...
+          const assetsIndex = cleanedUrl.indexOf('/assets/');
+          if (assetsIndex !== -1) {
+            cleanedUrl = cleanedUrl.substring(assetsIndex + 1); // e.g. "assets/videos/..."
+          }
+        }
+
+        const lowerUrl = cleanedUrl.toLowerCase();
+        if (
+          lowerUrl.endsWith('.mp4') ||
+          lowerUrl.endsWith('.webm') ||
+          lowerUrl.endsWith('.ogg') ||
+          lowerUrl.includes('youtube.com') ||
+          lowerUrl.includes('youtu.be')
+        ) {
+          // Add leading slash for correct routing resolving if it is local asset and doesn't have one
+          if (!cleanedUrl.startsWith('http') && !cleanedUrl.startsWith('/')) {
+            cleanedUrl = '/' + cleanedUrl;
+          }
+          return cleanedUrl;
+        }
+      }
+    }
+    return null;
+  });
+
+  isVideoLocal = computed(() => {
+    const url = this.videoUrl();
+    if (!url) return false;
+    const lowerUrl = url.toLowerCase();
+    return lowerUrl.includes('/assets/videos/');
+  });
+
+  youtubeEmbedUrl = computed(() => {
+    const url = this.videoUrl();
+    if (!url) return null;
+    let videoId = '';
+    if (url.includes('youtube.com/watch')) {
+      const parts = url.split('v=');
+      if (parts.length > 1) {
+        videoId = parts[1].split('&')[0];
+      }
+    } else if (url.includes('youtu.be/')) {
+      const parts = url.split('youtu.be/');
+      if (parts.length > 1) {
+        videoId = parts[1].split('?')[0];
+      }
+    } else if (url.includes('youtube.com/embed/')) {
+      const parts = url.split('youtube.com/embed/');
+      if (parts.length > 1) {
+        videoId = parts[1].split('?')[0];
+      }
+    }
+    if (videoId) {
+      return this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube.com/embed/${videoId}`);
+    }
+    return null;
+  });
 
   activeChapterId = computed(() => {
     const contentId = this.activeContentId();
@@ -114,7 +207,7 @@ export class CoursePlayer implements OnInit {
   activeContent = computed(() => {
     const id = this.activeContentId();
     const full = this.fullContent();
-    
+
     if (!id || !this.courseStructure()) return null;
 
     // If we have full content and its ID matches the active ID, return it
@@ -172,6 +265,37 @@ export class CoursePlayer implements OnInit {
         this.checkQueryParams();
       }
     });
+
+
+    // Initialize Speech Recognition
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        this.speechRecognition = new SpeechRecognition();
+        this.speechRecognition.continuous = false;
+        this.speechRecognition.interimResults = false;
+        this.speechRecognition.lang = this.currentLang() === 'ta' ? 'ta-IN' : 'en-US';
+
+        this.speechRecognition.onstart = () => {
+          this.isListening.set(true);
+        };
+
+        this.speechRecognition.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript;
+          this.chatInput.set(transcript);
+          this.sendChatMessage();
+        };
+
+        this.speechRecognition.onerror = (event: any) => {
+          console.error('Speech recognition error', event.error);
+          this.isListening.set(false);
+        };
+
+        this.speechRecognition.onend = () => {
+          this.isListening.set(false);
+        };
+      }
+    }
   }
 
   switchLanguage(event: Event) {
@@ -179,6 +303,9 @@ export class CoursePlayer implements OnInit {
     this.translate.use(lang);
     localStorage.setItem('userLang', lang);
     this.currentLang.set(lang);
+    if (this.speechRecognition) {
+      this.speechRecognition.lang = lang === 'ta' ? 'ta-IN' : 'en-US';
+    }
   }
 
   logout() {
@@ -214,10 +341,6 @@ export class CoursePlayer implements OnInit {
     this.http.get<any[]>('http://localhost:8000/api/courses').subscribe({
       next: (res) => {
         this.courses.set(res);
-        // If there is only one course available, auto-open the learning path for immediate learning
-        if (res && res.length === 1 && !this.courseId() && !skipAutoSelect) {
-          this.selectCourse(res[0].id);
-        }
       },
       error: (err) => console.error('Failed to load courses list', err)
     });
@@ -256,7 +379,7 @@ export class CoursePlayer implements OnInit {
       next: (structure) => {
         // Initialize expansion states
         structure.levels.forEach((l, idx) => {
-          l.is_expanded = idx === 0; 
+          l.is_expanded = idx === 0;
           l.chapters.forEach((c, cidx) => {
             c.is_expanded = idx === 0 && cidx === 0;
           });
@@ -276,6 +399,8 @@ export class CoursePlayer implements OnInit {
   selectTopic(id: number): void {
     this.activeContentId.set(id);
     this.fullContent.set(null); // Reset while loading
+    this.activeStep.set('lesson'); // Reset navigation step to lesson
+    this.currentActivityIndex.set(0); // Reset interactive activity index
 
     // Fetch full content details
     const url = `http://localhost:8000/api/contents/${id}`;
@@ -354,6 +479,7 @@ export class CoursePlayer implements OnInit {
       next: (res) => {
         this.isAiTyping.set(false);
         this.chatMessages.set([...this.chatMessages(), { role: 'ai', text: res.reply }]);
+        this.speakText(res.reply);
       },
       error: (err) => {
         console.error('AI Tutor Error:', err);
@@ -361,6 +487,29 @@ export class CoursePlayer implements OnInit {
         this.chatMessages.set([...this.chatMessages(), { role: 'ai', text: 'Sorry, I encountered an error connecting to the AI.' }]);
       }
     });
+  }
+
+  toggleListening(): void {
+    if (!this.speechRecognition) {
+      alert('Speech recognition is not supported in this browser.');
+      return;
+    }
+
+    if (this.isListening()) {
+      this.speechRecognition.stop();
+    } else {
+      this.speechRecognition.start();
+    }
+  }
+
+  speakText(text: string): void {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      // Remove markdown or special characters before speaking
+      const plainText = text.replace(/[*#_]/g, '');
+      const utterance = new SpeechSynthesisUtterance(plainText);
+      utterance.lang = this.currentLang() === 'ta' ? 'ta-IN' : 'en-US';
+      window.speechSynthesis.speak(utterance);
+    }
   }
 
   generateAiQuiz(): void {

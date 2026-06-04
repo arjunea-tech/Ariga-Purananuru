@@ -1,116 +1,164 @@
 <div class="container-fluid p-0 overflow-hidden" style="height: 100vh;">
   <div class="row g-0 h-100">
     <!-- Sidebar: Hierarchical View / Dashboard Sidebar -->
-    <aside class="col-md-3 col-lg-2 bg-white border-end h-100 d-flex flex-column justify-content-between shadow-sm">
+    <aside class="col-md-3 col-lg-2 bg-white border-end h-100 d-flex flex-column shadow-sm">
       <div class="overflow-y-auto flex-grow-1 sidebar-scroll">
         @if (courseId()) {
-          <div class="p-3 border-bottom bg-light">
-            <button class="btn btn-sm btn-outline-primary w-100 rounded-3 d-flex align-items-center justify-content-center gap-2 py-2" (click)="goBackToDashboard()">
-              <i class="bi bi-arrow-left"></i>
-              <span>{{ 'STUDENT.BACK_TO_DASHBOARD' | translate }}</span>
-            </button>
-          </div>
-          <div class="p-4 border-bottom bg-light">
-            <h6 class="fw-bold mb-0 text-secondary text-uppercase tracking-wider small">{{ 'STUDENT.COURSE_CONTENT' | translate }}</h6>
-            <div class="small text-muted mt-1" *ngIf="courseStructure()">{{ courseStructure()?.name }}</div>
-          </div>
-
-          <div class="tree-container">
-            <mcv-datatree 
-              [data]="treeData()" 
-              [readOnly]="true"
-              [showHeader]="false"
-              [showIcons]="true"
-              [expandIcon]="'bi bi-chevron-right'"
-              [collapseIcon]="'bi bi-chevron-down'"
-              (onNodeClick)="handleNodeClick($event)">
-            </mcv-datatree>
-          </div>
-        } @else {
-          <div class="p-4 border-bottom bg-light text-center">
-            <div class="avatar-circle-lg mx-auto mb-2">🎓</div>
-            <h6 class="fw-bold mb-0 text-dark">Ariga Workspace</h6>
-            <div class="small text-muted mt-1">Student Portal</div>
-          </div>
-          <div class="p-3 d-flex flex-column gap-2">
-            <button class="btn btn-light w-100 text-start rounded-3 py-2 px-3 fw-bold active-dashboard-tab">
-              <i class="bi bi-speedometer2 me-2 text-primary"></i>
-              <span>{{ 'STUDENT.DASHBOARD' | translate }}</span>
-            </button>
-          </div>
-        }
-      </div>
-
-      <!-- Bottom Profile, Language, and Logout panel for Student layout -->
-      <div class="p-3 border-top bg-light">
-        <div class="d-flex align-items-center gap-2 mb-3">
-          <div class="avatar-circle" style="width: 32px; height: 32px; font-size: 0.8rem; background-color: var(--primary-color, #1a73e8); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
-            {{ authService.getUser()?.name?.charAt(0) }}
-          </div>
-          <div class="d-flex flex-column overflow-hidden">
-            <span class="small fw-bold text-dark text-truncate" style="max-width: 130px;">{{ authService.getUser()?.name }}</span>
-            <small class="text-secondary text-uppercase fw-bold" style="font-size: 0.6rem; letter-spacing: 0.5px;">Student</small>
-          </div>
+        <div class="p-3 border-bottom bg-light">
+          <button
+            class="btn btn-sm btn-outline-primary w-100 rounded-3 d-flex align-items-center justify-content-center gap-2 py-2"
+            (click)="goBackToDashboard()">
+            <i class="bi bi-arrow-left"></i>
+            <span>{{ 'STUDENT.BACK_TO_DASHBOARD' | translate }}</span>
+          </button>
         </div>
-
-        <div class="mb-3">
-          <label class="small text-secondary fw-bold mb-1 d-block" style="font-size: 0.65rem; text-transform: uppercase;">{{ 'STUDENT.LANGUAGE' | translate }}</label>
+        <div class="px-3 py-2 border-bottom bg-light">
           <div class="d-flex align-items-center gap-2">
             <i class="bi bi-translate text-primary"></i>
             <select (change)="switchLanguage($event)" [value]="currentLang()"
-              class="form-select form-select-sm bg-white text-dark border-secondary border-opacity-50 shadow-none cursor-pointer py-1">
+              class="form-select form-select-sm bg-white text-dark border-secondary border-opacity-50 shadow-none cursor-pointer py-1"
+              style="font-size: 0.85rem;">
               <option value="en" class="bg-white text-dark">English (EN)</option>
               <option value="ta" class="bg-white text-dark">Tamil (தமிழ்)</option>
             </select>
           </div>
         </div>
+        <div class="p-4 border-bottom bg-light">
+          <h6 class="fw-bold mb-0 text-secondary text-uppercase tracking-wider small">{{ 'STUDENT.COURSE_CONTENT' |
+            translate }}</h6>
+          <div class="small text-muted mt-1" *ngIf="courseStructure()">{{ courseStructure()?.name }}</div>
+        </div>
 
-        <button (click)="logout()" class="btn btn-outline-danger btn-sm w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2 fw-semibold">
-          <i class="bi bi-box-arrow-right"></i>
-          <span>{{ 'STUDENT.LOGOUT' | translate }}</span>
-        </button>
+        <div class="tree-container">
+          <mcv-datatree [data]="treeData()" [readOnly]="true" [showHeader]="false" [showIcons]="true"
+            [expandIcon]="'bi bi-chevron-right'" [collapseIcon]="'bi bi-chevron-down'"
+            (onNodeClick)="handleNodeClick($event)">
+          </mcv-datatree>
+        </div>
+        } @else {
+        <div class="p-4 border-bottom bg-light text-center">
+          <div class="avatar-circle-lg mx-auto mb-2">🎓</div>
+          <h6 class="fw-bold mb-0 text-dark">Ariga Workspace</h6>
+          <div class="small text-muted mt-1">Student Portal</div>
+        </div>
+        <div class="px-3 py-2 border-bottom bg-light">
+          <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-translate text-primary"></i>
+            <select (change)="switchLanguage($event)" [value]="currentLang()"
+              class="form-select form-select-sm bg-white text-dark border-secondary border-opacity-50 shadow-none cursor-pointer py-1"
+              style="font-size: 0.85rem;">
+              <option value="en" class="bg-white text-dark">English (EN)</option>
+              <option value="ta" class="bg-white text-dark">Tamil (தமிழ்)</option>
+            </select>
+          </div>
+        </div>
+        <div class="p-3 d-flex flex-column gap-2">
+          <button class="btn btn-light w-100 text-start rounded-3 py-2 px-3 fw-bold active-dashboard-tab">
+            <i class="bi bi-speedometer2 me-2 text-primary"></i>
+            <span>{{ 'STUDENT.DASHBOARD' | translate }}</span>
+          </button>
+        </div>
+        }
       </div>
     </aside>
 
     <!-- Main Content Area -->
-    <main class="col h-100 overflow-y-auto bg-light">
-      @if (courseId() === null) {
+    <main class="col h-100 d-flex flex-column bg-light overflow-hidden">
+      <!-- Top Navbar -->
+      <header
+        class="navbar navbar-expand bg-white border-bottom px-4 py-2 shadow-sm d-flex justify-content-between align-items-center"
+        style="height: 60px; min-height: 60px;">
+        <div>
+          <span class="fw-semibold text-secondary" style="font-size: 0.95rem;">
+            @if (!courseId()) {
+            {{ 'STUDENT.DASHBOARD' | translate }}
+            }
+          </span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <!-- Profile Dropdown -->
+          <div class="position-relative">
+            <button (click)="isProfileDropdownOpen.set(!isProfileDropdownOpen())"
+              class="btn btn-link p-0 border-0 text-decoration-none d-flex align-items-center gap-2" type="button">
+              <span class="small fw-semibold text-dark d-none d-sm-inline">{{ authService.getUser()?.name }}</span>
+              <div class="avatar-circle"
+                style="width: 38px; height: 38px; font-size: 0.95rem; background-color: var(--primary-color, #4f46e5); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; border: 2px solid #e2e8f0;">
+                {{ authService.getUser()?.name?.charAt(0) }}
+              </div>
+            </button>
+
+            <!-- Backdrop to close dropdown on click outside -->
+            <div *ngIf="isProfileDropdownOpen()" class="position-fixed top-0 start-0 w-100 h-100" style="z-index: 1055;"
+              (click)="isProfileDropdownOpen.set(false)"></div>
+
+            <!-- Dropdown Menu -->
+            <div *ngIf="isProfileDropdownOpen()"
+              class="position-absolute end-0 mt-2 bg-white rounded-3 shadow border p-3 animate-fade-in"
+              style="min-width: 220px; z-index: 1060; right: 0;">
+              <div class="px-2 py-1 mb-2 border-bottom pb-2">
+                <div class="fw-bold text-dark text-truncate" style="max-width: 180px;">{{ authService.getUser()?.name }}
+                </div>
+                <small class="text-secondary text-uppercase fw-bold"
+                  style="font-size: 0.65rem; letter-spacing: 0.5px;">Student</small>
+              </div>
+              <button (click)="isProfileDropdownOpen.set(false); logout(); $event.stopPropagation()"
+                class="btn btn-logout-custom btn-sm w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2 fw-semibold">
+                <i class="bi bi-box-arrow-right"></i>
+                <span>{{ 'STUDENT.LOGOUT' | translate }}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Scrollable content -->
+      <div class="flex-grow-1 overflow-y-auto">
+        @if (courseId() === null) {
         <!-- Dynamic Student Gamified Dashboard -->
         <div class="p-4 p-lg-5 max-w-5xl mx-auto animate-fade-in">
           <!-- Welcome header -->
-          <div class="d-flex align-items-center justify-content-between mb-5 flex-wrap gap-3">
+          <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
             <div>
               <h1 class="fw-bold text-dark mb-1">{{ 'STUDENT.WELCOME' | translate }}</h1>
               <p class="text-secondary mb-0">{{ 'STUDENT.SUBTITLE' | translate }}</p>
             </div>
           </div>
 
+
+
           <!-- Quick Statistics and Circular/Bar Progress -->
           <div class="row g-4 mb-5">
             <!-- Course Completion Progress Card -->
             <div class="col-md-6 col-lg-4">
-              <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-between">
+              <div
+                class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-between">
                 <div>
-                  <h6 class="text-secondary text-uppercase small fw-bold mb-3">{{ 'STUDENT.SYLLABUS_PROGRESS' | translate }}</h6>
+                  <h6 class="text-secondary text-uppercase small fw-bold mb-3">{{ 'STUDENT.SYLLABUS_PROGRESS' |
+                    translate }}</h6>
                   <div class="d-flex align-items-baseline gap-2 mb-2">
                     <span class="display-6 fw-bold text-primary">{{ stats()?.completion_percentage || 0 }}%</span>
                   </div>
                   <div class="progress rounded-pill mb-2" style="height: 10px;">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" [style.width.%]="stats()?.completion_percentage || 0"></div>
+                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar"
+                      [style.width.%]="stats()?.completion_percentage || 0"></div>
                   </div>
                 </div>
-                <small class="text-secondary fw-semibold">{{ stats()?.completed_chapters || 0 }} / {{ stats()?.total_chapters || 0 }} {{ 'STUDENT.CHAPTERS_COMPLETED' | translate }}</small>
+                <small class="text-secondary fw-semibold">{{ stats()?.completed_chapters || 0 }} / {{
+                  stats()?.total_chapters || 0 }} {{ 'STUDENT.CHAPTERS_COMPLETED' | translate }}</small>
               </div>
             </div>
 
             <!-- Quiz Attempts Card -->
             <div class="col-md-6 col-lg-4">
-              <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-between">
+              <div
+                class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-between">
                 <div>
-                  <h6 class="text-secondary text-uppercase small fw-bold mb-3">{{ 'STUDENT.QUIZ_SUBMISSIONS' | translate }}</h6>
+                  <h6 class="text-secondary text-uppercase small fw-bold mb-3">{{ 'STUDENT.QUIZ_SUBMISSIONS' | translate
+                    }}</h6>
                   <div class="d-flex align-items-baseline gap-2 mb-2">
                     <span class="display-6 fw-bold text-success">{{ stats()?.passed_attempts || 0 }}</span>
-                    <span class="text-secondary">/ {{ stats()?.total_attempts || 0 }} {{ 'STUDENT.PASSED' | translate }}</span>
+                    <span class="text-secondary">/ {{ stats()?.total_attempts || 0 }} {{ 'STUDENT.PASSED' | translate
+                      }}</span>
                   </div>
                 </div>
                 <small class="text-secondary fw-semibold">{{ 'STUDENT.QUIZ_SUBTITLE' | translate }}</small>
@@ -119,9 +167,11 @@
 
             <!-- Average Quiz Score Card -->
             <div class="col-md-6 col-lg-4">
-              <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-between">
+              <div
+                class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-between">
                 <div>
-                  <h6 class="text-secondary text-uppercase small fw-bold mb-3">{{ 'STUDENT.AVG_SCORE' | translate }}</h6>
+                  <h6 class="text-secondary text-uppercase small fw-bold mb-3">{{ 'STUDENT.AVG_SCORE' | translate }}
+                  </h6>
                   <div class="d-flex align-items-baseline gap-2 mb-2">
                     <span class="display-6 fw-bold text-warning">{{ stats()?.average_score || 0 }}%</span>
                   </div>
@@ -136,18 +186,19 @@
             <h5 class="fw-bold mb-4 d-flex align-items-center gap-2">
               <span>🏆 {{ 'STUDENT.ACHIEVEMENTS' | translate }}</span>
             </h5>
-            
+
             <div class="row g-3">
               @for (badge of stats()?.badges; track badge.id) {
-                <div class="col-md-6 col-lg-4">
-                  <div class="badge-card d-flex align-items-center gap-3 p-3 rounded-4 border transition-all" [class.unlocked]="badge.unlocked" [class.locked]="!badge.unlocked">
-                    <div class="badge-icon-wrap">{{ badge.icon }}</div>
-                    <div>
-                      <div class="fw-bold badge-title text-dark">{{ 'BADGES.' + badge.id + '.TITLE' | translate }}</div>
-                      <div class="text-secondary small">{{ 'BADGES.' + badge.id + '.DESC' | translate }}</div>
-                    </div>
+              <div class="col-md-6 col-lg-4">
+                <div class="badge-card d-flex align-items-center gap-3 p-3 rounded-4 border transition-all"
+                  [class.unlocked]="badge.unlocked" [class.locked]="!badge.unlocked">
+                  <div class="badge-icon-wrap">{{ badge.icon }}</div>
+                  <div>
+                    <div class="fw-bold badge-title text-dark">{{ 'BADGES.' + badge.id + '.TITLE' | translate }}</div>
+                    <div class="text-secondary small">{{ 'BADGES.' + badge.id + '.DESC' | translate }}</div>
                   </div>
                 </div>
+              </div>
               }
             </div>
           </div>
@@ -156,216 +207,176 @@
           <h4 class="fw-bold mb-4">📚 {{ 'STUDENT.LEARNING_COURSES' | translate }}</h4>
           <div class="row g-4">
             @for (course of courses(); track course.id) {
-              <div class="col-md-6">
-                <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-between hover-scale transition-all">
-                  <div>
-                    <span class="badge bg-primary bg-opacity-10 text-primary mb-3 text-uppercase font-monospace">{{ 'STUDENT.ACTIVE_COURSE' | translate }}</span>
-                    <h4 class="fw-bold text-dark mb-2">{{ course.name }}</h4>
-                    <p class="text-secondary small mb-4">{{ course.description || 'Explore rich content and take assessments to master this subject.' }}</p>
-                  </div>
-                  <button class="btn btn-primary w-100 rounded-3 py-2 fw-bold" (click)="selectCourse(course.id)">
-                    {{ 'STUDENT.OPEN_PATH' | translate }}
-                    <i class="bi bi-chevron-right ms-2"></i>
-                  </button>
+            <div class="col-md-6">
+              <div
+                class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-between hover-scale transition-all">
+                <div>
+                  <span class="badge bg-primary bg-opacity-10 text-primary mb-3 text-uppercase font-monospace">{{
+                    'STUDENT.ACTIVE_COURSE' | translate }}</span>
+                  <h4 class="fw-bold text-dark mb-2">{{ course.name }}</h4>
+                  <p class="text-secondary small mb-4">{{ course.description || 'Explore rich content and take
+                    assessments to master this subject.' }}</p>
                 </div>
+                <button class="btn btn-primary w-100 rounded-3 py-2 fw-bold" (click)="selectCourse(course.id)">
+                  {{ 'STUDENT.OPEN_PATH' | translate }}
+                  <i class="bi bi-chevron-right ms-2"></i>
+                </button>
               </div>
+            </div>
             } @empty {
-              <div class="col-12 text-center py-5 text-secondary opacity-75">
-                <i class="bi bi-journals fs-1 d-block mb-2"></i>
-                {{ 'STUDENT.NO_COURSES' | translate }}
-              </div>
+            <div class="col-12 text-center py-5 text-secondary opacity-75">
+              <i class="bi bi-journals fs-1 d-block mb-2"></i>
+              {{ 'STUDENT.NO_COURSES' | translate }}
+            </div>
             }
           </div>
         </div>
-      } @else {
+        } @else {
         <!-- Existing Course Content Player -->
         @if (activeContent(); as content) {
-          <div class="p-4 p-lg-5 max-w-4xl mx-auto">
-            <!-- Content Header -->
-            <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 text-white d-flex flex-column" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);">
-              <div class="d-flex align-items-center mb-3">
-                <span class="badge bg-white bg-opacity-20 text-white text-uppercase tracking-wider px-3 py-2 rounded-pill fw-bold" style="font-size: 0.7rem; font-family: 'Plus Jakarta Sans', sans-serif !important;">Lesson Topic</span>
-              </div>
-              <h1 class="display-6 fw-bold text-white mb-0">{{ content.title || content.name }}</h1>
-            </div>
+        <div class="p-4 p-lg-5 max-w-6xl mx-auto">
+          <!-- Content Header with Step Indicator -->
+          <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 text-white d-flex flex-column"
+            style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);">
+            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+              <span
+                class="badge bg-white bg-opacity-20 text-black text-uppercase tracking-wider px-3 py-2 rounded-pill fw-bold"
+                style="font-size: 0.7rem; font-family: 'Plus Jakarta Sans', sans-serif !important;">
+                @if (activeStep() === 'lesson') { 📚 Step 1: Lesson Content }
+                @else if (activeStep() === 'activity') { 🎮 Step 2: Interactive Activity }
+                @else if (activeStep() === 'ai') { 🤖 Step 3: AI Tutor Practice }
+                @else if (activeStep() === 'assessment') { 📝 Step 4: Chapter Assessments }
+              </span>
 
-            <!-- Full Content Body -->
-            <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white">
-              <!-- Text Content -->
-              @if (isJsonContent()) {
-                <div class="editorjs-blocks">
-                  @for (block of parsedBlocks(); track $index) {
-                    @if (block.type === 'paragraph') {
-                      <p class="mb-3 fs-5 text-dark" [innerHTML]="block.data.text"></p>
-                    } @else if (block.type === 'header') {
-                      @if (block.data.level === 1) {
-                        <h1 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h1>
-                      } @else if (block.data.level === 2) {
-                        <h2 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h2>
-                      } @else {
-                        <h3 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h3>
-                      }
-                    } @else if (block.type === 'list') {
-                      @if (block.data.style === 'ordered') {
-                        <ol class="mb-3 fs-5 text-dark">
-                          @for (item of block.data.items; track item) {
-                            <li [innerHTML]="item"></li>
-                          }
-                        </ol>
-                      } @else {
-                        <ul class="mb-3 fs-5 text-dark">
-                          @for (item of block.data.items; track item) {
-                            <li [innerHTML]="item"></li>
-                          }
-                        </ul>
-                      }
-                    } @else if (block.type === 'table') {
-                      <div class="table-responsive mb-3">
-                        <table class="table table-bordered table-striped align-middle">
-                          @if (block.data.withHeadings && block.data.content.length > 0) {
-                            <thead>
-                              <tr>
-                                @for (cell of block.data.content[0]; track cell) {
-                                  <th [innerHTML]="cell"></th>
-                                }
-                              </tr>
-                            </thead>
-                            <tbody>
-                              @for (row of block.data.content.slice(1); track row) {
-                                <tr>
-                                  @for (cell of row; track cell) {
-                                    <td [innerHTML]="cell"></td>
-                                  }
-                                </tr>
-                              }
-                            </tbody>
-                          } @else {
-                            <tbody>
-                              @for (row of block.data.content; track row) {
-                                <tr>
-                                  @for (cell of row; track cell) {
-                                    <td [innerHTML]="cell"></td>
-                                  }
-                                </tr>
-                              }
-                            </tbody>
-                          }
-                        </table>
-                      </div>
-                    } @else if (block.type === 'activity') {
-                      <app-activity-renderer [activity]="block.data" [showFeedback]="true"></app-activity-renderer>
-                    } @else {
-                      <div class="mb-3 text-dark" [innerHTML]="block.data.text || ''"></div>
-                    }
-                  }
-                </div>
+              <!-- Step dots progress -->
+              <div class="d-flex gap-2 align-items-center">
+                <button class="btn btn-link p-0 text-white opacity-75 hover-opacity-100" style="font-size: 0.8rem;"
+                  (click)="activeStep.set('lesson')">Lesson</button>
+                <span class="text-white-50">/</span>
+                @if (activityBlocks().length > 0) {
+                <button class="btn btn-link p-0 text-white opacity-75 hover-opacity-100" style="font-size: 0.8rem;"
+                  (click)="activeStep.set('activity')">Activity</button>
+                <span class="text-white-50">/</span>
+                }
+                <button class="btn btn-link p-0 text-white opacity-75 hover-opacity-100" style="font-size: 0.8rem;"
+                  (click)="activeStep.set('ai')">AI Tutor</button>
+                @if (content.assessments && content.assessments.length > 0) {
+                <span class="text-white-50">/</span>
+                <button class="btn btn-link p-0 text-white opacity-75 hover-opacity-100" style="font-size: 0.8rem;"
+                  (click)="activeStep.set('assessment')">Assessments</button>
+                }
+              </div>
+            </div>
+            <h1 class="display-6 fw-bold text-white mb-0">{{ content.title || content.name }}</h1>
+          </div>
+
+          <!-- STEP 1: LESSON CONTENT & VIDEO -->
+          @if (activeStep() === 'lesson') {
+          <!-- Video Player Section (Below Content Header) -->
+          @if (videoUrl()) {
+          <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-black animate-fade-in"
+            style="aspect-ratio: 16/9; width: 100%; max-height: 480px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);">
+            @if (isVideoLocal()) {
+            <video controls [src]="videoUrl()" class="w-100 h-100" style="object-fit: contain; outline: none;">
+              Your browser does not support the video tag.
+            </video>
+            } @else if (youtubeEmbedUrl()) {
+            <iframe [src]="youtubeEmbedUrl()" class="w-100 h-100" frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen></iframe>
+            }
+          </div>
+          }
+
+          <!-- Full Content Body -->
+          <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white animate-fade-in">
+            <!-- Text Content -->
+            @if (isJsonContent()) {
+            <div class="editorjs-blocks">
+              @for (block of lessonBlocks(); track $index) {
+              @if (block.type === 'paragraph') {
+              <p class="mb-3 fs-5 text-dark" [innerHTML]="block.data.text"></p>
+              } @else if (block.type === 'header') {
+              @if (block.data.level === 1) {
+              <h1 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h1>
+              } @else if (block.data.level === 2) {
+              <h2 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h2>
               } @else {
-                <div class="prose max-w-none text-dark fs-5 mb-4" [innerHTML]="content.text_content"></div>
+              <h3 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h3>
               }
-
-              <!-- Attachments (Media & Files) -->
-              @if (content.attachments && content.attachments.length > 0) {
-              <div class="mt-4 space-y-4">
-                @for (file of content.attachments; track file.id) {
-                  <!-- Image Preview -->
-                  @if (['jpg','jpeg','png','gif','webp','svg'].includes(file.file_extension.toLowerCase())) {
-                    <div class="rounded-4 overflow-hidden shadow-sm border mb-4">
-                      <img [src]="file.url" class="img-fluid w-100" [alt]="file.alias_name">
-                    </div>
-                  }
-                  <!-- Video Player -->
-                  @else if (['mp4','webm','ogg'].includes(file.file_extension.toLowerCase())) {
-                    <div class="rounded-4 overflow-hidden shadow-sm border mb-4 bg-black">
-                      <video controls class="w-100" style="max-height: 500px;">
-                        <source [src]="file.url" [type]="'video/' + file.file_extension">
-                        Your browser does not support the video tag.
-                      </video>
-                    </div>
-                  }
-                  <!-- PDF Embed -->
-                  @else if (file.file_extension.toLowerCase() === 'pdf') {
-                    <div class="rounded-4 overflow-hidden shadow-sm border mb-4" style="height: 600px;">
-                      <embed [src]="file.url" type="application/pdf" width="100%" height="100%" />
-                    </div>
-                  }
-                  <!-- General File Download -->
-                  @else {
-                    <div class="list-group list-group-flush border rounded-3 mb-3">
-                      <a [href]="file.url" target="_blank" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3">
-                        <div class="d-flex align-items-center gap-3">
-                          <i class="bi bi-file-earmark-arrow-down fs-4 text-primary"></i>
-                          <div>
-                            <div class="fw-medium">{{ file.alias_name || file.original_name }}</div>
-                            <div class="text-secondary small">{{ file.file_extension }} • {{ file.file_size }}</div>
-                          </div>
-                        </div>
-                        <i class="bi bi-download text-secondary"></i>
-                      </a>
-                    </div>
-                  }
+              } @else if (block.type === 'list') {
+              @if (block.data.style === 'ordered') {
+              <ol class="mb-3 fs-5 text-dark">
+                @for (item of block.data.items; track item) {
+                <li [innerHTML]="item"></li>
                 }
-              </div>
+              </ol>
+              } @else {
+              <ul class="mb-3 fs-5 text-dark">
+                @for (item of block.data.items; track item) {
+                <li [innerHTML]="item"></li>
+                }
+              </ul>
               }
-
-              <!-- External URLs -->
-              @if (content.external_url && content.external_url.length > 0) {
-              <div class="mt-4">
-                <h6 class="fw-bold text-secondary text-uppercase small mb-3">External Resources</h6>
-                <div class="d-flex flex-wrap gap-2">
-                  @for (url of content.external_url; track url) {
-                    @if (url.toLowerCase().endsWith('.pdf')) {
-                      <div class="w-100 rounded-4 overflow-hidden shadow-sm border mb-3" style="height: 500px;">
-                        <iframe [src]="url" width="100%" height="100%"></iframe>
-                      </div>
-                    } @else {
-                      <a [href]="url" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
-                        <i class="bi bi-link-45deg me-1"></i>
-                        {{ url }}
-                      </a>
+              } @else if (block.type === 'table') {
+              <div class="table-responsive mb-3">
+                <table class="table table-bordered table-striped">
+                  <tbody>
+                    @for (row of block.data.content; track row) {
+                    <tr>
+                      @for (cell of row; track cell) {
+                      <td [innerHTML]="cell"></td>
+                      }
+                    </tr>
                     }
-                  }
-                </div>
+                  </tbody>
+                </table>
               </div>
-              }
-              <!-- Complete Chapter Button/Status -->
-              <div class="mt-5 pt-4 border-top d-flex justify-content-between align-items-center">
-                <div>
-                  <h6 class="fw-bold text-secondary text-uppercase small mb-1">Status</h6>
-                  <span class="badge" [class.bg-success]="isChapterCompleted()" [class.bg-secondary]="!isChapterCompleted()">
-                    {{ isChapterCompleted() ? ('STUDENT.COMPLETED' | translate) : 'In Progress' }}
-                  </span>
-                </div>
-                
-                @if (!isChapterCompleted()) {
-                  <button (click)="markChapterCompleted()" class="btn btn-success rounded-3 py-2 px-4 fw-bold shadow-sm d-flex align-items-center gap-2">
-                    <i class="bi bi-check-circle-fill"></i>
-                    {{ 'STUDENT.MARK_COMPLETED' | translate }}
-                  </button>
-                } @else {
-                  <div class="text-success fw-bold d-flex align-items-center gap-2">
-                    <i class="bi bi-patch-check-fill fs-4"></i>
-                    {{ 'STUDENT.COMPLETED' | translate }}
-                  </div>
+              } @else if (block.type === 'image') {
+              <div class="text-center mb-3">
+                <img [src]="block.data.file.url" [alt]="block.data.caption" class="img-fluid rounded shadow-sm"
+                  style="max-height: 400px; object-fit: contain;">
+                @if (block.data.caption) {
+                <p class="text-muted small mt-2" [innerHTML]="block.data.caption"></p>
                 }
               </div>
+              }
+              }
             </div>
+            } @else {
+            <div class="fs-5 text-dark" [innerHTML]="content.text_content"></div>
+            }
 
-            <!-- Assessments Section (Linked to the Chapter containing this Topic) -->
-            @if (content.assessments && content.assessments.length > 0) {
-            <div class="mt-5">
-              <h3 class="fw-bold mb-4">
-                <i class="bi bi-check2-square text-primary me-2"></i>
-                Chapter Assessments
-              </h3>
-              <div class="row g-4">
-                @for (assessment of content.assessments; track assessment.id) {
-                <div class="col-md-6">
-                  <div class="card border-0 shadow-sm rounded-4 h-100 p-4 transition-all hover-scale bg-white">
-                    <h5 class="fw-bold mb-2">{{ assessment.name }}</h5>
-                    <p class="text-secondary small mb-4 flex-grow-1">{{ assessment.description || 'Take this assessment to test your knowledge.' }}</p>
-                    <a [routerLink]="['/assessments/play', assessment.id]" class="btn btn-primary w-100 rounded-3 py-2 fw-bold text-decoration-none d-block text-center">
-                      Start Assessment
-                      <i class="bi bi-arrow-right ms-2"></i>
+            <!-- Attachments (excluding Resolved Video) -->
+            @if (content.attachments && content.attachments.length > 0) {
+            <div class="mt-5 border-top pt-4">
+              <h6 class="fw-bold text-secondary text-uppercase small mb-3">{{ 'STUDENT.ATTACHMENTS' | translate }}</h6>
+              <div class="row g-3">
+                @for (file of content.attachments; track file.id) {
+                <div class="col-md-6 col-lg-4">
+                  <div
+                    class="card border border-light-subtle rounded-3 p-3 h-100 d-flex flex-column justify-content-between hover-bg transition-all">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                      <div class="rounded-3 p-2 bg-light text-primary">
+                        @if (['jpg','jpeg','png','gif'].includes(file.file_extension.toLowerCase())) {
+                        <i class="bi bi-image fs-4"></i>
+                        } @else if (['mp4','webm','ogg'].includes(file.file_extension.toLowerCase())) {
+                        <i class="bi bi-play-btn fs-4"></i>
+                        } @else if (file.file_extension.toLowerCase() === 'pdf') {
+                        <i class="bi bi-file-earmark-pdf fs-4"></i>
+                        } @else {
+                        <i class="bi bi-file-earmark fs-4"></i>
+                        }
+                      </div>
+                      <div class="text-truncate">
+                        <h6 class="fw-bold mb-0 text-dark text-truncate">{{ file.original_name }}</h6>
+                        <small class="text-secondary">{{ file.file_size | number:'1.0-0' }} bytes</small>
+                      </div>
+                    </div>
+                    <a [href]="file.url" target="_blank" download
+                      class="btn btn-outline-primary btn-sm w-100 rounded-3 fw-bold">
+                      <i class="bi bi-download me-1"></i>
+                      {{ 'STUDENT.DOWNLOAD' | translate }}
                     </a>
                   </div>
                 </div>
@@ -374,123 +385,324 @@
             </div>
             }
 
-            <!-- AI Practice Quiz Section -->
-            <div class="mt-5 pt-4 border-top">
-              <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-                <h3 class="fw-bold mb-0 d-flex align-items-center gap-2">
-                  <i class="bi bi-robot text-primary"></i>
-                  AI Practice Quiz
-                </h3>
-                @if (aiQuizData().length === 0 && !isGeneratingQuiz()) {
-                  <button class="btn btn-outline-primary rounded-pill px-4 fw-bold" (click)="generateAiQuiz()">
-                    <i class="bi bi-magic me-2"></i> Generate Practice Quiz
-                  </button>
+            <!-- External URLs -->
+            @if (content.external_url && content.external_url.length > 0) {
+            <div class="mt-4 border-top pt-4">
+              <h6 class="fw-bold text-secondary text-uppercase small mb-3">External Resources</h6>
+              <div class="d-flex flex-wrap gap-2">
+                @for (url of content.external_url; track url) {
+                @if (url.toLowerCase().endsWith('.pdf')) {
+                <div class="w-100 rounded-4 overflow-hidden shadow-sm border mb-3" style="height: 500px;">
+                  <iframe [src]="url" width="100%" height="100%"></iframe>
+                </div>
+                } @else if (!url.toLowerCase().endsWith('.mp4') && !url.toLowerCase().endsWith('.webm') &&
+                !url.toLowerCase().endsWith('.ogg') && !url.includes('youtube.com') && !url.includes('youtu.be')) {
+                <a [href]="url" target="_blank" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+                  <i class="bi bi-link-45deg me-1"></i>
+                  {{ url }}
+                </a>
+                }
                 }
               </div>
+            </div>
+            }
+          </div>
 
-              @if (isGeneratingQuiz()) {
-                <div class="card border border-primary border-opacity-25 shadow-sm rounded-4 p-5 text-center bg-primary bg-opacity-10">
-                  <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
-                  <h5 class="fw-bold text-primary">AI is analyzing the lesson...</h5>
-                  <p class="text-secondary mb-0">Generating a custom practice quiz for you.</p>
+          <!-- Lesson Step Navigation Footer -->
+          <div
+            class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white d-flex flex-row justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+              <span class="text-muted small">Step 1 of {{ (activityBlocks().length > 0 ? 1 : 0) + 2 +
+                (content.assessments?.length ? 1 : 0) }}</span>
+            </div>
+            <div class="d-flex gap-2">
+              @if (activityBlocks().length > 0) {
+              <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold"
+                (click)="activeStep.set('activity')">Skip Activity</button>
+              <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" (click)="activeStep.set('activity')">
+                Start Activity <i class="bi bi-arrow-right ms-2"></i>
+              </button>
+              } @else {
+              <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold" (click)="activeStep.set('ai')">Skip to
+                AI Tutor</button>
+              <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" (click)="activeStep.set('ai')">
+                Next: AI Tutor <i class="bi bi-arrow-right ms-2"></i>
+              </button>
+              }
+            </div>
+          </div>
+          }
+
+          <!-- STEP 2: INTERACTIVE ACTIVITIES (ONE BY ONE) -->
+          @if (activeStep() === 'activity') {
+          <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white animate-fade-in">
+            <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3 flex-wrap gap-3">
+              <h4 class="fw-bold text-dark mb-0">
+                <i class="bi bi-controller text-primary me-2"></i>
+                Interactive Activity ({{ currentActivityIndex() + 1 }} of {{ activityBlocks().length }})
+              </h4>
+              <div class="progress rounded-pill" style="width: 150px; height: 8px;">
+                <div class="progress-bar bg-primary" role="progressbar"
+                  [style.width.%]="((currentActivityIndex() + 1) / activityBlocks().length) * 100"></div>
+              </div>
+            </div>
+
+            @if (activityBlocks()[currentActivityIndex()]; as block) {
+            <div class="py-3">
+              <app-activity-renderer [activity]="block.data" [showFeedback]="true"></app-activity-renderer>
+            </div>
+            }
+          </div>
+
+          <!-- Activity Navigation Footer -->
+          <div
+            class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white d-flex flex-row justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+              <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold"
+                (click)="currentActivityIndex() > 0 ? currentActivityIndex.set(currentActivityIndex() - 1) : activeStep.set('lesson')">
+                <i class="bi bi-arrow-left me-2"></i> Previous
+              </button>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold" (click)="activeStep.set('ai')">
+                Skip to AI Tutor
+              </button>
+              @if (currentActivityIndex() < activityBlocks().length - 1) { <button
+                class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
+                (click)="currentActivityIndex.set(currentActivityIndex() + 1)">
+                Next Question <i class="bi bi-arrow-right ms-2"></i>
+                </button>
+                } @else {
+                <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" (click)="activeStep.set('ai')">
+                  Next: AI Tutor <i class="bi bi-arrow-right ms-2"></i>
+                </button>
+                }
+            </div>
+          </div>
+          }
+
+          <!-- STEP 3: AI PRACTICE QUIZ & TUTOR -->
+          @if (activeStep() === 'ai') {
+          <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white animate-fade-in">
+            <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+              <div>
+                <h3 class="fw-bold mb-1 d-flex align-items-center gap-2">
+                  <i class="bi bi-robot text-primary"></i>
+                  AI Practice Quiz & Tutor
+                </h3>
+                <p class="text-secondary small mb-0">Generate a custom AI quiz based on this chapter, or open the AI
+                  Tutor chat on the bottom right!</p>
+              </div>
+              @if (aiQuizData().length === 0 && !isGeneratingQuiz()) {
+              <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" (click)="generateAiQuiz()">
+                <i class="bi bi-magic me-2"></i> Generate Practice Quiz
+              </button>
+              }
+            </div>
+
+            @if (isGeneratingQuiz()) {
+            <div
+              class="card border border-primary border-opacity-25 shadow-sm rounded-4 p-5 text-center bg-primary bg-opacity-10 mb-4">
+              <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+              <h5 class="fw-bold text-primary">AI is analyzing the lesson...</h5>
+              <p class="text-secondary mb-0">Generating a custom practice quiz for you.</p>
+            </div>
+            }
+
+            @if (aiQuizData().length > 0) {
+            <div class="ai-quiz-container">
+              @if (aiQuizScore() !== null) {
+              <div
+                class="alert alert-success rounded-4 border-0 shadow-sm d-flex align-items-center gap-3 p-4 mb-4 animate-fade-in">
+                <div class="display-4">{{ aiQuizScore()?.score }}/{{ aiQuizScore()?.total }}</div>
+                <div>
+                  <h4 class="alert-heading fw-bold mb-1">Quiz Completed!</h4>
+                  <p class="mb-0">You scored {{ (aiQuizScore()!.score / aiQuizScore()!.total * 100) | number:'1.0-0'
+                    }}%.</p>
                 </div>
+              </div>
               }
 
-              @if (aiQuizData().length > 0) {
-                <div class="ai-quiz-container">
+              @for (q of aiQuizData(); track $index; let qIndex = $index) {
+              <div class="card border border-light-subtle shadow-sm rounded-4 mb-4 overflow-hidden">
+                <div class="card-header bg-light border-bottom-0 pt-4 pb-0 px-4">
+                  <h5 class="fw-bold d-flex gap-2">
+                    <span class="text-primary">{{ qIndex + 1 }}.</span>
+                    <span [innerHTML]="q.question"></span>
+                  </h5>
+                </div>
+                <div class="card-body p-4">
+                  <div class="list-group gap-2">
+                    @for (opt of q.options; track $index; let oIndex = $index) {
+                    <button type="button"
+                      class="list-group-item list-group-item-action border rounded-3 d-flex align-items-center gap-3 py-3 px-4 transition-all"
+                      [class.active]="aiQuizAnswers()[qIndex] === oIndex"
+                      [class.border-success]="aiQuizScore() !== null && opt.isCorrect"
+                      [class.bg-success]="aiQuizScore() !== null && opt.isCorrect"
+                      [class.text-white]="aiQuizScore() !== null && opt.isCorrect"
+                      [class.border-danger]="aiQuizScore() !== null && aiQuizAnswers()[qIndex] === oIndex && !opt.isCorrect"
+                      [class.bg-danger]="aiQuizScore() !== null && aiQuizAnswers()[qIndex] === oIndex && !opt.isCorrect"
+                      [class.text-white]="aiQuizScore() !== null && aiQuizAnswers()[qIndex] === oIndex && !opt.isCorrect"
+                      [disabled]="aiQuizScore() !== null" (click)="selectAiQuizOption(qIndex, oIndex)">
+                      <div class="form-check m-0 p-0 d-flex align-items-center">
+                        <i class="bi fs-5"
+                          [class.bi-circle]="aiQuizAnswers()[qIndex] !== oIndex && aiQuizScore() === null"
+                          [class.bi-check-circle-fill]="aiQuizAnswers()[qIndex] === oIndex && aiQuizScore() === null"
+                          [class.bi-check-circle-fill]="aiQuizScore() !== null && opt.isCorrect"
+                          [class.bi-x-circle-fill]="aiQuizScore() !== null && aiQuizAnswers()[qIndex] === oIndex && !opt.isCorrect">
+                        </i>
+                      </div>
+                      <span class="fs-6" [innerHTML]="opt.text"></span>
+                    </button>
+                    }
+                  </div>
+
                   @if (aiQuizScore() !== null) {
-                    <div class="alert alert-success rounded-4 border-0 shadow-sm d-flex align-items-center gap-3 p-4 mb-4">
-                      <div class="display-4">{{ aiQuizScore()?.score }}/{{ aiQuizScore()?.total }}</div>
-                      <div>
-                        <h4 class="alert-heading fw-bold mb-1">Quiz Completed!</h4>
-                        <p class="mb-0">You scored {{ (aiQuizScore()!.score / aiQuizScore()!.total * 100) | number:'1.0-0' }}%.</p>
-                      </div>
-                    </div>
-                  }
-
-                  @for (q of aiQuizData(); track $index; let qIndex = $index) {
-                    <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden ai-quiz-card">
-                      <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
-                        <h5 class="fw-bold d-flex gap-2">
-                          <span class="text-primary">{{ qIndex + 1 }}.</span>
-                          <span [innerHTML]="q.question"></span>
-                        </h5>
-                      </div>
-                      <div class="card-body p-4">
-                        <div class="list-group gap-2">
-                          @for (opt of q.options; track $index; let oIndex = $index) {
-                            <button type="button" 
-                                    class="list-group-item list-group-item-action border rounded-3 d-flex align-items-center gap-3 py-3 px-4 transition-all"
-                                    [class.active]="aiQuizAnswers()[qIndex] === oIndex"
-                                    [class.border-success]="aiQuizScore() !== null && opt.isCorrect"
-                                    [class.bg-success]="aiQuizScore() !== null && opt.isCorrect"
-                                    [class.text-white]="aiQuizScore() !== null && opt.isCorrect"
-                                    [class.border-danger]="aiQuizScore() !== null && aiQuizAnswers()[qIndex] === oIndex && !opt.isCorrect"
-                                    [class.bg-danger]="aiQuizScore() !== null && aiQuizAnswers()[qIndex] === oIndex && !opt.isCorrect"
-                                    [class.text-white]="aiQuizScore() !== null && aiQuizAnswers()[qIndex] === oIndex && !opt.isCorrect"
-                                    [disabled]="aiQuizScore() !== null"
-                                    (click)="selectAiQuizOption(qIndex, oIndex)">
-                              <div class="form-check m-0 p-0 d-flex align-items-center">
-                                <i class="bi fs-5"
-                                   [class.bi-circle]="aiQuizAnswers()[qIndex] !== oIndex && aiQuizScore() === null"
-                                   [class.bi-check-circle-fill]="aiQuizAnswers()[qIndex] === oIndex && aiQuizScore() === null"
-                                   [class.bi-check-circle-fill]="aiQuizScore() !== null && opt.isCorrect"
-                                   [class.bi-x-circle-fill]="aiQuizScore() !== null && aiQuizAnswers()[qIndex] === oIndex && !opt.isCorrect">
-                                </i>
-                              </div>
-                              <span class="fs-6" [innerHTML]="opt.text"></span>
-                            </button>
-                          }
-                        </div>
-
-                        @if (aiQuizScore() !== null) {
-                          <div class="mt-4 p-3 bg-light rounded-3 border-start border-4 border-info">
-                            <h6 class="fw-bold mb-1 text-info d-flex align-items-center gap-2">
-                              <i class="bi bi-info-circle-fill"></i> Explanation
-                            </h6>
-                            <p class="mb-0 small text-secondary" [innerHTML]="q.explanation"></p>
-                          </div>
-                        }
-                      </div>
-                    </div>
-                  }
-
-                  @if (aiQuizScore() === null) {
-                    <div class="text-end mb-5">
-                      <button class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow"
-                              [disabled]="(aiQuizAnswers() | keyvalue).length < aiQuizData().length"
-                              (click)="submitAiQuiz()">
-                        Submit Quiz
-                      </button>
-                    </div>
+                  <div class="mt-4 p-3 bg-light rounded-3 border-start border-4 border-info">
+                    <h6 class="fw-bold mb-1 text-info d-flex align-items-center gap-2">
+                      <i class="bi bi-info-circle-fill"></i> Explanation
+                    </h6>
+                    <p class="mb-0 small text-secondary" [innerHTML]="q.explanation"></p>
+                  </div>
                   }
                 </div>
+              </div>
+              }
+
+              @if (aiQuizScore() === null) {
+              <div class="text-end mb-4">
+                <button class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow"
+                  [disabled]="(aiQuizAnswers() | keyvalue).length < aiQuizData().length" (click)="submitAiQuiz()">
+                  Submit Quiz
+                </button>
+              </div>
+              }
+            </div>
+            }
+
+            <!-- AI Chat Reminder -->
+            <div class="alert alert-info rounded-4 border-0 p-4 d-flex align-items-center gap-3 mt-4">
+              <i class="bi bi-magic fs-2 text-info"></i>
+              <div>
+                <h6 class="fw-bold mb-1">Need help or want to clear doubts?</h6>
+                <p class="mb-0 small text-secondary">Click the purple AI magic wand button at the bottom-right corner of
+                  the screen to start chatting with your AI Tutor anytime!</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Step Navigation Footer -->
+          <div
+            class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white d-flex flex-row justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+              <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold"
+                (click)="activityBlocks().length > 0 ? activeStep.set('activity') : activeStep.set('lesson')">
+                <i class="bi bi-arrow-left me-2"></i> Previous
+              </button>
+            </div>
+            <div class="d-flex gap-2">
+              @if (content.assessments && content.assessments.length > 0) {
+              <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold"
+                (click)="activeStep.set('assessment')">Skip to Assessment</button>
+              <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
+                (click)="activeStep.set('assessment')">
+                Next: Assessments <i class="bi bi-arrow-right ms-2"></i>
+              </button>
+              } @else {
+              @if (!isChapterCompleted()) {
+              <button (click)="markChapterCompleted()"
+                class="btn btn-success rounded-pill py-2 px-4 fw-bold shadow-sm d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle-fill"></i>
+                {{ 'STUDENT.MARK_COMPLETED' | translate }}
+              </button>
+              } @else {
+              <div class="text-success fw-bold d-flex align-items-center gap-2 px-3">
+                <i class="bi bi-patch-check-fill fs-4"></i>
+                {{ 'STUDENT.COMPLETED' | translate }}
+              </div>
+              }
               }
             </div>
           </div>
-        } @else {
-          <div class="d-flex flex-column align-items-center justify-content-center h-100 p-5 text-center">
-            <div class="p-5 bg-white rounded-circle shadow-sm mb-4">
-              <i class="bi bi-book fs-1 text-primary"></i>
+          }
+
+          <!-- STEP 4: CHAPTER ASSESSMENT -->
+          @if (activeStep() === 'assessment' && content.assessments && content.assessments.length > 0) {
+          <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white animate-fade-in">
+            <h3 class="fw-bold mb-4">
+              <i class="bi bi-check2-square text-primary me-2"></i>
+              Chapter Assessments
+            </h3>
+            <div class="row g-4">
+              @for (assessment of content.assessments; track assessment.id) {
+              <div class="col-md-6">
+                <div
+                  class="card border border-light-subtle shadow-sm rounded-4 h-100 p-4 transition-all hover-scale bg-white">
+                  <h5 class="fw-bold mb-2">{{ assessment.name }}</h5>
+                  <p class="text-secondary small mb-4 flex-grow-1">{{ assessment.description || 'Take this assessment to
+                    test your knowledge.' }}</p>
+                  <a [routerLink]="['/assessments/play', assessment.id]"
+                    class="btn btn-primary w-100 rounded-3 py-2 fw-bold text-decoration-none d-block text-center shadow-sm">
+                    Start Assessment
+                    <i class="bi bi-arrow-right ms-2"></i>
+                  </a>
+                </div>
+              </div>
+              }
             </div>
-            <h2 class="fw-bold text-dark mb-2">Select a Topic</h2>
-            <p class="text-secondary opacity-75 max-w-sm">Choose a topic from the sidebar to begin your learning journey.</p>
           </div>
+
+          <!-- Assessment Navigation Footer -->
+          <div
+            class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white d-flex flex-row justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+              <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold" (click)="activeStep.set('ai')">
+                <i class="bi bi-arrow-left me-2"></i> Previous
+              </button>
+            </div>
+            <div>
+              @if (!isChapterCompleted()) {
+              <button (click)="markChapterCompleted()"
+                class="btn btn-success rounded-pill py-2 px-4 fw-bold shadow-sm d-flex align-items-center gap-2">
+                <i class="bi bi-check-circle-fill"></i>
+                {{ 'STUDENT.MARK_COMPLETED' | translate }}
+              </button>
+              } @else {
+              <div class="text-success fw-bold d-flex align-items-center gap-2 px-3">
+                <i class="bi bi-patch-check-fill fs-4"></i>
+                {{ 'STUDENT.COMPLETED' | translate }}
+              </div>
+              }
+            </div>
+          </div>
+          }
+        </div>
+        } @else {
+        <div class="d-flex flex-column align-items-center justify-content-center h-100 p-5 text-center">
+          <div class="p-5 bg-white rounded-circle shadow-sm mb-4">
+            <i class="bi bi-book fs-1 text-primary"></i>
+          </div>
+          <h2 class="fw-bold text-dark mb-2">Select a Topic</h2>
+          <p class="text-secondary opacity-75 max-w-sm">Choose a topic from the sidebar to begin your learning journey.
+          </p>
+        </div>
         }
-      }
+        }
+      </div>
     </main>
   </div>
 
   <!-- AI Tutor FAB -->
   @if (courseId() !== null && activeContentId() !== null) {
-    <button class="ai-tutor-fab shadow-lg" [class.active]="isChatOpen()" (click)="toggleChat()">
-      <i class="bi" [class.bi-magic]="!isChatOpen()" [class.bi-x-lg]="isChatOpen()"></i>
-    </button>
+  <button class="ai-tutor-fab shadow-lg" [class.active]="isChatOpen()" (click)="toggleChat()">
+    <i class="bi" [class.bi-magic]="!isChatOpen()" [class.bi-x-lg]="isChatOpen()"></i>
+  </button>
   }
 
   <!-- AI Tutor Chat Panel -->
   <div class="ai-chat-panel shadow-lg border rounded-4 d-flex flex-column" [class.open]="isChatOpen()">
-    <div class="ai-chat-header p-3 border-bottom d-flex align-items-center justify-content-between rounded-top-4 text-white">
+    <div
+      class="ai-chat-header p-3 border-bottom d-flex align-items-center justify-content-between rounded-top-4 text-white">
       <div class="d-flex align-items-center gap-2">
         <i class="bi bi-robot fs-4"></i>
         <div>
@@ -502,48 +714,59 @@
         <i class="bi bi-chevron-down fs-5"></i>
       </button>
     </div>
-    
+
     <div class="ai-chat-body p-3 flex-grow-1 overflow-y-auto" #chatBody>
       @if (chatMessages().length === 0) {
-        <div class="text-center text-secondary h-100 d-flex flex-column align-items-center justify-content-center opacity-75">
-          <i class="bi bi-chat-dots fs-1 mb-2"></i>
-          <p class="small mb-0">Ask me anything about this lesson!</p>
-        </div>
+      <div
+        class="text-center text-secondary h-100 d-flex flex-column align-items-center justify-content-center opacity-75">
+        <i class="bi bi-chat-dots fs-1 mb-2"></i>
+        <p class="small mb-0">Ask me anything about this lesson!</p>
+      </div>
       }
       @for (msg of chatMessages(); track $index) {
-        <div class="d-flex flex-column mb-3" [class.align-items-end]="msg.role === 'user'">
-          <div class="chat-bubble px-3 py-2 rounded-4 shadow-sm"
-               [class.ai-bubble]="msg.role === 'ai'"
-               [class.user-bubble]="msg.role === 'user'"
-               [class.rounded-bottom-end-0]="msg.role === 'user'"
-               [class.rounded-top-start-0]="msg.role === 'ai'"
-               style="max-width: 85%;">
-            <div class="text-dark markdown-body fs-6" [innerHTML]="msg.text"></div>
-          </div>
-          <small class="text-secondary mt-1" style="font-size: 0.65rem;">{{ msg.role === 'ai' ? 'AI Tutor' : 'You' }}</small>
+      <div class="d-flex flex-column mb-3" [class.align-items-end]="msg.role === 'user'">
+        <div class="chat-bubble px-3 py-2 rounded-4 shadow-sm position-relative" [class.ai-bubble]="msg.role === 'ai'"
+          [class.user-bubble]="msg.role === 'user'" [class.rounded-bottom-end-0]="msg.role === 'user'"
+          [class.rounded-top-start-0]="msg.role === 'ai'" style="max-width: 85%;">
+          <div class="text-dark markdown-body fs-6" [innerHTML]="msg.text"></div>
+          @if (msg.role === 'ai') {
+          <button class="btn btn-sm btn-link text-secondary p-0 shadow-none mt-2 d-block" (click)="speakText(msg.text)"
+            title="Read aloud">
+            <i class="bi bi-volume-up"></i> Listen
+          </button>
+          }
         </div>
+        <small class="text-secondary mt-1" style="font-size: 0.65rem;">{{ msg.role === 'ai' ? 'AI Tutor' : 'You'
+          }}</small>
+      </div>
       }
       @if (isAiTyping()) {
-        <div class="d-flex flex-column mb-3">
-          <div class="chat-bubble ai-bubble px-3 py-2 rounded-4 rounded-top-start-0 shadow-sm" style="max-width: 85%;">
-            <div class="typing-indicator">
-              <span></span><span></span><span></span>
-            </div>
+      <div class="d-flex flex-column mb-3">
+        <div class="chat-bubble ai-bubble px-3 py-2 rounded-4 rounded-top-start-0 shadow-sm" style="max-width: 85%;">
+          <div class="typing-indicator">
+            <span></span><span></span><span></span>
           </div>
-          <small class="text-secondary mt-1" style="font-size: 0.65rem;">AI Tutor is typing...</small>
         </div>
+        <small class="text-secondary mt-1" style="font-size: 0.65rem;">AI Tutor is typing...</small>
+      </div>
       }
     </div>
 
     <div class="ai-chat-footer p-3 border-top bg-light rounded-bottom-4">
-      <div class="input-group">
-        <input type="text" class="form-control form-control-sm border-end-0 shadow-none bg-white py-2 px-3 rounded-start-pill"
-               placeholder="Type your question..."
-               [(ngModel)]="chatInput"
-               (keyup.enter)="sendChatMessage()">
-        <button class="btn btn-primary border-start-0 rounded-end-pill px-3 d-flex align-items-center"
-                (click)="sendChatMessage()"
-                [disabled]="isAiTyping() || !chatInput().trim()">
+      <div class="input-group align-items-center bg-white rounded-pill border">
+        <input type="text" class="form-control border-0 shadow-none bg-transparent py-2 px-3 rounded-start-pill"
+          [placeholder]="isListening() ? 'Listening...' : 'Type your question...'" [(ngModel)]="chatInput"
+          (keyup.enter)="sendChatMessage()">
+
+        <button class="btn btn-link border-0 shadow-none px-2" (click)="toggleListening()"
+          [class.text-danger]="isListening()" [class.text-secondary]="!isListening()"
+          [title]="isListening() ? 'Listening...' : 'Voice Input'">
+          <i class="bi fs-5" [class.bi-mic-fill]="isListening()" [class.bi-mic]="!isListening()"
+            [class.recording-pulse]="isListening()"></i>
+        </button>
+
+        <button class="btn btn-primary rounded-pill px-3 m-1 d-flex align-items-center shadow-sm"
+          (click)="sendChatMessage()" [disabled]="isAiTyping() || (!chatInput().trim() && !isListening())">
           <i class="bi bi-send-fill"></i>
         </button>
       </div>

@@ -147,16 +147,25 @@ export class StudentManagement implements OnInit {
 
   initAddUserForm(): void {
     const defaultRole = this.availableRoles()[0]?.value || 'student';
-    const defaultTenant = this.authService.getTenantCode() || '';
 
     this.addUserForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       login: ['', [Validators.required, Validators.minLength(3)]],
       role: [defaultRole, [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      password_confirmation: ['', [Validators.required]],
-      tenant_code: [defaultTenant, [Validators.required]]
+      password_confirmation: ['', [Validators.required]]
     }, { validators: this.passwordMatchValidator });
+
+    // Handle dynamic validation for name field based on role selection
+    this.addUserForm.get('role')?.valueChanges.subscribe((role) => {
+      const nameControl = this.addUserForm.get('name');
+      if (role === 'property_manager') {
+        nameControl?.clearValidators();
+      } else {
+        nameControl?.setValidators([Validators.required, Validators.minLength(3)]);
+      }
+      nameControl?.updateValueAndValidity();
+    });
   }
 
   passwordMatchValidator(g: FormGroup) {
@@ -183,7 +192,12 @@ export class StudentManagement implements OnInit {
     }
 
     this.submitting = true;
-    const formValue = this.addUserForm.value;
+    const formValue = { ...this.addUserForm.value };
+
+    // For property managers (coordinators), set name to be username if not provided
+    if (formValue.role === 'property_manager' && !formValue.name) {
+      formValue.name = `Manager (${formValue.login})`;
+    }
 
     this.http.post<any>('http://localhost:8000/api/register', formValue).subscribe({
       next: (res) => {

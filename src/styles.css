@@ -3,7 +3,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Serif+Tamil:wght@400;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&display=swap');
 
 :root {
-  --bs-primary: #4f46e5; /* Modern Indigo primary */
+  --bs-primary: #4f46e5;
+  /* Modern Indigo primary */
   --bs-primary-rgb: 79, 70, 229;
   --primary-color: #4f46e5;
   --secondary-color: #ec4899;
@@ -12,16 +13,32 @@
   --sidebar-active: #2563eb;
 }
 
-body, button, select, input, textarea, span, p, div:not(.tamil-verse):not(blockquote) {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+body,
+button,
+select,
+input,
+textarea,
+span,
+p,
+div:not(.tamil-verse):not(blockquote) {
+  font-family: 'Times New Roman', Times, serif !important;
 }
 
-h1, h2, h3, h4, h5, h6, .fw-bold, .display-5 {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif !important;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.fw-bold,
+.display-5 {
+  font-family: 'Times New Roman', Times, serif !important;
 }
 
-blockquote, .tamil-verse, blockquote * {
-  font-family: 'Noto Serif Tamil', 'Merriweather', serif !important;
+blockquote,
+.tamil-verse,
+blockquote * {
+  font-family: 'Times New Roman', Times, serif !important;
 }
 
 body {
@@ -44,4 +61,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Custom Logout Button Styles */
+.btn-logout-custom {
+  background-color: #dc3545 !important;
+  color: #ffffff !important;
+  border: 1px solid #dc3545 !important;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-logout-custom:hover {
+  background-color: #ffffff !important;
+  color: #dc3545 !important;
+  border: 1px solid #dc3545 !important;
 }
