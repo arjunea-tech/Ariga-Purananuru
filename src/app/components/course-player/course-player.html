@@ -1,51 +1,77 @@
-<div class="container-fluid p-0 overflow-hidden" style="height: 100vh;">
-  <div class="row g-0 h-100">
+<div class="container-fluid p-0">
+  <div class="row g-0">
     <!-- Sidebar: Hierarchical View / Dashboard Sidebar -->
-    <aside class="col-md-3 col-lg-2 bg-white border-end h-100 d-flex flex-column shadow-sm">
+    <aside class="col-md-3 col-lg-2 student-sidebar position-sticky top-0 d-flex flex-column" style="height: 100vh; z-index: 100;">
       <div class="overflow-y-auto flex-grow-1 sidebar-scroll">
         @if (courseId()) {
-        <div class="p-3 border-bottom bg-light">
-          <button
-            class="btn btn-sm btn-outline-primary w-100 rounded-3 d-flex align-items-center justify-content-center gap-2 py-2"
-            (click)="goBackToDashboard()">
-            <i class="bi bi-arrow-left"></i>
-            <span>{{ 'STUDENT.BACK_TO_DASHBOARD' | translate }}</span>
-          </button>
-        </div>
-        <div class="px-3 py-2 border-bottom bg-light">
-          <div class="d-flex align-items-center gap-2">
-            <i class="bi bi-translate text-primary"></i>
-            <select (change)="switchLanguage($event)" [value]="currentLang()"
-              class="form-select form-select-sm bg-white text-dark border-secondary border-opacity-50 shadow-none cursor-pointer py-1"
-              style="font-size: 0.85rem;">
-              <option value="en" class="bg-white text-dark">English (EN)</option>
-              <option value="ta" class="bg-white text-dark">Tamil (தமிழ்)</option>
-            </select>
+          <div class="p-3 sidebar-header border-bottom">
+            <button
+              class="btn btn-sm btn-sidebar-back w-100 rounded-3 d-flex align-items-center justify-content-center gap-2 py-2"
+              (click)="goBackToDashboard()">
+              <i class="bi bi-arrow-left"></i>
+              <span>{{ 'STUDENT.BACK_TO_DASHBOARD' | translate }}</span>
+            </button>
           </div>
-        </div>
-        <div class="p-4 border-bottom bg-light">
-          <h6 class="fw-bold mb-0 text-secondary text-uppercase tracking-wider small">{{ 'STUDENT.COURSE_CONTENT' |
-            translate }}</h6>
-          <div class="small text-muted mt-1" *ngIf="courseStructure()">{{ courseStructure()?.name }}</div>
-        </div>
+          <div class="px-3 py-2 sidebar-subheader border-bottom">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-translate text-primary"></i>
+              <select (change)="switchLanguage($event)" [value]="currentLang()"
+                class="form-select form-select-sm cursor-pointer py-1"
+                style="font-size: 0.85rem;">
+                <option value="en" class="bg-white text-dark">English (EN)</option>
+                <option value="ta" class="bg-white text-dark">Tamil (தமிழ்)</option>
+              </select>
+            </div>
+          </div>
+          <div class="p-3">
+            <h6 class="fw-bold mb-3 text-secondary text-uppercase tracking-wider small" style="font-size: 0.72rem;">
+              {{ 'STUDENT.LEARNING_COURSES' | translate }}
+            </h6>
+            <div class="d-flex flex-column gap-3">
+              @for (course of courses(); track course.id) {
+                <div class="d-flex flex-column">
+                  <button
+                    class="btn text-start rounded-3 py-2 px-3 fw-medium w-100 d-flex align-items-center justify-content-between transition-all sidebar-course-btn"
+                    [class.active]="course.id === courseId()"
+                    (click)="toggleCourseTree(course.id)"
+                    style="font-size: 0.85rem;">
+                    <span class="text-truncate me-2">{{ course.name }}</span>
+                    @if (course.id === courseId()) {
+                      <i class="bi bi-check-circle-fill small"></i>
+                    }
+                  </button>
 
-        <div class="tree-container">
-          <mcv-datatree [data]="treeData()" [readOnly]="true" [showHeader]="false" [showIcons]="true"
-            [expandIcon]="'bi bi-chevron-right'" [collapseIcon]="'bi bi-chevron-down'"
-            (onNodeClick)="handleNodeClick($event)">
-          </mcv-datatree>
-        </div>
+                  <!-- Render the tree inline directly underneath the active course -->
+                  @if (course.id === courseId() && showTreeInline() && treeData().length > 0) {
+                    <div class="tree-container ps-3 mt-2 border-start ms-2 animate-fade-in" style="border-color: rgba(var(--bs-primary-rgb), 0.3) !important;">
+                      <!-- Quick Link to Course Overview -->
+                      <button class="btn btn-sm btn-link text-decoration-none text-primary d-flex align-items-center gap-1 mb-2 p-0 small fw-bold"
+                        (click)="activeContentId.set(null); selectedChapterId.set(null); $event.stopPropagation()">
+                        <i class="bi bi-grid-fill"></i>
+                        <span>Course Overview</span>
+                      </button>
+                      
+                      <mcv-datatree [data]="treeData()" [readOnly]="true" [showHeader]="false" [showIcons]="true"
+                        [expandIcon]="'bi bi-chevron-right'" [collapseIcon]="'bi bi-chevron-down'"
+                        (onNodeClick)="handleNodeClick($event)">
+                      </mcv-datatree>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
         } @else {
-        <div class="p-4 border-bottom bg-light text-center">
+        <div class="p-4 sidebar-header border-bottom text-center">
           <div class="avatar-circle-lg mx-auto mb-2">🎓</div>
           <h6 class="fw-bold mb-0 text-dark">Ariga Workspace</h6>
           <div class="small text-muted mt-1">Student Portal</div>
         </div>
-        <div class="px-3 py-2 border-bottom bg-light">
+        <div class="px-3 py-2 sidebar-subheader border-bottom">
           <div class="d-flex align-items-center gap-2">
             <i class="bi bi-translate text-primary"></i>
             <select (change)="switchLanguage($event)" [value]="currentLang()"
-              class="form-select form-select-sm bg-white text-dark border-secondary border-opacity-50 shadow-none cursor-pointer py-1"
+              class="form-select form-select-sm cursor-pointer py-1"
               style="font-size: 0.85rem;">
               <option value="en" class="bg-white text-dark">English (EN)</option>
               <option value="ta" class="bg-white text-dark">Tamil (தமிழ்)</option>
@@ -60,171 +86,99 @@
         </div>
         }
       </div>
+      <!-- Sidebar Footer: Profile Dropdown -->
+      <div class="p-3 sidebar-footer border-top position-relative">
+        <div class="position-relative">
+          <button (click)="isProfileDropdownOpen.set(!isProfileDropdownOpen())"
+            class="btn profile-pill-btn w-100 d-flex align-items-center justify-content-between px-3 py-2 border shadow-sm rounded-pill bg-white transition-all"
+            type="button">
+            <div class="d-flex align-items-center gap-2 text-truncate">
+              <div class="avatar-circle animate-pulse-glow"
+                style="width: 28px; height: 28px; font-size: 0.8rem; background-color: var(--primary-color, #4f46e5); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; flex-shrink: 0;">
+                {{ authService.getUser()?.name?.charAt(0) }}
+              </div>
+              <span class="small fw-semibold text-dark text-truncate">{{ authService.getUser()?.name }}</span>
+            </div>
+            <i class="bi bi-chevron-expand text-secondary small"></i>
+          </button>
+
+          <!-- Backdrop to close dropdown on click outside -->
+          <div *ngIf="isProfileDropdownOpen()" class="position-fixed top-0 start-0 w-100 h-100" style="z-index: 1055;"
+            (click)="isProfileDropdownOpen.set(false)"></div>
+
+          <!-- Dropdown Menu (Opens upwards) -->
+          <div *ngIf="isProfileDropdownOpen()"
+            class="position-absolute start-0 bottom-100 mb-2 w-100 bg-white rounded-3 shadow border p-3 animate-fade-in"
+            style="z-index: 1060; left: 0;">
+            <div class="px-2 py-1 mb-2 border-bottom pb-2">
+              <div class="fw-bold text-dark text-truncate" style="max-width: 180px;">{{ authService.getUser()?.name }}</div>
+              <small class="text-secondary text-uppercase fw-bold" style="font-size: 0.65rem; letter-spacing: 0.5px;">Student</small>
+            </div>
+            <button (click)="isProfileDropdownOpen.set(false); logout(); $event.stopPropagation()"
+              class="btn btn-logout-custom btn-sm w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2 fw-semibold">
+              <i class="bi bi-box-arrow-right"></i>
+              <span>{{ 'STUDENT.LOGOUT' | translate }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </aside>
 
     <!-- Main Content Area -->
-    <main class="col h-100 d-flex flex-column bg-light overflow-hidden">
-      <!-- Top Navbar -->
-      <header
-        class="navbar navbar-expand bg-white border-bottom px-4 py-2 shadow-sm d-flex justify-content-between align-items-center"
-        style="height: 60px; min-height: 60px;">
-        <div>
-          <span class="fw-semibold text-secondary" style="font-size: 0.95rem;">
-            @if (!courseId()) {
-            {{ 'STUDENT.DASHBOARD' | translate }}
-            }
-          </span>
-        </div>
-        <div class="d-flex align-items-center gap-3">
-          <!-- Profile Dropdown -->
-          <div class="position-relative">
-            <button (click)="isProfileDropdownOpen.set(!isProfileDropdownOpen())"
-              class="btn btn-link p-0 border-0 text-decoration-none d-flex align-items-center gap-2" type="button">
-              <span class="small fw-semibold text-dark d-none d-sm-inline">{{ authService.getUser()?.name }}</span>
-              <div class="avatar-circle"
-                style="width: 38px; height: 38px; font-size: 0.95rem; background-color: var(--primary-color, #4f46e5); color: white; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: bold; border: 2px solid #e2e8f0;">
-                {{ authService.getUser()?.name?.charAt(0) }}
-              </div>
-            </button>
+    <main class="col bg-light position-relative">
 
-            <!-- Backdrop to close dropdown on click outside -->
-            <div *ngIf="isProfileDropdownOpen()" class="position-fixed top-0 start-0 w-100 h-100" style="z-index: 1055;"
-              (click)="isProfileDropdownOpen.set(false)"></div>
-
-            <!-- Dropdown Menu -->
-            <div *ngIf="isProfileDropdownOpen()"
-              class="position-absolute end-0 mt-2 bg-white rounded-3 shadow border p-3 animate-fade-in"
-              style="min-width: 220px; z-index: 1060; right: 0;">
-              <div class="px-2 py-1 mb-2 border-bottom pb-2">
-                <div class="fw-bold text-dark text-truncate" style="max-width: 180px;">{{ authService.getUser()?.name }}
-                </div>
-                <small class="text-secondary text-uppercase fw-bold"
-                  style="font-size: 0.65rem; letter-spacing: 0.5px;">Student</small>
-              </div>
-              <button (click)="isProfileDropdownOpen.set(false); logout(); $event.stopPropagation()"
-                class="btn btn-logout-custom btn-sm w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2 fw-semibold">
-                <i class="bi bi-box-arrow-right"></i>
-                <span>{{ 'STUDENT.LOGOUT' | translate }}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <!-- Scrollable content -->
-      <div class="flex-grow-1 overflow-y-auto">
+      <!-- Main Page Content -->
+      <div class="w-100">
         @if (courseId() === null) {
         <!-- Dynamic Student Gamified Dashboard -->
         <div class="p-4 p-lg-5 max-w-5xl mx-auto animate-fade-in">
-          <!-- Welcome header -->
-          <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+          <!-- Welcome Banner -->
+          <div
+            class="welcome-banner p-4 p-md-5 mb-5 text-white d-flex align-items-center justify-content-between flex-wrap gap-4">
             <div>
-              <h1 class="fw-bold text-dark mb-1">{{ 'STUDENT.WELCOME' | translate }}</h1>
-              <p class="text-secondary mb-0">{{ 'STUDENT.SUBTITLE' | translate }}</p>
+              <span
+                class="badge bg-white bg-opacity-20 text-black text-uppercase tracking-wider px-3 py-2 rounded-pill fw-bold mb-3"
+                style="font-size: 0.7rem;">
+                👋 {{ 'STUDENT.WELCOME' | translate }}
+              </span>
+              <h1 class="fw-bold display-6 mb-2">{{ authService.getUser()?.name }}!</h1>
+              <p class="mb-0 opacity-90 fs-6">{{ 'STUDENT.SUBTITLE' | translate }}</p>
             </div>
+            <div class="d-none d-md-block fs-1 pe-4">🚀</div>
           </div>
 
 
-
-          <!-- Quick Statistics and Circular/Bar Progress -->
-          <div class="row g-4 mb-5">
-            <!-- Course Completion Progress Card -->
-            <div class="col-md-6 col-lg-4">
-              <div
-                class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-between">
-                <div>
-                  <h6 class="text-secondary text-uppercase small fw-bold mb-3">{{ 'STUDENT.SYLLABUS_PROGRESS' |
-                    translate }}</h6>
-                  <div class="d-flex align-items-baseline gap-2 mb-2">
-                    <span class="display-6 fw-bold text-primary">{{ stats()?.completion_percentage || 0 }}%</span>
-                  </div>
-                  <div class="progress rounded-pill mb-2" style="height: 10px;">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar"
-                      [style.width.%]="stats()?.completion_percentage || 0"></div>
-                  </div>
-                </div>
-                <small class="text-secondary fw-semibold">{{ stats()?.completed_chapters || 0 }} / {{
-                  stats()?.total_chapters || 0 }} {{ 'STUDENT.CHAPTERS_COMPLETED' | translate }}</small>
-              </div>
-            </div>
-
-            <!-- Quiz Attempts Card -->
-            <div class="col-md-6 col-lg-4">
-              <div
-                class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-between">
-                <div>
-                  <h6 class="text-secondary text-uppercase small fw-bold mb-3">{{ 'STUDENT.QUIZ_SUBMISSIONS' | translate
-                    }}</h6>
-                  <div class="d-flex align-items-baseline gap-2 mb-2">
-                    <span class="display-6 fw-bold text-success">{{ stats()?.passed_attempts || 0 }}</span>
-                    <span class="text-secondary">/ {{ stats()?.total_attempts || 0 }} {{ 'STUDENT.PASSED' | translate
-                      }}</span>
-                  </div>
-                </div>
-                <small class="text-secondary fw-semibold">{{ 'STUDENT.QUIZ_SUBTITLE' | translate }}</small>
-              </div>
-            </div>
-
-            <!-- Average Quiz Score Card -->
-            <div class="col-md-6 col-lg-4">
-              <div
-                class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-between">
-                <div>
-                  <h6 class="text-secondary text-uppercase small fw-bold mb-3">{{ 'STUDENT.AVG_SCORE' | translate }}
-                  </h6>
-                  <div class="d-flex align-items-baseline gap-2 mb-2">
-                    <span class="display-6 fw-bold text-warning">{{ stats()?.average_score || 0 }}%</span>
-                  </div>
-                </div>
-                <small class="text-secondary fw-semibold">{{ 'STUDENT.AVG_SUBTITLE' | translate }}</small>
-              </div>
-            </div>
-          </div>
-
-          <!-- Gamified Badges Showcase -->
-          <div class="card border-0 shadow-sm rounded-4 p-4 mb-5 bg-white">
-            <h5 class="fw-bold mb-4 d-flex align-items-center gap-2">
-              <span>🏆 {{ 'STUDENT.ACHIEVEMENTS' | translate }}</span>
-            </h5>
-
-            <div class="row g-3">
-              @for (badge of stats()?.badges; track badge.id) {
-              <div class="col-md-6 col-lg-4">
-                <div class="badge-card d-flex align-items-center gap-3 p-3 rounded-4 border transition-all"
-                  [class.unlocked]="badge.unlocked" [class.locked]="!badge.unlocked">
-                  <div class="badge-icon-wrap">{{ badge.icon }}</div>
-                  <div>
-                    <div class="fw-bold badge-title text-dark">{{ 'BADGES.' + badge.id + '.TITLE' | translate }}</div>
-                    <div class="text-secondary small">{{ 'BADGES.' + badge.id + '.DESC' | translate }}</div>
-                  </div>
-                </div>
-              </div>
-              }
-            </div>
-          </div>
 
           <!-- Available Courses Grid -->
-          <h4 class="fw-bold mb-4">📚 {{ 'STUDENT.LEARNING_COURSES' | translate }}</h4>
+          <h4 class="fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+            <span>📚</span> {{ 'STUDENT.LEARNING_COURSES' | translate }}
+          </h4>
           <div class="row g-4">
             @for (course of courses(); track course.id) {
             <div class="col-md-6">
-              <div
-                class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-between hover-scale transition-all">
-                <div>
-                  <span class="badge bg-primary bg-opacity-10 text-primary mb-3 text-uppercase font-monospace">{{
-                    'STUDENT.ACTIVE_COURSE' | translate }}</span>
-                  <h4 class="fw-bold text-dark mb-2">{{ course.name }}</h4>
-                  <p class="text-secondary small mb-4">{{ course.description || 'Explore rich content and take
-                    assessments to master this subject.' }}</p>
+              <div class="course-card h-100 d-flex flex-column justify-content-between">
+                <div class="course-card-accent-bar"></div>
+                <div class="p-4 flex-grow-1 d-flex flex-column justify-content-between">
+                  <div class="mb-4">
+                    <span
+                      class="badge bg-primary bg-opacity-10 text-primary mb-3 text-uppercase tracking-wider font-monospace"
+                      style="font-size: 0.7rem;">
+                      {{ 'STUDENT.ACTIVE_COURSE' | translate }}
+                    </span>
+                    <h4 class="fw-bold text-dark mb-2">{{ course.name }}</h4>
+                    <p class="text-secondary small mb-0">{{ course.description || 'Explore rich content and take
+                      assessments to master this subject.' }}</p>
+                  </div>
+                  <button class="btn btn-primary w-100 rounded-3 py-2 fw-bold hover-scale-btn mt-3"
+                    (click)="selectCourse(course.id)">
+                    {{ 'STUDENT.OPEN_PATH' | translate }}
+                    <i class="bi bi-chevron-right ms-2"></i>
+                  </button>
                 </div>
-                <button class="btn btn-primary w-100 rounded-3 py-2 fw-bold" (click)="selectCourse(course.id)">
-                  {{ 'STUDENT.OPEN_PATH' | translate }}
-                  <i class="bi bi-chevron-right ms-2"></i>
-                </button>
               </div>
             </div>
             } @empty {
-            <div class="col-12 text-center py-5 text-secondary opacity-75">
+            <div class="col-12 text-center py-5 text-secondary opacity-75 glass-card">
               <i class="bi bi-journals fs-1 d-block mb-2"></i>
               {{ 'STUDENT.NO_COURSES' | translate }}
             </div>
@@ -236,38 +190,41 @@
         @if (activeContent(); as content) {
         <div class="p-4 p-lg-5 max-w-6xl mx-auto">
           <!-- Content Header with Step Indicator -->
-          <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 text-white d-flex flex-column"
-            style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);">
-            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+          <div class="player-header-banner p-4 p-md-5 mb-4 text-white d-flex flex-column gap-3">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
               <span
                 class="badge bg-white bg-opacity-20 text-black text-uppercase tracking-wider px-3 py-2 rounded-pill fw-bold"
-                style="font-size: 0.7rem; font-family: 'Plus Jakarta Sans', sans-serif !important;">
-                @if (activeStep() === 'lesson') { 📚 Step 1: Lesson Content }
-                @else if (activeStep() === 'activity') { 🎮 Step 2: Interactive Activity }
-                @else if (activeStep() === 'ai') { 🤖 Step 3: AI Tutor Practice }
-                @else if (activeStep() === 'assessment') { 📝 Step 4: Chapter Assessments }
+                style="font-size: 0.7rem;">
+                @if (activeStep() === 'lesson') { 📚 {{ 'STUDENT.STEP_LESSON' | translate }} }
+                @else if (activeStep() === 'activity') { 🎮 {{ 'STUDENT.STEP_ACTIVITY' | translate }} }
+                @else if (activeStep() === 'ai') { 🤖 {{ 'STUDENT.STEP_AI' | translate }} }
+                @else if (activeStep() === 'assessment') { 📝 {{ 'STUDENT.STEP_ASSESSMENT' | translate }} }
               </span>
 
-              <!-- Step dots progress -->
-              <div class="d-flex gap-2 align-items-center">
-                <button class="btn btn-link p-0 text-white opacity-75 hover-opacity-100" style="font-size: 0.8rem;"
-                  (click)="activeStep.set('lesson')">Lesson</button>
-                <span class="text-white-50">/</span>
+              <!-- Stepper Navigation Pills -->
+              <div class="step-navigation-pillbar header-stepper">
+                <button class="step-nav-pill" [class.active]="activeStep() === 'lesson'"
+                  (click)="activeStep.set('lesson')">
+                  📚 {{ 'STUDENT.LESSON' | translate }}
+                </button>
                 @if (activityBlocks().length > 0) {
-                <button class="btn btn-link p-0 text-white opacity-75 hover-opacity-100" style="font-size: 0.8rem;"
-                  (click)="activeStep.set('activity')">Activity</button>
-                <span class="text-white-50">/</span>
+                <button class="step-nav-pill" [class.active]="activeStep() === 'activity'"
+                  (click)="activeStep.set('activity')">
+                  🎮 {{ 'STUDENT.ACTIVITY' | translate }}
+                </button>
                 }
-                <button class="btn btn-link p-0 text-white opacity-75 hover-opacity-100" style="font-size: 0.8rem;"
-                  (click)="activeStep.set('ai')">AI Tutor</button>
+                <button class="step-nav-pill" [class.active]="activeStep() === 'ai'" (click)="activeStep.set('ai')">
+                  🤖 {{ 'STUDENT.AI_TUTOR' | translate }}
+                </button>
                 @if (content.assessments && content.assessments.length > 0) {
-                <span class="text-white-50">/</span>
-                <button class="btn btn-link p-0 text-white opacity-75 hover-opacity-100" style="font-size: 0.8rem;"
-                  (click)="activeStep.set('assessment')">Assessments</button>
+                <button class="step-nav-pill" [class.active]="activeStep() === 'assessment'"
+                  (click)="activeStep.set('assessment')">
+                  📝 {{ 'STUDENT.QUIZ' | translate }}
+                </button>
                 }
               </div>
             </div>
-            <h1 class="display-6 fw-bold text-white mb-0">{{ content.title || content.name }}</h1>
+            <h1 class="display-5 fw-bold text-white mb-0">{{ content.title || content.name }}</h1>
           </div>
 
           <!-- STEP 1: LESSON CONTENT & VIDEO -->
@@ -308,13 +265,49 @@
               @if (block.data.style === 'ordered') {
               <ol class="mb-3 fs-5 text-dark">
                 @for (item of block.data.items; track item) {
-                <li [innerHTML]="item"></li>
+                <li>
+                  <span [innerHTML]="item && item.content !== undefined ? item.content : item"></span>
+                  @if (item && item.items && item.items.length > 0) {
+                    <ul>
+                      @for (sub of item.items; track sub) {
+                        <li>
+                          <span [innerHTML]="sub && sub.content !== undefined ? sub.content : sub"></span>
+                          @if (sub && sub.items && sub.items.length > 0) {
+                            <ul>
+                              @for (nested of sub.items; track nested) {
+                                <li><span [innerHTML]="nested && nested.content !== undefined ? nested.content : nested"></span></li>
+                              }
+                            </ul>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  }
+                </li>
                 }
               </ol>
               } @else {
               <ul class="mb-3 fs-5 text-dark">
                 @for (item of block.data.items; track item) {
-                <li [innerHTML]="item"></li>
+                <li>
+                  <span [innerHTML]="item && item.content !== undefined ? item.content : item"></span>
+                  @if (item && item.items && item.items.length > 0) {
+                    <ul>
+                      @for (sub of item.items; track sub) {
+                        <li>
+                          <span [innerHTML]="sub && sub.content !== undefined ? sub.content : sub"></span>
+                          @if (sub && sub.items && sub.items.length > 0) {
+                            <ul>
+                              @for (nested of sub.items; track nested) {
+                                <li><span [innerHTML]="nested && nested.content !== undefined ? nested.content : nested"></span></li>
+                              }
+                            </ul>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  }
+                </li>
                 }
               </ul>
               }
@@ -412,21 +405,20 @@
           <div
             class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white d-flex flex-row justify-content-between align-items-center flex-wrap gap-3">
             <div>
-              <span class="text-muted small">Step 1 of {{ (activityBlocks().length > 0 ? 1 : 0) + 2 +
+              <span class="text-muted small">{{ 'STUDENT.STEP_COUNT' | translate }} 1 {{ 'STUDENT.STEP_OF' | translate }} {{ (activityBlocks().length > 0 ? 1 : 0) + 2 +
                 (content.assessments?.length ? 1 : 0) }}</span>
             </div>
             <div class="d-flex gap-2">
               @if (activityBlocks().length > 0) {
               <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold"
-                (click)="activeStep.set('activity')">Skip Activity</button>
+                (click)="activeStep.set('activity')">{{ 'STUDENT.SKIP_ACTIVITY' | translate }}</button>
               <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" (click)="activeStep.set('activity')">
-                Start Activity <i class="bi bi-arrow-right ms-2"></i>
+                {{ 'STUDENT.START_ACTIVITY' | translate }} <i class="bi bi-arrow-right ms-2"></i>
               </button>
               } @else {
-              <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold" (click)="activeStep.set('ai')">Skip to
-                AI Tutor</button>
+              <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold" (click)="activeStep.set('ai')">{{ 'STUDENT.SKIP_AI' | translate }}</button>
               <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" (click)="activeStep.set('ai')">
-                Next: AI Tutor <i class="bi bi-arrow-right ms-2"></i>
+                {{ 'STUDENT.NEXT_AI' | translate }} <i class="bi bi-arrow-right ms-2"></i>
               </button>
               }
             </div>
@@ -439,7 +431,7 @@
             <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3 flex-wrap gap-3">
               <h4 class="fw-bold text-dark mb-0">
                 <i class="bi bi-controller text-primary me-2"></i>
-                Interactive Activity ({{ currentActivityIndex() + 1 }} of {{ activityBlocks().length }})
+                {{ 'STUDENT.INTERACTIVE_ACTIVITY' | translate }} ({{ currentActivityIndex() + 1 }} {{ 'STUDENT.STEP_OF' | translate }} {{ activityBlocks().length }})
               </h4>
               <div class="progress rounded-pill" style="width: 150px; height: 8px;">
                 <div class="progress-bar bg-primary" role="progressbar"
@@ -460,21 +452,21 @@
             <div>
               <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold"
                 (click)="currentActivityIndex() > 0 ? currentActivityIndex.set(currentActivityIndex() - 1) : activeStep.set('lesson')">
-                <i class="bi bi-arrow-left me-2"></i> Previous
+                <i class="bi bi-arrow-left me-2"></i> {{ 'STUDENT.PREVIOUS' | translate }}
               </button>
             </div>
             <div class="d-flex gap-2">
               <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold" (click)="activeStep.set('ai')">
-                Skip to AI Tutor
+                {{ 'STUDENT.SKIP_AI' | translate }}
               </button>
               @if (currentActivityIndex() < activityBlocks().length - 1) { <button
                 class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
                 (click)="currentActivityIndex.set(currentActivityIndex() + 1)">
-                Next Question <i class="bi bi-arrow-right ms-2"></i>
+                {{ 'STUDENT.NEXT_QUESTION' | translate }} <i class="bi bi-arrow-right ms-2"></i>
                 </button>
                 } @else {
                 <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" (click)="activeStep.set('ai')">
-                  Next: AI Tutor <i class="bi bi-arrow-right ms-2"></i>
+                  {{ 'STUDENT.NEXT_AI' | translate }} <i class="bi bi-arrow-right ms-2"></i>
                 </button>
                 }
             </div>
@@ -488,14 +480,13 @@
               <div>
                 <h3 class="fw-bold mb-1 d-flex align-items-center gap-2">
                   <i class="bi bi-robot text-primary"></i>
-                  AI Practice Quiz & Tutor
+                  {{ 'STUDENT.STEP_AI' | translate }}
                 </h3>
-                <p class="text-secondary small mb-0">Generate a custom AI quiz based on this chapter, or open the AI
-                  Tutor chat on the bottom right!</p>
+                <p class="text-secondary small mb-0">{{ 'STUDENT.EXPLORE_LESSONS' | translate }}</p>
               </div>
               @if (aiQuizData().length === 0 && !isGeneratingQuiz()) {
               <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" (click)="generateAiQuiz()">
-                <i class="bi bi-magic me-2"></i> Generate Practice Quiz
+                <i class="bi bi-magic me-2"></i> {{ 'STUDENT.GENERATE_QUIZ' | translate }}
               </button>
               }
             </div>
@@ -504,8 +495,8 @@
             <div
               class="card border border-primary border-opacity-25 shadow-sm rounded-4 p-5 text-center bg-primary bg-opacity-10 mb-4">
               <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
-              <h5 class="fw-bold text-primary">AI is analyzing the lesson...</h5>
-              <p class="text-secondary mb-0">Generating a custom practice quiz for you.</p>
+              <h5 class="fw-bold text-primary">{{ 'STUDENT.AI_ANALYZING' | translate }}</h5>
+              <p class="text-secondary mb-0">{{ 'STUDENT.AI_GENERATING' | translate }}</p>
             </div>
             }
 
@@ -516,9 +507,8 @@
                 class="alert alert-success rounded-4 border-0 shadow-sm d-flex align-items-center gap-3 p-4 mb-4 animate-fade-in">
                 <div class="display-4">{{ aiQuizScore()?.score }}/{{ aiQuizScore()?.total }}</div>
                 <div>
-                  <h4 class="alert-heading fw-bold mb-1">Quiz Completed!</h4>
-                  <p class="mb-0">You scored {{ (aiQuizScore()!.score / aiQuizScore()!.total * 100) | number:'1.0-0'
-                    }}%.</p>
+                  <h4 class="alert-heading fw-bold mb-1">{{ 'STUDENT.QUIZ_COMPLETED' | translate }}</h4>
+                  <p class="mb-0">{{ 'STUDENT.AVG_SCORE' | translate }}: {{ (aiQuizScore()!.score / aiQuizScore()!.total * 100) | number:'1.0-0' }}%.</p>
                 </div>
               </div>
               }
@@ -560,7 +550,7 @@
                   @if (aiQuizScore() !== null) {
                   <div class="mt-4 p-3 bg-light rounded-3 border-start border-4 border-info">
                     <h6 class="fw-bold mb-1 text-info d-flex align-items-center gap-2">
-                      <i class="bi bi-info-circle-fill"></i> Explanation
+                      <i class="bi bi-info-circle-fill"></i> {{ 'STUDENT.EXPLANATION' | translate }}
                     </h6>
                     <p class="mb-0 small text-secondary" [innerHTML]="q.explanation"></p>
                   </div>
@@ -573,7 +563,7 @@
               <div class="text-end mb-4">
                 <button class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow"
                   [disabled]="(aiQuizAnswers() | keyvalue).length < aiQuizData().length" (click)="submitAiQuiz()">
-                  Submit Quiz
+                  {{ 'STUDENT.SUBMIT_QUIZ' | translate }}
                 </button>
               </div>
               }
@@ -584,9 +574,8 @@
             <div class="alert alert-info rounded-4 border-0 p-4 d-flex align-items-center gap-3 mt-4">
               <i class="bi bi-magic fs-2 text-info"></i>
               <div>
-                <h6 class="fw-bold mb-1">Need help or want to clear doubts?</h6>
-                <p class="mb-0 small text-secondary">Click the purple AI magic wand button at the bottom-right corner of
-                  the screen to start chatting with your AI Tutor anytime!</p>
+                <h6 class="fw-bold mb-1">{{ 'STUDENT.NEED_HELP' | translate }}</h6>
+                <p class="mb-0 small text-secondary">{{ 'STUDENT.AI_HINT' | translate }}</p>
               </div>
             </div>
           </div>
@@ -597,16 +586,16 @@
             <div>
               <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold"
                 (click)="activityBlocks().length > 0 ? activeStep.set('activity') : activeStep.set('lesson')">
-                <i class="bi bi-arrow-left me-2"></i> Previous
+                <i class="bi bi-arrow-left me-2"></i> {{ 'STUDENT.PREVIOUS' | translate }}
               </button>
             </div>
             <div class="d-flex gap-2">
               @if (content.assessments && content.assessments.length > 0) {
               <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold"
-                (click)="activeStep.set('assessment')">Skip to Assessment</button>
+                (click)="activeStep.set('assessment')">{{ 'STUDENT.SKIP_ASSESSMENT' | translate }}</button>
               <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm"
                 (click)="activeStep.set('assessment')">
-                Next: Assessments <i class="bi bi-arrow-right ms-2"></i>
+                {{ 'STUDENT.NEXT_ASSESSMENT' | translate }} <i class="bi bi-arrow-right ms-2"></i>
               </button>
               } @else {
               @if (!isChapterCompleted()) {
@@ -631,7 +620,7 @@
           <div class="card border-0 shadow-sm rounded-4 p-4 p-lg-5 mb-4 bg-white animate-fade-in">
             <h3 class="fw-bold mb-4">
               <i class="bi bi-check2-square text-primary me-2"></i>
-              Chapter Assessments
+              {{ 'STUDENT.STEP_ASSESSMENT' | translate }}
             </h3>
             <div class="row g-4">
               @for (assessment of content.assessments; track assessment.id) {
@@ -639,11 +628,10 @@
                 <div
                   class="card border border-light-subtle shadow-sm rounded-4 h-100 p-4 transition-all hover-scale bg-white">
                   <h5 class="fw-bold mb-2">{{ assessment.name }}</h5>
-                  <p class="text-secondary small mb-4 flex-grow-1">{{ assessment.description || 'Take this assessment to
-                    test your knowledge.' }}</p>
+                  <p class="text-secondary small mb-4 flex-grow-1">{{ assessment.description || ('ASSESSMENT.EMPTY' | translate) }}</p>
                   <a [routerLink]="['/assessments/play', assessment.id]"
                     class="btn btn-primary w-100 rounded-3 py-2 fw-bold text-decoration-none d-block text-center shadow-sm">
-                    Start Assessment
+                    {{ 'STUDENT.START_ASSESSMENT' | translate }}
                     <i class="bi bi-arrow-right ms-2"></i>
                   </a>
                 </div>
@@ -657,7 +645,7 @@
             class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white d-flex flex-row justify-content-between align-items-center flex-wrap gap-3">
             <div>
               <button class="btn btn-outline-secondary rounded-pill px-4 fw-bold" (click)="activeStep.set('ai')">
-                <i class="bi bi-arrow-left me-2"></i> Previous
+                <i class="bi bi-arrow-left me-2"></i> {{ 'STUDENT.PREVIOUS' | translate }}
               </button>
             </div>
             <div>
@@ -677,15 +665,211 @@
           </div>
           }
         </div>
-        } @else {
-        <div class="d-flex flex-column align-items-center justify-content-center h-100 p-5 text-center">
-          <div class="p-5 bg-white rounded-circle shadow-sm mb-4">
-            <i class="bi bi-book fs-1 text-primary"></i>
+        } @else if (selectedChapterId() !== null) {
+          <!-- Chapter Detail Page -->
+          <div class="p-4 p-lg-5 max-w-5xl mx-auto animate-fade-in" *ngIf="selectedChapter()">
+            <!-- Chapter Welcome Banner -->
+            <div class="welcome-banner p-4 p-md-5 mb-5 text-white d-flex align-items-center justify-content-between flex-wrap gap-4">
+              <div class="flex-grow-1" style="max-width: 650px;">
+                <span class="badge bg-white bg-opacity-20 text-black text-uppercase tracking-wider px-3 py-2 rounded-pill fw-bold mb-3" style="font-size: 0.7rem;">
+                  📖 {{ 'STUDENT.CHAPTER_OVERVIEW' | translate }}
+                </span>
+                <h1 class="fw-bold display-6 mb-2">{{ selectedChapter()?.name }}</h1>
+                <p class="mb-0 opacity-90 fs-6">{{ 'STUDENT.EXPLORE_LESSONS' | translate }}</p>
+              </div>
+              <div class="d-none d-lg-block fs-1 pe-4">📖</div>
+            </div>
+
+            <!-- Chapter Completion Status -->
+            <div class="glass-card p-4 mb-5 d-flex align-items-center justify-content-between flex-wrap gap-3">
+              <div>
+                <h5 class="fw-bold text-dark mb-1">{{ 'STUDENT.COMPLETION_STATUS' | translate }}</h5>
+                <p class="text-secondary small mb-0">{{ 'STUDENT.TRACK_PROGRESS' | translate }}</p>
+              </div>
+              <div>
+                @if (selectedChapterCompleted()) {
+                  <div class="badge bg-success bg-opacity-10 text-success px-4 py-2 rounded-pill fw-bold fs-6 d-flex align-items-center gap-2">
+                    <i class="bi bi-patch-check-fill"></i>
+                    {{ 'STUDENT.COMPLETED' | translate }}
+                  </div>
+                } @else {
+                  <div class="badge bg-warning bg-opacity-10 text-warning px-4 py-2 rounded-pill fw-bold fs-6 d-flex align-items-center gap-2">
+                    <i class="bi bi-hourglass-split"></i>
+                    {{ 'STUDENT.IN_PROGRESS' | translate }}
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="row g-4">
+              <!-- Lessons List -->
+              <div class="col-md-6">
+                <div class="glass-card p-4 h-100">
+                  <h5 class="fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                    <span class="fs-5">📚</span> {{ 'STUDENT.LESSONS_COUNT' | translate }} ({{ selectedChapter()?.contents?.length || 0 }})
+                  </h5>
+                  <div class="d-flex flex-column gap-3">
+                    @for (topic of selectedChapter()?.contents; track topic.id) {
+                      <div class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light hover-scale transition-all border border-light-subtle">
+                        <div class="d-flex align-items-center gap-3">
+                          <div class="rounded-circle p-2 bg-primary bg-opacity-10 text-primary d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                            <i class="bi bi-journal-text"></i>
+                          </div>
+                          <div>
+                            <div class="fw-bold text-dark small">{{ topic.title || topic.name }}</div>
+                          </div>
+                        </div>
+                        <button (click)="selectTopic(topic.id)" class="btn btn-sm btn-primary rounded-pill px-3">
+                          {{ 'STUDENT.START' | translate }}
+                        </button>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+
+              <!-- Assessments List -->
+              <div class="col-md-6">
+                <div class="glass-card p-4 h-100">
+                  <h5 class="fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+                    <span class="fs-5">📝</span> {{ 'STUDENT.ASSESSMENTS_COUNT' | translate }} ({{ selectedChapter()?.assessments?.length || 0 }})
+                  </h5>
+                  @if (selectedChapter()?.assessments && selectedChapter()!.assessments!.length > 0) {
+                    <div class="d-flex flex-column gap-3">
+                      @for (assessment of selectedChapter()?.assessments; track assessment.id) {
+                        <div class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-light hover-scale transition-all border border-light-subtle">
+                          <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle p-2 bg-success bg-opacity-10 text-success d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                              <i class="bi bi-patch-question"></i>
+                            </div>
+                            <div>
+                              <div class="fw-bold text-dark small">{{ assessment.name }}</div>
+                            </div>
+                          </div>
+                          <a [routerLink]="['/assessments/play', assessment.id]" class="btn btn-sm btn-success rounded-pill px-3 text-decoration-none">
+                            {{ 'STUDENT.TAKE_QUIZ' | translate }}
+                          </a>
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <div class="d-flex flex-column align-items-center justify-content-center h-75 text-center p-4">
+                      <i class="bi bi-info-circle text-secondary fs-3 mb-2 opacity-50"></i>
+                      <p class="text-secondary small mb-0">{{ 'STUDENT.NO_ASSESSMENTS' | translate }}</p>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
           </div>
-          <h2 class="fw-bold text-dark mb-2">Select a Topic</h2>
-          <p class="text-secondary opacity-75 max-w-sm">Choose a topic from the sidebar to begin your learning journey.
-          </p>
-        </div>
+        } @else {
+          <!-- Course Overview Page -->
+          <div class="p-4 p-lg-5 max-w-5xl mx-auto animate-fade-in">
+            <!-- Course Welcome Banner -->
+            <div class="welcome-banner p-4 p-md-5 mb-5 text-white d-flex align-items-center justify-content-between flex-wrap gap-4">
+              <div class="flex-grow-1" style="max-width: 650px;">
+                <span class="badge bg-white bg-opacity-20 text-black text-uppercase tracking-wider px-3 py-2 rounded-pill fw-bold mb-3" style="font-size: 0.7rem;">
+                  📚 {{ 'STUDENT.COURSE_OVERVIEW' | translate }}
+                </span>
+                <h1 class="fw-bold display-6 mb-2">{{ courseStructure()?.name }}</h1>
+                <p class="mb-0 opacity-90 fs-6">{{ courseStructure()?.description || ('STUDENT.SUBTITLE' | translate) }}</p>
+              </div>
+              <div class="d-none d-lg-block fs-1 pe-4">🎓</div>
+            </div>
+
+            <!-- Course Progress Statistics -->
+            <h5 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+              <span class="fs-5">📊</span> {{ 'STUDENT.COURSE_METRICS' | translate }}
+            </h5>
+            <div class="row g-4 mb-5">
+              <!-- Course Completion Progress Card -->
+              <div class="col-md-6 col-lg-4">
+                <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+                  <div>
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                      <span class="text-secondary text-uppercase small fw-bold tracking-wider">{{ 'STUDENT.SYLLABUS_PROGRESS' | translate }}</span>
+                      <div class="rounded-3 p-2 bg-primary bg-opacity-10 text-primary">
+                        <i class="bi bi-journal-check fs-4"></i>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2 mb-3">
+                      <span class="display-6 fw-bold text-primary">{{ courseProgress().percentage }}%</span>
+                    </div>
+                    <div class="progress rounded-pill mb-2 animate-pulse" style="height: 8px;">
+                      <div class="progress-bar bg-primary" role="progressbar"
+                        [style.width.%]="courseProgress().percentage"></div>
+                    </div>
+                  </div>
+                  <div class="text-secondary small mt-3 fw-medium">
+                    {{ courseProgress().completed }} / {{ courseProgress().total }} {{ 'STUDENT.CHAPTERS_COMPLETED_COUNT' | translate }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Quiz Attempts Card -->
+              <div class="col-md-6 col-lg-4">
+                <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+                  <div>
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                      <span class="text-secondary text-uppercase small fw-bold tracking-wider">{{ 'STUDENT.QUIZZES_PASSED' | translate }}</span>
+                      <div class="rounded-3 p-2 bg-success bg-opacity-10 text-success">
+                        <i class="bi bi-patch-question fs-4"></i>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2 mb-3">
+                      <span class="display-6 fw-bold text-success">{{ stats()?.passed_attempts || 0 }}</span>
+                      <span class="text-secondary">/ {{ stats()?.total_attempts || 0 }} {{ 'STUDENT.PASSED' | translate }}</span>
+                    </div>
+                  </div>
+                  <div class="text-secondary small mt-3 fw-medium">
+                    {{ 'STUDENT.QUIZZES_METRICS' | translate }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Average Quiz Score Card -->
+              <div class="col-md-6 col-lg-4">
+                <div class="glass-card p-4 h-100 d-flex flex-column justify-content-between">
+                  <div>
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                      <span class="text-secondary text-uppercase small fw-bold tracking-wider">{{ 'STUDENT.AVERAGE_SCORE' | translate }}</span>
+                      <div class="rounded-3 p-2 bg-warning bg-opacity-10 text-warning">
+                        <i class="bi bi-graph-up-arrow fs-4"></i>
+                      </div>
+                    </div>
+                    <div class="d-flex align-items-baseline gap-2 mb-3">
+                      <span class="display-6 fw-bold text-warning">{{ stats()?.average_score || 0 }}%</span>
+                    </div>
+                  </div>
+                  <div class="text-secondary small mt-3 fw-medium">
+                    {{ 'STUDENT.ALL_QUIZZES' | translate }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Gamified Badges Showcase -->
+            <div class="glass-card p-4 p-md-5 mb-5">
+              <h5 class="fw-bold mb-4 d-flex align-items-center gap-2 text-dark">
+                <span>🏆 {{ 'STUDENT.ACHIEVEMENTS_BADGES' | translate }}</span>
+              </h5>
+
+              <div class="row g-3">
+                @for (badge of stats()?.badges; track badge.id) {
+                <div class="col-md-6 col-lg-4">
+                  <div class="badge-card d-flex align-items-center gap-3 p-3 transition-all"
+                    [class.unlocked]="badge.unlocked" [class.locked]="!badge.unlocked">
+                    <div class="badge-icon-wrap">{{ badge.icon }}</div>
+                    <div>
+                      <div class="fw-bold badge-title text-dark">{{ 'BADGES.' + badge.id + '.TITLE' | translate }}</div>
+                      <div class="text-secondary small" style="font-size: 0.78rem;">{{ 'BADGES.' + badge.id + '.DESC' | translate }}</div>
+                    </div>
+                  </div>
+                </div>
+                }
+              </div>
+            </div>
+          </div>
         }
         }
       </div>
@@ -693,21 +877,27 @@
   </div>
 
   <!-- AI Tutor FAB -->
-  @if (courseId() !== null && activeContentId() !== null) {
   <button class="ai-tutor-fab shadow-lg" [class.active]="isChatOpen()" (click)="toggleChat()">
     <i class="bi" [class.bi-magic]="!isChatOpen()" [class.bi-x-lg]="isChatOpen()"></i>
   </button>
-  }
 
   <!-- AI Tutor Chat Panel -->
   <div class="ai-chat-panel shadow-lg border rounded-4 d-flex flex-column" [class.open]="isChatOpen()">
-    <div
-      class="ai-chat-header p-3 border-bottom d-flex align-items-center justify-content-between rounded-top-4 text-white">
+    <div class="ai-chat-header p-3 d-flex align-items-center justify-content-between rounded-top-4 text-white">
       <div class="d-flex align-items-center gap-2">
-        <i class="bi bi-robot fs-4"></i>
+        <div class="position-relative">
+          <div class="rounded-circle bg-white bg-opacity-20 d-flex align-items-center justify-content-center"
+            style="width: 38px; height: 38px;">
+            <i class="bi bi-robot fs-5"></i>
+          </div>
+          <span class="position-absolute bottom-0 end-0 bg-success border border-white rounded-circle"
+            style="width: 10px; height: 10px;"></span>
+        </div>
         <div>
-          <h6 class="mb-0 fw-bold">AI Tutor</h6>
-          <small class="opacity-75" style="font-size: 0.7rem;">Powered by Gemini</small>
+          <h6 class="mb-0 fw-bold" style="font-size: 0.9rem;">{{ 'STUDENT.AI_TUTOR' | translate }}</h6>
+          <small class="opacity-80 d-flex align-items-center gap-1" style="font-size: 0.68rem;">
+            <span>{{ 'STUDENT.GEMINI_POWERED' | translate }}</span>
+          </small>
         </div>
       </div>
       <button class="btn btn-sm btn-link text-white p-0 border-0 shadow-none" (click)="toggleChat()">
@@ -720,7 +910,7 @@
       <div
         class="text-center text-secondary h-100 d-flex flex-column align-items-center justify-content-center opacity-75">
         <i class="bi bi-chat-dots fs-1 mb-2"></i>
-        <p class="small mb-0">Ask me anything about this lesson!</p>
+        <p class="small mb-0">{{ 'STUDENT.ASK_ANYTHING' | translate }}</p>
       </div>
       }
       @for (msg of chatMessages(); track $index) {
@@ -731,13 +921,12 @@
           <div class="text-dark markdown-body fs-6" [innerHTML]="msg.text"></div>
           @if (msg.role === 'ai') {
           <button class="btn btn-sm btn-link text-secondary p-0 shadow-none mt-2 d-block" (click)="speakText(msg.text)"
-            title="Read aloud">
-            <i class="bi bi-volume-up"></i> Listen
+            [title]="'STUDENT.LISTEN_ALOUD' | translate">
+            <i class="bi bi-volume-up"></i> {{ 'STUDENT.LISTEN_ALOUD' | translate }}
           </button>
           }
         </div>
-        <small class="text-secondary mt-1" style="font-size: 0.65rem;">{{ msg.role === 'ai' ? 'AI Tutor' : 'You'
-          }}</small>
+        <small class="text-secondary mt-1" style="font-size: 0.65rem;">{{ msg.role === 'ai' ? ('STUDENT.AI_TUTOR' | translate) : ('STUDENT.YOU' | translate) }}</small>
       </div>
       }
       @if (isAiTyping()) {
@@ -747,7 +936,7 @@
             <span></span><span></span><span></span>
           </div>
         </div>
-        <small class="text-secondary mt-1" style="font-size: 0.65rem;">AI Tutor is typing...</small>
+        <small class="text-secondary mt-1" style="font-size: 0.65rem;">{{ 'STUDENT.AI_TYPING' | translate }}</small>
       </div>
       }
     </div>
@@ -755,12 +944,12 @@
     <div class="ai-chat-footer p-3 border-top bg-light rounded-bottom-4">
       <div class="input-group align-items-center bg-white rounded-pill border">
         <input type="text" class="form-control border-0 shadow-none bg-transparent py-2 px-3 rounded-start-pill"
-          [placeholder]="isListening() ? 'Listening...' : 'Type your question...'" [(ngModel)]="chatInput"
+          [placeholder]="isListening() ? ('STUDENT.LISTENING' | translate) : ('STUDENT.TYPE_QUESTION' | translate)" [(ngModel)]="chatInput"
           (keyup.enter)="sendChatMessage()">
 
         <button class="btn btn-link border-0 shadow-none px-2" (click)="toggleListening()"
           [class.text-danger]="isListening()" [class.text-secondary]="!isListening()"
-          [title]="isListening() ? 'Listening...' : 'Voice Input'">
+          [title]="isListening() ? ('STUDENT.LISTENING' | translate) : 'Voice Input'">
           <i class="bi fs-5" [class.bi-mic-fill]="isListening()" [class.bi-mic]="!isListening()"
             [class.recording-pulse]="isListening()"></i>
         </button>

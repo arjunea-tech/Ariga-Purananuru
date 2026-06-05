@@ -112,7 +112,14 @@ export class LoginComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        this.errorMessage = err.error?.message || err.error?.login?.[0] || 'Authentication failed. Please verify credentials.';
+        // Laravel 422 validation errors come as: { errors: { login: ["msg"] } }
+        // Laravel 401/other errors come as: { message: "msg" }
+        this.errorMessage =
+          err.error?.errors?.login?.[0] ||
+          err.error?.errors?.password?.[0] ||
+          err.error?.message ||
+          err.error?.login?.[0] ||
+          'Authentication failed. Please verify credentials.';
       },
     });
   }

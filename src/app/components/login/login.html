@@ -31,14 +31,14 @@
         
         <!-- Username / Email -->
         <div class="form-group">
-          <label for="login">Username / Email</label>
+          <label for="login">Username</label>
           <div class="input-wrapper">
             <span class="input-icon">👤</span>
             <input
               id="login"
               type="text"
               formControlName="login"
-              placeholder="Enter your username or email"
+              placeholder="Enter your username"
               [class.invalid]="loginForm.get('login')?.touched && loginForm.get('login')?.invalid"
             />
           </div>

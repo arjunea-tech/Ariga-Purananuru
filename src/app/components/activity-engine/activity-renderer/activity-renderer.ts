@@ -108,7 +108,22 @@ export class ActivityRenderer implements OnChanges {
         } else if (block.type === 'header') {
           return `<h${block.data.level} class="fw-bold mb-3">${block.data.text || ''}</h${block.data.level}>`;
         } else if (block.type === 'list') {
-          const items = (block.data.items || []).map((item: string) => `<li>${item}</li>`).join('');
+          const items = (block.data.items || []).map((item: any) => {
+            const content = (item && typeof item === 'object' && item.content !== undefined) ? item.content : item;
+            let subItemsHtml = '';
+            if (item && item.items && Array.isArray(item.items) && item.items.length > 0) {
+              const subItems = item.items.map((sub: any) => {
+                const subContent = (sub && typeof sub === 'object' && sub.content !== undefined) ? sub.content : sub;
+                let nestedHtml = '';
+                if (sub && sub.items && Array.isArray(sub.items) && sub.items.length > 0) {
+                  nestedHtml = '<ul>' + sub.items.map((nested: any) => `<li>${(nested && typeof nested === 'object' && nested.content !== undefined) ? nested.content : nested}</li>`).join('') + '</ul>';
+                }
+                return `<li>${subContent}${nestedHtml}</li>`;
+              }).join('');
+              subItemsHtml = `<ul>${subItems}</ul>`;
+            }
+            return `<li>${content}${subItemsHtml}</li>`;
+          }).join('');
           return block.data.style === 'ordered' ? `<ol>${items}</ol>` : `<ul>${items}</ul>`;
         } else if (block.type === 'table') {
           const withHeadings = !!block.data.withHeadings;

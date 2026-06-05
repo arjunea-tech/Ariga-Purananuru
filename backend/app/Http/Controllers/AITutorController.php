@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Content;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -12,15 +11,9 @@ class AITutorController extends Controller
     public function chat(Request $request)
     {
         $validated = $request->validate([
-            'content_id' => 'required|exists:contents,id',
             'message' => 'required|string|max:1000',
         ]);
 
-        $content = Content::findOrFail($validated['content_id']);
-        
-        // Extract text safely
-        $courseContext = $content->text_content ?? $content->name ?? 'No text content available.';
-        
         $userMessage = $validated['message'];
 
         $apiKey = env('GEMINI_API_KEY');
@@ -28,8 +21,7 @@ class AITutorController extends Controller
             return response()->json(['error' => 'LLM API Key not configured.'], 500);
         }
 
-        // Construct the prompt
-        $systemPrompt = "You are an AI Tutor for a student learning a course. Your goal is to answer the student's question based strictly on the provided lesson content. Be encouraging, clear, and concise. Do not hallucinate information outside the lesson if possible. If the question is completely unrelated to the lesson, politely guide the student back to the topic.\n\n--- LESSON CONTENT ---\n" . strip_tags($courseContext) . "\n----------------------\n";
+        $systemPrompt = "You are a helpful AI Tutor for students on the Ariga-Purananuru Tamil language learning platform. Answer the student's questions clearly, encouragingly, and concisely. You can help with Tamil language learning, course-related questions, and general study queries.";
 
         // Call Gemini API
         try {
@@ -40,7 +32,7 @@ class AITutorController extends Controller
                     [
                         'role' => 'user',
                         'parts' => [
-                            ['text' => $systemPrompt . "\nStudent Question: " . $userMessage]
+                            ['text' => $systemPrompt . "\n\nStudent: " . $userMessage]
                         ]
                     ]
                 ]
