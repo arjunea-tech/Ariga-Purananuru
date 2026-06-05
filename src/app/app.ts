@@ -16,7 +16,7 @@ export class App implements OnInit {
 
   private translate = inject(TranslateService);
   protected authService = inject(AuthService);
-  
+
   currentLang = signal('en');
   isSidebarOpen = signal(false);
 
