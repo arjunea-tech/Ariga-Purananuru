@@ -13,7 +13,7 @@ class AITutorController extends Controller
     public function chat(Request $request)
     {
         $validated = $request->validate([
-            'content_id' => 'required|exists:contents,id',
+            'content_id' => 'nullable|exists:contents,id',
             'course_id'  => 'nullable|integer',
             'message'    => 'required|string|max:1000',
         ]);
@@ -68,8 +68,12 @@ class AITutorController extends Controller
         }
 
         if (empty(trim($courseContext))) {
-            $content = Content::findOrFail($validated['content_id']);
-            $courseContext = strip_tags($content->text_content ?? $content->name ?? 'No text content available.');
+            if (!empty($validated['content_id'])) {
+                $content = Content::find($validated['content_id']);
+                $courseContext = $content ? strip_tags($content->text_content ?? $content->name ?? 'No text content available.') : '';
+            } else {
+                $courseContext = 'General course discussion.';
+            }
         }
 
         // Construct the prompt
