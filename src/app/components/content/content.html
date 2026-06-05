@@ -361,13 +361,49 @@
                   @if (block.data.style === 'ordered') {
                     <ol class="mb-3 text-dark fs-5">
                       @for (item of block.data.items; track $index) {
-                        <li [innerHTML]="item"></li>
+                        <li>
+                          <span [innerHTML]="item && item.content !== undefined ? item.content : item"></span>
+                          @if (item && item.items && item.items.length > 0) {
+                            <ul>
+                              @for (sub of item.items; track sub) {
+                                <li>
+                                  <span [innerHTML]="sub && sub.content !== undefined ? sub.content : sub"></span>
+                                  @if (sub && sub.items && sub.items.length > 0) {
+                                    <ul>
+                                      @for (nested of sub.items; track nested) {
+                                        <li><span [innerHTML]="nested && nested.content !== undefined ? nested.content : nested"></span></li>
+                                      }
+                                    </ul>
+                                  }
+                                </li>
+                              }
+                            </ul>
+                          }
+                        </li>
                       }
                     </ol>
                   } @else {
                     <ul class="mb-3 text-dark fs-5">
                       @for (item of block.data.items; track $index) {
-                        <li [innerHTML]="item"></li>
+                        <li>
+                          <span [innerHTML]="item && item.content !== undefined ? item.content : item"></span>
+                          @if (item && item.items && item.items.length > 0) {
+                            <ul>
+                              @for (sub of item.items; track sub) {
+                                <li>
+                                  <span [innerHTML]="sub && sub.content !== undefined ? sub.content : sub"></span>
+                                  @if (sub && sub.items && sub.items.length > 0) {
+                                    <ul>
+                                      @for (nested of sub.items; track nested) {
+                                        <li><span [innerHTML]="nested && nested.content !== undefined ? nested.content : nested"></span></li>
+                                      }
+                                    </ul>
+                                  }
+                                </li>
+                              }
+                            </ul>
+                          }
+                        </li>
                       }
                     </ul>
                   }

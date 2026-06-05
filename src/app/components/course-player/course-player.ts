@@ -91,6 +91,8 @@ export class CoursePlayer implements OnInit {
   stats = signal<any>(null);
   courses = signal<any[]>([]);
   isProfileDropdownOpen = signal<boolean>(false);
+  showTreeInline = signal<boolean>(true);
+  selectedChapterId = signal<number | null>(null);
 
   // AI Tutor signals
   isChatOpen = signal<boolean>(false);
@@ -197,10 +199,49 @@ export class CoursePlayer implements OnInit {
   });
 
   isChapterCompleted = computed(() => {
-    const chapterId = this.activeChapterId();
+    const chapterId = this.activeChapterId() || this.selectedChapterId();
     const completedIds = this.stats()?.completed_chapter_ids;
     if (!chapterId || !completedIds) return false;
     return completedIds.includes(chapterId);
+  });
+
+  selectedChapter = computed(() => {
+    const chapterId = this.selectedChapterId();
+    const structure = this.courseStructure();
+    if (!chapterId || !structure) return null;
+
+    for (const level of structure.levels) {
+      const chapter = level.chapters.find(c => c.id === chapterId);
+      if (chapter) return chapter;
+    }
+    return null;
+  });
+
+  selectedChapterCompleted = computed(() => {
+    const id = this.selectedChapterId();
+    const completedIds = this.stats()?.completed_chapter_ids || [];
+    return id !== null && completedIds.includes(id);
+  });
+
+  courseProgress = computed(() => {
+    const structure = this.courseStructure();
+    const completedIds = this.stats()?.completed_chapter_ids || [];
+    if (!structure) return { completed: 0, total: 0, percentage: 0 };
+
+    let total = 0;
+    let completed = 0;
+
+    structure.levels.forEach(level => {
+      level.chapters.forEach(chapter => {
+        total++;
+        if (completedIds.includes(chapter.id)) {
+          completed++;
+        }
+      });
+    });
+
+    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+    return { completed, total, percentage };
   });
 
   // Computed values
@@ -348,6 +389,9 @@ export class CoursePlayer implements OnInit {
 
   selectCourse(id: number): void {
     this.courseId.set(id);
+    this.showTreeInline.set(true);
+    this.selectedChapterId.set(null);
+    this.activeContentId.set(null);
     this.loadStructure();
   }
 
@@ -368,6 +412,8 @@ export class CoursePlayer implements OnInit {
     this.courseStructure.set(null);
     this.activeContentId.set(null);
     this.fullContent.set(null);
+    this.showTreeInline.set(true);
+    this.selectedChapterId.set(null);
     this.loadStudentDashboardData(true);
   }
 
@@ -378,22 +424,71 @@ export class CoursePlayer implements OnInit {
     this.http.get<CourseStructure>(url).subscribe({
       next: (structure) => {
         // Initialize expansion states
-        structure.levels.forEach((l, idx) => {
-          l.is_expanded = idx === 0;
-          l.chapters.forEach((c, cidx) => {
-            c.is_expanded = idx === 0 && cidx === 0;
+        structure.levels.forEach((l) => {
+          l.is_expanded = false;
+          l.chapters.forEach((c) => {
+            c.is_expanded = false;
           });
         });
         this.courseStructure.set(structure);
         this.treeData.set(this.mapStructureToTree(structure));
 
-        // Auto-select first topic
-        if (structure.levels[0]?.chapters[0]?.contents[0]) {
-          this.selectTopic(structure.levels[0].chapters[0].contents[0].id);
-        }
       },
       error: (err) => console.error('Failed to load course structure:', err)
     });
+  }
+
+  continueCourse(): void {
+    const structure = this.courseStructure();
+    if (!structure) return;
+
+    const completedIds = this.stats()?.completed_chapter_ids || [];
+
+    // Find the first chapter that is NOT completed, and select its first content topic
+    for (const level of structure.levels) {
+      for (const chapter of level.chapters) {
+        if (!completedIds.includes(chapter.id) && chapter.contents.length > 0) {
+          this.selectTopic(chapter.contents[0].id);
+          return;
+        }
+      }
+    }
+
+    // Fallback: select the very first topic of the course if all are completed or none found
+    if (structure.levels[0]?.chapters[0]?.contents[0]) {
+      this.selectTopic(structure.levels[0].chapters[0].contents[0].id);
+    }
+  }
+
+  toggleCourseTree(id: number): void {
+    if (this.courseId() === id) {
+      this.showTreeInline.set(!this.showTreeInline());
+    } else {
+      this.courseId.set(id);
+      this.showTreeInline.set(true);
+      this.selectedChapterId.set(null);
+      this.activeContentId.set(null);
+      this.fullContent.set(null);
+
+      const url = `http://localhost:8000/api/courses/${id}/player-structure`;
+      this.http.get<CourseStructure>(url).subscribe({
+        next: (structure) => {
+          structure.levels.forEach((l) => {
+            l.is_expanded = false;
+            l.chapters.forEach((c) => {
+              c.is_expanded = false;
+            });
+          });
+          this.courseStructure.set(structure);
+          this.treeData.set(this.mapStructureToTree(structure));
+          this.continueCourse();
+        },
+        error: (err) => console.error('Failed to load course structure:', err)
+      });
+    }
+  }
+  startCourse(id: number): void {
+    this.toggleCourseTree(id);
   }
 
   selectTopic(id: number): void {
@@ -440,26 +535,34 @@ export class CoursePlayer implements OnInit {
   handleNodeClick(node: McvDatatreeNode): void {
     if (node.id.startsWith('topic-')) {
       const topicId = parseInt(node.id.replace('topic-', ''), 10);
+      this.selectedChapterId.set(null);
       this.selectTopic(topicId);
       // Reset quiz state on topic change
       this.aiQuizData.set([]);
       this.aiQuizAnswers.set({});
       this.aiQuizScore.set(null);
+    } else if (node.id.startsWith('chapter-')) {
+      const chapterId = parseInt(node.id.replace('chapter-', ''), 10);
+      this.activeContentId.set(null);
+      this.fullContent.set(null);
+      this.selectedChapterId.set(chapterId);
     }
   }
 
   toggleChat(): void {
     this.isChatOpen.set(!this.isChatOpen());
     if (this.isChatOpen() && this.chatMessages().length === 0) {
+      const key = this.activeContentId() ? 'STUDENT.ASK_ANYTHING' : 'STUDENT.ASK_GENERAL';
+      const welcomeText = this.translate.instant(key);
       this.chatMessages.set([
-        { role: 'ai', text: 'Hello! I am your AI Tutor. Ask me any questions about this lesson!' }
+        { role: 'ai', text: welcomeText }
       ]);
     }
   }
 
   sendChatMessage(): void {
     const input = this.chatInput().trim();
-    if (!input || !this.activeContentId()) return;
+    if (!input) return;
 
     // Add user message
     this.chatMessages.set([...this.chatMessages(), { role: 'user', text: input }]);

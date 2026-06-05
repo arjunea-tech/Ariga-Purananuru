@@ -31,6 +31,7 @@ export class App implements OnInit {
     this.authService.logout().subscribe({
       complete: () => {
         this.closeSidebar();
+        window.location.href = '/login';
       },
       error: () => {
         this.authService.clearSession();

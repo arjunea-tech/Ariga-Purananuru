@@ -18,11 +18,12 @@ class AITutorController extends Controller
             'message'    => 'required|string|max:1000',
         ]);
 
+        $userMessage = $validated['message'];
+
         $apiKey = env('GEMINI_API_KEY');
         if (!$apiKey) {
             return response()->json(['error' => 'LLM API Key not configured.'], 500);
         }
-
         $userMessage = $validated['message'];
         $courseContext = '';
         $questionEmbedding = $this->getEmbedding($userMessage, $apiKey);
@@ -83,7 +84,7 @@ class AITutorController extends Controller
                     [
                         'role' => 'user',
                         'parts' => [
-                            ['text' => $systemPrompt . "\nStudent Question: " . $userMessage]
+                            ['text' => $systemPrompt . "\n\nStudent: " . $userMessage]
                         ]
                     ]
                 ]

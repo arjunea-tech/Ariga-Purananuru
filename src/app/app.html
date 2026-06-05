@@ -4,8 +4,9 @@
   <router-outlet></router-outlet>
 </main>
 } @else if (authService.getUserRole() === 'student') {
+
 <!-- Clean layout for students (No global sidebar, uses player layout) -->
-<main class="w-100 min-vh-100 m-0 p-0 overflow-hidden bg-light">
+<main class="w-100 min-vh-100 m-0 p-0 bg-light">
   <router-outlet></router-outlet>
 </main>
 } @else {
