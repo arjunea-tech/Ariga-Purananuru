@@ -4,15 +4,22 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth';
+import { TenantService, TenantData } from '../../services/tenant';
 
-interface Student {
+interface User {
   id: number;
   name: string;
   username: string;
+  role: string;
   is_active?: boolean;
+  tenant_id?: number;
+  tenant?: {
+    id: number;
+    tenant_name: string;
+  };
 }
 
-interface ImportedStudent {
+interface ImportedUser {
   id: number;
   name: string;
   username: string;
@@ -20,40 +27,49 @@ interface ImportedStudent {
 }
 
 @Component({
-  selector: 'app-student-management',
+  selector: 'app-user-management',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
-  templateUrl: './student-management.html',
-  styleUrls: ['./student-management.css'],
+  templateUrl: './user-management.html',
+  styleUrls: ['./user-management.css'],
 })
-export class StudentManagement implements OnInit {
+export class UserManagement implements OnInit {
   private http = inject(HttpClient);
   private router = inject(Router);
 
-  students = signal<Student[]>([]);
+  users = signal<User[]>([]);
+  tenants = signal<TenantData[]>([]);
   searchQuery = signal<string>('');
+  selectedRoleFilter = signal<string>('all');
+  selectedTenantFilter = signal<string>('all');
   importing = false;
   feedbackMessage = signal<{ type: 'success' | 'error'; text: string } | null>(null);
 
   protected authService = inject(AuthService);
+  private tenantService = inject(TenantService);
   private fb = inject(FormBuilder);
 
   showAddUserModal = false;
   addUserForm!: FormGroup;
   submitting = false;
 
+  showEditUserModal = false;
+  editUserForm!: FormGroup;
+  selectedUserForEdit: User | null = null;
+  deletingUserId: number | null = null;
+
   // Roles available for creation based on active user's role
   availableRoles = computed(() => {
     const currentRole = this.authService.getUserRole();
     if (currentRole === 'super_admin') {
       return [
-        { value: 'tenant_admin', label: 'Tenant Admin' },
-        { value: 'property_manager', label: 'Property Manager' },
+        { value: 'admin', label: 'Admin' },
+        { value: 'staff', label: 'Staff' },
         { value: 'student', label: 'Student' }
       ];
-    } else if (currentRole === 'tenant_admin') {
+    } else if (currentRole === 'admin') {
       return [
-        { value: 'property_manager', label: 'Property Manager (Coordinator)' },
+        { value: 'staff', label: 'Staff' },
         { value: 'student', label: 'Student' }
       ];
     } else {
@@ -63,36 +79,71 @@ export class StudentManagement implements OnInit {
     }
   });
 
-  // Modal data for showing imported student credentials
-  importedResults = signal<ImportedStudent[]>([]);
+  // Modal data for showing imported user credentials
+  importedResults = signal<ImportedUser[]>([]);
   importErrors = signal<string[]>([]);
   showResultsModal = false;
 
-  // Filtered student list
-  filteredStudents = computed(() => {
+  // Filtered user list
+  filteredUsers = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
-    if (!query) return this.students();
-    return this.students().filter(
-      (s) =>
-        s.name.toLowerCase().includes(query) ||
-        s.username.toLowerCase().includes(query)
-    );
+    const roleFilter = this.selectedRoleFilter();
+    const tenantFilter = this.selectedTenantFilter();
+    let result = this.users();
+
+    if (roleFilter !== 'all') {
+      result = result.filter(u => u.role === roleFilter);
+    }
+    
+    if (tenantFilter !== 'all') {
+      result = result.filter(u => u.tenant_id === parseInt(tenantFilter, 10));
+    }
+
+    if (query) {
+      result = result.filter(
+        (u) =>
+          u.name.toLowerCase().includes(query) ||
+          u.username.toLowerCase().includes(query)
+      );
+    }
+    
+    return result;
   });
 
   ngOnInit(): void {
-    this.loadStudents();
+    this.loadUsers();
+    if (this.authService.getUserRole() === 'super_admin') {
+      this.loadTenants();
+    }
   }
 
-  loadStudents(): void {
-    this.http.get<Student[]>('http://localhost:8000/api/users/students').subscribe({
-      next: (data) => this.students.set(data),
-      error: (err) => this.showFeedback('error', 'Failed to load students list.'),
+  loadUsers(): void {
+    this.http.get<User[]>('http://localhost:8000/api/users').subscribe({
+      next: (data) => this.users.set(data),
+      error: (err) => this.showFeedback('error', 'Failed to load users list.'),
+    });
+  }
+
+  loadTenants(): void {
+    this.tenantService.getAll().subscribe({
+      next: (data) => this.tenants.set(data),
+      error: (err) => console.error('Failed to load tenants', err)
     });
   }
 
   onSearch(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.searchQuery.set(input.value);
+  }
+
+  onRoleFilterChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.selectedRoleFilter.set(select.value);
+  }
+  
+  onTenantFilterChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.selectedTenantFilter.set(select.value);
   }
 
   onFileSelected(event: Event): void {
@@ -111,11 +162,11 @@ export class StudentManagement implements OnInit {
     this.http.post<any>('http://localhost:8000/api/users/import', formData).subscribe({
       next: (res) => {
         this.importing = false;
-        this.students.set([...this.students(), ...res.imported]);
+        this.users.set([...this.users(), ...res.imported]);
         this.importedResults.set(res.imported);
         this.importErrors.set(res.errors || []);
         this.showResultsModal = true;
-        this.showFeedback('success', `Import completed. ${res.imported.length} students added.`);
+        this.showFeedback('success', `Import completed. ${res.imported.length} users added.`);
         // Reset file input
         input.value = '';
       },
@@ -139,7 +190,7 @@ export class StudentManagement implements OnInit {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'student_import_template.csv';
+    a.download = 'user_import_template.csv';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -159,7 +210,7 @@ export class StudentManagement implements OnInit {
     // Handle dynamic validation for name field based on role selection
     this.addUserForm.get('role')?.valueChanges.subscribe((role) => {
       const nameControl = this.addUserForm.get('name');
-      if (role === 'property_manager') {
+      if (role === 'staff') {
         nameControl?.clearValidators();
       } else {
         nameControl?.setValidators([Validators.required, Validators.minLength(3)]);
@@ -194,8 +245,8 @@ export class StudentManagement implements OnInit {
     this.submitting = true;
     const formValue = { ...this.addUserForm.value };
 
-    // For property managers (coordinators), set name to be username if not provided
-    if (formValue.role === 'property_manager' && !formValue.name) {
+    // For staff (coordinators), set name to be username if not provided
+    if (formValue.role === 'staff' && !formValue.name) {
       formValue.name = `Manager (${formValue.login})`;
     }
 
@@ -204,14 +255,80 @@ export class StudentManagement implements OnInit {
         this.submitting = false;
         this.closeAddUserModal();
         this.showFeedback('success', `User Account for "${res.user.name}" created successfully!`);
-        // If the created user was a student, reload the list
-        if (res.user.role === 'student') {
-          this.loadStudents();
-        }
+        this.loadUsers();
       },
       error: (err) => {
         this.submitting = false;
         this.showFeedback('error', err.error?.message || err.error?.login?.[0] || 'Failed to create user account.');
+      }
+    });
+  }
+
+  initEditUserForm(user: User): void {
+    this.selectedUserForEdit = user;
+    this.editUserForm = this.fb.group({
+      name: [user.name, [Validators.required, Validators.minLength(3)]],
+      username: [user.username, [Validators.required, Validators.minLength(3)]],
+      password: ['', [Validators.minLength(6)]] // optional for edit
+    });
+  }
+
+  openEditUserModal(user: User): void {
+    this.initEditUserForm(user);
+    this.showEditUserModal = true;
+  }
+
+  closeEditUserModal(): void {
+    this.showEditUserModal = false;
+    this.selectedUserForEdit = null;
+    if (this.editUserForm) {
+      this.editUserForm.reset();
+    }
+  }
+
+  onSubmitEditUser(): void {
+    if (this.editUserForm.invalid || !this.selectedUserForEdit) {
+      this.editUserForm.markAllAsTouched();
+      return;
+    }
+
+    this.submitting = true;
+    const formValue = { ...this.editUserForm.value };
+    
+    // Remove password if it's empty so we don't overwrite with blank
+    if (!formValue.password) {
+      delete formValue.password;
+    }
+
+    this.http.put<any>(`http://localhost:8000/api/users/${this.selectedUserForEdit.id}`, formValue).subscribe({
+      next: (res) => {
+        this.submitting = false;
+        this.closeEditUserModal();
+        this.showFeedback('success', `User account updated successfully!`);
+        this.loadUsers();
+      },
+      error: (err) => {
+        this.submitting = false;
+        this.showFeedback('error', err.error?.message || 'Failed to update user account.');
+      }
+    });
+  }
+
+  deleteUser(userId: number): void {
+    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+      return;
+    }
+
+    this.deletingUserId = userId;
+    this.http.delete<any>(`http://localhost:8000/api/users/${userId}`).subscribe({
+      next: () => {
+        this.deletingUserId = null;
+        this.showFeedback('success', 'User deleted successfully.');
+        this.loadUsers();
+      },
+      error: (err) => {
+        this.deletingUserId = null;
+        this.showFeedback('error', err.error?.message || 'Failed to delete user.');
       }
     });
   }

@@ -12,7 +12,10 @@ import { Assessment } from './components/assessment/assessment';
 import { LearningMode } from './components/learning-mode/learning-mode';
 import { CoursePlayer } from './components/course-player/course-player';
 import { AssessmentPlayerComponent } from './components/activity-engine/assessment-player/assessment-player';
-import { StudentManagement } from './components/student-management/student-management';
+import { UserManagement } from './components/user-management/user-management';
+import { StudentProgressComponent } from './components/student-progress/student-progress';
+import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard';
+import { Announcements } from './components/announcements/announcements';
 import { roleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
@@ -42,51 +45,66 @@ export const routes: Routes = [
   { 
     path: 'properties', 
     component: Property, 
-    canActivate: [roleGuard(['super_admin', 'tenant_admin'])] 
+    canActivate: [roleGuard(['super_admin', 'admin'])] 
   },
 
   /*
-   * 🏫 Staff (Super Admin, Tenant Admin, Property Manager) Pages
+   * 🏫 Staff (Super Admin, Admin, Staff) Pages
    */
+  { 
+    path: 'admin-dashboard', 
+    component: AdminDashboardComponent, 
+    canActivate: [roleGuard(['super_admin', 'admin', 'staff'])] 
+  },
+  { 
+    path: 'announcements', 
+    component: Announcements, 
+    canActivate: [roleGuard(['super_admin', 'admin', 'staff', 'student'])] 
+  },
   { 
     path: 'courses', 
     component: Course, 
-    canActivate: [roleGuard(['super_admin', 'tenant_admin', 'property_manager'])] 
+    canActivate: [roleGuard(['super_admin', 'admin', 'staff'])] 
   },
   { 
-    path: 'students', 
-    component: StudentManagement, 
-    canActivate: [roleGuard(['super_admin', 'tenant_admin', 'property_manager'])] 
+    path: 'users', 
+    component: UserManagement, 
+    canActivate: [roleGuard(['super_admin', 'admin', 'staff'])] 
+  },
+  { 
+    path: 'student-progress', 
+    component: StudentProgressComponent, 
+    canActivate: [roleGuard(['super_admin', 'admin', 'staff'])] 
   },
   { 
     path: 'levels', 
     component: Level, 
-    canActivate: [roleGuard(['super_admin', 'tenant_admin', 'property_manager'])] 
+    canActivate: [roleGuard(['super_admin', 'admin', 'staff'])] 
   },
   { 
     path: 'course-package-levels', 
     component: CoursePackageLevel, 
-    canActivate: [roleGuard(['super_admin', 'tenant_admin', 'property_manager'])] 
+    canActivate: [roleGuard(['super_admin', 'admin', 'staff'])] 
   },
   { 
     path: 'chapters', 
     component: Chapter, 
-    canActivate: [roleGuard(['super_admin', 'tenant_admin', 'property_manager'])] 
+    canActivate: [roleGuard(['super_admin', 'admin', 'staff'])] 
   },
   { 
     path: 'contents', 
     component: Content, 
-    canActivate: [roleGuard(['super_admin', 'tenant_admin', 'property_manager'])] 
+    canActivate: [roleGuard(['super_admin', 'admin', 'staff'])] 
   },
   { 
     path: 'assessments', 
     component: Assessment, 
-    canActivate: [roleGuard(['super_admin', 'tenant_admin', 'property_manager'])] 
+    canActivate: [roleGuard(['super_admin', 'admin', 'staff'])] 
   },
   { 
     path: 'learning-modes', 
     component: LearningMode, 
-    canActivate: [roleGuard(['super_admin', 'tenant_admin', 'property_manager'])] 
+    canActivate: [roleGuard(['super_admin', 'admin', 'staff'])] 
   },
 
   /*
@@ -95,17 +113,17 @@ export const routes: Routes = [
   { 
     path: 'learn', 
     component: CoursePlayer, 
-    canActivate: [roleGuard(['student', 'super_admin', 'tenant_admin', 'property_manager'])] 
+    canActivate: [roleGuard(['student', 'super_admin', 'admin', 'staff'])] 
   },
   { 
     path: 'learn/:courseId', 
     component: CoursePlayer, 
-    canActivate: [roleGuard(['student', 'super_admin', 'tenant_admin', 'property_manager'])] 
+    canActivate: [roleGuard(['student', 'super_admin', 'admin', 'staff'])] 
   },
   { 
     path: 'assessments/play/:assessmentId', 
     component: AssessmentPlayerComponent, 
-    canActivate: [roleGuard(['student', 'super_admin', 'tenant_admin', 'property_manager'])] 
+    canActivate: [roleGuard(['student', 'super_admin', 'admin', 'staff'])] 
   },
 
   // Fallback for unauthorized pages

@@ -19,7 +19,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'login' => 'required|string|max:255', // email or username
             'password' => 'required|string|min:6|confirmed',
-            'role' => 'required|string|in:tenant_admin,property_manager,student',
+            'role' => 'required|string|in:admin,staff,student',
             'tenant_code' => 'nullable|string|exists:tenants,tenant_code',
         ]);
 
@@ -112,18 +112,9 @@ class AuthController extends Controller
             }
         }
 
-        // If user is a property manager, verify they are associated with an active property
-        if ($user->role === 'property_manager') {
-            $propertyExists = \App\Models\Property::where('tenant_id', $user->tenant_id)
-                ->where('property_code', $user->username)
-                ->where('is_active', true)
-                ->exists();
-            if (!$propertyExists) {
-                throw ValidationException::withMessages([
-                    'login' => ['This coordinator is not associated with any active property code.'],
-                ]);
-            }
-        }
+        // Removed legacy check that required staff (formerly property_manager) 
+        // to have a matching property_code. Staff can now be generic academy users.
+
 
         // Verify password
         if (!Hash::check($validated['password'], $user->password)) {
@@ -256,10 +247,55 @@ class AuthController extends Controller
     }
 
     /**
-     * Get list of students belonging to the active tenant.
+     * Get list of users based on the requesting user's role.
      */
-    public function getStudents()
+    public function getUsers(Request $request)
     {
-        return response()->json(User::where('role', 'student')->orderBy('name', 'asc')->get());
+        $user = $request->user();
+        $query = User::with('tenant');
+
+        if ($user->role !== 'super_admin') {
+            $query->where('tenant_id', $user->tenant_id);
+            
+            if ($user->role === 'admin') {
+                $query->whereIn('role', ['admin', 'staff', 'student']);
+            } else if ($user->role === 'staff') {
+                $query->where('role', 'student');
+            }
+        }
+
+        return response()->json($query->orderBy('name', 'asc')->get());
+    }
+
+    /**
+     * Update an existing user.
+     */
+    public function updateUser(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users,username,' . $user->id,
+            'password' => 'nullable|string|min:6',
+        ]);
+
+        $user->name = $validated['name'];
+        $user->username = $validated['username'];
+        
+        if (!empty($validated['password'])) {
+            $user->password = Hash::make($validated['password']);
+        }
+
+        $user->save();
+
+        return response()->json(['message' => 'User updated successfully', 'user' => $user]);
+    }
+
+    /**
+     * Delete a user.
+     */
+    public function destroyUser(User $user)
+    {
+        $user->delete();
+        return response()->json(['message' => 'User deleted successfully']);
     }
 }

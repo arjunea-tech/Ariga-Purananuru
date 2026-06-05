@@ -12,8 +12,8 @@
   <!-- Header Panel -->
   <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
     <div>
-      <h2 class="fw-bold text-dark mb-1">Student Management</h2>
-      <p class="text-secondary mb-0">View student rosters and batch import student accounts.</p>
+      <h2 class="fw-bold text-dark mb-1">User Management</h2>
+      <p class="text-secondary mb-0">View user rosters and batch import user accounts.</p>
     </div>
     
     <div class="d-flex align-items-center gap-2">
@@ -32,7 +32,7 @@
       <!-- Import CSV Button -->
       <label class="btn btn-primary d-flex align-items-center gap-2 px-4 py-2 shadow-sm rounded-3 cursor-pointer mb-0">
         <i class="bi bi-file-earmark-arrow-up"></i>
-        <span>{{ importing ? 'Importing...' : 'Import Students (CSV)' }}</span>
+        <span>{{ importing ? 'Importing...' : 'Import Users (CSV)' }}</span>
         <input type="file" (change)="onFileSelected($event)" accept=".csv" class="d-none" [disabled]="importing" />
       </label>
     </div>
@@ -49,46 +49,96 @@
           <input 
             type="text" 
             class="form-control bg-light border-0 py-2 shadow-none" 
-            placeholder="Search by name or roll number/username..." 
+            placeholder="Search by name or username..." 
             (input)="onSearch($event)"
           />
         </div>
       </div>
+      <div class="col-md-6 col-lg-3">
+        <select class="form-select bg-light border-0 py-2 shadow-none text-secondary" (change)="onRoleFilterChange($event)">
+          <option value="all">All Roles</option>
+          <option value="student">Student</option>
+          @if (authService.hasRole(['super_admin', 'admin'])) {
+            <option value="staff">Staff</option>
+            <option value="admin">Admin</option>
+          }
+          @if (authService.hasRole(['super_admin'])) {
+            <option value="super_admin">Super Admin</option>
+          }
+        </select>
+      </div>
+      @if (authService.getUserRole() === 'super_admin') {
+        <div class="col-md-6 col-lg-3">
+          <select class="form-select bg-light border-0 py-2 shadow-none text-secondary" (change)="onTenantFilterChange($event)">
+            <option value="all">All Tenants (Schools)</option>
+            @for (tenant of tenants(); track tenant.id) {
+              <option [value]="tenant.id">{{ tenant.tenant_name }}</option>
+            }
+          </select>
+        </div>
+      }
     </div>
   </div>
 
-  <!-- Students List Grid/Table -->
+  <!-- Users List Grid/Table -->
   <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
     <div class="table-responsive">
       <table class="table table-hover align-middle mb-0">
         <thead class="bg-light text-secondary small text-uppercase fw-bold">
           <tr>
-            <th class="px-4 py-3">Student Name</th>
-            <th class="py-3">Roll Number / Username</th>
+            <th class="px-4 py-3">Name</th>
+            <th class="py-3">Username / Roll No.</th>
+            <th class="py-3">Role</th>
+            @if (authService.getUserRole() === 'super_admin') {
+              <th class="py-3">Tenant (School)</th>
+            }
             <th class="py-3 text-center">Status</th>
+            <th class="py-3 text-center">Actions</th>
           </tr>
         </thead>
         <tbody class="border-top-0">
-          @for (student of filteredStudents(); track student.id) {
+          @for (user of filteredUsers(); track user.id) {
             <tr>
               <td class="px-4 py-3">
                 <div class="d-flex align-items-center gap-3">
-                  <div class="avatar-circle">{{ student.name.charAt(0) }}</div>
-                  <span class="fw-semibold text-dark">{{ student.name }}</span>
+                  <div class="avatar-circle">{{ user.name.charAt(0) }}</div>
+                  <span class="fw-semibold text-dark">{{ user.name }}</span>
                 </div>
               </td>
-              <td class="py-3 font-monospace fw-bold text-secondary">{{ student.username }}</td>
+              <td class="py-3 font-monospace fw-bold text-secondary">{{ user.username }}</td>
+              <td class="py-3 text-secondary text-capitalize">
+                {{ user.role.replace('_', ' ') }}
+              </td>
+              @if (authService.getUserRole() === 'super_admin') {
+                <td class="py-3 fw-medium text-dark">
+                  {{ user.tenant?.tenant_name || 'System' }}
+                </td>
+              }
               <td class="py-3 text-center">
                 <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 fw-semibold">
                   Active
                 </span>
               </td>
+              <td class="py-3 text-center">
+                <div class="d-flex justify-content-center gap-2">
+                  <button class="btn btn-sm btn-outline-primary shadow-none" (click)="openEditUserModal(user)" title="Edit User">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger shadow-none" (click)="deleteUser(user.id)" title="Delete User" [disabled]="deletingUserId === user.id">
+                    @if (deletingUserId === user.id) {
+                      <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    } @else {
+                      <i class="bi bi-trash"></i>
+                    }
+                  </button>
+                </div>
+              </td>
             </tr>
           } @empty {
             <tr>
-              <td colspan="3" class="text-center py-5 text-secondary fs-5 opacity-50">
+              <td colspan="5" class="text-center py-5 text-secondary fs-5 opacity-50">
                 <i class="bi bi-people fs-1 d-block mb-2"></i>
-                No students found. Upload a CSV to add student accounts!
+                No users found. Upload a CSV to add user accounts!
               </td>
             </tr>
           }
@@ -109,7 +159,7 @@
           </div>
           
           <div class="modal-body p-4 bg-light">
-            <p class="text-dark fw-bold mb-3">Copy or print these generated student logins. Passwords will NOT be shown again!</p>
+            <p class="text-dark fw-bold mb-3">Copy or print these generated user logins. Passwords will NOT be shown again!</p>
             
             <div class="table-responsive rounded-3 border bg-white mb-3" style="max-height: 350px; overflow-y: auto;">
               <table class="table align-middle mb-0">
@@ -258,6 +308,84 @@
               <button type="button" class="btn btn-secondary px-4 rounded-3" (click)="closeAddUserModal()" [disabled]="submitting">Cancel</button>
               <button type="submit" class="btn btn-success px-4 rounded-3 fw-bold" [disabled]="submitting || addUserForm.invalid">
                 {{ submitting ? 'Creating...' : 'Create Account' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- EDIT USER MODAL -->
+  @if (showEditUserModal) {
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal fade show d-block" tabindex="-1" role="dialog">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+          <div class="modal-header bg-primary text-white p-3">
+            <h5 class="modal-title fw-bold">
+              <i class="bi bi-pencil-square me-2"></i>Edit User
+            </h5>
+            <button type="button" class="btn-close btn-close-white shadow-none" (click)="closeEditUserModal()"></button>
+          </div>
+          
+          <form [formGroup]="editUserForm" (ngSubmit)="onSubmitEditUser()">
+            <div class="modal-body p-4 bg-light">
+              
+              <!-- Name Field -->
+              <div class="mb-3">
+                <label for="edit_name" class="form-label fw-semibold text-secondary mb-1">Full Name</label>
+                <input 
+                  id="edit_name"
+                  type="text" 
+                  formControlName="name" 
+                  class="form-control border-0 shadow-sm py-2" 
+                  placeholder="e.g. John Doe"
+                  [class.is-invalid]="editUserForm.get('name')?.touched && editUserForm.get('name')?.invalid"
+                />
+                @if (editUserForm.get('name')?.touched && editUserForm.get('name')?.invalid) {
+                  <small class="text-danger mt-1 d-block">Full name (min 3 chars) is required.</small>
+                }
+              </div>
+
+              <!-- Username Field -->
+              <div class="mb-3">
+                <label for="edit_login" class="form-label fw-semibold text-secondary mb-1">Username / Roll No.</label>
+                <input 
+                  id="edit_login"
+                  type="text" 
+                  formControlName="username" 
+                  class="form-control border-0 shadow-sm py-2 font-monospace" 
+                  placeholder="e.g. john_doe"
+                  [class.is-invalid]="editUserForm.get('username')?.touched && editUserForm.get('username')?.invalid"
+                />
+                @if (editUserForm.get('username')?.touched && editUserForm.get('username')?.invalid) {
+                  <small class="text-danger mt-1 d-block">Username / Roll number (min 3 chars) is required.</small>
+                }
+              </div>
+
+              <!-- Password Field -->
+              <div class="mb-3">
+                <label for="edit_password" class="form-label fw-semibold text-secondary mb-1">New Password (optional)</label>
+                <input 
+                  id="edit_password"
+                  type="password" 
+                  formControlName="password" 
+                  class="form-control border-0 shadow-sm py-2" 
+                  placeholder="Leave blank to keep existing"
+                  [class.is-invalid]="editUserForm.get('password')?.touched && editUserForm.get('password')?.invalid"
+                />
+                @if (editUserForm.get('password')?.touched && editUserForm.get('password')?.invalid) {
+                  <small class="text-danger mt-1 d-block">Password must be at least 6 characters.</small>
+                }
+              </div>
+
+            </div>
+            
+            <div class="modal-footer p-3 bg-white">
+              <button type="button" class="btn btn-secondary px-4 rounded-3" (click)="closeEditUserModal()" [disabled]="submitting">Cancel</button>
+              <button type="submit" class="btn btn-primary px-4 rounded-3 fw-bold" [disabled]="submitting || editUserForm.invalid">
+                {{ submitting ? 'Saving...' : 'Save Changes' }}
               </button>
             </div>
           </form>

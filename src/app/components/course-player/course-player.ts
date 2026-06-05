@@ -468,6 +468,7 @@ export class CoursePlayer implements OnInit {
 
     const payload = {
       content_id: this.activeContentId(),
+      course_id: this.courseId(),
       message: input
     };
 

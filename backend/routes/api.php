@@ -14,6 +14,7 @@ use App\Http\Controllers\LearningModeController;
 use App\Http\Controllers\ContentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AITutorController;
+use App\Http\Controllers\AnnouncementController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +35,16 @@ Route::middleware(['auth:sanctum', 'identify.tenant'])->group(function () {
     // Auth profile endpoints
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
+    
+    // Common Routes
+    Route::get('dashboard/tenant-stats', [DashboardController::class, 'getTenantStats']);
+    Route::get('announcements', [AnnouncementController::class, 'index']);
+
+    // Admin/Staff Routes for Announcements
+    Route::middleware(['role:super_admin,admin,staff'])->group(function () {
+        Route::post('announcements', [AnnouncementController::class, 'store']);
+        Route::delete('announcements/{announcement}', [AnnouncementController::class, 'destroy']);
+    });
 
     /*
      * 👑 Super Admin Only Modifiers
@@ -66,14 +77,18 @@ Route::middleware(['auth:sanctum', 'identify.tenant'])->group(function () {
     });
 
     /*
-     * 🏫 Staff (Super Admin, Tenant Admin, Property Manager) Resources
+     * 🏫 Staff (Super Admin, Admin, Staff) Resources
      */
-    Route::middleware(['role:super_admin,tenant_admin,property_manager'])->group(function () {
+    Route::middleware(['role:super_admin,admin,staff'])->group(function () {
         Route::post('courses', [CourseController::class, 'store']);
         Route::put('courses/{course}', [CourseController::class, 'update']);
         Route::delete('courses/{course}', [CourseController::class, 'destroy']);
         Route::post('users/import', [AuthController::class, 'batchImport']);
-        Route::get('users/students', [AuthController::class, 'getStudents']);
+        Route::get('users', [AuthController::class, 'getUsers']);
+        Route::put('users/{user}', [AuthController::class, 'updateUser']);
+        Route::delete('users/{user}', [AuthController::class, 'destroyUser']);
+        Route::get('users/{userId}/progress-stats', [DashboardController::class, 'getStudentStatsForStaff']);
+        Route::get('dashboard/tenant-stats', [DashboardController::class, 'getTenantStats']);
         
         Route::post('levels', [LevelController::class, 'store']);
         Route::put('levels/{level}', [LevelController::class, 'update']);

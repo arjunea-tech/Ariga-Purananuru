@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Content;
+use App\Models\ContentChunk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ContentController extends Controller
@@ -117,6 +120,8 @@ class ContentController extends Controller
             }
         }
 
+        $this->processContentChunks($content);
+
         return $content->load(['chapters', 'attachments']);
     }
 
@@ -186,6 +191,8 @@ class ContentController extends Controller
             $content->attachments()->whereNotIn('unique_id', $newUniqueIds)->update(['is_deleted' => true]);
         }
 
+        $this->processContentChunks($content);
+
         return $content->load(['chapters', 'attachments']);
     }
 
@@ -196,5 +203,112 @@ class ContentController extends Controller
     {
         $content->delete();
         return response()->noContent();
+    }
+
+    private function processContentChunks(Content $content)
+    {
+        if (empty($content->text_content)) {
+            $content->chunks()->delete();
+            return;
+        }
+
+        $text = $this->extractPlainText($content->text_content);
+        if (empty($text)) {
+            $content->chunks()->delete();
+            return;
+        }
+
+        $chunks = $this->chunkText($text, 500, 100);
+        
+        $content->chunks()->delete();
+
+        foreach ($chunks as $index => $chunk) {
+            $embedding = $this->getEmbedding($chunk);
+            if ($embedding) {
+                ContentChunk::create([
+                    'content_id' => $content->id,
+                    'chunk_index' => $index,
+                    'chunk_text' => $chunk,
+                    'embedding' => $embedding
+                ]);
+            }
+        }
+    }
+
+    private function extractPlainText($text)
+    {
+        $text = trim($text);
+        if (str_starts_with($text, '{') && str_ends_with($text, '}')) {
+            $data = json_decode($text, true);
+            if ($data && isset($data['blocks'])) {
+                $extracted = '';
+                foreach ($data['blocks'] as $block) {
+                    if (isset($block['data']['text'])) {
+                        $extracted .= strip_tags($block['data']['text']) . ' ';
+                    } elseif (isset($block['data']['items'])) {
+                         foreach($block['data']['items'] as $item) {
+                              $extracted .= strip_tags($item) . ' ';
+                         }
+                    }
+                }
+                return trim(preg_replace('/\s+/', ' ', $extracted));
+            }
+        }
+        return trim(preg_replace('/\s+/', ' ', strip_tags($text)));
+    }
+
+    private function chunkText($text, $chunkSize = 500, $overlap = 100)
+    {
+        $words = explode(' ', $text);
+        $chunks = [];
+        $currentChunk = [];
+        $currentLength = 0;
+        
+        foreach ($words as $word) {
+            $currentChunk[] = $word;
+            $currentLength += strlen($word) + 1;
+            
+            if ($currentLength >= $chunkSize) {
+                $chunks[] = implode(' ', $currentChunk);
+                $overlapWordsCount = max(1, (int)($overlap / 5));
+                $currentChunk = array_slice($currentChunk, -$overlapWordsCount);
+                $currentLength = strlen(implode(' ', $currentChunk));
+            }
+        }
+        if (count($currentChunk) > 0 && count($chunks) == 0) {
+            $chunks[] = implode(' ', $currentChunk);
+        } elseif (count($currentChunk) > 0 && strlen(implode(' ', $currentChunk)) > $overlap) {
+            $chunks[] = implode(' ', $currentChunk);
+        }
+        
+        return $chunks;
+    }
+
+    private function getEmbedding($text)
+    {
+        $apiKey = env('GEMINI_API_KEY');
+        if (!$apiKey) return null;
+        
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->withoutVerifying()->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent?key=" . $apiKey, [
+                'model' => 'models/gemini-embedding-2',
+                'content' => [
+                    'parts' => [
+                        ['text' => $text]
+                    ]
+                ]
+            ]);
+            
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['embedding']['values'] ?? null;
+            }
+            Log::error('Gemini Embedding Error: ' . $response->body());
+        } catch (\Exception $e) {
+            Log::error('Embedding Exception: ' . $e->getMessage());
+        }
+        return null;
     }
 }

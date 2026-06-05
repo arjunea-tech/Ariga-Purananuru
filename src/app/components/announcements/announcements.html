@@ -1,0 +1,115 @@
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+    <div>
+      <h2 class="fw-bold mb-1 d-flex align-items-center gap-2">
+        <i class="bi bi-megaphone text-primary"></i>
+        Announcements
+      </h2>
+      <p class="text-secondary mb-0">Broadcast messages to staff and students in your academy.</p>
+    </div>
+    @if (authService.hasRole(['super_admin', 'admin'])) {
+      <button class="btn btn-primary shadow-sm rounded-3 fw-semibold px-4" (click)="showForm.set(!showForm())">
+        <i class="bi" [ngClass]="showForm() ? 'bi-x-lg' : 'bi-plus-lg'"></i> 
+        {{ showForm() ? 'Cancel' : 'New Announcement' }}
+      </button>
+    }
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm rounded-3">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ error() }}
+      <button type="button" class="btn-close" (click)="error.set(null)"></button>
+    </div>
+  }
+
+  @if (showForm() && authService.hasRole(['super_admin', 'admin'])) {
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Create New Announcement</h5>
+        <form [formGroup]="announcementForm" (ngSubmit)="submitAnnouncement()">
+          <div class="mb-3">
+            <label class="form-label fw-semibold small text-secondary">Title</label>
+            <input type="text" class="form-control bg-light border-0 py-2 shadow-none" formControlName="title" placeholder="E.g., School Closed Tomorrow">
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label fw-semibold small text-secondary">Message</label>
+            <textarea class="form-control bg-light border-0 py-2 shadow-none" rows="4" formControlName="message" placeholder="Type your announcement here..."></textarea>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-semibold small text-secondary">Target Audience</label>
+            <select class="form-select bg-light border-0 py-2 shadow-none" formControlName="target_roles" multiple style="height: 100px;">
+              <option value="student">Students</option>
+              <option value="staff">Staff Members</option>
+            </select>
+            <div class="form-text">Hold Ctrl/Cmd to select multiple. Leave completely unselected to broadcast to everyone.</div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn btn-light fw-semibold" (click)="showForm.set(false)">Cancel</button>
+            <button type="submit" class="btn btn-primary fw-semibold px-4" [disabled]="announcementForm.invalid || isSubmitting()">
+              @if (isSubmitting()) {
+                <span class="spinner-border spinner-border-sm me-2"></span> Publishing...
+              } @else {
+                <i class="bi bi-send-fill me-2"></i> Publish
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="mt-2 text-secondary">Loading announcements...</p>
+    </div>
+  } @else {
+    <div class="row g-4">
+      @for (announcement of announcements(); track announcement.id) {
+        <div class="col-12">
+          <div class="card border-0 shadow-sm rounded-4 h-100 announcement-card">
+            <div class="card-body p-4 position-relative">
+              @if (authService.hasRole(['super_admin', 'admin'])) {
+                <button class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 mt-3 me-3" (click)="deleteAnnouncement(announcement.id)">
+                  <i class="bi bi-trash3"></i>
+                </button>
+              }
+              
+              <div class="d-flex align-items-center gap-2 mb-2">
+                <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-semibold">
+                  <i class="bi bi-calendar-event me-1"></i> {{ announcement.created_at | date:'medium' }}
+                </span>
+                @if (announcement.target_roles && announcement.target_roles.length > 0) {
+                  @for (role of announcement.target_roles; track role) {
+                    <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-1">
+                      {{ role | titlecase }}
+                    </span>
+                  }
+                } @else {
+                  <span class="badge bg-success-subtle text-success rounded-pill px-2 py-1">
+                    All Users
+                  </span>
+                }
+              </div>
+              
+              <h4 class="fw-bold mb-3 mt-3">{{ announcement.title }}</h4>
+              <p class="text-secondary mb-0" style="white-space: pre-wrap;">{{ announcement.message }}</p>
+            </div>
+          </div>
+        </div>
+      }
+      @empty {
+        <div class="col-12 text-center py-5">
+          <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3" style="width: 80px; height: 80px;">
+            <i class="bi bi-inbox fs-1 text-secondary opacity-50"></i>
+          </div>
+          <h5 class="fw-bold text-dark mb-1">No Announcements</h5>
+          <p class="text-secondary mb-0">There are no active announcements to display.</p>
+        </div>
+      }
+    </div>
+  }
+</div>

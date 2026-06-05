@@ -37,4 +37,9 @@ class Content extends Model
     {
         return $this->hasMany(ContentAttachment::class)->where('is_deleted', false);
     }
+
+    public function chunks(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ContentChunk::class);
+    }
 }

@@ -101,10 +101,8 @@ export class LoginComponent implements OnInit {
             this.router.navigate(['/learn']); // Student workspace
           } else if (role === 'super_admin') {
             this.router.navigate(['/tenants']); // Super Admin workspace
-          } else if (role === 'tenant_admin') {
-            this.router.navigate(['/properties']); // Tenant Admin workspace
-          } else if (role === 'property_manager') {
-            this.router.navigate(['/courses']); // Property Manager / Coordinator workspace
+          } else if (role === 'admin' || role === 'staff') {
+            this.router.navigate(['/admin-dashboard']); // Admin dashboard
           } else {
             this.router.navigate(['/learn']);
           }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Content;
+use App\Models\ContentChunk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -13,23 +14,65 @@ class AITutorController extends Controller
     {
         $validated = $request->validate([
             'content_id' => 'required|exists:contents,id',
-            'message' => 'required|string|max:1000',
+            'course_id'  => 'nullable|integer',
+            'message'    => 'required|string|max:1000',
         ]);
-
-        $content = Content::findOrFail($validated['content_id']);
-        
-        // Extract text safely
-        $courseContext = $content->text_content ?? $content->name ?? 'No text content available.';
-        
-        $userMessage = $validated['message'];
 
         $apiKey = env('GEMINI_API_KEY');
         if (!$apiKey) {
             return response()->json(['error' => 'LLM API Key not configured.'], 500);
         }
 
+        $userMessage = $validated['message'];
+        $courseContext = '';
+        $questionEmbedding = $this->getEmbedding($userMessage, $apiKey);
+
+        if ($questionEmbedding) {
+            $courseId = $validated['course_id'] ?? null;
+            if ($courseId) {
+                $contentIds = \Illuminate\Support\Facades\DB::table('contents')
+                    ->join('content_chapters', 'contents.id', '=', 'content_chapters.content_id')
+                    ->join('level_chapter', 'content_chapters.chapter_id', '=', 'level_chapter.chapter_id')
+                    ->join('course_package_levels', 'level_chapter.level_id', '=', 'course_package_levels.level_id')
+                    ->where('course_package_levels.course_id', $courseId)
+                    ->pluck('contents.id')
+                    ->unique()
+                    ->toArray();
+
+                $allChunks = ContentChunk::whereIn('content_id', $contentIds)->get();
+            } else {
+                $allChunks = ContentChunk::where('content_id', $validated['content_id'])->get();
+            }
+
+            $scoredChunks = [];
+            foreach ($allChunks as $chunk) {
+                if ($chunk->embedding && is_array($chunk->embedding)) {
+                    $score = $this->cosineSimilarity($questionEmbedding, $chunk->embedding);
+                    if ($score > 0.4) { // Only consider somewhat relevant chunks
+                        $scoredChunks[] = [
+                            'score' => $score,
+                            'text' => $chunk->chunk_text
+                        ];
+                    }
+                }
+            }
+
+            usort($scoredChunks, function($a, $b) {
+                return $b['score'] <=> $a['score'];
+            });
+
+            $topChunks = array_slice($scoredChunks, 0, 5);
+            $contextTexts = array_map(function($c) { return $c['text']; }, $topChunks);
+            $courseContext = implode("\n\n---\n\n", $contextTexts);
+        }
+
+        if (empty(trim($courseContext))) {
+            $content = Content::findOrFail($validated['content_id']);
+            $courseContext = strip_tags($content->text_content ?? $content->name ?? 'No text content available.');
+        }
+
         // Construct the prompt
-        $systemPrompt = "You are an AI Tutor for a student learning a course. Your goal is to answer the student's question based strictly on the provided lesson content. Be encouraging, clear, and concise. Do not hallucinate information outside the lesson if possible. If the question is completely unrelated to the lesson, politely guide the student back to the topic.\n\n--- LESSON CONTENT ---\n" . strip_tags($courseContext) . "\n----------------------\n";
+        $systemPrompt = "You are an AI Tutor for a student learning a course. Your goal is to answer the student's question based strictly on the provided lesson context chunks below. Be encouraging, clear, and concise. Do not hallucinate information outside the provided context. If the question is completely unrelated to the context, politely guide the student back to the topic.\n\n--- CONTEXT CHUNKS ---\n" . $courseContext . "\n----------------------\n";
 
         // Call Gemini API
         try {
@@ -140,5 +183,49 @@ class AITutorController extends Controller
             Log::error('AI Quiz Exception: ' . $e->getMessage());
             return response()->json(['error' => 'An error occurred while generating the quiz.'], 500);
         }
+    }
+
+    private function getEmbedding($text, $apiKey)
+    {
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->withoutVerifying()->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2:embedContent?key=" . $apiKey, [
+                'model' => 'models/gemini-embedding-2',
+                'content' => [
+                    'parts' => [
+                        ['text' => $text]
+                    ]
+                ]
+            ]);
+            
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['embedding']['values'] ?? null;
+            }
+        } catch (\Exception $e) {
+            Log::error('Embedding Exception: ' . $e->getMessage());
+        }
+        return null;
+    }
+
+    private function cosineSimilarity(array $vec1, array $vec2)
+    {
+        $dotProduct = 0.0;
+        $normA = 0.0;
+        $normB = 0.0;
+        
+        $count = count($vec1);
+        if ($count !== count($vec2)) return 0.0;
+        
+        for ($i = 0; $i < $count; $i++) {
+            $dotProduct += $vec1[$i] * $vec2[$i];
+            $normA += pow($vec1[$i], 2);
+            $normB += pow($vec2[$i], 2);
+        }
+        
+        if ($normA == 0 || $normB == 0) return 0.0;
+        
+        return $dotProduct / (sqrt($normA) * sqrt($normB));
     }
 }

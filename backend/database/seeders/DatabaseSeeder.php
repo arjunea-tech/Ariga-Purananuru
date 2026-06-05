@@ -56,13 +56,13 @@ class DatabaseSeeder extends Seeder
             'secondary_color' => '#db2777',
         ]);
 
-        // 4. Seed Property Manager (School Coordinator)
+        // 4. Seed Staff (School Coordinator)
         User::create([
             'name' => 'School Coordinator',
             'username' => 'coordinator',
             'email' => 'manager@ariga.school',
             'password' => Hash::make('admin123'),
-            'role' => 'property_manager',
+            'role' => 'staff',
             'tenant_id' => $tenant->id,
         ]);
 
