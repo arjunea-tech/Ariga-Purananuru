@@ -291,6 +291,26 @@ class AuthController extends Controller
     }
 
     /**
+     * Update current user profile.
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|email|unique:users,email,' . $user->id,
+        ]);
+        
+        $user->update($validated);
+        
+        return response()->json([
+            'message' => 'Profile updated successfully',
+            'user' => $user
+        ]);
+    }
+
+    /**
      * Delete a user.
      */
     public function destroyUser(User $user)

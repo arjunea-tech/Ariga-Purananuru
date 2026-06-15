@@ -88,4 +88,16 @@ export class AuthService {
     const role = this.getUserRole();
     return role ? allowedRoles.includes(role) : false;
   }
+
+  updateProfile(data: { name: string; email: string }): Observable<any> {
+    const token = this.getToken();
+    const headers = { 'Authorization': `Bearer ${token || ''}` };
+    return this.http.put<any>(`${this.apiUrl}/profile`, data, { headers }).pipe(
+      tap((res) => {
+        if (res.user) {
+          localStorage.setItem('user', JSON.stringify(res.user));
+        }
+      })
+    );
+  }
 }

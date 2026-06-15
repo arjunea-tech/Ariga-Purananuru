@@ -162,4 +162,13 @@ Route::middleware(['auth:sanctum', 'identify.tenant'])->group(function () {
     // AI Tutor
     Route::post('ai-tutor/chat', [AITutorController::class, 'chat']);
     Route::post('ai-tutor/generate-quiz', [AITutorController::class, 'generateQuiz']);
+
+    // Profile Settings & dynamic updates
+    Route::put('/profile', [AuthController::class, 'updateProfile']);
+
+    // Dynamic topic-specific learning activities
+    Route::post('contents/{contentId}/activities', [AITutorController::class, 'generateActivities']);
+
+    // Record student activity for XP & streak tracking
+    Route::post('student/record-activity', [DashboardController::class, 'recordActivity']);
 });

@@ -190,6 +190,155 @@ class AITutorController extends Controller
         }
     }
 
+    public function generateActivities(Request $request, $contentId)
+    {
+        $content = Content::findOrFail($contentId);
+        $courseContext = $content->text_content ?? $content->name ?? '';
+
+        // Prepare a robust, content-aware fallback dataset in case Gemini is offline or fails
+        $fallback = [
+            'mcq' => [
+                [
+                    'question' => "What is the primary theme of " . $content->name . "?",
+                    'options' => [
+                        ['text' => "It details historical context and cultural wisdom", 'isCorrect' => true],
+                        ['text' => "It is purely a collection of fictional fables", 'isCorrect' => false],
+                        ['text' => "It describes modern scientific concepts", 'isCorrect' => false],
+                        ['text' => "None of the above", 'isCorrect' => false]
+                    ],
+                    'explanation' => "This topic represents ancient Tamil literature and historical wisdom."
+                ],
+                [
+                    'question' => "Which of the following is correct regarding " . ($content->title ?? $content->name) . "?",
+                    'options' => [
+                        ['text' => "It belongs to Sangam literature anthologies", 'isCorrect' => true],
+                        ['text' => "It was written in the modern era", 'isCorrect' => false],
+                        ['text' => "It has no historical value", 'isCorrect' => false],
+                        ['text' => "It is written in English", 'isCorrect' => false]
+                    ],
+                    'explanation' => "Sangam literature covers ancient anthologies including Purananuru and Thirukkural."
+                ],
+                [
+                    'question' => "What is the value of learning " . $content->name . "?",
+                    'options' => [
+                        ['text' => "Understanding ancient heritage, ethics, and lifestyle", 'isCorrect' => true],
+                        ['text' => "Learning modern programming languages", 'isCorrect' => false],
+                        ['text' => "Preparing for chemical engineering exams", 'isCorrect' => false],
+                        ['text' => "All of the above", 'isCorrect' => false]
+                    ],
+                    'explanation' => "Learning Sangam texts provides insights into the ancient Tamil lifestyle, values, and ethics."
+                ]
+            ],
+            'flashcards' => [
+                [
+                    'front' => $content->name,
+                    'back' => "A core chapter topic in this study curriculum."
+                ],
+                [
+                    'front' => "Sangam Era",
+                    'back' => "The classical period of ancient Tamil history and literature."
+                ],
+                [
+                    'front' => "Wisdom & Ethics",
+                    'back' => "The primary teachings and values expressed in these classical anthologies."
+                ]
+            ],
+            'match' => [
+                ['term' => 'Aram (அறம்)', 'definition' => 'Righteousness, moral duty and ethics'],
+                ['term' => 'Porul (பொருள்)', 'definition' => 'Wealth, governance and worldly affairs'],
+                ['term' => 'Inbam (இன்பம்)', 'definition' => 'Love, family and domestic pleasure'],
+                ['term' => 'Veedu (வீடு)', 'definition' => 'Ultimate liberation or spiritual salvation']
+            ]
+        ];
+
+        if (empty(strip_tags($courseContext))) {
+            return response()->json(['activities' => $fallback]);
+        }
+
+        $apiKey = env('GEMINI_API_KEY');
+        if (!$apiKey) {
+            return response()->json(['activities' => $fallback]);
+        }
+
+        $systemPrompt = "You are an expert AI educational game designer. Based ONLY on the lesson content provided below, generate a package of learning activities. This package must contain:\n"
+            . "1. A 3-question MCQ challenge.\n"
+            . "2. A set of 3 Flashcards with a key term on the front and description on the back.\n"
+            . "3. A set of 4 Match-the-Following pairs connecting key terms to short definitions.\n\n"
+            . "You MUST return ONLY a valid JSON object. Do not include markdown formatting like ```json or any other text.\n"
+            . "The JSON format must strictly be:\n"
+            . "{\n"
+            . "  \"mcq\": [\n"
+            . "    {\n"
+            . "      \"question\": \"Question text here\",\n"
+            . "      \"options\": [\n"
+            . "        {\"text\": \"Option A\", \"isCorrect\": true},\n"
+            . "        {\"text\": \"Option B\", \"isCorrect\": false},\n"
+            . "        {\"text\": \"Option C\", \"isCorrect\": false},\n"
+            . "        {\"text\": \"Option D\", \"isCorrect\": false}\n"
+            . "      ],\n"
+            . "      \"explanation\": \"Brief explanation of the correct answer.\"\n"
+            . "    }\n"
+            . "  ],\n"
+            . "  \"flashcards\": [\n"
+            . "    {\n"
+            . "      \"front\": \"Key Term or Concept\",\n"
+            . "      \"back\": \"Short explanation of the concept\"\n"
+            . "    }\n"
+            . "  ],\n"
+            . "  \"match\": [\n"
+            . "    {\n"
+            . "      \"term\": \"Key Term\",\n"
+            . "      \"definition\": \"Matching Definition\"\n"
+            . "    }\n"
+            . "  ]\n"
+            . "}\n\n"
+            . "Ensure the match array has exactly 4 pairs. Ensure options inside mcq have exactly 4 items and exactly one isCorrect=true.\n"
+            . "Ensure everything is relevant to this content:\n\n"
+            . "--- LESSON CONTENT ---\n" . strip_tags($courseContext) . "\n----------------------\n";
+
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])->withoutVerifying()->post("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" . $apiKey, [
+                'contents' => [
+                    [
+                        'role' => 'user',
+                        'parts' => [
+                            ['text' => $systemPrompt]
+                        ]
+                    ]
+                ],
+                'generationConfig' => [
+                    'temperature' => 0.2,
+                    'responseMimeType' => 'application/json',
+                ]
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $reply = $data['candidates'][0]['content']['parts'][0]['text'] ?? "{}";
+                
+                $reply = preg_replace('/^```json\s*/', '', $reply);
+                $reply = preg_replace('/```$/', '', $reply);
+                $reply = trim($reply);
+
+                $activitiesData = json_decode($reply, true);
+
+                if (json_last_error() === JSON_ERROR_NONE && isset($activitiesData['mcq']) && isset($activitiesData['flashcards']) && isset($activitiesData['match'])) {
+                    return response()->json(['activities' => $activitiesData]);
+                }
+                Log::error('Failed to parse AI Activities JSON: ' . $reply);
+            } else {
+                Log::error('Gemini API Error (Activities): ' . $response->body());
+            }
+        } catch (\Exception $e) {
+            Log::error('AI Activities Exception: ' . $e->getMessage());
+        }
+
+        // Return fallback on failure
+        return response()->json(['activities' => $fallback]);
+    }
+
     private function getEmbedding($text, $apiKey)
     {
         try {

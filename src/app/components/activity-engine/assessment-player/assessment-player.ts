@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, Input, Output, EventEmitter, SimpleChanges, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -35,19 +35,21 @@ interface AssessmentData {
   templateUrl: './assessment-player.html',
   styleUrls: ['./assessment-player.css']
 })
-export class AssessmentPlayerComponent implements OnInit, OnDestroy {
+export class AssessmentPlayerComponent implements OnInit, OnDestroy, OnChanges {
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private authService = inject(AuthService);
 
+  @Input() inputAssessmentId: number | null = null;
+  @Output() assessmentCompleted = new EventEmitter<{ score: number; passed: boolean }>();
   assessmentId = signal<number | null>(null);
   assessment = signal<AssessmentData | null>(null);
   gameState = signal<'start' | 'active' | 'results'>('start');
 
   currentQuestionIdx = signal<number>(0);
   answersMap = new Map<number, number>(); // questionId -> selectedOptionId
-  
+
   // Timer States
   timeLeft = signal<number>(0); // in seconds
   timerInterval: any = null;
@@ -67,12 +69,33 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      if (params['assessmentId']) {
-        this.assessmentId.set(+params['assessmentId']);
+    // If @Input assessmentId is provided, use it directly
+    if (this.inputAssessmentId) {
+      this.assessmentId.set(this.inputAssessmentId);
+      this.loadAssessmentDetails();
+    } else {
+      // Otherwise, try route params
+      this.route.params.subscribe(params => {
+        if (params['assessmentId']) {
+          this.assessmentId.set(+params['assessmentId']);
+          this.loadAssessmentDetails();
+        }
+      });
+    }
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['inputAssessmentId'] && !changes['inputAssessmentId'].firstChange) {
+      const newId = changes['inputAssessmentId'].currentValue;
+      if (newId) {
+        this.assessmentId.set(newId);
+        this.gameState.set('start');
+        this.resultsData.set(null);
+        this.answersMap.clear();
+        this.currentQuestionIdx.set(0);
         this.loadAssessmentDetails();
       }
-    });
+    }
   }
 
   ngOnDestroy(): void {
@@ -187,6 +210,7 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
           pass_percentage: res.pass_percentage
         });
         this.gameState.set('results');
+        this.assessmentCompleted.emit({ score: res.score, passed: res.passed });
       },
       error: (err) => {
         console.error('Failed to submit assessment answers:', err);
@@ -221,6 +245,7 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
       pass_percentage: exam.pass_percentage
     });
     this.gameState.set('results');
+    this.assessmentCompleted.emit({ score, passed });
   }
 
   getStrokeDashoffset(score: number): number {

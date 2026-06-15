@@ -247,7 +247,11 @@ class ContentController extends Controller
                         $extracted .= strip_tags($block['data']['text']) . ' ';
                     } elseif (isset($block['data']['items'])) {
                          foreach($block['data']['items'] as $item) {
-                              $extracted .= strip_tags($item) . ' ';
+                              if (is_string($item)) {
+                                  $extracted .= strip_tags($item) . ' ';
+                              } elseif (is_array($item) && isset($item['content'])) {
+                                  $extracted .= strip_tags($item['content']) . ' ';
+                              }
                          }
                     }
                 }

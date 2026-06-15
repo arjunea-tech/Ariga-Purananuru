@@ -21,7 +21,7 @@ textarea,
 span,
 p,
 div:not(.tamil-verse):not(blockquote) {
-  font-family: 'Times New Roman', Times, serif !important;
+  font-family: 'Times New Roman', 'Noto Serif Tamil', Times, serif !important;
 }
 
 h1,
@@ -32,13 +32,13 @@ h5,
 h6,
 .fw-bold,
 .display-5 {
-  font-family: 'Times New Roman', Times, serif !important;
+  font-family: 'Times New Roman', 'Noto Serif Tamil', Times, serif !important;
 }
 
 blockquote,
 .tamil-verse,
 blockquote * {
-  font-family: 'Times New Roman', Times, serif !important;
+  font-family: 'Noto Serif Tamil', 'Merriweather', serif !important;
 }
 
 body {
