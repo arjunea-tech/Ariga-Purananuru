@@ -17,6 +17,7 @@ import { StudentProgressComponent } from './components/student-progress/student-
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard';
 import { Announcements } from './components/announcements/announcements';
 import { roleGuard } from './guards/role.guard';
+import { AdminUploadComponent } from './components/admin-upload/admin-upload.component';
 
 export const routes: Routes = [
   // Public Login route
@@ -36,6 +37,11 @@ export const routes: Routes = [
   { 
     path: 'tenants', 
     component: Tenant, 
+    canActivate: [roleGuard(['super_admin'])] 
+  },
+  { 
+    path: 'admin-upload', 
+    component: AdminUploadComponent, 
     canActivate: [roleGuard(['super_admin'])] 
   },
 

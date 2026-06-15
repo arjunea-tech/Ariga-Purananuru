@@ -51,11 +51,12 @@ import { AssessmentPlayerComponent } from '../activity-engine/assessment-player/
 import { ActivityRenderer } from '../activity-engine/activity-renderer/activity-renderer';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../services/auth';
+import { AiTutorChatComponent } from '../ai-tutor-chat/ai-tutor-chat.component';
 
 @Component({
   selector: 'app-course-player',
   standalone: true,
-  imports: [CommonModule, RouterModule, AssessmentPlayerComponent, ActivityRenderer, TranslateModule, FormsModule],
+  imports: [CommonModule, RouterModule, AssessmentPlayerComponent, ActivityRenderer, TranslateModule, FormsModule, AiTutorChatComponent],
   templateUrl: './course-player.html',
   styleUrls: ['./course-player.css']
 })
@@ -137,9 +138,7 @@ export class CoursePlayer implements OnInit {
     this.translate.use(lang);
     localStorage.setItem('lang', lang);
     this.currentLang.set(lang);
-    if (this.speechRecognition) {
-      this.speechRecognition.lang = lang === 'ta' ? 'ta-IN' : 'en-US';
-    }
+
   }
 
   toggleSidebar(): void {
@@ -197,13 +196,6 @@ export class CoursePlayer implements OnInit {
 
   // AI Tutor signals
   isChatOpen = signal<boolean>(false);
-  chatMessages = signal<{ role: 'user' | 'ai', text: string }[]>([]);
-  isAiTyping = signal<boolean>(false);
-  chatInput = signal<string>('');
-
-  //Voice Signals
-  isListening = signal<boolean>(false);
-  speechRecognition: any = null;
 
   // AI Quiz signals
   isGeneratingQuiz = signal<boolean>(false);
@@ -565,37 +557,6 @@ export class CoursePlayer implements OnInit {
         this.checkQueryParams();
       }
     });
-
-
-    // Initialize Speech Recognition
-    if (typeof window !== 'undefined') {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        this.speechRecognition = new SpeechRecognition();
-        this.speechRecognition.continuous = false;
-        this.speechRecognition.interimResults = false;
-        this.speechRecognition.lang = this.currentLang() === 'ta' ? 'ta-IN' : 'en-US';
-
-        this.speechRecognition.onstart = () => {
-          this.isListening.set(true);
-        };
-
-        this.speechRecognition.onresult = (event: any) => {
-          const transcript = event.results[0][0].transcript;
-          this.chatInput.set(transcript);
-          this.sendChatMessage();
-        };
-
-        this.speechRecognition.onerror = (event: any) => {
-          console.error('Speech recognition error', event.error);
-          this.isListening.set(false);
-        };
-
-        this.speechRecognition.onend = () => {
-          this.isListening.set(false);
-        };
-      }
-    }
   }
 
   logout() {
@@ -811,69 +772,6 @@ export class CoursePlayer implements OnInit {
 
   toggleChat(): void {
     this.isChatOpen.set(!this.isChatOpen());
-    if (this.isChatOpen() && this.chatMessages().length === 0) {
-      const key = this.activeContentId() ? 'STUDENT.ASK_ANYTHING' : 'STUDENT.ASK_GENERAL';
-      const welcomeText = this.translate.instant(key);
-      this.chatMessages.set([
-        { role: 'ai', text: welcomeText }
-      ]);
-    }
-  }
-
-  sendChatMessage(): void {
-    const input = this.chatInput().trim();
-    if (!input) return;
-
-    // Add user message
-    this.chatMessages.set([...this.chatMessages(), { role: 'user', text: input }]);
-    this.chatInput.set('');
-    this.isAiTyping.set(true);
-
-    const payload = {
-      content_id: this.activeContentId(),
-      course_id: this.courseId(),
-      message: input
-    };
-
-    const headers = {
-      'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
-    };
-
-    this.http.post<any>('http://localhost:8000/api/ai-tutor/chat', payload, { headers }).subscribe({
-      next: (res) => {
-        this.isAiTyping.set(false);
-        this.chatMessages.set([...this.chatMessages(), { role: 'ai', text: res.reply }]);
-        this.speakText(res.reply);
-      },
-      error: (err) => {
-        console.error('AI Tutor Error:', err);
-        this.isAiTyping.set(false);
-        this.chatMessages.set([...this.chatMessages(), { role: 'ai', text: 'Sorry, I encountered an error connecting to the AI.' }]);
-      }
-    });
-  }
-
-  toggleListening(): void {
-    if (!this.speechRecognition) {
-      alert('Speech recognition is not supported in this browser.');
-      return;
-    }
-
-    if (this.isListening()) {
-      this.speechRecognition.stop();
-    } else {
-      this.speechRecognition.start();
-    }
-  }
-
-  speakText(text: string): void {
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      // Remove markdown or special characters before speaking
-      const plainText = text.replace(/[*#_]/g, '');
-      const utterance = new SpeechSynthesisUtterance(plainText);
-      utterance.lang = this.currentLang() === 'ta' ? 'ta-IN' : 'en-US';
-      window.speechSynthesis.speak(utterance);
-    }
   }
 
   generateAiQuiz(): void {

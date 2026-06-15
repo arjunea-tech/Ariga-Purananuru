@@ -1089,82 +1089,7 @@
           <!-- STEP 3: FULL PAGE AI TUTOR PANEL -->
           @if (activeStep() === 'ai') {
             <div class="max-w-4xl mx-auto animate-fade-in">
-              <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white" style="height: 600px;">
-                <!-- Header -->
-                <div class="ariga-primary-gradient p-4 text-white d-flex align-items-center justify-content-between">
-                  <div class="d-flex align-items-center gap-3">
-                    <div class="rounded-3 bg-white bg-opacity-20 d-flex align-items-center justify-content-center text-white" style="width: 48px; height: 48px;">
-                      <i class="bi bi-robot fs-3"></i>
-                    </div>
-                    <div>
-                      <h5 class="fw-bold mb-0 text-white">AI Tutor Workspace</h5>
-                      <span class="text-white-50 small d-flex align-items-center gap-1"><span class="d-inline-block rounded-circle bg-success" style="width: 8px; height: 8px;"></span> Online Helper</span>
-                    </div>
-                  </div>
-                  <span class="badge bg-white bg-opacity-20 rounded-pill px-3 py-2 fw-semibold" style="font-size: 11px;">✦ Context: {{ activeContent()?.title || activeContent()?.name || courseStructure()?.name || 'Course Content' }}</span>
-                </div>
-
-                <!-- Chat Body messages -->
-                <div class="flex-grow-1 p-4 overflow-y-auto bg-light-subtle d-flex flex-column gap-3" style="max-height: 420px;">
-                  @for (msg of chatMessages(); track $index) {
-                    <div class="d-flex" [class.justify-content-end]="msg.role === 'user'">
-                      <div class="d-flex gap-2 max-w-75" [class.flex-row-reverse]="msg.role === 'user'">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0" 
-                          style="width: 32px; height: 32px;" 
-                          [style.background]="msg.role === 'user' ? 'linear-gradient(135deg, #3b82f6, #06b6d4)' : 'linear-gradient(135deg, #6c47ff, #4f46e5)'">
-                          <i [class]="msg.role === 'user' ? 'bi bi-person-fill' : 'bi bi-robot'"></i>
-                        </div>
-                        <div class="p-3 rounded-4" 
-                          [class.user-bubble]="msg.role === 'user'" 
-                          [class.ai-bubble]="msg.role === 'ai'"
-                          style="font-size: 14px;">
-                          <div [innerHTML]="msg.text"></div>
-                        </div>
-                      </div>
-                    </div>
-                  }
-
-                  @if (isAiTyping()) {
-                    <div class="d-flex">
-                      <div class="d-flex gap-2 align-items-center">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0" style="width: 32px; height: 32px; background: linear-gradient(135deg, #6c47ff, #4f46e5);">
-                          <i class="bi bi-robot"></i>
-                        </div>
-                        <div class="typing-indicator px-3 py-2 bg-white rounded-pill border">
-                          <span></span><span></span><span></span>
-                        </div>
-                      </div>
-                    </div>
-                  }
-                </div>
-
-                <!-- Quick prompt chips -->
-                <div class="px-4 py-2 border-top bg-light d-flex gap-2 overflow-x-auto whitespace-nowrap">
-                  <button class="btn btn-outline-primary btn-sm rounded-pill py-1 px-3 fw-semibold flex-shrink-0" (click)="chatInput.set('Explain in Tamil'); sendChatMessage()">🗣️ Explain in Tamil</button>
-                  <button class="btn btn-outline-primary btn-sm rounded-pill py-1 px-3 fw-semibold flex-shrink-0" (click)="chatInput.set('Give Examples'); sendChatMessage()">💡 Give Examples</button>
-                  <button class="btn btn-outline-primary btn-sm rounded-pill py-1 px-3 fw-semibold flex-shrink-0" (click)="chatInput.set('Summarize'); sendChatMessage()">📝 Summarize</button>
-                  <button class="btn btn-outline-primary btn-sm rounded-pill py-1 px-3 fw-semibold flex-shrink-0" (click)="chatInput.set('Generate Quiz'); sendChatMessage()">🎯 Generate Quiz</button>
-                </div>
-
-                <!-- Message input footer -->
-                <div class="p-3 border-top d-flex align-items-center gap-2">
-                  <button class="btn rounded-circle btn-light flex-shrink-0 d-flex align-items-center justify-content-center" 
-                    [class.recording-pulse]="isListening()"
-                    style="width: 44px; height: 44px;" 
-                    (click)="toggleListening()" 
-                    [title]="isListening() ? 'Stop Listening' : 'Speak Message'">
-                    <i class="bi" [class.bi-mic-fill]="!isListening()" [class.bi-mic-mute-fill]="isListening()" [class.text-danger]="isListening()"></i>
-                  </button>
-                  <input type="text" [ngModel]="chatInput()" (ngModelChange)="chatInput.set($event)" (keyup.enter)="sendChatMessage()" class="form-control rounded-pill border-light-subtle py-2 px-3" placeholder="Ask AI Tutor about closures, hoisting, scope, etc...">
-                  <button class="btn rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-white" 
-                    [style.background]="chatInput().trim() ? 'linear-gradient(135deg, #6c47ff, #4f46e5)' : '#cbd5e1'" 
-                    style="width: 44px; height: 44px; border: none;"
-                    (click)="sendChatMessage()"
-                    [disabled]="!chatInput().trim()">
-                    <i class="bi bi-send-fill"></i>
-                  </button>
-                </div>
-              </div>
+              <app-ai-tutor-chat [activeContentId]="activeContentId()" [courseId]="courseId()"></app-ai-tutor-chat>
             </div>
           }
 
@@ -1239,64 +1164,7 @@
         <button class="btn btn-link text-white p-0" (click)="toggleChat()"><i class="bi bi-x-lg"></i></button>
       </div>
 
-      <!-- Messages Body -->
-      <div class="flex-grow-1 p-3 overflow-y-auto bg-light-subtle d-flex flex-column gap-3" style="max-height: 420px;">
-        @for (msg of chatMessages(); track $index) {
-          <div class="d-flex" [class.justify-content-end]="msg.role === 'user'">
-            <div class="d-flex gap-2 max-w-85" [class.flex-row-reverse]="msg.role === 'user'">
-              <div class="rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0" 
-                style="width: 28px; height: 28px; font-size: 10px;" 
-                [style.background]="msg.role === 'user' ? 'linear-gradient(135deg, #3b82f6, #06b6d4)' : 'linear-gradient(135deg, #6c47ff, #4f46e5)'">
-                <i [class]="msg.role === 'user' ? 'bi bi-person-fill' : 'bi bi-robot'"></i>
-              </div>
-              <div class="p-2.5 rounded-4 shadow-2xs" 
-                [class.user-bubble]="msg.role === 'user'" 
-                [class.ai-bubble]="msg.role === 'ai'"
-                style="font-size: 13px;">
-                <div [innerHTML]="msg.text"></div>
-              </div>
-            </div>
-          </div>
-        }
-
-        @if (isAiTyping()) {
-          <div class="d-flex">
-            <div class="d-flex gap-2 align-items-center">
-              <div class="rounded-circle d-flex align-items-center justify-content-center text-white flex-shrink-0" style="width: 28px; height: 28px; font-size: 10px; background: linear-gradient(135deg, #6c47ff, #4f46e5);">
-                <i class="bi bi-robot"></i>
-              </div>
-              <div class="typing-indicator px-2.5 py-1.5 bg-white rounded-pill border">
-                <span></span><span></span><span></span>
-              </div>
-            </div>
-          </div>
-        }
-      </div>
-
-      <!-- Quick prompts -->
-      <div class="p-2 border-top bg-light d-flex gap-1.5 overflow-x-auto whitespace-nowrap">
-        <button class="btn btn-outline-primary btn-sm rounded-pill py-0.5 px-2.5 fw-semibold flex-shrink-0" style="font-size: 11px;" (click)="chatInput.set('Explain in Tamil'); sendChatMessage()">🗣️ Tamil</button>
-        <button class="btn btn-outline-primary btn-sm rounded-pill py-0.5 px-2.5 fw-semibold flex-shrink-0" style="font-size: 11px;" (click)="chatInput.set('Give Examples'); sendChatMessage()">💡 Examples</button>
-        <button class="btn btn-outline-primary btn-sm rounded-pill py-0.5 px-2.5 fw-semibold flex-shrink-0" style="font-size: 11px;" (click)="chatInput.set('Summarize'); sendChatMessage()">📝 Summarize</button>
-      </div>
-
-      <!-- Inputs -->
-      <div class="p-2.5 border-top d-flex align-items-center gap-2">
-        <button class="btn rounded-circle btn-light flex-shrink-0 d-flex align-items-center justify-content-center" 
-          [class.recording-pulse]="isListening()"
-          style="width: 36px; height: 36px;" 
-          (click)="toggleListening()">
-          <i class="bi" [class.bi-mic-fill]="!isListening()" [class.bi-mic-mute-fill]="isListening()"></i>
-        </button>
-        <input type="text" [ngModel]="chatInput()" (ngModelChange)="chatInput.set($event)" (keyup.enter)="sendChatMessage()" class="form-control rounded-pill border-light-subtle py-1.5 px-3" style="font-size: 13px;" placeholder="Ask anything...">
-        <button class="btn rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-white" 
-          [style.background]="chatInput().trim() ? 'linear-gradient(135deg, #6c47ff, #4f46e5)' : '#cbd5e1'" 
-          style="width: 36px; height: 36px; border: none;"
-          (click)="sendChatMessage()"
-          [disabled]="!chatInput().trim()">
-          <i class="bi bi-send-fill" style="font-size: 12px;"></i>
-        </button>
-      </div>
+      <app-ai-tutor-chat [activeContentId]="activeContentId()" [courseId]="courseId()" [isFloating]="true"></app-ai-tutor-chat>
     </div>
   }
 </div>
