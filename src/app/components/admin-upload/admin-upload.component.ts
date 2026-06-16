@@ -16,7 +16,7 @@ export class AdminUploadComponent {
   isError = false;
   uploadMode: 'poem' | 'qa' = 'poem';
 
-  constructor(private api: AiAdminService) {}
+  constructor(private api: AiAdminService) { }
 
   setMode(mode: 'poem' | 'qa') {
     this.uploadMode = mode;
@@ -38,15 +38,15 @@ export class AdminUploadComponent {
 
   uploadData() {
     if (!this.fileContent) return;
-    
+
     this.loading = true;
     this.message = '';
-    
+
     try {
       const jsonData = JSON.parse(this.fileContent);
-      
-      const apiCall = this.uploadMode === 'poem' 
-        ? this.api.uploadDataset(jsonData) 
+
+      const apiCall = this.uploadMode === 'poem'
+        ? this.api.uploadDataset(jsonData)
         : this.api.uploadQaDataset(jsonData);
 
       apiCall.subscribe({

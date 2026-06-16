@@ -58,11 +58,11 @@ export class AiTutorChatComponent implements OnInit {
       'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
     };
 
-    this.http.post<any>('https://sangam-backend-gyu4.onrender.com/api/ai-tutor/chat', payload, { headers }).subscribe({
+    this.http.post<any>('https://sangam-ai.onrender.com/api/ai-tutor/chat', payload, { headers }).subscribe({
       next: (res) => {
         this.isAiTyping.set(false);
-        this.chatMessages.set([...this.chatMessages(), { 
-          role: 'ai', 
+        this.chatMessages.set([...this.chatMessages(), {
+          role: 'ai',
           text: res.reply || res.answer || '',
           is_verified_static: res.is_verified_static,
           sources: res.sources,

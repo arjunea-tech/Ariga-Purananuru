@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class AiAdminService {
   // Python FastAPI backend URL
-  private baseUrl = 'https://sangam-backend-gyu4.onrender.com/api';
+  private baseUrl = 'https://sangam-ai.onrender.com/api';
 
   constructor(private http: HttpClient) { }
 
