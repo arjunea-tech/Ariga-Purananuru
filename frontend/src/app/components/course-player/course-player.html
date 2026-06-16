@@ -1149,9 +1149,9 @@
     </button>
 
     <!-- Floating Chat Window -->
-    <div class="card border-0 shadow-lg rounded-4 overflow-hidden ai-chat-panel" [class.open]="isChatOpen()">
+    <div class="card border-0 shadow-lg rounded-4 overflow-hidden ai-chat-panel d-flex flex-column" [class.open]="isChatOpen()">
       <!-- Header -->
-      <div class="ariga-primary-gradient p-3 text-white d-flex align-items-center justify-content-between">
+      <div class="ariga-primary-gradient p-3 text-white d-flex align-items-center justify-content-between flex-shrink-0">
         <div class="d-flex align-items-center gap-2">
           <div class="rounded-3 bg-white bg-opacity-20 d-flex align-items-center justify-content-center text-white" style="width: 34px; height: 34px;">
             <i class="bi bi-robot"></i>
@@ -1164,7 +1164,7 @@
         <button class="btn btn-link text-white p-0" (click)="toggleChat()"><i class="bi bi-x-lg"></i></button>
       </div>
 
-      <app-ai-tutor-chat [activeContentId]="activeContentId()" [courseId]="courseId()" [isFloating]="true"></app-ai-tutor-chat>
+      <app-ai-tutor-chat class="flex-grow-1 d-flex flex-column overflow-hidden" [activeContentId]="activeContentId()" [courseId]="courseId()" [isFloating]="true"></app-ai-tutor-chat>
     </div>
   }
 </div>
