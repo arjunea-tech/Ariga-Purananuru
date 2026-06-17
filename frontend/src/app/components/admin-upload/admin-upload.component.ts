@@ -16,7 +16,7 @@ export class AdminUploadComponent {
   isError = false;
   uploadMode: 'poem' | 'qa' = 'poem';
 
-  constructor(private api: AiAdminService) { }
+  constructor(private api: AiAdminService, private cdr: import('@angular/core').ChangeDetectorRef) { }
 
   setMode(mode: 'poem' | 'qa') {
     this.uploadMode = mode;
@@ -51,17 +51,20 @@ export class AdminUploadComponent {
 
       apiCall.subscribe({
         next: (res) => {
-          this.message = res.message || 'Data uploaded successfully!';
+          console.log('Upload success response:', res);
+          this.message = res?.message || 'Data uploaded successfully!';
           this.isError = false;
           this.loading = false;
           this.selectedFile = null;
           this.fileContent = '';
+          this.cdr.detectChanges();
         },
         error: (err) => {
-          console.error(err);
-          this.message = 'Failed to upload data. Check console for details.';
+          console.error('Upload error:', err);
+          this.message = err?.error?.message || 'Failed to upload data. Check console for details.';
           this.isError = true;
           this.loading = false;
+          this.cdr.detectChanges();
         }
       });
     } catch (e) {
