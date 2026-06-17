@@ -37,6 +37,21 @@ export class AiTutorChatComponent implements OnInit {
   pushWelcomeMessage() {
     const key = this.activeContentId() ? 'STUDENT.ASK_ANYTHING' : 'STUDENT.ASK_GENERAL';
     this.chatMessages.set([{ role: 'ai', text: key, isTranslationKey: true }]);
+
+    if (!this.activeContentId()) {
+      this.http.get<any[]>('https://sangam-ai.onrender.com/api/qa/starter').subscribe({
+        next: (questions) => {
+          if (questions && questions.length > 0) {
+            const msgs = [...this.chatMessages()];
+            if (msgs.length > 0 && msgs[0].role === 'ai') {
+              msgs[0].suggested_questions = questions.map(q => q.question);
+              this.chatMessages.set(msgs);
+            }
+          }
+        },
+        error: (err) => console.error('Failed to fetch starter questions', err)
+      });
+    }
   }
 
   sendChatMessage(): void {

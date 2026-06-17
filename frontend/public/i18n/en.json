@@ -181,5 +181,9 @@
   "VIEW_ALL": "View all",
   "WEEKLY_ACTIVITY": "Weekly Activity",
   "WELCOME_BACK": "WELCOME BACK",
-  "XP_POINTS": "XP Points"
+  "XP_POINTS": "XP Points",
+  "STUDENT": {
+    "ASK_GENERAL": "Hello! I am Sangam AI Assistant. How can I help you today?",
+    "ASK_ANYTHING": "Hello! I am ready to answer any questions about this topic."
+  }
 }
