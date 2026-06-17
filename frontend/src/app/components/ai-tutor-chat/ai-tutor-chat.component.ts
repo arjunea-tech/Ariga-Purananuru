@@ -8,7 +8,8 @@ import { TranslateService, TranslateModule } from '@ngx-translate/core';
   selector: 'app-ai-tutor-chat',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslateModule],
-  templateUrl: './ai-tutor-chat.component.html'
+  templateUrl: './ai-tutor-chat.component.html',
+  styleUrl: './ai-tutor-chat.component.css'
 })
 export class AiTutorChatComponent implements OnInit {
   private http = inject(HttpClient);
@@ -19,7 +20,7 @@ export class AiTutorChatComponent implements OnInit {
   courseId = input<number | null>(null);
   isFloating = input<boolean>(false);
 
-  chatMessages = signal<{ role: 'user' | 'ai', text: string, is_verified_static?: boolean, sources?: string[], suggested_questions?: string[] }[]>([]);
+  chatMessages = signal<{ role: 'user' | 'ai', text: string, isTranslationKey?: boolean, is_verified_static?: boolean, sources?: string[], suggested_questions?: string[] }[]>([]);
   isAiTyping = signal<boolean>(false);
   chatInput = signal<string>('');
   isListening = signal<boolean>(false);
@@ -35,8 +36,7 @@ export class AiTutorChatComponent implements OnInit {
 
   pushWelcomeMessage() {
     const key = this.activeContentId() ? 'STUDENT.ASK_ANYTHING' : 'STUDENT.ASK_GENERAL';
-    const welcomeText = this.translate.instant(key);
-    this.chatMessages.set([{ role: 'ai', text: welcomeText }]);
+    this.chatMessages.set([{ role: 'ai', text: key, isTranslationKey: true }]);
   }
 
   sendChatMessage(): void {
