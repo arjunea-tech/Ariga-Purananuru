@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AiAdminService } from '../../services/ai-admin.service';
 
@@ -16,7 +16,7 @@ export class AdminUploadComponent {
   isError = false;
   uploadMode: 'poem' | 'qa' = 'poem';
 
-  constructor(private api: AiAdminService, private cdr: import('@angular/core').ChangeDetectorRef) { }
+  constructor(private api: AiAdminService, private cdr: ChangeDetectorRef) { }
 
   setMode(mode: 'poem' | 'qa') {
     this.uploadMode = mode;
