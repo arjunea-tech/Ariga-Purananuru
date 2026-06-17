@@ -603,8 +603,8 @@ main.col > * {
   position: fixed;
   bottom: 6rem;
   right: 2rem;
-  width: 440px;
-  height: 650px;
+  width: 500px;
+  height: 700px;
   max-height: calc(100vh - 9rem);
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
