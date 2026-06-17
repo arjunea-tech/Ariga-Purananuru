@@ -58,7 +58,7 @@ export class AiTutorChatComponent implements OnInit {
       'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
     };
 
-    this.http.post<any>('https://sangam-ai.onrender.com/api/ai-tutor/chat', payload, { headers }).subscribe({
+    this.http.post<any>('https://sangam-ai.onrender.com/api/chat', payload, { headers }).subscribe({
       next: (res) => {
         this.isAiTyping.set(false);
         this.chatMessages.set([...this.chatMessages(), {
