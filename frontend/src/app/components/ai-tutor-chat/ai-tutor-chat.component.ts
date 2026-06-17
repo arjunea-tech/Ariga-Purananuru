@@ -66,7 +66,7 @@ export class AiTutorChatComponent implements OnInit {
     const payload = {
       content_id: this.activeContentId(),
       course_id: this.courseId(),
-      message: input
+      question: input
     };
 
     const headers = {
@@ -80,7 +80,7 @@ export class AiTutorChatComponent implements OnInit {
           role: 'ai',
           text: res.reply || res.answer || '',
           is_verified_static: res.is_verified_static,
-          sources: res.sources,
+          sources: res.context_sources || res.sources,
           suggested_questions: res.suggested_questions
         }]);
         this.speakText(res.reply || res.answer || '');
