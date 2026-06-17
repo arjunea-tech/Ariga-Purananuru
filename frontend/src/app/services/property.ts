@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -34,7 +35,7 @@ export interface PropertyData {
 })
 export class PropertyService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://127.0.0.1:8000/api/properties';
+  private apiUrl = `${environment.apiUrl}/properties`;
 
   getAll(): Observable<PropertyData[]> {
     return this.http.get<PropertyData[]>(this.apiUrl);

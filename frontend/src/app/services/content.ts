@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -34,7 +35,7 @@ export interface ContentData {
 })
 export class ContentService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://127.0.0.1:8000/api/contents';
+  private apiUrl = `${environment.apiUrl}/contents`;
 
   getAll(chapterId?: number): Observable<ContentData[]> {
     let params = new HttpParams();

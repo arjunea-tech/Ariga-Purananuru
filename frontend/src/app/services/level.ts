@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -25,7 +26,7 @@ export interface LevelData {
 })
 export class LevelService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://127.0.0.1:8000/api/levels';
+  private apiUrl = `${environment.apiUrl}/levels`;
 
   getAll(courseId?: number): Observable<LevelData[]> {
     let params = new HttpParams();

@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -23,7 +24,7 @@ export interface CourseProgress {
 })
 export class LearningProgressService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://127.0.0.1:8000/api';
+  private apiUrl = `${environment.apiUrl}`;
 
   getUserProgress(userId: number, courseId: number): Observable<CourseProgress> {
     return this.http.get<CourseProgress>(`${this.apiUrl}/users/${userId}/courses/${courseId}/progress`);

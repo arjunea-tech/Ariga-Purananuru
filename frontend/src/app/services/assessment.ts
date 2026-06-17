@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -63,7 +64,7 @@ export interface AttemptResult {
 })
 export class AssessmentService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://127.0.0.1:8000/api/assessments';
+  private apiUrl = `${environment.apiUrl}/assessments`;
 
   getAll(filters?: { level_id?: number, chapter_id?: number }): Observable<AssessmentData[]> {
     let params = new HttpParams();

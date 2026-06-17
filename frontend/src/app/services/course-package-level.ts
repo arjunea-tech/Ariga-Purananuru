@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -14,7 +15,7 @@ export interface CoursePackageLevelData {
 })
 export class CoursePackageLevelService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://127.0.0.1:8000/api/packages';
+  private apiUrl = `${environment.apiUrl}/packages`;
 
   getByPackage(packageId: number, courseId?: number): Observable<any[]> {
     let url = `${this.apiUrl}/${packageId}/levels`;

@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -18,7 +19,7 @@ export interface CourseData {
 })
 export class CourseService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://127.0.0.1:8000/api/courses';
+  private apiUrl = `${environment.apiUrl}/courses`;
 
   getAll(): Observable<CourseData[]> {
     return this.http.get<CourseData[]>(this.apiUrl);

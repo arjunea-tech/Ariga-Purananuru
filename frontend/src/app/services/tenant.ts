@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -20,7 +21,7 @@ export interface TenantData {
 })
 export class TenantService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://127.0.0.1:8000/api/tenants';
+  private apiUrl = `${environment.apiUrl}/tenants`;
 
   getAll(): Observable<TenantData[]> {
     return this.http.get<TenantData[]>(this.apiUrl);

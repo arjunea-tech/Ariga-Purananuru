@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -9,8 +10,8 @@ import { LevelData } from './level';
 })
 export class LevelChapterService {
   private http = inject(HttpClient);
-  private levelsApiUrl = 'http://127.0.0.1:8000/api/levels';
-  private chaptersApiUrl = 'http://127.0.0.1:8000/api/chapters';
+  private levelsApiUrl = `${environment.apiUrl}/levels`;
+  private chaptersApiUrl = `${environment.apiUrl}/chapters`;
 
   getMappedChapters(levelId: number): Observable<ChapterData[]> {
     return this.http.get<ChapterData[]>(`${this.levelsApiUrl}/${levelId}/chapters`);

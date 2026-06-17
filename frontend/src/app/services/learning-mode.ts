@@ -1,3 +1,4 @@
+import { environment } from '../../environments/environment';
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -17,7 +18,7 @@ export interface LearningModeData {
 })
 export class LearningModeService {
   private http = inject(HttpClient);
-  private apiUrl = 'http://127.0.0.1:8000/api/learning-modes';
+  private apiUrl = `${environment.apiUrl}/learning-modes`;
 
   getAll(): Observable<LearningModeData[]> {
     return this.http.get<LearningModeData[]>(this.apiUrl);
