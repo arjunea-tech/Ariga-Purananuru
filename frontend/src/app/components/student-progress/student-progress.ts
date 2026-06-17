@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -69,7 +70,7 @@ export class StudentProgressComponent implements OnInit {
 
   loadStudents(): void {
     this.loadingStudents.set(true);
-    this.http.get<User[]>('http://localhost:8000/api/users').subscribe({
+    this.http.get<User[]>(`${environment.apiUrl}/users`).subscribe({
       next: (data) => {
         const studentsOnly = data.filter(u => u.role === 'student');
         this.students.set(studentsOnly);
@@ -93,7 +94,7 @@ export class StudentProgressComponent implements OnInit {
     this.loadingProgress.set(true);
     this.selectedStudentProgress.set(null);
 
-    this.http.get<StudentProgressStats>(`http://localhost:8000/api/users/${student.id}/progress-stats`).subscribe({
+    this.http.get<StudentProgressStats>(`${environment.apiUrl}/users/${student.id}/progress-stats`).subscribe({
       next: (data) => {
         this.selectedStudentProgress.set(data);
         this.loadingProgress.set(false);

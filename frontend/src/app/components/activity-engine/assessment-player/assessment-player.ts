@@ -1,3 +1,4 @@
+import { environment } from '../../../../environments/environment';
 import { Component, OnInit, OnDestroy, inject, signal, computed, Input, Output, EventEmitter, SimpleChanges, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -105,7 +106,7 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy, OnChanges {
   loadAssessmentDetails(): void {
     if (!this.assessmentId()) return;
 
-    const url = `http://localhost:8000/api/assessments/${this.assessmentId()}`;
+    const url = `${environment.apiUrl}/assessments/${this.assessmentId()}`;
     this.http.get<AssessmentData>(url).subscribe({
       next: (data) => {
         this.assessment.set(data);
@@ -199,7 +200,7 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy, OnChanges {
       answers: answersPayload
     };
 
-    const url = `http://localhost:8000/api/assessments/${exam.id}/submit`;
+    const url = `${environment.apiUrl}/assessments/${exam.id}/submit`;
     this.http.post<any>(url, body).subscribe({
       next: (res) => {
         this.resultsData.set({

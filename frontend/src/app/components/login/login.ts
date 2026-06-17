@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { Component, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -45,7 +46,7 @@ export class LoginComponent implements OnInit {
   fetchBranding(code: string): void {
     if (!code) return;
 
-    this.http.get<any>(`http://localhost:8000/api/tenants/brand/${code}`).subscribe({
+    this.http.get<any>(`${environment.apiUrl}/tenants/brand/${code}`).subscribe({
       next: (brand) => {
         this.tenantBranding = brand;
         this.applyBranding(brand);

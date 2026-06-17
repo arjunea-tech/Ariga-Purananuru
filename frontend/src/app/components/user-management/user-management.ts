@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -118,7 +119,7 @@ export class UserManagement implements OnInit {
   }
 
   loadUsers(): void {
-    this.http.get<User[]>('http://localhost:8000/api/users').subscribe({
+    this.http.get<User[]>(`${environment.apiUrl}/users`).subscribe({
       next: (data) => this.users.set(data),
       error: (err) => this.showFeedback('error', 'Failed to load users list.'),
     });
@@ -159,7 +160,7 @@ export class UserManagement implements OnInit {
     this.importedResults.set([]);
     this.importErrors.set([]);
 
-    this.http.post<any>('http://localhost:8000/api/users/import', formData).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/users/import`, formData).subscribe({
       next: (res) => {
         this.importing = false;
         this.users.set([...this.users(), ...res.imported]);
@@ -250,7 +251,7 @@ export class UserManagement implements OnInit {
       formValue.name = `Manager (${formValue.login})`;
     }
 
-    this.http.post<any>('http://localhost:8000/api/register', formValue).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/register`, formValue).subscribe({
       next: (res) => {
         this.submitting = false;
         this.closeAddUserModal();
@@ -300,7 +301,7 @@ export class UserManagement implements OnInit {
       delete formValue.password;
     }
 
-    this.http.put<any>(`http://localhost:8000/api/users/${this.selectedUserForEdit.id}`, formValue).subscribe({
+    this.http.put<any>(`${environment.apiUrl}/users/${this.selectedUserForEdit.id}`, formValue).subscribe({
       next: (res) => {
         this.submitting = false;
         this.closeEditUserModal();
@@ -320,7 +321,7 @@ export class UserManagement implements OnInit {
     }
 
     this.deletingUserId = userId;
-    this.http.delete<any>(`http://localhost:8000/api/users/${userId}`).subscribe({
+    this.http.delete<any>(`${environment.apiUrl}/users/${userId}`).subscribe({
       next: () => {
         this.deletingUserId = null;
         this.showFeedback('success', 'User deleted successfully.');

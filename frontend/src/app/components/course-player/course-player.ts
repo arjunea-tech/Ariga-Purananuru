@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -61,6 +62,7 @@ import { AiTutorChatComponent } from '../ai-tutor-chat/ai-tutor-chat.component';
   styleUrls: ['./course-player.css']
 })
 export class CoursePlayer implements OnInit {
+  environment = environment;
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
   protected authService = inject(AuthService);
@@ -584,18 +586,18 @@ export class CoursePlayer implements OnInit {
   }
 
   loadStudentDashboardData(skipAutoSelect = false): void {
-    this.http.get<any>('http://localhost:8000/api/student/dashboard').subscribe({
+    this.http.get<any>(`${environment.apiUrl}/student/dashboard`).subscribe({
       next: (res) => this.stats.set(res),
       error: (err) => console.error('Failed to load student dashboard stats', err)
     });
 
-    this.http.get<any[]>('http://localhost:8000/api/courses').subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/courses`).subscribe({
       next: (res) => {
         this.courses.set(res);
       
       // Load achievements if we are on the achievements screen
       if (this.currentScreen() === 'achievements') {
-        this.http.get<any[]>('http://localhost:8000/api/student/achievements')
+        this.http.get<any[]>(`${environment.apiUrl}/student/achievements`)
           .subscribe({
             next: (list) => this.achievements.set(list),
             error: (err) => console.error('Failed to load achievements', err)
@@ -621,7 +623,7 @@ export class CoursePlayer implements OnInit {
     const chapterId = this.activeChapterId();
     if (!chapterId) return;
 
-    this.http.post<any>(`http://localhost:8000/api/chapters/${chapterId}/complete`, {}).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/chapters/${chapterId}/complete`, {}).subscribe({
       next: () => {
         this.loadStudentDashboardData(true);
       },
@@ -634,7 +636,7 @@ export class CoursePlayer implements OnInit {
   loadStructure(): void {
     if (!this.courseId()) return;
 
-    const url = `http://localhost:8000/api/courses/${this.courseId()}/player-structure`;
+    const url = `${environment.apiUrl}/courses/${this.courseId()}/player-structure`;
     this.http.get<CourseStructure>(url).subscribe({
       next: (structure) => {
         // Initialize expansion states
@@ -685,7 +687,7 @@ export class CoursePlayer implements OnInit {
       this.activeContentId.set(null);
       this.fullContent.set(null);
 
-      const url = `http://localhost:8000/api/courses/${id}/player-structure`;
+      const url = `${environment.apiUrl}/courses/${id}/player-structure`;
       this.http.get<CourseStructure>(url).subscribe({
         next: (structure) => {
           structure.levels.forEach((l) => {
@@ -715,7 +717,7 @@ export class CoursePlayer implements OnInit {
     this.selectedAssessmentId.set(null); // Reset assessment selection
 
     // Fetch full content details
-    const url = `http://localhost:8000/api/contents/${id}`;
+    const url = `${environment.apiUrl}/contents/${id}`;
     this.http.get<Content>(url).subscribe({
       next: (content) => {
         this.fullContent.set(content);
@@ -787,7 +789,7 @@ export class CoursePlayer implements OnInit {
       'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
     };
 
-    this.http.post<any>('http://localhost:8000/api/ai-tutor/generate-quiz', { content_id: contentId }, { headers }).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/ai-tutor/generate-quiz`, { content_id: contentId }, { headers }).subscribe({
       next: (res) => {
         this.isGeneratingQuiz.set(false);
         if (res.quiz && Array.isArray(res.quiz)) {
@@ -835,7 +837,7 @@ export class CoursePlayer implements OnInit {
       'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
     };
 
-    this.http.post<any>(`http://localhost:8000/api/contents/${id}/activities`, {}, { headers }).subscribe({
+    this.http.post<any>(`${environment.apiUrl}/contents/${id}/activities`, {}, { headers }).subscribe({
       next: (res) => {
         this.isLoadingActivities.set(false);
         if (res.activities) {
@@ -914,7 +916,7 @@ export class CoursePlayer implements OnInit {
       'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
     };
 
-    this.http.post<any>('http://localhost:8000/api/student/record-activity', {
+    this.http.post<any>(`${environment.apiUrl}/student/record-activity`, {
       content_id: contentId,
       activity_type: type,
       score: score,

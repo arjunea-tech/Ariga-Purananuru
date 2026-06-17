@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -33,7 +34,7 @@ export class AdminDashboardComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.http.get<TenantStats>('http://localhost:8000/api/dashboard/tenant-stats').subscribe({
+    this.http.get<TenantStats>(`${environment.apiUrl}/dashboard/tenant-stats`).subscribe({
       next: (data) => {
         this.stats.set(data);
         this.loading.set(false);
