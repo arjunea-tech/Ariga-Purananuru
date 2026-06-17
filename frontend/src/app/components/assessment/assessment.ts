@@ -230,13 +230,7 @@ export class Assessment implements OnInit {
     this.addQuestion();
   }
 
-  onSubmit(): void {
-    if (this.assessmentForm.invalid) {
-      this.assessmentForm.markAllAsTouched();
-      this.showFeedback('error', 'Please fill all required fields correctly.');
-      return;
-    }
-
+  async onSubmit(): Promise<void> {
     const savePromises: Promise<any>[] = [];
 
     if (this.preludeEditor) {
@@ -252,49 +246,64 @@ export class Assessment implements OnInit {
         const editor = this.questionEditors.get(editorId);
         if (editor) {
           const qPromise = editor.save().then(data => {
-            control.get('question_text')?.setValue(JSON.stringify(data));
+            // Check if editor is actually empty
+            if (!data.blocks || data.blocks.length === 0) {
+              control.get('question_text')?.setValue('');
+            } else {
+              control.get('question_text')?.setValue(JSON.stringify(data));
+            }
           });
           savePromises.push(qPromise);
         }
       }
     });
 
-    Promise.all(savePromises).then(() => {
-      const assessmentData = JSON.parse(JSON.stringify(this.assessmentForm.value));
-      if (assessmentData.questions) {
-        assessmentData.questions.forEach((q: any) => {
-          delete q._editorId;
-        });
-      }
+    try {
+      await Promise.all(savePromises);
+    } catch (error) {
+      console.error('Saving editors failed: ', error);
+      this.showFeedback('error', 'Failed to save rich text content.');
+      return;
+    }
 
-      if (this.isEditMode()) {
-        const id = this.currentAssessmentId();
-        if (id) {
-          this.assessmentService.update(id, assessmentData).subscribe({
-            next: () => {
-              this.showFeedback('success', 'Assessment updated successfully');
-              this.isFormVisible.set(false);
-              this.loadAssessments();
-              this.resetForm();
-            },
-            error: (err) => this.showFeedback('error', err.error?.message || 'Failed to update assessment'),
-          });
-        }
-      } else {
-        this.assessmentService.create(assessmentData).subscribe({
+    if (this.assessmentForm.invalid) {
+      this.assessmentForm.markAllAsTouched();
+      this.showFeedback('error', 'Please fill all required fields correctly.');
+      console.error('Invalid Form:', this.assessmentForm.value);
+      return;
+    }
+
+    const assessmentData = JSON.parse(JSON.stringify(this.assessmentForm.value));
+    if (assessmentData.questions) {
+      assessmentData.questions.forEach((q: any) => {
+        delete q._editorId;
+      });
+    }
+
+    if (this.isEditMode()) {
+      const id = this.currentAssessmentId();
+      if (id) {
+        this.assessmentService.update(id, assessmentData).subscribe({
           next: () => {
-            this.showFeedback('success', 'Assessment created successfully');
+            this.showFeedback('success', 'Assessment updated successfully');
             this.isFormVisible.set(false);
             this.loadAssessments();
             this.resetForm();
           },
-          error: (err) => this.showFeedback('error', err.error?.message || 'Failed to create assessment'),
+          error: (err) => this.showFeedback('error', err.error?.message || 'Failed to update assessment'),
         });
       }
-    }).catch(error => {
-      console.error('Saving editors failed: ', error);
-      this.showFeedback('error', 'Failed to save rich text content.');
-    });
+    } else {
+      this.assessmentService.create(assessmentData).subscribe({
+        next: () => {
+          this.showFeedback('success', 'Assessment created successfully');
+          this.isFormVisible.set(false);
+          this.loadAssessments();
+          this.resetForm();
+        },
+        error: (err) => this.showFeedback('error', err.error?.message || 'Failed to create assessment'),
+      });
+    }
   }
 
   editAssessment(assessment: AssessmentData): void {
