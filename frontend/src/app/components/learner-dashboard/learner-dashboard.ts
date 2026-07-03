@@ -71,11 +71,6 @@ export class LearnerDashboard implements OnInit {
         const activeCourses = data.filter(c => c.is_active);
         this.courses.set(activeCourses);
         this.isLoading.set(false);
-
-        // For classic UI (age > 15), skip this page and go directly to the course player
-        if (this.uiTheme() === 'classic' && activeCourses.length > 0) {
-          this.router.navigate(['/learn', activeCourses[0].id]);
-        }
       },
       error: (err) => {
         console.error('Failed to load courses', err);

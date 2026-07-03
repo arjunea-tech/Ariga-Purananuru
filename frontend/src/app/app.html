@@ -42,17 +42,23 @@
 
     <div class="p-4 border-bottom border-secondary border-opacity-25 d-none d-lg-block">
       <div class="d-flex align-items-center gap-3">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--bs-primary)" stroke-width="2.5"
-          stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0">
-          <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-          <path d="M2 17l10 5 10-5"></path>
-          <path d="M2 12l10 5 10-5"></path>
-        </svg>
+        @if (tenantBranding()?.logo_url) {
+          <img [src]="tenantBranding()?.logo_url" class="rounded-circle flex-shrink-0" style="width: 32px; height: 32px; object-fit: contain; background: white; padding: 2px;">
+        } @else {
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--bs-primary)" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
+          </svg>
+        }
         <div class="d-flex flex-column">
-          <span class="h6 mb-0 fw-bold text-truncate" style="max-width: 160px;">{{ authService.getUser()?.name }}</span>
+          <span class="h6 mb-0 fw-bold text-truncate" style="max-width: 160px;">
+            {{ tenantBranding()?.tenant_name || authService.getUser()?.name }}
+          </span>
           <small class="text-secondary"
             style="font-size: 0.7rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">
-            {{ authService.getUserRole()?.replace('_', ' ') }}
+            {{ tenantBranding() ? authService.getUser()?.name : authService.getUserRole()?.replace('_', ' ') }}
           </small>
         </div>
       </div>
@@ -91,7 +97,7 @@
       <a routerLink="/announcements" routerLinkActive="active" (click)="closeSidebar()"
         class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
         <i class="bi bi-megaphone"></i>
-        <span>Announcements</span>
+        <span>{{ 'SIDEBAR.ANNOUNCEMENTS' | translate }}</span>
       </a>
 
       <!-- 🏫 Academy Manager Menu Items (Super Admin, Admin, Staff) -->
@@ -104,7 +110,7 @@
       <a routerLink="/admin-dashboard" routerLinkActive="active" (click)="closeSidebar()"
         class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
         <i class="bi bi-speedometer2"></i>
-        <span>Dashboard</span>
+        <span>{{ 'SIDEBAR.DASHBOARD' | translate }}</span>
       </a>
       <a routerLink="/users" routerLinkActive="active" (click)="closeSidebar()"
         class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
@@ -114,7 +120,7 @@
       <a routerLink="/student-progress" routerLinkActive="active" (click)="closeSidebar()"
         class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
         <i class="bi bi-graph-up"></i>
-        <span>Student Progress</span>
+        <span>{{ 'SIDEBAR.STUDENT_PROGRESS' | translate }}</span>
       </a>
       }
 
@@ -189,7 +195,7 @@
       <a routerLink="/admin-upload" routerLinkActive="active" (click)="closeSidebar()"
         class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
         <i class="bi bi-cloud-arrow-up"></i>
-        <span>Admin Upload</span>
+        <span>{{ 'SIDEBAR.ADMIN_UPLOAD' | translate }}</span>
       </a>
       }
 
@@ -199,7 +205,7 @@
         <button (click)="logout(); $event.stopPropagation()"
           class="btn btn-logout-custom btn-sm w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2 fw-semibold">
           <i class="bi bi-box-arrow-right fs-5"></i>
-          <span>Logout</span>
+          <span>{{ 'LOGOUT' | translate }}</span>
         </button>
       </div>
 

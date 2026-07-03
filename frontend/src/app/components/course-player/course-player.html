@@ -9,15 +9,20 @@
       <div class="p-3 d-flex align-items-center justify-content-between border-bottom" style="height: 84px;">
         @if (!isSidebarCollapsed()) {
         <div class="d-flex align-items-center gap-3 animate-fade-in">
-          <div
-            class="sidebar-logo-square d-flex align-items-center justify-content-center text-white rounded-3 flex-shrink-0"
-            style="width: 40px; height: 40px; font-size: 1.25rem;">
-            <i class="bi bi-zap-fill"></i>
-          </div>
+          @if (tenantBranding()?.logo_url) {
+            <img [src]="tenantBranding()?.logo_url" class="rounded-3 flex-shrink-0" style="width: 40px; height: 40px; object-fit: contain; background: white; padding: 2px; border: 1px solid #e2e8f0;">
+          } @else {
+            <div
+              class="sidebar-logo-square d-flex align-items-center justify-content-center text-white rounded-3 flex-shrink-0"
+              style="width: 40px; height: 40px; font-size: 1.25rem;">
+              <i class="bi bi-zap-fill"></i>
+            </div>
+          }
           <div>
-            <h5 class="fw-bold mb-0 text-dark" style="font-size: 15px; letter-spacing: -0.02em;">Ariga Workspace</h5>
-            <span class="text-uppercase fw-bold text-primary" style="font-size: 10px; letter-spacing: 0.05em;">STUDENT
-              PORTAL</span>
+            <h5 class="fw-bold mb-0 text-dark" style="font-size: 15px; letter-spacing: -0.02em; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              {{ tenantBranding()?.tenant_name || 'Ariga Workspace' }}
+            </h5>
+            <span class="text-uppercase fw-bold text-primary" style="font-size: 10px; letter-spacing: 0.05em;">STUDENT PORTAL</span>
           </div>
         </div>
         }
@@ -90,12 +95,22 @@
           <select [ngModel]="selectedLang()" (ngModelChange)="updateLanguage($event)"
             class="form-select form-select-sm border-0 bg-transparent fw-bold shadow-none ms-1 text-dark"
             style="cursor: pointer;">
-            <option value="en">English (EN)</option>
-            <option value="ta">Tamil (TA)</option>
+            @for (mode of allowedLearningModes(); track mode.id) {
+              @if (mode.code.toLowerCase() === 'english') {
+                <option value="en">English (EN)</option>
+              }
+              @if (mode.code.toLowerCase() === 'tamil') {
+                <option value="ta">Tamil (TA)</option>
+              }
+            }
+            @empty {
+              <option value="en">English (EN)</option>
+              <option value="ta">Tamil (TA)</option>
+            }
           </select>
           } @else {
           <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill cursor-pointer hover-scale-btn"
-            style="font-size: 10px;" (click)="selectedLang() === 'en' ? updateLanguage('ta') : updateLanguage('en')"
+            style="font-size: 10px;" (click)="toggleLanguageCollapsed()"
             title="Switch Language">
             {{ selectedLang() | uppercase }}
           </span>

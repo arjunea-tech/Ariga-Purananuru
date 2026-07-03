@@ -18,7 +18,38 @@ class DashboardController extends Controller
         $userId = $user->id;
 
         // 1. Overall Completion Progress
-        $totalChapters = DB::table('chapters')->count();
+        $allowedCourseIds = [];
+        if ($user->role === 'student' && $user->tenant_id) {
+            $today = now()->toDateString();
+            $allowedCourseIds = DB::table('property_packages')
+                ->join('properties', 'property_packages.property_id', '=', 'properties.id')
+                ->where('properties.tenant_id', $user->tenant_id)
+                ->where('property_packages.is_active', true)
+                ->whereNotNull('property_packages.course_id')
+                ->where(function ($q) use ($today) {
+                    $q->whereNull('property_packages.start_date')
+                      ->orWhere('property_packages.start_date', '<=', $today);
+                })
+                ->where(function ($q) use ($today) {
+                    $q->whereNull('property_packages.end_date')
+                      ->orWhere('property_packages.end_date', '>=', $today);
+                })
+                ->distinct('property_packages.course_id')
+                ->pluck('property_packages.course_id')
+                ->toArray();
+        }
+
+        $totalChaptersQuery = DB::table('chapters');
+        if (!empty($allowedCourseIds)) {
+            $totalChaptersQuery->whereIn('chapters.id', function ($query) use ($allowedCourseIds) {
+                $query->select('level_chapter.chapter_id')
+                    ->from('level_chapter')
+                    ->join('levels', 'level_chapter.level_id', '=', 'levels.id')
+                    ->join('course_package_levels', 'levels.id', '=', 'course_package_levels.level_id')
+                    ->whereIn('course_package_levels.course_id', $allowedCourseIds);
+            });
+        }
+        $totalChapters = $totalChaptersQuery->count();
         
         $completedChapters = DB::table('user_course_progress')
             ->where('user_id', $userId)
@@ -60,7 +91,27 @@ class DashboardController extends Controller
 
         // 5. Course-by-course progressions
         $courseProgressions = [];
-        $courses = \App\Models\Course::where('is_active', true)->get();
+        $coursesQuery = \App\Models\Course::where('is_active', true);
+        if ($user->role === 'student' && $user->tenant_id) {
+            $today = now()->toDateString();
+            $coursesQuery->whereIn('id', function ($query) use ($user, $today) {
+                $query->select('property_packages.course_id')
+                    ->from('property_packages')
+                    ->join('properties', 'property_packages.property_id', '=', 'properties.id')
+                    ->where('properties.tenant_id', $user->tenant_id)
+                    ->where('property_packages.is_active', true)
+                    ->whereNotNull('property_packages.course_id')
+                    ->where(function ($q) use ($today) {
+                        $q->whereNull('property_packages.start_date')
+                          ->orWhere('property_packages.start_date', '<=', $today);
+                    })
+                    ->where(function ($q) use ($today) {
+                        $q->whereNull('property_packages.end_date')
+                          ->orWhere('property_packages.end_date', '>=', $today);
+                    });
+            });
+        }
+        $courses = $coursesQuery->get();
         foreach ($courses as $course) {
             $totalCourseChapters = DB::table('chapters')
                 ->join('level_chapter', 'chapters.id', '=', 'level_chapter.chapter_id')
@@ -429,11 +480,20 @@ class DashboardController extends Controller
             $activeCourses = \App\Models\Course::where('is_active', true)->count();
         } else {
             // A tenant only has access to courses mapped to its properties
+            $today = now()->toDateString();
             $activeCourses = DB::table('property_packages')
                 ->join('properties', 'property_packages.property_id', '=', 'properties.id')
                 ->where('properties.tenant_id', $tenantId)
                 ->where('property_packages.is_active', true)
                 ->whereNotNull('property_packages.course_id')
+                ->where(function ($q) use ($today) {
+                    $q->whereNull('property_packages.start_date')
+                      ->orWhere('property_packages.start_date', '<=', $today);
+                })
+                ->where(function ($q) use ($today) {
+                    $q->whereNull('property_packages.end_date')
+                      ->orWhere('property_packages.end_date', '>=', $today);
+                })
                 ->distinct('property_packages.course_id')
                 ->count('property_packages.course_id');
         }

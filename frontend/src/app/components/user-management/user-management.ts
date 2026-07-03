@@ -153,9 +153,25 @@ export class UserManagement implements OnInit {
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
 
+    const currentRole = this.authService.getUserRole();
+    const selectedTenantId = this.selectedTenantFilter();
+
+    if (currentRole === 'super_admin' && selectedTenantId === 'all') {
+      this.showFeedback('error', 'Please select a specific Tenant (School) filter first before importing users.');
+      input.value = '';
+      return;
+    }
+
     const file = input.files[0];
     const formData = new FormData();
     formData.append('file', file);
+
+    if (currentRole === 'super_admin') {
+      const selectedTenant = this.tenants().find(t => t.id === parseInt(selectedTenantId, 10));
+      if (selectedTenant) {
+        formData.append('tenant_code', selectedTenant.tenant_code);
+      }
+    }
 
     this.importing = true;
     this.importedResults.set([]);
@@ -200,6 +216,7 @@ export class UserManagement implements OnInit {
 
   initAddUserForm(): void {
     const defaultRole = this.availableRoles()[0]?.value || 'student';
+    const isSuperAdmin = this.authService.getUserRole() === 'super_admin';
 
     this.addUserForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
@@ -207,7 +224,8 @@ export class UserManagement implements OnInit {
       role: [defaultRole, [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       password_confirmation: ['', [Validators.required]],
-      dob: [null]
+      dob: [null],
+      tenant_code: [isSuperAdmin ? '' : null, isSuperAdmin ? [Validators.required] : []]
     }, { validators: this.passwordMatchValidator });
 
     // Handle dynamic validation for name field based on role selection

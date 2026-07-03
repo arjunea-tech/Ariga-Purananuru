@@ -119,7 +119,37 @@ export const routes: Routes = [
    */
   { 
     path: 'learn', 
-    component: LearnerDashboard, 
+    redirectTo: 'learn/dashboard', 
+    pathMatch: 'full' 
+  },
+  { 
+    path: 'learn/dashboard', 
+    component: CoursePlayer, 
+    canActivate: [roleGuard(['student', 'super_admin', 'admin', 'staff'])] 
+  },
+  { 
+    path: 'learn/courses', 
+    component: CoursePlayer, 
+    canActivate: [roleGuard(['student', 'super_admin', 'admin', 'staff'])] 
+  },
+  { 
+    path: 'learn/achievements', 
+    component: CoursePlayer, 
+    canActivate: [roleGuard(['student', 'super_admin', 'admin', 'staff'])] 
+  },
+  { 
+    path: 'learn/progress', 
+    component: CoursePlayer, 
+    canActivate: [roleGuard(['student', 'super_admin', 'admin', 'staff'])] 
+  },
+  { 
+    path: 'learn/settings', 
+    component: CoursePlayer, 
+    canActivate: [roleGuard(['student', 'super_admin', 'admin', 'staff'])] 
+  },
+  { 
+    path: 'learn/play/:courseId', 
+    component: CoursePlayer, 
     canActivate: [roleGuard(['student', 'super_admin', 'admin', 'staff'])] 
   },
   { 

@@ -7,8 +7,30 @@ use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $user = $request->user();
+        if ($user && $user->role === 'student' && $user->tenant_id) {
+            $today = now()->toDateString();
+            $courses = Course::where('is_active', true)
+                ->whereIn('id', function($query) use ($user, $today) {
+                    $query->select('property_packages.course_id')
+                        ->from('property_packages')
+                        ->join('properties', 'property_packages.property_id', '=', 'properties.id')
+                        ->where('properties.tenant_id', $user->tenant_id)
+                        ->where('property_packages.is_active', true)
+                        ->whereNotNull('property_packages.course_id')
+                        ->where(function ($q) use ($today) {
+                            $q->whereNull('property_packages.start_date')
+                              ->orWhere('property_packages.start_date', '<=', $today);
+                        })
+                        ->where(function ($q) use ($today) {
+                            $q->whereNull('property_packages.end_date')
+                              ->orWhere('property_packages.end_date', '>=', $today);
+                        });
+                })->latest()->get();
+            return response()->json($courses);
+        }
         return response()->json(Course::latest()->get());
     }
 

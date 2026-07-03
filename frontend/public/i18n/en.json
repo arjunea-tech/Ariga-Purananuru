@@ -150,16 +150,20 @@
   "SIDEBAR": {
     "ACADEMY_MANAGER": "Academy Manager",
     "ADMIN_SECTION": "Admin Section",
+    "ADMIN_UPLOAD": "Admin Upload",
+    "ANNOUNCEMENTS": "Announcements",
     "ASSESSMENTS": "Assessments",
     "CHAPTERS": "Chapters",
     "CONTENTS": "Contents",
     "COURSES": "Courses",
+    "DASHBOARD": "Dashboard",
     "LEARNING_MODE": "Learning Mode",
     "LEARNING_PORTAL": "Learning Portal",
     "LEVELS": "Levels",
     "MAPPING": "Mapping",
     "PACKAGES": "Packages",
     "PROPERTIES": "Properties",
+    "STUDENT_PROGRESS": "Student Progress",
     "TENANTS": "Tenants",
     "USERS": "Users"
   },
@@ -182,6 +186,7 @@
   "WEEKLY_ACTIVITY": "Weekly Activity",
   "WELCOME_BACK": "WELCOME BACK",
   "XP_POINTS": "XP Points",
+  "LOGOUT": "Logout",
   "STUDENT": {
     "ASK_GENERAL": "Hello! I am Sangam AI Assistant. How can I help you today?",
     "ASK_ANYTHING": "Hello! I am ready to answer any questions about this topic."

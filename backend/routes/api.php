@@ -62,9 +62,10 @@ Route::middleware(['auth:sanctum', 'identify.tenant'])->group(function () {
     /*
      * 🏢 Tenant Admin and Super Admin Resources
      */
-    Route::middleware(['role:super_admin,tenant_admin'])->group(function () {
+    Route::middleware(['role:super_admin,admin,tenant_admin'])->group(function () {
         Route::get('tenants', [TenantController::class, 'index']);
         Route::get('tenants/{tenant}', [TenantController::class, 'show']);
+        Route::put('tenants/{tenant}/branding', [TenantController::class, 'updateBranding']);
 
         Route::get('packages', [PackageController::class, 'index']);
         Route::get('packages/{package}', [PackageController::class, 'show']);

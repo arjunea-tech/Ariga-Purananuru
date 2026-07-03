@@ -244,13 +244,24 @@ export class Property implements OnInit {
     if (property.packages && property.packages.length > 0) {
       property.packages.forEach((pkg: any) => {
         const pivot = pkg.pivot;
+        let learningModeId: any = '';
+        if (pivot?.learning_mode_ids) {
+          try {
+            const parsed = typeof pivot.learning_mode_ids === 'string'
+              ? JSON.parse(pivot.learning_mode_ids)
+              : pivot.learning_mode_ids;
+            learningModeId = Array.isArray(parsed) ? (parsed[0] || '') : (parsed || '');
+          } catch (e) {
+            console.error('Failed to parse learning_mode_ids', e);
+          }
+        }
         const row = this.fb.group({
           course_id: [pivot?.course_id || '', Validators.required],
           package_id: [pkg.id, Validators.required],
           start_date: [pivot?.start_date || null],
           end_date: [pivot?.end_date || null],
           is_active: [pivot?.is_active ?? true],
-          learning_modes: pivot?.learning_mode_ids ? (JSON.parse(pivot.learning_mode_ids)[0] || '') : ''
+          learning_modes: [learningModeId]
         });
         this.packagesFormArray.push(row);
       });

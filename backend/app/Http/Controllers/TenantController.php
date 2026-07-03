@@ -93,4 +93,29 @@ class TenantController extends Controller
             'secondary_color' => $tenant->secondary_color ?: '#db2777',
         ]);
     }
+
+    /**
+     * Update branding options for a tenant.
+     */
+    public function updateBranding(Request $request, Tenant $tenant)
+    {
+        $user = $request->user();
+        if (!$user || !in_array($user->role, ['super_admin', 'admin']) || ($user->role === 'admin' && $user->tenant_id !== $tenant->id)) {
+            return response()->json(['error' => 'Unauthorized action.'], 403);
+        }
+
+        $validated = $request->validate([
+            'primary_color' => 'nullable|string|max:10',
+            'secondary_color' => 'nullable|string|max:10',
+            'logo_path' => 'nullable|string',
+        ]);
+
+        if ($request->hasFile('logo')) {
+            $path = $request->file('logo')->store('logos', 'public');
+            $validated['logo_path'] = asset('storage/' . $path);
+        }
+
+        $tenant->update($validated);
+        return response()->json($tenant);
+    }
 }

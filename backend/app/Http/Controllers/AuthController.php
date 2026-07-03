@@ -43,6 +43,20 @@ class AuthController extends Controller
             ]);
         }
 
+        // Enforce max_users check (Option A: tenant-wide limit)
+        $maxAllowedUsers = (int) \App\Models\Property::where('tenant_id', $tenant->id)
+            ->where('is_active', true)
+            ->sum('max_users');
+
+        if ($maxAllowedUsers > 0) {
+            $currentUserCount = User::where('tenant_id', $tenant->id)->count();
+            if ($currentUserCount >= $maxAllowedUsers) {
+                throw ValidationException::withMessages([
+                    'login' => ["The registration limit of {$maxAllowedUsers} users for this tenant/school has been reached."],
+                ]);
+            }
+        }
+
         $isEmail = filter_var($validated['login'], FILTER_VALIDATE_EMAIL);
         $email = $isEmail ? $validated['login'] : null;
         $username = !$isEmail ? $validated['login'] : null;
@@ -185,7 +199,23 @@ class AuthController extends Controller
             return response()->json(['error' => 'CSV file must contain a "name" column.'], 422);
         }
 
-        $activeTenant = app('active_tenant');
+        $activeTenant = null;
+        if (app()->bound('active_tenant')) {
+            $activeTenant = app('active_tenant');
+        } elseif ($request->has('tenant_code')) {
+            $activeTenant = Tenant::where('tenant_code', $request->input('tenant_code'))->first();
+        }
+
+        if (!$activeTenant) {
+            fclose($fileHandle);
+            return response()->json(['error' => 'A valid school/tenant could not be resolved. Please select a tenant.'], 422);
+        }
+
+        $maxAllowedUsers = (int) \App\Models\Property::where('tenant_id', $activeTenant->id)
+            ->where('is_active', true)
+            ->sum('max_users');
+        $currentUserCount = User::where('tenant_id', $activeTenant->id)->count();
+
         $importedUsers = [];
         $errors = [];
         $rowNumber = 1;
@@ -214,6 +244,12 @@ class AuthController extends Controller
                 $rawPassword = trim($row[$passwordIdx]);
             } else {
                 $rawPassword = bin2hex(random_bytes(3)); // 6 random characters
+            }
+
+            // Enforce max_users check (Option A: tenant-wide limit)
+            if ($maxAllowedUsers > 0 && ($currentUserCount + count($importedUsers)) >= $maxAllowedUsers) {
+                $errors[] = "Row {$rowNumber}: Cannot import student. Registration limit of {$maxAllowedUsers} users has been reached.";
+                continue;
             }
 
             // Verify unique username across DB

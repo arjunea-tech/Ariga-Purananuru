@@ -135,6 +135,8 @@ export class CoursePlayer implements OnInit, OnDestroy {
 
   // Selected language (default from admin settings or localStorage)
   selectedLang = signal<string>(localStorage.getItem('lang') || 'en');
+  allowedLearningModes = signal<any[]>([]);
+  tenantBranding = signal<any>(null);
 
   currentScreen = signal<'dashboard' | 'courses' | 'achievements' | 'progress' | 'settings' | 'continue'>('dashboard');
 
@@ -168,7 +170,44 @@ export class CoursePlayer implements OnInit, OnDestroy {
     this.translate.use(lang);
     localStorage.setItem('lang', lang);
     this.currentLang.set(lang);
+  }
 
+  loadAllowedLearningModes(): void {
+    const token = this.authService.getToken();
+    const headers = { 'Authorization': `Bearer ${token || ''}` };
+    this.http.get<any[]>(`${environment.apiUrl}/learning-modes`, { headers }).subscribe({
+      next: (modes) => {
+        this.allowedLearningModes.set(modes);
+        
+        if (modes.length > 0) {
+          const isCurrentAllowed = modes.some(m => {
+            const code = m.code.toLowerCase();
+            return (code === 'tamil' && this.selectedLang() === 'ta') ||
+                   (code === 'english' && this.selectedLang() === 'en');
+          });
+
+          if (!isCurrentAllowed) {
+            const firstMode = modes[0].code.toLowerCase();
+            if (firstMode === 'tamil') {
+              this.updateLanguage('ta');
+            } else if (firstMode === 'english') {
+              this.updateLanguage('en');
+            }
+          }
+        }
+      },
+      error: (err) => {
+        console.error('Failed to load allowed learning modes', err);
+      }
+    });
+  }
+
+  toggleLanguageCollapsed(): void {
+    const modes = this.allowedLearningModes();
+    if (modes.length < 2) return;
+
+    const targetLang = this.selectedLang() === 'en' ? 'ta' : 'en';
+    this.updateLanguage(targetLang);
   }
 
   toggleSidebar(): void {
@@ -585,8 +624,45 @@ export class CoursePlayer implements OnInit, OnDestroy {
     this.translate.use(savedLang);
     this.selectedLang.set(savedLang);
     this.currentLang.set(savedLang);
+    this.loadAllowedLearningModes();
 
+    // Fetch and apply branding based on user's active tenant
     const user = this.authService.getUser();
+    const tenantCode = this.authService.getTenantCode();
+    if (user && user.tenant_id && tenantCode) {
+      this.http.get<any>(`${environment.apiUrl}/tenants/brand/${tenantCode}`).subscribe({
+        next: (brand) => {
+          this.tenantBranding.set(brand);
+          const root = document.documentElement;
+          if (brand.primary_color) {
+            root.style.setProperty('--primary-color', brand.primary_color);
+          }
+          if (brand.secondary_color) {
+            root.style.setProperty('--secondary-color', brand.secondary_color);
+          }
+          localStorage.setItem('tenant_branding', JSON.stringify(brand));
+        },
+        error: () => {
+          // Fallback to local storage if API call fails
+          const savedBranding = localStorage.getItem('tenant_branding');
+          if (savedBranding) {
+            try {
+              this.tenantBranding.set(JSON.parse(savedBranding));
+            } catch (e) {
+              console.error('Failed to parse saved branding', e);
+            }
+          }
+        }
+      });
+    } else {
+      // Clear branding if no tenant (e.g. super admin)
+      this.tenantBranding.set(null);
+      localStorage.removeItem('tenant_branding');
+      const root = document.documentElement;
+      root.style.removeProperty('--primary-color');
+      root.style.removeProperty('--secondary-color');
+    }
+
     if (user) {
       this.settingsName.set(user.name);
       this.settingsEmail.set(user.email || '');
@@ -608,12 +684,46 @@ export class CoursePlayer implements OnInit, OnDestroy {
         this.uiTheme.set('classic');
       }
     }
-    this.route.params.subscribe(params => {
-      if (params['courseId']) {
-        this.courseId.set(+params['courseId']);
-        this.loadStructure();
+    this.route.url.subscribe(() => {
+      const segments = this.route.snapshot.url;
+      const pathSegments = segments.map(s => s.path);
+      
+      if (pathSegments.includes('dashboard')) {
+        this.courseId.set(null);
+        this.currentScreen.set('dashboard');
+        this.loadStudentDashboardData(true);
+      } else if (pathSegments.includes('courses')) {
+        this.courseId.set(null);
+        this.currentScreen.set('courses');
+        this.loadStudentDashboardData(true);
+      } else if (pathSegments.includes('achievements')) {
+        this.courseId.set(null);
+        this.currentScreen.set('achievements');
+        this.loadStudentDashboardData(true);
+      } else if (pathSegments.includes('progress')) {
+        this.courseId.set(null);
+        this.currentScreen.set('progress');
+        this.loadStudentDashboardData(true);
+      } else if (pathSegments.includes('settings')) {
+        this.courseId.set(null);
+        this.currentScreen.set('settings');
+        this.loadStudentDashboardData(true);
+      } else if (pathSegments.includes('play')) {
+        const id = this.route.snapshot.paramMap.get('courseId');
+        if (id) {
+          this.courseId.set(+id);
+          this.loadStructure();
+        }
       } else {
-        this.checkQueryParams();
+        const id = this.route.snapshot.paramMap.get('courseId');
+        if (id) {
+          this.courseId.set(+id);
+          this.loadStructure();
+        } else {
+          this.courseId.set(null);
+          this.currentScreen.set('dashboard');
+          this.loadStudentDashboardData(false);
+        }
       }
     });
   }
@@ -621,10 +731,18 @@ export class CoursePlayer implements OnInit, OnDestroy {
   logout() {
     this.authService.logout().subscribe({
       complete: () => {
+        localStorage.removeItem('tenant_branding');
+        const root = document.documentElement;
+        root.style.removeProperty('--primary-color');
+        root.style.removeProperty('--secondary-color');
         window.location.href = '/login';
       },
       error: () => {
         this.authService.clearSession();
+        localStorage.removeItem('tenant_branding');
+        const root = document.documentElement;
+        root.style.removeProperty('--primary-color');
+        root.style.removeProperty('--secondary-color');
         window.location.href = '/login';
       }
     });
@@ -666,14 +784,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
   }
 
   selectCourse(id: number): void {
-    this.courseId.set(id);
-    this.selectedChapterId.set(null);
-    this.activeContentId.set(null);
-    this.activeStep.set('lesson');
-    this.isSidebarCollapsed.set(true); // Collapse sidebar when a course is selected
-    
-    // Fetch course structure
-    this.loadStructure();
+    this.router.navigate(['/learn/play', id]);
   }
 
   markChapterCompleted(): void {
@@ -1142,16 +1253,15 @@ export class CoursePlayer implements OnInit, OnDestroy {
 
   // General navigation helpers
   switchScreen(screen: 'dashboard' | 'courses' | 'achievements' | 'progress' | 'settings' | 'continue'): void {
-    this.courseId.set(null);
-    this.currentScreen.set(screen);
-    this.selectedChapterId.set(null);
-    this.activeContentId.set(null);
-    this.fullContent.set(null);
-    this.loadStudentDashboardData(true);
+    if (screen === 'continue') {
+      this.continueLearning();
+    } else {
+      this.router.navigate(['/learn', screen]);
+    }
   }
 
   goBackToDashboard(): void {
-    this.router.navigate(['/learn']);
+    this.router.navigate(['/learn/dashboard']);
   }
 
   continueLearning(): void {

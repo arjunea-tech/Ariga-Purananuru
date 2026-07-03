@@ -224,6 +224,22 @@
                 </select>
               </div>
 
+              <!-- Tenant Selection (Visible for Super Admin only) -->
+              @if (authService.getUserRole() === 'super_admin') {
+                <div class="mb-3">
+                  <label for="new_tenant" class="form-label fw-semibold text-secondary mb-1">Tenant (School)</label>
+                  <select id="new_tenant" formControlName="tenant_code" class="form-select border-0 shadow-sm py-2" [class.is-invalid]="addUserForm.get('tenant_code')?.touched && addUserForm.get('tenant_code')?.invalid">
+                    <option value="" disabled>Select Tenant</option>
+                    @for (tenant of tenants(); track tenant.id) {
+                      <option [value]="tenant.tenant_code">{{ tenant.tenant_name }} ({{ tenant.tenant_code }})</option>
+                    }
+                  </select>
+                  @if (addUserForm.get('tenant_code')?.touched && addUserForm.get('tenant_code')?.invalid) {
+                    <small class="text-danger mt-1 d-block">Selecting a tenant is required.</small>
+                  }
+                </div>
+              }
+
               <!-- Name Field -->
               @if (addUserForm.get('role')?.value !== 'property_manager') {
                 <div class="mb-3">

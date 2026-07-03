@@ -8,9 +8,29 @@ use Illuminate\Http\Request;
 
 class LearningModeController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(LearningMode::latest()->get());
+        $user = $request->user();
+        if ($user && $user->role === 'student' && $user->tenant_id) {
+            $allowedModeIds = \Illuminate\Support\Facades\DB::table('property_packages')
+                ->join('properties', 'property_packages.property_id', '=', 'properties.id')
+                ->where('properties.tenant_id', $user->tenant_id)
+                ->where('properties.is_active', true)
+                ->where('property_packages.is_active', true)
+                ->whereNotNull('property_packages.learning_mode_ids')
+                ->pluck('property_packages.learning_mode_ids')
+                ->flatMap(function ($item) {
+                    $decoded = json_decode($item, true);
+                    return is_array($decoded) ? $decoded : [];
+                })
+                ->unique()
+                ->toArray();
+
+            if (!empty($allowedModeIds)) {
+                return response()->json(LearningMode::whereIn('id', $allowedModeIds)->where('is_active', true)->latest()->get());
+            }
+        }
+        return response()->json(LearningMode::where('is_active', true)->latest()->get());
     }
 
     public function store(Request $request)

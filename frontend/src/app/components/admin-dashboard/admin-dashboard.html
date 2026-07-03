@@ -103,7 +103,7 @@
     </div>
 
     <!-- Quick Actions / Secondary Row -->
-    <div class="row g-4">
+    <div class="row g-4 mb-4">
       <div class="col-12">
         <div class="card border-0 shadow-sm rounded-4">
           <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
@@ -125,5 +125,77 @@
         </div>
       </div>
     </div>
+
+    <!-- Institution Branding Settings (Visible for super_admin and admin only) -->
+    @if (authService.hasRole(['super_admin', 'admin'])) {
+      <div class="row g-4 mt-2">
+        <div class="col-12 col-lg-6">
+          <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+              <h5 class="fw-bold"><i class="bi bi-palette text-primary me-2"></i>Institution Branding Settings</h5>
+            </div>
+            <div class="card-body p-4">
+              <form [formGroup]="brandingForm" (ngSubmit)="saveBranding()">
+                <!-- Tenant Selector (Visible for super_admin only) -->
+                @if (authService.getUserRole() === 'super_admin' && tenantsList().length > 0) {
+                  <div class="mb-4">
+                    <label for="tenantSelect" class="form-label fw-semibold text-secondary small">Select Institution / Tenant</label>
+                    <select id="tenantSelect" [value]="tenant()?.id" (change)="onTenantChange($event)" class="form-select form-select-sm">
+                      @for (t of tenantsList(); track t.id) {
+                        <option [value]="t.id">{{ t.tenant_name }} ({{ t.tenant_code }})</option>
+                      }
+                    </select>
+                  </div>
+                }
+
+                <!-- Logo upload -->
+                <div class="mb-4">
+                  <label class="form-label fw-semibold text-secondary small">School Logo</label>
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="border rounded-3 p-1 bg-light d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                      @if (logoPreviewUrl()) {
+                        <img [src]="logoPreviewUrl()" class="img-fluid rounded-3 object-fit-contain" style="max-height: 100%;">
+                      } @else {
+                        <i class="bi bi-image text-muted fs-2"></i>
+                      }
+                    </div>
+                    <div>
+                      <input type="file" (change)="onLogoSelected($event)" accept="image/*" class="form-control form-control-sm">
+                      <small class="text-muted d-block mt-1">Recommended square format (PNG/JPEG).</small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Primary & Secondary Colors -->
+                <div class="row g-3 mb-4">
+                  <div class="col-6">
+                    <label for="primary_color" class="form-label fw-semibold text-secondary small">Primary Color</label>
+                    <div class="d-flex align-items-center gap-2">
+                      <input type="color" id="primary_color" formControlName="primary_color" class="form-control form-control-color border-0 p-0" style="width: 44px; height: 38px; cursor: pointer;">
+                      <input type="text" formControlName="primary_color" class="form-control form-control-sm" style="font-size: 13px;">
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <label for="secondary_color" class="form-label fw-semibold text-secondary small">Secondary Color</label>
+                    <div class="d-flex align-items-center gap-2">
+                      <input type="color" id="secondary_color" formControlName="secondary_color" class="form-control form-control-color border-0 p-0" style="width: 44px; height: 38px; cursor: pointer;">
+                      <input type="text" formControlName="secondary_color" class="form-control form-control-sm" style="font-size: 13px;">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Save Button -->
+                <button type="submit" [disabled]="savingBranding()" class="btn btn-primary px-4 rounded-pill fw-semibold shadow-sm">
+                  @if (savingBranding()) {
+                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                  }
+                  <span>Save Branding</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
   }
 </div>
