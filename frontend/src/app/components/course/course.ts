@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { CourseService, CourseData } from '../../services/course';
+import { NotificationService } from '../../services/notification.service';
 import {
   McvInputField,
   McvTextArea,
@@ -28,13 +29,13 @@ import {
 export class Course implements OnInit {
   private fb = inject(FormBuilder);
   private courseService = inject(CourseService);
+  private notificationService = inject(NotificationService);
 
   courseForm: FormGroup;
   courses = signal<CourseData[]>([]);
   isEditMode = signal(false);
   isFormVisible = signal(false);
   currentCourseId = signal<number | null>(null);
-  feedbackMessage = signal<{ type: 'success' | 'error', text: string } | null>(null);
 
   constructor() {
     this.courseForm = this.fb.group({
@@ -109,7 +110,7 @@ export class Course implements OnInit {
     if (confirm('Are you sure you want to delete this course?')) {
       this.courseService.delete(id).subscribe({
         next: () => {
-          this.showFeedback('success', 'Course deleted successfully');
+          this.showFeedback('error', 'Course deleted successfully');
           this.loadCourses();
         },
         error: () => this.showFeedback('error', 'Failed to delete course'),
@@ -129,7 +130,6 @@ export class Course implements OnInit {
   }
 
   private showFeedback(type: 'success' | 'error', text: string): void {
-    this.feedbackMessage.set({ type, text });
-    setTimeout(() => this.feedbackMessage.set(null), 5000);
+    this.notificationService.show(type, text);
   }
 }

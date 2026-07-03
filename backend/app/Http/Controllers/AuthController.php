@@ -21,6 +21,7 @@ class AuthController extends Controller
             'password' => 'required|string|min:6|confirmed',
             'role' => 'required|string|in:admin,staff,student',
             'tenant_code' => 'nullable|string|exists:tenants,tenant_code',
+            'dob' => 'nullable|date',
         ]);
 
         $tenant = null;
@@ -67,6 +68,7 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
             'tenant_id' => $tenant->id,
+            'dob' => $request->input('dob'),
         ]);
 
         $token = $user->createToken('auth_token')->plainTextToken;
@@ -276,10 +278,12 @@ class AuthController extends Controller
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username,' . $user->id,
             'password' => 'nullable|string|min:6',
+            'dob' => 'nullable|date',
         ]);
 
         $user->name = $validated['name'];
         $user->username = $validated['username'];
+        $user->dob = $request->input('dob');
         
         if (!empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);

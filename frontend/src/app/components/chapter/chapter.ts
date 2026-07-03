@@ -5,6 +5,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { ChapterService, ChapterData } from '../../services/chapter';
 import { LevelService, LevelData } from '../../services/level';
 import { LevelChapterService } from '../../services/level-chapter';
+import { NotificationService } from '../../services/notification.service';
 import EditorJS from '@editorjs/editorjs';
 import { CustomList as List } from '../../editor-plugins/custom-list';
 import Table from '@editorjs/table';
@@ -32,6 +33,7 @@ export class Chapter implements OnInit {
   private chapterService = inject(ChapterService);
   private levelService = inject(LevelService);
   private levelChapterService = inject(LevelChapterService);
+  private notificationService = inject(NotificationService);
 
   chapterForm: FormGroup;
   chapters = signal<ChapterData[]>([]);
@@ -42,7 +44,6 @@ export class Chapter implements OnInit {
   isEditMode = signal(false);
   isFormVisible = signal(false);
   currentChapterId = signal<number | null>(null);
-  feedbackMessage = signal<{ type: 'success' | 'error', text: string } | null>(null);
   levelSearchQuery = signal('');
 
   private descriptionEditor: EditorJS | null = null;
@@ -245,7 +246,7 @@ export class Chapter implements OnInit {
     if (confirm('Are you sure you want to delete this chapter?')) {
       this.chapterService.delete(id).subscribe({
         next: () => {
-          this.showFeedback('success', 'Chapter deleted successfully');
+          this.showFeedback('error', 'Chapter deleted successfully');
           this.loadChapters();
         },
         error: () => this.showFeedback('error', 'Failed to delete chapter'),
@@ -316,7 +317,6 @@ export class Chapter implements OnInit {
   }
 
   private showFeedback(type: 'success' | 'error', text: string): void {
-    this.feedbackMessage.set({ type, text });
-    setTimeout(() => this.feedbackMessage.set(null), 5000);
+    this.notificationService.show(type, text);
   }
 }

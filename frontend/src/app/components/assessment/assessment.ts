@@ -5,6 +5,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { AssessmentService, AssessmentData } from '../../services/assessment';
 import { LevelService, LevelData } from '../../services/level';
 import { ChapterService, ChapterData } from '../../services/chapter';
+import { NotificationService } from '../../services/notification.service';
 import EditorJS from '@editorjs/editorjs';
 import { CustomList as List } from '../../editor-plugins/custom-list';
 import Table from '@editorjs/table';
@@ -32,6 +33,7 @@ export class Assessment implements OnInit {
   private assessmentService = inject(AssessmentService);
   private levelService = inject(LevelService);
   private chapterService = inject(ChapterService);
+  private notificationService = inject(NotificationService);
 
   assessmentForm: FormGroup;
   assessments = signal<AssessmentData[]>([]);
@@ -41,7 +43,6 @@ export class Assessment implements OnInit {
   isEditMode = signal(false);
   isFormVisible = signal(false);
   currentAssessmentId = signal<number | null>(null);
-  feedbackMessage = signal<{ type: 'success' | 'error', text: string } | null>(null);
 
   private preludeEditor: EditorJS | null = null;
   private questionEditors = new Map<string, EditorJS>();
@@ -230,7 +231,7 @@ export class Assessment implements OnInit {
     this.addQuestion();
   }
 
-  async onSubmit(): Promise<void> {
+  onSubmit(): void {
     const savePromises: Promise<any>[] = [];
 
     if (this.preludeEditor) {
@@ -246,71 +247,63 @@ export class Assessment implements OnInit {
         const editor = this.questionEditors.get(editorId);
         if (editor) {
           const qPromise = editor.save().then(data => {
-            // Check if editor is actually empty
-            if (!data.blocks || data.blocks.length === 0) {
-              control.get('question_text')?.setValue('');
-            } else {
-              control.get('question_text')?.setValue(JSON.stringify(data));
-            }
+            const hasContent = data.blocks && data.blocks.length > 0;
+            control.get('question_text')?.setValue(hasContent ? JSON.stringify(data) : '');
           });
           savePromises.push(qPromise);
         }
       }
     });
 
-    try {
-      await Promise.all(savePromises);
-    } catch (error) {
-      console.error('Saving editors failed: ', error);
-      this.showFeedback('error', 'Failed to save rich text content.');
-      return;
-    }
+    Promise.all(savePromises).then(() => {
+      if (this.assessmentForm.invalid) {
+        this.assessmentForm.markAllAsTouched();
+        this.showFeedback('error', 'Please fill all required fields correctly.');
+        return;
+      }
 
-    if (this.assessmentForm.invalid) {
-      this.assessmentForm.markAllAsTouched();
-      this.showFeedback('error', 'Please fill all required fields correctly.');
-      console.error('Invalid Form:', this.assessmentForm.value);
-      return;
-    }
+      const assessmentData = JSON.parse(JSON.stringify(this.assessmentForm.value));
+      if (assessmentData.questions) {
+        assessmentData.questions.forEach((q: any) => {
+          delete q._editorId;
+        });
+      }
 
-    const assessmentData = JSON.parse(JSON.stringify(this.assessmentForm.value));
-    if (assessmentData.questions) {
-      assessmentData.questions.forEach((q: any) => {
-        delete q._editorId;
-      });
-    }
-
-    if (this.isEditMode()) {
-      const id = this.currentAssessmentId();
-      if (id) {
-        this.assessmentService.update(id, assessmentData).subscribe({
+      if (this.isEditMode()) {
+        const id = this.currentAssessmentId();
+        if (id) {
+          this.assessmentService.update(id, assessmentData).subscribe({
+            next: () => {
+              this.showFeedback('success', 'Assessment updated successfully');
+              this.isFormVisible.set(false);
+              this.loadAssessments();
+              this.resetForm();
+            },
+            error: (err) => this.showFeedback('error', err.error?.message || 'Failed to update assessment'),
+          });
+        }
+      } else {
+        this.assessmentService.create(assessmentData).subscribe({
           next: () => {
-            this.showFeedback('success', 'Assessment updated successfully');
+            this.showFeedback('success', 'Assessment created successfully');
             this.isFormVisible.set(false);
             this.loadAssessments();
             this.resetForm();
           },
-          error: (err) => this.showFeedback('error', err.error?.message || 'Failed to update assessment'),
+          error: (err) => this.showFeedback('error', err.error?.message || 'Failed to create assessment'),
         });
       }
-    } else {
-      this.assessmentService.create(assessmentData).subscribe({
-        next: () => {
-          this.showFeedback('success', 'Assessment created successfully');
-          this.isFormVisible.set(false);
-          this.loadAssessments();
-          this.resetForm();
-        },
-        error: (err) => this.showFeedback('error', err.error?.message || 'Failed to create assessment'),
-      });
-    }
+    }).catch(error => {
+      console.error('Saving editors failed: ', error);
+      this.showFeedback('error', 'Failed to save rich text content.');
+    });
   }
 
   editAssessment(assessment: AssessmentData): void {
+    this.resetForm();
+
     this.isEditMode.set(true);
     this.currentAssessmentId.set(assessment.id!);
-
-    this.resetForm();
 
     this.assessmentForm.patchValue({
       level_id: assessment.level_id,
@@ -397,7 +390,7 @@ export class Assessment implements OnInit {
     if (confirm('Are you sure you want to delete this assessment?')) {
       this.assessmentService.delete(id).subscribe({
         next: () => {
-          this.showFeedback('success', 'Assessment deleted successfully');
+          this.showFeedback('error', 'Assessment deleted successfully');
           this.loadAssessments();
         },
         error: () => this.showFeedback('error', 'Failed to delete assessment'),
@@ -436,7 +429,6 @@ export class Assessment implements OnInit {
   }
 
   private showFeedback(type: 'success' | 'error', text: string): void {
-    this.feedbackMessage.set({ type, text });
-    setTimeout(() => this.feedbackMessage.set(null), 5000);
+    this.notificationService.show(type, text);
   }
 }

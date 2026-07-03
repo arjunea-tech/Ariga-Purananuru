@@ -25,6 +25,7 @@ import { ActivityBlock } from '../../editor-plugins/activity-block';
 import { CustomList as List } from '../../editor-plugins/custom-list';
 import Table from '@editorjs/table';
 import { ActivityRenderer } from '../activity-engine/activity-renderer/activity-renderer';
+import { NotificationService } from '../../services/notification.service';
 
 import {
   McvInputField,
@@ -51,6 +52,7 @@ export class Content implements OnInit {
   private fb = inject(FormBuilder);
   private contentService = inject(ContentService);
   private chapterService = inject(ChapterService);
+  private notificationService = inject(NotificationService);
 
   contentForm: FormGroup;
   contents = signal<ContentData[]>([]);
@@ -59,7 +61,6 @@ export class Content implements OnInit {
   isEditMode = signal(false);
   isFormVisible = signal(false);
   currentContentId = signal<number | null>(null);
-  feedbackMessage = signal<{ type: 'success' | 'error', text: string } | null>(null);
   previewContent = signal<ContentData | null>(null);
 
   private editorjsInstance: EditorJS | null = null;
@@ -418,7 +419,6 @@ export class Content implements OnInit {
   }
 
   private showFeedback(type: 'success' | 'error', text: string): void {
-    this.feedbackMessage.set({ type, text });
-    setTimeout(() => this.feedbackMessage.set(null), 5000);
+    this.notificationService.show(type, text);
   }
 }

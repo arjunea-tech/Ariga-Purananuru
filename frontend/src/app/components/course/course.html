@@ -1,13 +1,4 @@
 <div class="container-fluid py-4">
-  <!-- Feedback Messages -->
-  @if (feedbackMessage(); as msg) {
-  <div class="alert alert-dismissible fade show shadow-sm border-0 mb-4 animate-in slide-in-from-top-4" 
-       [class.alert-success]="msg.type === 'success'" 
-       [class.alert-danger]="msg.type === 'error'">
-    {{ msg.text }}
-    <button type="button" class="btn-close shadow-none" data-bs-dismiss="alert" aria-label="Close"></button>
-  </div>
-  }
 
   <!-- List View -->
   @if (!isFormVisible()) {
@@ -51,6 +42,11 @@
             </td>
             <td class="px-4 py-3 text-end">
               <div class="d-flex justify-content-end gap-2">
+                <button class="btn btn-light btn-sm rounded-3 p-2 shadow-none border-0 text-success bg-success bg-opacity-10 hover-bg-success hover-text-white transition-all" 
+                        [routerLink]="['/learn', course.id]"
+                        [title]="'Play'">
+                  <i class="bi bi-play-fill"></i>
+                </button>
                 <button class="btn btn-light btn-sm rounded-3 p-2 shadow-none border-0 text-primary bg-primary bg-opacity-10 hover-bg-primary hover-text-white transition-all" 
                         (click)="editCourse(course)" 
                         [title]="'COMMON.EDIT' | translate">

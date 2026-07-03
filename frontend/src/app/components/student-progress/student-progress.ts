@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth';
+import { NotificationService } from '../../services/notification.service';
 
 interface User {
   id: number;
@@ -39,6 +40,7 @@ interface StudentProgressStats {
 export class StudentProgressComponent implements OnInit {
   private http = inject(HttpClient);
   protected authService = inject(AuthService);
+  private notificationService = inject(NotificationService);
 
   students = signal<User[]>([]);
   searchQuery = signal<string>('');
@@ -48,7 +50,6 @@ export class StudentProgressComponent implements OnInit {
   selectedStudentForProgress: User | null = null;
   selectedStudentProgress = signal<StudentProgressStats | null>(null);
   loadingProgress = signal<boolean>(false);
-  feedbackMessage = signal<{ type: 'success' | 'error'; text: string } | null>(null);
 
   filteredStudents = computed(() => {
     const query = this.searchQuery().toLowerCase().trim();
@@ -114,7 +115,6 @@ export class StudentProgressComponent implements OnInit {
   }
 
   private showFeedback(type: 'success' | 'error', text: string): void {
-    this.feedbackMessage.set({ type, text });
-    setTimeout(() => this.feedbackMessage.set(null), 5000);
+    this.notificationService.show(type, text);
   }
 }

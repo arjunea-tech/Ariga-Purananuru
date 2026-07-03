@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from './services/auth';
+import { NotificationService } from './services/notification.service';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +17,7 @@ export class App implements OnInit {
 
   private translate = inject(TranslateService);
   protected authService = inject(AuthService);
+  protected notificationService = inject(NotificationService);
 
   currentLang = signal('en');
   isSidebarOpen = signal(false);

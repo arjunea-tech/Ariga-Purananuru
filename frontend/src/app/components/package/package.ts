@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { PackageService, PackageData } from '../../services/package';
+import { NotificationService } from '../../services/notification.service';
 import {
   McvInputField,
   McvTextArea,
@@ -26,13 +27,13 @@ import {
 export class Package implements OnInit {
   private fb = inject(FormBuilder);
   private packageService = inject(PackageService);
+  private notificationService = inject(NotificationService);
 
   packageForm: FormGroup;
   packages = signal<PackageData[]>([]);
   isEditMode = signal(false);
   isFormVisible = signal(false); // Default to table view
   currentPackageId = signal<number | null>(null);
-  feedbackMessage = signal<{ type: 'success' | 'error', text: string } | null>(null);
 
   constructor() {
     this.packageForm = this.fb.group({
@@ -123,7 +124,7 @@ export class Package implements OnInit {
     if (confirm('Are you sure you want to delete this package?')) {
       this.packageService.delete(id).subscribe({
         next: () => {
-          this.showFeedback('success', 'Package deleted successfully');
+          this.showFeedback('error', 'Package deleted successfully');
           this.loadPackages();
         },
         error: (err) => this.showFeedback('error', 'Failed to delete package'),
@@ -143,7 +144,6 @@ export class Package implements OnInit {
   }
 
   private showFeedback(type: 'success' | 'error', text: string): void {
-    this.feedbackMessage.set({ type, text });
-    setTimeout(() => this.feedbackMessage.set(null), 5000);
+    this.notificationService.show(type, text);
   }
 }

@@ -36,7 +36,10 @@
     "@ngx-translate/http-loader": "^17.0.0",
     "bootstrap": "^5.3.8",
     "bootstrap-icons": "^1.13.1",
-    "mcv-ui-toolkit": "git+https://github.com/gsailappanskarthikkumaran-sys/mcv-ui-toolkit.git",
+    "canvas-confetti": "^1.9.4",
+    "gsap": "^3.15.0",
+    "howler": "^2.2.4",
+    "mcv-ui-toolkit": "github:gsailappanskarthikkumaran-sys/mcv-ui-toolkit",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"
   },
@@ -44,6 +47,8 @@
     "@angular/build": "^21.1.2",
     "@angular/cli": "^21.1.2",
     "@angular/compiler-cli": "^21.1.0",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/howler": "^2.2.13",
     "jsdom": "^27.1.0",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"

@@ -10,15 +10,6 @@
     </div>
   </div>
 
-  <!-- Feedback Message -->
-  @if (feedbackMessage()) {
-    <div class="alert alert-{{ feedbackMessage()?.type === 'success' ? 'success' : 'danger' }} alert-dismissible fade show d-flex align-items-center gap-2 shadow-sm rounded-3">
-      <i class="bi bi-{{ feedbackMessage()?.type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill' }}"></i>
-      {{ feedbackMessage()?.text }}
-      <button type="button" class="btn-close shadow-none" (click)="feedbackMessage.set(null)"></button>
-    </div>
-  }
-
   <!-- Filters & Search -->
   <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
     <div class="card-body p-3">

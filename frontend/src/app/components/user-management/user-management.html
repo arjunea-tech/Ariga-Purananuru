@@ -1,13 +1,4 @@
 <div class="container-fluid py-4">
-  <!-- Feedback Message -->
-  @if (feedbackMessage(); as msg) {
-    <div class="alert alert-dismissible fade show shadow-sm border-0 mb-4 animate-in slide-in-from-top-4" 
-         [class.alert-success]="msg.type === 'success'" 
-         [class.alert-danger]="msg.type === 'error'">
-      {{ msg.text }}
-      <button type="button" class="btn-close shadow-none" (click)="feedbackMessage.set(null)"></button>
-    </div>
-  }
 
   <!-- Header Panel -->
   <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
@@ -89,6 +80,7 @@
             <th class="px-4 py-3">Name</th>
             <th class="py-3">Username / Roll No.</th>
             <th class="py-3">Role</th>
+            <th class="py-3">Age</th>
             @if (authService.getUserRole() === 'super_admin') {
               <th class="py-3">Tenant (School)</th>
             }
@@ -108,6 +100,9 @@
               <td class="py-3 font-monospace fw-bold text-secondary">{{ user.username }}</td>
               <td class="py-3 text-secondary text-capitalize">
                 {{ user.role.replace('_', ' ') }}
+              </td>
+              <td class="py-3 text-secondary">
+                {{ calculateAge(user.dob) }}
               </td>
               @if (authService.getUserRole() === 'super_admin') {
                 <td class="py-3 fw-medium text-dark">
@@ -266,8 +261,21 @@
                   </small>
                 }
               </div>
-
-
+              
+              <!-- Date of Birth Field (Only for student role) -->
+              @if (addUserForm.get('role')?.value === 'student') {
+                <div class="mb-3">
+                  <label for="new_dob" class="form-label fw-semibold text-secondary mb-1">Date of Birth</label>
+                  <input 
+                    id="new_dob"
+                    type="date" 
+                    formControlName="dob" 
+                    class="form-control border-0 shadow-sm py-2" 
+                    [class.is-invalid]="addUserForm.get('dob')?.touched && addUserForm.get('dob')?.invalid"
+                  />
+                  <small class="text-muted mt-1 d-block">If calculated age is 15 years or lower, the Adventure UI (Kids theme) is shown; otherwise, the Classic UI is shown.</small>
+                </div>
+              }
 
               <!-- Password Field -->
               <div class="row">
@@ -359,10 +367,21 @@
                   placeholder="e.g. john_doe"
                   [class.is-invalid]="editUserForm.get('username')?.touched && editUserForm.get('username')?.invalid"
                 />
-                @if (editUserForm.get('username')?.touched && editUserForm.get('username')?.invalid) {
-                  <small class="text-danger mt-1 d-block">Username / Roll number (min 3 chars) is required.</small>
-                }
               </div>
+              <!-- Date of Birth Field (Only for student role) -->
+              @if (selectedUserForEdit?.role === 'student') {
+                <div class="mb-3">
+                  <label for="edit_dob" class="form-label fw-semibold text-secondary mb-1">Date of Birth</label>
+                  <input 
+                    id="edit_dob"
+                    type="date" 
+                    formControlName="dob" 
+                    class="form-control border-0 shadow-sm py-2" 
+                    [class.is-invalid]="editUserForm.get('dob')?.touched && editUserForm.get('dob')?.invalid"
+                  />
+                  <small class="text-muted mt-1 d-block">If calculated age is 15 years or lower, the Adventure UI (Kids theme) is shown; otherwise, the Classic UI is shown.</small>
+                </div>
+              }
 
               <!-- Password Field -->
               <div class="mb-3">

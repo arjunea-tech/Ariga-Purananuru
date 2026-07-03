@@ -11,6 +11,7 @@ import { Content } from './components/content/content';
 import { Assessment } from './components/assessment/assessment';
 import { LearningMode } from './components/learning-mode/learning-mode';
 import { CoursePlayer } from './components/course-player/course-player';
+import { LearnerDashboard } from './components/learner-dashboard/learner-dashboard';
 import { AssessmentPlayerComponent } from './components/activity-engine/assessment-player/assessment-player';
 import { UserManagement } from './components/user-management/user-management';
 import { StudentProgressComponent } from './components/student-progress/student-progress';
@@ -118,7 +119,7 @@ export const routes: Routes = [
    */
   { 
     path: 'learn', 
-    component: CoursePlayer, 
+    component: LearnerDashboard, 
     canActivate: [roleGuard(['student', 'super_admin', 'admin', 'staff'])] 
   },
   { 

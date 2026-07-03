@@ -7,6 +7,7 @@ import { TenantService, TenantData } from '../../services/tenant';
 import { PackageService, PackageData } from '../../services/package';
 import { CourseService, CourseData } from '../../services/course';
 import { LearningModeService, LearningModeData } from '../../services/learning-mode';
+import { NotificationService } from '../../services/notification.service';
 import {
   McvInputField,
   McvTextArea,
@@ -36,6 +37,7 @@ export class Property implements OnInit {
   private courseService = inject(CourseService);
   private learningModeService = inject(LearningModeService);
   private cdr = inject(ChangeDetectorRef);
+  private notificationService = inject(NotificationService);
 
   propertyForm: FormGroup;
   properties = signal<PropertyData[]>([]);
@@ -46,7 +48,6 @@ export class Property implements OnInit {
   isEditMode = signal(false);
   isFormVisible = signal(false);
   currentPropertyId = signal<number | null>(null);
-  feedbackMessage = signal<{ type: 'success' | 'error', text: string } | null>(null);
   today = new Date();
   
   // Multi-select state for learning modes
@@ -265,7 +266,7 @@ export class Property implements OnInit {
     if (confirm('Are you sure you want to delete this property?')) {
       this.propertyService.delete(id).subscribe({
         next: () => {
-          this.showFeedback('success', 'Property deleted successfully');
+          this.showFeedback('error', 'Property deleted successfully');
           this.loadInitialData();
         },
         error: () => this.showFeedback('error', 'Failed to delete property'),
@@ -332,7 +333,6 @@ export class Property implements OnInit {
   }
 
   private showFeedback(type: 'success' | 'error', text: string): void {
-    this.feedbackMessage.set({ type, text });
-    setTimeout(() => this.feedbackMessage.set(null), 5000);
+    this.notificationService.show(type, text);
   }
 }

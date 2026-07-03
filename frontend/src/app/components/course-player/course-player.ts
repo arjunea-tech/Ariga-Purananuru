@@ -1,10 +1,14 @@
 import { environment } from '../../../environments/environment';
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import confetti from 'canvas-confetti';
+import { AudioService } from '../../services/audio.service';
+import { NotificationService } from '../../services/notification.service';
+import { KidsDashboard } from '../kids-dashboard/kids-dashboard';
 
 interface Content {
   id: number;
@@ -57,17 +61,41 @@ import { AiTutorChatComponent } from '../ai-tutor-chat/ai-tutor-chat.component';
 @Component({
   selector: 'app-course-player',
   standalone: true,
-  imports: [CommonModule, RouterModule, AssessmentPlayerComponent, ActivityRenderer, TranslateModule, FormsModule, AiTutorChatComponent],
+  imports: [CommonModule, RouterModule, AssessmentPlayerComponent, ActivityRenderer, TranslateModule, FormsModule, AiTutorChatComponent, KidsDashboard],
   templateUrl: './course-player.html',
   styleUrls: ['./course-player.css']
 })
-export class CoursePlayer implements OnInit {
+export class CoursePlayer implements OnInit, OnDestroy {
   environment = environment;
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   protected authService = inject(AuthService);
   private translate = inject(TranslateService);
   private sanitizer = inject(DomSanitizer);
+  private audioService = inject(AudioService);
+  private notificationService = inject(NotificationService);
+
+  uiTheme = signal<'classic' | 'adventure'>('classic');
+  kidsCurrentView = signal<string>('levels');
+  kidsActiveLevelId = signal<number | null>(null);
+
+  // Gamification stats
+  hearts = signal<number>(5);
+  coins = signal<number>(85);
+  xp = signal<number>(1250);
+  showGameOver = signal<boolean>(false);
+  activityFeedbackState = signal<'correct' | 'incorrect' | null>(null);
+
+  // Typewriter & Speech properties
+  typedContent = signal<string>('');
+  private typingTimeout: any;
+  private activeUtterances: SpeechSynthesisUtterance[] = [];
+  private speechStartTimeout: any;
+
+  // Mascot warning properties
+  showMascotWarning = signal<boolean>(false);
+  mascotWarning = signal<string>('');
 
   currentLang = signal('en');
 
@@ -157,6 +185,18 @@ export class CoursePlayer implements OnInit {
       return 'Language & Literature';
     }
     return 'LMS Course';
+  }
+
+  getAgeFromDob(dob: string | null | undefined): number | null {
+    if (!dob) return null;
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age >= 0 ? age : null;
   }
 
   courseCategories = computed(() => {
@@ -550,6 +590,23 @@ export class CoursePlayer implements OnInit {
     if (user) {
       this.settingsName.set(user.name);
       this.settingsEmail.set(user.email || '');
+
+      const roleLower = (user.role || '').toLowerCase();
+      const usernameLower = (user.username || '').toLowerCase();
+      const nameLower = (user.name || '').toLowerCase();
+      const calculatedAge = this.getAgeFromDob(user.dob);
+      
+      if (calculatedAge !== null) {
+        if (calculatedAge <= 15) {
+          this.uiTheme.set('adventure');
+        } else {
+          this.uiTheme.set('classic');
+        }
+      } else if (roleLower === 'student_kids' || usernameLower.includes('kid') || usernameLower.includes('primary') || nameLower.includes('kid') || nameLower.includes('primary')) {
+        this.uiTheme.set('adventure');
+      } else {
+        this.uiTheme.set('classic');
+      }
     }
     this.route.params.subscribe(params => {
       if (params['courseId']) {
@@ -648,6 +705,44 @@ export class CoursePlayer implements OnInit {
           });
         });
         this.courseStructure.set(structure);
+        
+        // Age-based or course-based theme selection:
+        const user = this.authService.getUser();
+        let themeSet = false;
+        if (user) {
+          const calculatedAge = this.getAgeFromDob(user.dob);
+          if (calculatedAge !== null) {
+            if (calculatedAge <= 15) {
+              this.uiTheme.set('adventure');
+            } else {
+              this.uiTheme.set('classic');
+            }
+            themeSet = true;
+          } else {
+            const roleLower = (user.role || '').toLowerCase();
+            const usernameLower = (user.username || '').toLowerCase();
+            const nameLower = (user.name || '').toLowerCase();
+            
+            if (roleLower === 'super_admin' || roleLower === 'admin' || roleLower === 'staff') {
+              this.uiTheme.set('classic');
+              themeSet = true;
+            } else if (roleLower === 'student_kids' || usernameLower.includes('kid') || usernameLower.includes('primary') || nameLower.includes('kid') || nameLower.includes('primary')) {
+              this.uiTheme.set('adventure');
+              themeSet = true;
+            }
+          }
+        }
+
+        if (!themeSet) {
+          // Fallback to Course-based theme selection: Tamil course uses the gamified Adventure UI; other courses use the Classic UI
+          const courseName = (structure.name || '').toLowerCase();
+          if (courseName.includes('tamil') || courseName.includes('purananuru')) {
+            this.uiTheme.set('adventure');
+          } else {
+            this.uiTheme.set('classic');
+          }
+        }
+
         this.treeData.set(this.mapStructureToTree(structure));
 
       },
@@ -1056,7 +1151,7 @@ export class CoursePlayer implements OnInit {
   }
 
   goBackToDashboard(): void {
-    this.switchScreen('dashboard');
+    this.router.navigate(['/learn']);
   }
 
   continueLearning(): void {
@@ -1081,5 +1176,263 @@ export class CoursePlayer implements OnInit {
   onAssessmentCompleted(event: { score: number; passed: boolean }): void {
     // Record XP for assessment completion
     this.recordActivityXp('assessment', event.score, 100);
+  }
+
+  onKidsSelectLevel(levelId: number) {
+    this.kidsActiveLevelId.set(levelId);
+    this.kidsCurrentView.set('map');
+  }
+
+  onKidsSelectChapterNode(chapterId: number) {
+    const structure = this.courseStructure();
+    if (!structure) return;
+
+    for (const level of structure.levels) {
+      const chapter = level.chapters.find(c => c.id === chapterId);
+      if (chapter && chapter.contents.length > 0) {
+        this.selectTopic(chapter.contents[0].id);
+        return;
+      }
+    }
+
+    const chapter = this.flatChapters().find(c => c.id === chapterId);
+    if (chapter && chapter.assessments && chapter.assessments.length > 0) {
+      this.selectAssessment(chapter.assessments[0].id, chapter);
+    }
+  }
+
+  onActivityAnswered(event: any) {
+    if (event && event.isCorrect !== undefined) {
+      this.activityFeedbackState.set(event.isCorrect ? 'correct' : 'incorrect');
+      if (event.isCorrect) {
+        this.audioService.playSuccess();
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.8 },
+          colors: ['#4ade80', '#fcd34d', '#3b82f6']
+        });
+
+        this.coins.update(c => c + 5);
+        this.xp.update(x => x + 10);
+        this.notificationService.show('success', 'Correct! You earned 10 XP & 5 Coins! 🌟');
+      } else {
+        this.audioService.playError();
+        this.hearts.update(h => Math.max(0, h - 1));
+        this.notificationService.show('error', 'Oops, incorrect! Try again! ❤️');
+
+        if (this.hearts() === 0) {
+          this.showGameOver.set(true);
+        }
+      }
+    }
+  }
+
+  retryActivity() {
+    this.hearts.set(5);
+    this.showGameOver.set(false);
+    this.activityFeedbackState.set(null);
+  }
+
+  stopSpeech() {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    this.activeUtterances = [];
+    clearTimeout(this.speechStartTimeout);
+  }
+
+  speakText(text: string) {
+    if (!text) return;
+    this.stopSpeech();
+
+    let cleanText = '';
+    try {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = text;
+
+      const parts: string[] = [];
+      const traverse = (node: Node) => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const content = node.textContent?.trim();
+          if (content) {
+            parts.push(content);
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const tagName = (node as Element).tagName.toLowerCase();
+          if (tagName === 'li') {
+            parts.push(', ');
+          }
+          for (let i = 0; i < node.childNodes.length; i++) {
+            traverse(node.childNodes[i]);
+          }
+          if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'li', 'tr'].includes(tagName)) {
+            parts.push('. ');
+          }
+        }
+      };
+
+      traverse(tempDiv);
+      cleanText = parts.join(' ')
+        .replace(/\s+/g, ' ')
+        .replace(/\.\s*\./g, '.')
+        .replace(/,\s*\./g, '.')
+        .trim();
+    } catch (e) {
+      cleanText = text.replace(/<[^>]*>?/gm, '');
+    }
+
+    if (!cleanText) return;
+
+    const isTamil = /[\u0B80-\u0BFF]/.test(cleanText);
+
+    let typewriterStarted = false;
+    const startTypewriterSafely = () => {
+      if (typewriterStarted) return;
+      typewriterStarted = true;
+      this.startTypewriter(text, isTamil);
+    };
+
+    this.speechStartTimeout = setTimeout(startTypewriterSafely, 800);
+
+    const rawSentences = cleanText.split(/([.?!:;]+)/);
+    const sentences: string[] = [];
+    for (let i = 0; i < rawSentences.length; i += 2) {
+      const textPart = rawSentences[i]?.trim();
+      const delim = rawSentences[i + 1] || '';
+      if (textPart) {
+        sentences.push(textPart + (delim ? delim + ' ' : ''));
+      }
+    }
+
+    if (sentences.length === 0) return;
+
+    const getTamilVoiceScore = (name: string): number => {
+      let score = 0;
+      const lower = name.toLowerCase();
+      if (lower.includes('kid') || lower.includes('child') || lower.includes('junior') || lower.includes('girl') || lower.includes('young')) score += 150;
+      if (lower.includes('natural') || lower.includes('neural')) score += 100;
+      if (lower.includes('online')) score += 50;
+      if (lower.includes('google')) score += 40;
+      if (lower.includes('lekha')) score += 30;
+      if (lower.includes('heera')) score += 25;
+      if (lower.includes('female') || lower.includes('girl') || lower.includes('woman') || lower.includes('pallavi') || lower.includes('kalpana') || lower.includes('siri')) score += 20;
+      if (lower.includes('valluvar')) score += 15;
+      if (lower.includes('microsoft')) score += 10;
+      return score;
+    };
+
+    const getEnglishVoiceScore = (name: string): number => {
+      let score = 0;
+      const lower = name.toLowerCase();
+      if (lower.includes('kid') || lower.includes('child') || lower.includes('junior') || lower.includes('girl') || lower.includes('young')) score += 150;
+      if (lower.includes('natural') || lower.includes('neural')) score += 100;
+      if (lower.includes('online')) score += 50;
+      if (lower.includes('google')) score += 40;
+      if (lower.includes('female') || lower.includes('girl') || lower.includes('woman') || lower.includes('zira') || lower.includes('samantha') || lower.includes('aria') || lower.includes('jenny') || lower.includes('siri')) score += 30;
+      if (lower.includes('microsoft') || lower.includes('david')) score += 10;
+      return score;
+    };
+
+    sentences.forEach((sentence, idx) => {
+      const utterance = new SpeechSynthesisUtterance(sentence);
+
+      if (isTamil) {
+        utterance.lang = 'ta-IN';
+        const voices = window.speechSynthesis.getVoices();
+        const tamilVoices = voices.filter(v => v.lang.startsWith('ta') || v.name.toLowerCase().includes('tamil'));
+        if (tamilVoices.length > 0) {
+          const bestTamilVoice = tamilVoices.reduce((prev, curr) => {
+            return getTamilVoiceScore(curr.name) > getTamilVoiceScore(prev.name) ? curr : prev;
+          });
+          utterance.voice = bestTamilVoice;
+        }
+      } else {
+        utterance.lang = 'en-US';
+        const voices = window.speechSynthesis.getVoices();
+        const englishVoices = voices.filter(v => v.lang.startsWith('en'));
+        if (englishVoices.length > 0) {
+          const bestEnglishVoice = englishVoices.reduce((prev, curr) => {
+            return getEnglishVoiceScore(curr.name) > getEnglishVoiceScore(prev.name) ? curr : prev;
+          });
+          utterance.voice = bestEnglishVoice;
+        }
+      }
+
+      utterance.rate = isTamil ? 0.82 : 0.85;
+      utterance.pitch = 1.35;
+
+      this.activeUtterances.push(utterance);
+
+      if (idx === 0) {
+        utterance.onstart = () => {
+          clearTimeout(this.speechStartTimeout);
+          startTypewriterSafely();
+        };
+      }
+
+      utterance.onend = () => {
+        this.activeUtterances = this.activeUtterances.filter(u => u !== utterance);
+      };
+      utterance.onerror = () => {
+        clearTimeout(this.speechStartTimeout);
+        startTypewriterSafely();
+        this.activeUtterances = this.activeUtterances.filter(u => u !== utterance);
+      };
+
+      window.speechSynthesis.speak(utterance);
+    });
+  }
+
+  startTypewriter(htmlContent: string, isTamil: boolean = false) {
+    this.typedContent.set('');
+    clearTimeout(this.typingTimeout);
+
+    let i = 0;
+    let isTag = false;
+    let currentText = '';
+
+    const charDelay = isTamil ? Math.random() * 30 + 55 : Math.random() * 20 + 35;
+    const sentenceDelay = isTamil ? 900 : 600;
+    const commaDelay = isTamil ? 450 : 300;
+
+    const type = () => {
+      if (i < htmlContent.length) {
+        let char = htmlContent.charAt(i);
+        if (char === '<') isTag = true;
+
+        currentText += char;
+        i++;
+
+        if (isTag) {
+          while (i < htmlContent.length && htmlContent.charAt(i - 1) !== '>') {
+            currentText += htmlContent.charAt(i);
+            i++;
+          }
+          isTag = false;
+          this.typedContent.set(currentText);
+          this.typingTimeout = setTimeout(type, 0);
+        } else {
+          this.typedContent.set(currentText);
+          const delay = char === '.' || char === '!' || char === '?' ? sentenceDelay : (char === ',' ? commaDelay : charDelay);
+          this.typingTimeout = setTimeout(type, delay);
+        }
+      }
+    };
+
+    type();
+  }
+
+  triggerMascotWarning(msg: string) {
+    this.mascotWarning.set(msg);
+    this.showMascotWarning.set(true);
+    setTimeout(() => {
+      this.showMascotWarning.set(false);
+    }, 4000);
+  }
+
+  ngOnDestroy() {
+    this.stopSpeech();
+    clearTimeout(this.typingTimeout);
   }
 }

@@ -76,3 +76,121 @@ body {
   color: #dc3545 !important;
   border: 1px solid #dc3545 !important;
 }
+
+/* Animated Premium Toasts */
+.toast-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 10000 !important;
+}
+
+.toast-custom {
+  border-radius: 8px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  border: none !important;
+  padding: 14px 20px !important;
+  min-width: 320px;
+  max-width: 450px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  animation: toastSlideIn 0.3s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+  transition: all 0.2s ease;
+}
+
+.toast-custom.toast-success {
+  background-color: #11824f !important;
+  color: #ffffff !important;
+}
+
+.toast-custom.toast-error {
+  background-color: #d92534 !important;
+  color: #ffffff !important;
+}
+
+.toast-custom.toast-warning {
+  background-color: #f59e0b !important;
+  color: #ffffff !important;
+}
+
+.toast-custom.toast-info {
+  background-color: #0d6efd !important;
+  color: #ffffff !important;
+}
+
+.toast-message-content {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #ffffff !important;
+  flex-grow: 1;
+  line-height: 1.4;
+  font-family: 'Times New Roman', 'Noto Serif Tamil', serif !important;
+}
+
+.toast-close-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+  line-height: 1;
+}
+
+.toast-close-btn:hover {
+  color: #ffffff;
+  transform: scale(1.15);
+}
+
+@keyframes toastSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Global Solid Color Alert Styling */
+.alert {
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 14px 20px !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.alert-success {
+  background-color: #11824f !important;
+}
+
+.alert-danger {
+  background-color: #d92534 !important;
+}
+
+.alert-warning {
+  background-color: #f59e0b !important;
+}
+
+.alert-info {
+  background-color: #0d6efd !important;
+}
+
+/* Make alert close buttons white */
+.alert .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%) !important;
+  opacity: 0.8 !important;
+  box-shadow: none !important;
+}
+
+.alert .btn-close:hover {
+  opacity: 1 !important;
+}

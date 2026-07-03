@@ -7,6 +7,7 @@ import { CoursePackageLevelService } from '../../services/course-package-level';
 import { PackageService, PackageData } from '../../services/package';
 import { LevelService, LevelData } from '../../services/level';
 import { CourseService, CourseData } from '../../services/course';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-course-package-level',
@@ -21,6 +22,7 @@ export class CoursePackageLevel implements OnInit {
   private levelService = inject(LevelService);
   private courseService = inject(CourseService);
   private mappingService = inject(CoursePackageLevelService);
+  private notificationService = inject(NotificationService);
 
   packages = signal<PackageData[]>([]);
   courses = signal<CourseData[]>([]);
@@ -33,9 +35,6 @@ export class CoursePackageLevel implements OnInit {
   selectedLevelIds = signal<number[]>([]);
   selectedCourseName = signal<string | null>(null);
   isDropdownOpen = signal(false);
-
-
-  feedbackMessage = signal<{ type: 'success' | 'error', text: string } | null>(null);
 
   ngOnInit(): void {
     this.loadPackages();
@@ -193,7 +192,6 @@ export class CoursePackageLevel implements OnInit {
 
 
   private showFeedback(type: 'success' | 'error', text: string): void {
-    this.feedbackMessage.set({ type, text });
-    setTimeout(() => this.feedbackMessage.set(null), 5000);
+    this.notificationService.show(type, text);
   }
 }

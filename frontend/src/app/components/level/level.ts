@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { LevelService, LevelData } from '../../services/level';
+import { NotificationService } from '../../services/notification.service';
 
 import {
   McvInputField,
@@ -27,6 +28,7 @@ import {
 export class Level implements OnInit {
   private fb = inject(FormBuilder);
   private levelService = inject(LevelService);
+  private notificationService = inject(NotificationService);
 
 
   levelForm: FormGroup;
@@ -35,7 +37,6 @@ export class Level implements OnInit {
   isEditMode = signal(false);
   isFormVisible = signal(false);
   currentLevelId = signal<number | null>(null);
-  feedbackMessage = signal<{ type: 'success' | 'error', text: string } | null>(null);
 
   constructor() {
     this.levelForm = this.fb.group({
@@ -141,7 +142,7 @@ export class Level implements OnInit {
     if (confirm('Are you sure you want to delete this level?')) {
       this.levelService.delete(id).subscribe({
         next: () => {
-          this.showFeedback('success', 'Level deleted successfully');
+          this.showFeedback('error', 'Level deleted successfully');
           this.loadLevels();
         },
         error: () => this.showFeedback('error', 'Failed to delete level'),
@@ -161,7 +162,6 @@ export class Level implements OnInit {
   }
 
   private showFeedback(type: 'success' | 'error', text: string): void {
-    this.feedbackMessage.set({ type, text });
-    setTimeout(() => this.feedbackMessage.set(null), 5000);
+    this.notificationService.show(type, text);
   }
 }

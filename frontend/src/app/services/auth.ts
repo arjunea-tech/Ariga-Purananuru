@@ -10,6 +10,7 @@ export interface UserData {
   email?: string;
   role: string;
   tenant_id?: number;
+  dob?: string | null;
 }
 
 export interface AuthResponse {

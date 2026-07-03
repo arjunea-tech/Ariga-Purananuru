@@ -1,27 +1,31 @@
+@if (uiTheme() === 'classic') {
 <div class="container-fluid p-0" style="background-color: #f4f5fb; min-height: 100vh;">
   <div class="row g-0">
     <!-- Sidebar (Fixed Left, 280px) -->
-    <aside class="col-auto d-flex flex-column border-end bg-white transition-all position-relative" 
-      [style.width]="isSidebarCollapsed() ? '88px' : '280px'" 
+    <aside class="col-auto d-flex flex-column border-end bg-white transition-all position-relative"
+      [style.width]="isSidebarCollapsed() ? '88px' : '280px'"
       style="height: 100vh; position: sticky; top: 0; z-index: 100; overflow-x: visible; white-space: nowrap;">
       <!-- Top Section Logo & Toggle -->
       <div class="p-3 d-flex align-items-center justify-content-between border-bottom" style="height: 84px;">
         @if (!isSidebarCollapsed()) {
-          <div class="d-flex align-items-center gap-3 animate-fade-in">
-            <div class="sidebar-logo-square d-flex align-items-center justify-content-center text-white rounded-3 flex-shrink-0" style="width: 40px; height: 40px; font-size: 1.25rem;">
-              <i class="bi bi-zap-fill"></i>
-            </div>
-            <div>
-              <h5 class="fw-bold mb-0 text-dark" style="font-size: 15px; letter-spacing: -0.02em;">Ariga Workspace</h5>
-              <span class="text-uppercase fw-bold text-primary" style="font-size: 10px; letter-spacing: 0.05em;">STUDENT PORTAL</span>
-            </div>
+        <div class="d-flex align-items-center gap-3 animate-fade-in">
+          <div
+            class="sidebar-logo-square d-flex align-items-center justify-content-center text-white rounded-3 flex-shrink-0"
+            style="width: 40px; height: 40px; font-size: 1.25rem;">
+            <i class="bi bi-zap-fill"></i>
           </div>
+          <div>
+            <h5 class="fw-bold mb-0 text-dark" style="font-size: 15px; letter-spacing: -0.02em;">Ariga Workspace</h5>
+            <span class="text-uppercase fw-bold text-primary" style="font-size: 10px; letter-spacing: 0.05em;">STUDENT
+              PORTAL</span>
+          </div>
+        </div>
         }
-        
-        <button class="btn btn-light rounded-3 p-0 d-flex align-items-center justify-content-center text-secondary shadow-sm" 
+
+        <button
+          class="btn btn-light rounded-3 p-0 d-flex align-items-center justify-content-center text-secondary shadow-sm"
           [class.mx-auto]="isSidebarCollapsed()"
-          style="width: 38px; height: 38px; border: 1px solid #e2e8f0; flex-shrink: 0;"
-          (click)="toggleSidebar()">
+          style="width: 38px; height: 38px; border: 1px solid #e2e8f0; flex-shrink: 0;" (click)="toggleSidebar()">
           <i class="bi fs-5" [class.bi-list]="isSidebarCollapsed()" [class.bi-chevron-left]="!isSidebarCollapsed()"></i>
         </button>
       </div>
@@ -30,27 +34,43 @@
       <div class="overflow-y-auto flex-grow-1 p-3 sidebar-scroll">
         <!-- Global Navigation Links -->
         <div class="d-flex flex-column gap-2">
-          <button class="btn nav-item-btn w-100 py-3 px-3 d-flex align-items-center gap-3" [class.text-center]="isSidebarCollapsed()" [class.justify-content-center]="isSidebarCollapsed()" [class.active]="currentScreen() === 'dashboard' && courseId() === null" (click)="switchScreen('dashboard')" title="Dashboard">
+          <button class="btn nav-item-btn w-100 py-3 px-3 d-flex align-items-center gap-3"
+            [class.text-center]="isSidebarCollapsed()" [class.justify-content-center]="isSidebarCollapsed()"
+            [class.active]="currentScreen() === 'dashboard' && courseId() === null" (click)="switchScreen('dashboard')"
+            title="Dashboard">
             <i class="bi bi-grid-1x2-fill fs-5" [class.m-auto]="isSidebarCollapsed()"></i>
             @if (!isSidebarCollapsed()) { <span class="animate-fade-in">{{ 'DASHBOARD' | translate }}</span> }
           </button>
-          <button class="btn nav-item-btn w-100 py-3 px-3 d-flex align-items-center gap-3" [class.text-center]="isSidebarCollapsed()" [class.justify-content-center]="isSidebarCollapsed()" [class.active]="currentScreen() === 'courses' || (courseId() !== null && currentScreen() !== 'continue')" (click)="switchScreen('courses')" title="My Courses">
+          <button class="btn nav-item-btn w-100 py-3 px-3 d-flex align-items-center gap-3"
+            [class.text-center]="isSidebarCollapsed()" [class.justify-content-center]="isSidebarCollapsed()"
+            [class.active]="currentScreen() === 'courses' || (courseId() !== null && currentScreen() !== 'continue')"
+            (click)="switchScreen('courses')" title="My Courses">
             <i class="bi bi-book-half fs-5" [class.m-auto]="isSidebarCollapsed()"></i>
             @if (!isSidebarCollapsed()) { <span class="animate-fade-in">{{ 'COURSES' | translate }}</span> }
           </button>
-          <button class="btn nav-item-btn w-100 py-3 px-3 d-flex align-items-center gap-3" [class.text-center]="isSidebarCollapsed()" [class.justify-content-center]="isSidebarCollapsed()" [class.active]="currentScreen() === 'continue'" (click)="continueLearning()" [title]="'CONTINUE_LEARNING' | translate">
+          <button class="btn nav-item-btn w-100 py-3 px-3 d-flex align-items-center gap-3"
+            [class.text-center]="isSidebarCollapsed()" [class.justify-content-center]="isSidebarCollapsed()"
+            [class.active]="currentScreen() === 'continue'" (click)="continueLearning()"
+            [title]="'CONTINUE_LEARNING' | translate">
             <i class="bi bi-play-circle-fill fs-5" [class.m-auto]="isSidebarCollapsed()"></i>
             @if (!isSidebarCollapsed()) { <span class="animate-fade-in">{{ 'CONTINUE_LEARNING' | translate }}</span> }
           </button>
-          <button class="btn nav-item-btn w-100 py-3 px-3 d-flex align-items-center gap-3" [class.text-center]="isSidebarCollapsed()" [class.justify-content-center]="isSidebarCollapsed()" [class.active]="currentScreen() === 'achievements'" (click)="switchScreen('achievements')" title="Achievements">
+          <button class="btn nav-item-btn w-100 py-3 px-3 d-flex align-items-center gap-3"
+            [class.text-center]="isSidebarCollapsed()" [class.justify-content-center]="isSidebarCollapsed()"
+            [class.active]="currentScreen() === 'achievements'" (click)="switchScreen('achievements')"
+            title="Achievements">
             <i class="bi bi-trophy-fill fs-5" [class.m-auto]="isSidebarCollapsed()"></i>
             @if (!isSidebarCollapsed()) { <span class="animate-fade-in">{{ 'ACHIEVEMENTS' | translate }}</span> }
           </button>
-          <button class="btn nav-item-btn w-100 py-3 px-3 d-flex align-items-center gap-3" [class.text-center]="isSidebarCollapsed()" [class.justify-content-center]="isSidebarCollapsed()" [class.active]="currentScreen() === 'progress'" (click)="switchScreen('progress')" title="Progress">
+          <button class="btn nav-item-btn w-100 py-3 px-3 d-flex align-items-center gap-3"
+            [class.text-center]="isSidebarCollapsed()" [class.justify-content-center]="isSidebarCollapsed()"
+            [class.active]="currentScreen() === 'progress'" (click)="switchScreen('progress')" title="Progress">
             <i class="bi bi-bar-chart-line-fill fs-5" [class.m-auto]="isSidebarCollapsed()"></i>
             @if (!isSidebarCollapsed()) { <span class="animate-fade-in">{{ 'PROGRESS' | translate }}</span> }
           </button>
-          <button class="btn nav-item-btn w-100 py-3 px-3 d-flex align-items-center gap-3" [class.text-center]="isSidebarCollapsed()" [class.justify-content-center]="isSidebarCollapsed()" [class.active]="currentScreen() === 'settings'" (click)="switchScreen('settings')" title="Settings">
+          <button class="btn nav-item-btn w-100 py-3 px-3 d-flex align-items-center gap-3"
+            [class.text-center]="isSidebarCollapsed()" [class.justify-content-center]="isSidebarCollapsed()"
+            [class.active]="currentScreen() === 'settings'" (click)="switchScreen('settings')" title="Settings">
             <i class="bi bi-gear-fill fs-5" [class.m-auto]="isSidebarCollapsed()"></i>
             @if (!isSidebarCollapsed()) { <span class="animate-fade-in">{{ 'SETTINGS' | translate }}</span> }
           </button>
@@ -59,36 +79,52 @@
 
       <!-- Bottom Profile & Switcher Section -->
       <div class="p-3 border-top bg-light-subtle d-flex flex-column gap-3">
-        
+
         <!-- Language Switcher -->
-        <div class="d-flex align-items-center rounded-3 p-2" style="background: rgba(255,255,255,0.7); border: 1px solid #e2e8f0; transition: all 0.3s;" [class.justify-content-center]="isSidebarCollapsed()" [class.flex-column]="isSidebarCollapsed()" [class.gap-1]="isSidebarCollapsed()">
+        <div class="d-flex align-items-center rounded-3 p-2"
+          style="background: rgba(255,255,255,0.7); border: 1px solid #e2e8f0; transition: all 0.3s;"
+          [class.justify-content-center]="isSidebarCollapsed()" [class.flex-column]="isSidebarCollapsed()"
+          [class.gap-1]="isSidebarCollapsed()">
           <i class="bi bi-globe2 text-primary" [class.fs-5]="isSidebarCollapsed()" title="Language"></i>
           @if (!isSidebarCollapsed()) {
-            <select [ngModel]="selectedLang()" (ngModelChange)="updateLanguage($event)" class="form-select form-select-sm border-0 bg-transparent fw-bold shadow-none ms-1 text-dark" style="cursor: pointer;">
-              <option value="en">English (EN)</option>
-              <option value="ta">Tamil (TA)</option>
-            </select>
+          <select [ngModel]="selectedLang()" (ngModelChange)="updateLanguage($event)"
+            class="form-select form-select-sm border-0 bg-transparent fw-bold shadow-none ms-1 text-dark"
+            style="cursor: pointer;">
+            <option value="en">English (EN)</option>
+            <option value="ta">Tamil (TA)</option>
+          </select>
           } @else {
-            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill cursor-pointer hover-scale-btn" style="font-size: 10px;" (click)="selectedLang() === 'en' ? updateLanguage('ta') : updateLanguage('en')" title="Switch Language">
-              {{ selectedLang() | uppercase }}
-            </span>
+          <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill cursor-pointer hover-scale-btn"
+            style="font-size: 10px;" (click)="selectedLang() === 'en' ? updateLanguage('ta') : updateLanguage('en')"
+            title="Switch Language">
+            {{ selectedLang() | uppercase }}
+          </span>
           }
         </div>
 
         <!-- Student Profile Card -->
-        <div class="profile-card-sidebar p-2 rounded-4 d-flex align-items-center" [class.justify-content-between]="!isSidebarCollapsed()" [class.flex-column]="isSidebarCollapsed()" [class.gap-3]="isSidebarCollapsed()">
+        <div class="profile-card-sidebar p-2 rounded-4 d-flex align-items-center"
+          [class.justify-content-between]="!isSidebarCollapsed()" [class.flex-column]="isSidebarCollapsed()"
+          [class.gap-3]="isSidebarCollapsed()">
           <div class="d-flex align-items-center gap-2 text-truncate">
-            <div class="avatar-circle-sidebar d-flex align-items-center justify-content-center text-white font-monospace fw-bold rounded-circle flex-shrink-0" style="width: 40px; height: 40px; background: linear-gradient(135deg, #4f46e5, #3b82f6);" title="{{ authService.getUser()?.name || 'Logesh Kumar' }}">
+            <div
+              class="avatar-circle-sidebar d-flex align-items-center justify-content-center text-white font-monospace fw-bold rounded-circle flex-shrink-0"
+              style="width: 40px; height: 40px; background: linear-gradient(135deg, #4f46e5, #3b82f6);"
+              title="{{ authService.getUser()?.name || 'Logesh Kumar' }}">
               {{ (authService.getUser()?.name || 'L').charAt(0) }}
             </div>
             @if (!isSidebarCollapsed()) {
-              <div class="text-truncate animate-fade-in">
-                <h6 class="fw-bold mb-0 text-dark text-truncate" style="font-size: 13px;">{{ authService.getUser()?.name || 'Logesh Kumar' }}</h6>
-                <span class="text-secondary text-truncate d-block" style="font-size: 11px;">{{ authService.getUser()?.email || 'student@edu' }}</span>
-              </div>
+            <div class="text-truncate animate-fade-in">
+              <h6 class="fw-bold mb-0 text-dark text-truncate" style="font-size: 13px;">{{ authService.getUser()?.name
+                || 'Logesh Kumar' }}</h6>
+              <span class="text-secondary text-truncate d-block" style="font-size: 11px;">{{
+                authService.getUser()?.email || 'student@edu' }}</span>
+            </div>
             }
           </div>
-          <button class="btn btn-white rounded-circle p-0 d-flex align-items-center justify-content-center text-danger shadow-sm border hover-scale-btn" style="width: 36px; height: 36px; flex-shrink: 0;" (click)="logout()" title="Logout">
+          <button
+            class="btn btn-white rounded-circle p-0 d-flex align-items-center justify-content-center text-danger shadow-sm border hover-scale-btn"
+            style="width: 36px; height: 36px; flex-shrink: 0;" (click)="logout()" title="Logout">
             <i class="bi bi-power fs-6"></i>
           </button>
         </div>
@@ -97,1042 +133,1179 @@
 
     <!-- Sidebar 2: Course Navigation Sidebar (Conditional) -->
     @if (courseId() !== null) {
-      <aside class="col-auto d-flex flex-column border-end bg-white course-navigation-sidebar position-relative" 
-        style="width: 280px; height: 100vh; position: sticky; top: 0; z-index: 99; overflow-x: hidden; white-space: nowrap;">
+    <aside class="col-auto d-flex flex-column border-end bg-white course-navigation-sidebar position-relative"
+      style="width: 280px; height: 100vh; position: sticky; top: 0; z-index: 99; overflow-x: hidden; white-space: nowrap;">
 
-        <!-- Top Section: Back button -->
-        <div class="p-4 border-bottom">
-          <button class="btn btn-link text-primary text-decoration-none fw-bold p-0 d-flex align-items-center gap-2 small" (click)="switchScreen('courses')">
-            <i class="bi bi-arrow-left"></i>
-            <span>Back to Courses</span>
-          </button>
-          
-          @if (courseStructure(); as structure) {
-            <h5 class="fw-bold text-dark mt-3 mb-1 text-truncate" style="font-size: 16px; letter-spacing: -0.01em;">{{ structure.name }}</h5>
-            <div class="progress mt-2" style="height: 5px; background-color: #e2e8f0;">
-              <div class="progress-bar ariga-primary-gradient" [style.width.%]="courseProgress().percentage"></div>
-            </div>
-            <div class="d-flex justify-content-between text-secondary mt-1" style="font-size: 11px;">
-              <span>Progress</span>
-              <span class="fw-bold text-dark">{{ courseProgress().percentage }}%</span>
-            </div>
-          }
+      <!-- Top Section: Back button -->
+      <div class="p-4 border-bottom">
+        <button class="btn btn-link text-primary text-decoration-none fw-bold p-0 d-flex align-items-center gap-2 small"
+          (click)="switchScreen('courses')">
+          <i class="bi bi-arrow-left"></i>
+          <span>Back to Courses</span>
+        </button>
+
+        @if (courseStructure(); as structure) {
+        <h5 class="fw-bold text-dark mt-3 mb-1 text-truncate" style="font-size: 16px; letter-spacing: -0.01em;">{{
+          structure.name }}</h5>
+        <div class="progress mt-2" style="height: 5px; background-color: #e2e8f0;">
+          <div class="progress-bar ariga-primary-gradient" [style.width.%]="courseProgress().percentage"></div>
         </div>
+        <div class="d-flex justify-content-between text-secondary mt-1" style="font-size: 11px;">
+          <span>Progress</span>
+          <span class="fw-bold text-dark">{{ courseProgress().percentage }}%</span>
+        </div>
+        }
+      </div>
 
-        <!-- Chapters / Topics Accordion List -->
-        <div class="overflow-y-auto flex-grow-1 p-3 sidebar-scroll">
-          <div class="chapters-accordion d-flex flex-column gap-2">
-            @for (chapter of flatChapters(); track chapter.id) {
-              <div class="chapter-item border-bottom pb-2">
-                <!-- Chapter Header -->
-                <div class="d-flex align-items-center justify-content-between py-2 px-2 rounded-3 hover-bg-light cursor-pointer" 
-                     (click)="toggleChapter(chapter)" 
-                     style="cursor: pointer;">
-                  <span class="fw-bold text-dark small text-truncate pe-2" style="font-size: 13px;">{{ chapter.name }}</span>
-                  <i class="bi" [class.bi-chevron-down]="chapter.is_expanded" [class.bi-chevron-right]="!chapter.is_expanded" style="font-size: 12px; color: #a0aec0;"></i>
-                </div>
-                
-                <!-- Chapter Topics -->
-                @if (chapter.is_expanded) {
-                  <div class="topics-list mt-1 ps-2 d-flex flex-column gap-1">
-                    @for (topic of chapter.contents; track topic.id) {
-                      <div class="topic-item d-flex align-items-center gap-3 py-2 px-3 rounded-4 transition-all"
-                           [class.active-topic-bubble]="activeContentId() === topic.id"
-                           (click)="selectTopic(topic.id)"
-                           style="cursor: pointer; font-size: 13px;">
-                        
-                        <!-- Check / Circle Icon -->
-                        <span class="topic-status-icon d-flex align-items-center justify-content-center flex-shrink-0" style="width: 20px; height: 20px;">
-                          @if (isTopicCompleted(chapter.id, topic.id)) {
-                            <i class="bi bi-check-circle-fill text-success" style="font-size: 15px;"></i>
-                          } @else if (activeContentId() === topic.id) {
-                            <i class="bi bi-circle text-primary" style="font-size: 15px;"></i>
-                          } @else {
-                            <i class="bi bi-circle text-secondary opacity-50" style="font-size: 15px;"></i>
-                          }
-                        </span>
-                        
-                        <!-- Topic Title -->
-                        <span class="text-truncate" 
-                              [class.text-primary]="activeContentId() === topic.id" 
-                              [class.fw-bold]="activeContentId() === topic.id" 
-                              [class.text-dark]="activeContentId() !== topic.id && !isTopicCompleted(chapter.id, topic.id)"
-                              [class.text-secondary]="isTopicCompleted(chapter.id, topic.id) && activeContentId() !== topic.id">
-                          {{ topic.title || topic.name }}
-                        </span>
-                      </div>
-                    }
-                  </div>
-                }
+      <!-- Chapters / Topics Accordion List -->
+      <div class="overflow-y-auto flex-grow-1 p-3 sidebar-scroll">
+        <div class="chapters-accordion d-flex flex-column gap-2">
+          @for (chapter of flatChapters(); track chapter.id) {
+          <div class="chapter-item border-bottom pb-2">
+            <!-- Chapter Header -->
+            <div
+              class="d-flex align-items-center justify-content-between py-2 px-2 rounded-3 hover-bg-light cursor-pointer"
+              (click)="toggleChapter(chapter)" style="cursor: pointer;">
+              <span class="fw-bold text-dark small text-truncate pe-2" style="font-size: 13px;">{{ chapter.name
+                }}</span>
+              <i class="bi" [class.bi-chevron-down]="chapter.is_expanded"
+                [class.bi-chevron-right]="!chapter.is_expanded" style="font-size: 12px; color: #a0aec0;"></i>
+            </div>
+
+            <!-- Chapter Topics -->
+            @if (chapter.is_expanded) {
+            <div class="topics-list mt-1 ps-2 d-flex flex-column gap-1">
+              @for (topic of chapter.contents; track topic.id) {
+              <div class="topic-item d-flex align-items-center gap-3 py-2 px-3 rounded-4 transition-all"
+                [class.active-topic-bubble]="activeContentId() === topic.id" (click)="selectTopic(topic.id)"
+                style="cursor: pointer; font-size: 13px;">
+
+                <!-- Check / Circle Icon -->
+                <span class="topic-status-icon d-flex align-items-center justify-content-center flex-shrink-0"
+                  style="width: 20px; height: 20px;">
+                  @if (isTopicCompleted(chapter.id, topic.id)) {
+                  <i class="bi bi-check-circle-fill text-success" style="font-size: 15px;"></i>
+                  } @else if (activeContentId() === topic.id) {
+                  <i class="bi bi-circle text-primary" style="font-size: 15px;"></i>
+                  } @else {
+                  <i class="bi bi-circle text-secondary opacity-50" style="font-size: 15px;"></i>
+                  }
+                </span>
+
+                <!-- Topic Title -->
+                <span class="text-truncate" [class.text-primary]="activeContentId() === topic.id"
+                  [class.fw-bold]="activeContentId() === topic.id"
+                  [class.text-dark]="activeContentId() !== topic.id && !isTopicCompleted(chapter.id, topic.id)"
+                  [class.text-secondary]="isTopicCompleted(chapter.id, topic.id) && activeContentId() !== topic.id">
+                  {{ topic.title || topic.name }}
+                </span>
               </div>
+              }
+            </div>
             }
           </div>
+          }
         </div>
-      </aside>
+      </div>
+    </aside>
     }
 
     <!-- Main Content Area -->
     <main class="col p-4 p-md-5 overflow-y-auto" style="height: 100vh;">
-      
+
       <!-- SCREEN 1: STUDENT DASHBOARD -->
       @if (courseId() === null && currentScreen() === 'dashboard') {
-        <div class="max-w-5xl mx-auto animate-fade-in">
-          <!-- Hero Banner (Figma Match) -->
-          <div class="p-5 mb-4 rounded-4 position-relative overflow-hidden shadow-sm" style="background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%); border: none;">
-            <!-- Decorative circle backgrounds -->
-            <div class="position-absolute rounded-circle" style="width: 350px; height: 350px; top: -100px; right: -50px; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);"></div>
-            <div class="position-absolute rounded-circle" style="width: 250px; height: 250px; bottom: -80px; right: 150px; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);"></div>
-            
-            <div class="row align-items-center position-relative" style="z-index: 2;">
-              <div class="col-md-8 text-white">
-                <span class="badge bg-white bg-opacity-25 text-white text-uppercase px-3 py-2 rounded-pill fw-bold mb-3 d-inline-flex align-items-center gap-2" style="font-size: 0.75rem; letter-spacing: 0.05em;">
-                  <span>🎓</span> {{ 'WELCOME_BACK' | translate }}
-                </span>
-                <h1 class="fw-bold display-6 mb-2" style="letter-spacing: -0.01em;">{{ 'HELLO' | translate }}, {{ authService.getUser()?.name || 'Logesh' }}! 👋</h1>
-                <p class="mb-4 opacity-75 fs-5">{{ 'READY_JOURNEY' | translate }}</p>
-                <button class="btn btn-white rounded-pill px-4 py-2 fw-bold d-inline-flex align-items-center gap-2 shadow-sm" style="color: #4f46e5;" (click)="continueLearning()">
-                  <i class="bi bi-play-fill fs-5"></i>
-                  <span>{{ 'RESUME_LEARNING' | translate }}</span>
-                </button>
+      <div class="max-w-5xl mx-auto animate-fade-in">
+        <!-- Hero Banner (Figma Match) -->
+        <div class="p-5 mb-4 rounded-4 position-relative overflow-hidden shadow-sm"
+          style="background: linear-gradient(135deg, #38bdf8 0%, #2563eb 100%); border: none;">
+          <!-- Decorative circle backgrounds -->
+          <div class="position-absolute rounded-circle"
+            style="width: 350px; height: 350px; top: -100px; right: -50px; background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);">
+          </div>
+          <div class="position-absolute rounded-circle"
+            style="width: 250px; height: 250px; bottom: -80px; right: 150px; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);">
+          </div>
+
+          <div class="row align-items-center position-relative" style="z-index: 2;">
+            <div class="col-md-8 text-white">
+              <span
+                class="badge bg-white bg-opacity-25 text-white text-uppercase px-3 py-2 rounded-pill fw-bold mb-3 d-inline-flex align-items-center gap-2"
+                style="font-size: 0.75rem; letter-spacing: 0.05em;">
+                <span>🎓</span> {{ 'WELCOME_BACK' | translate }}
+              </span>
+              <h1 class="fw-bold display-6 mb-2" style="letter-spacing: -0.01em;">{{ 'HELLO' | translate }}, {{
+                authService.getUser()?.name || 'Logesh' }}! 👋</h1>
+              <p class="mb-4 opacity-75 fs-5">{{ 'READY_JOURNEY' | translate }}</p>
+              <button
+                class="btn btn-white rounded-pill px-4 py-2 fw-bold d-inline-flex align-items-center gap-2 shadow-sm"
+                style="color: #4f46e5;" (click)="continueLearning()">
+                <i class="bi bi-play-fill fs-5"></i>
+                <span>{{ 'RESUME_LEARNING' | translate }}</span>
+              </button>
+            </div>
+            <div class="col-md-4 d-none d-md-block text-center position-relative">
+              <!-- Custom Figma Rocket SVG -->
+              <svg width="180" height="180" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"
+                style="filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.15)); transform: rotate(15deg);">
+                <!-- Flame -->
+                <path d="M42 75 Q50 95 58 75 Q50 85 42 75 Z" fill="#FBBF24" />
+                <!-- Left Fin -->
+                <path d="M30 65 L15 80 L35 75 Z" fill="#E2E8F0" />
+                <!-- Right Fin -->
+                <path d="M70 65 L85 80 L65 75 Z" fill="#E2E8F0" />
+                <!-- Body -->
+                <path d="M50 10 C30 30 30 60 35 75 L65 75 C70 60 70 30 50 10 Z" fill="#FFFFFF" />
+                <!-- Window -->
+                <circle cx="50" cy="45" r="8" fill="#5b53ff" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Statistics Cards Grid -->
+        <div class="row g-4 mb-5">
+          <!-- Card 1 -->
+          <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                  style="width: 48px; height: 48px; background-color: rgba(108, 71, 255, 0.1); color: #6c47ff;">
+                  <i class="bi bi-book-half fs-4"></i>
+                </div>
+                <span class="text-success small fw-bold"><i class="bi bi-arrow-up-short"></i>{{ 'ACTIVE' | translate
+                  }}</span>
               </div>
-              <div class="col-md-4 d-none d-md-block text-center position-relative">
-                <!-- Custom Figma Rocket SVG -->
-                <svg width="180" height="180" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0px 10px 15px rgba(0,0,0,0.15)); transform: rotate(15deg);">
-                  <!-- Flame -->
-                  <path d="M42 75 Q50 95 58 75 Q50 85 42 75 Z" fill="#FBBF24"/>
-                  <!-- Left Fin -->
-                  <path d="M30 65 L15 80 L35 75 Z" fill="#E2E8F0"/>
-                  <!-- Right Fin -->
-                  <path d="M70 65 L85 80 L65 75 Z" fill="#E2E8F0"/>
-                  <!-- Body -->
-                  <path d="M50 10 C30 30 30 60 35 75 L65 75 C70 60 70 30 50 10 Z" fill="#FFFFFF"/>
-                  <!-- Window -->
-                  <circle cx="50" cy="45" r="8" fill="#5b53ff"/>
+              <h3 class="fw-bold mb-1 text-dark">{{ courses().length || 0 }}</h3>
+              <span class="text-uppercase text-secondary fw-semibold"
+                style="font-size: 11px; letter-spacing: 0.05em;">{{ 'COURSES_ENROLLED' | translate }}</span>
+            </div>
+          </div>
+          <!-- Card 2 -->
+          <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                  style="width: 48px; height: 48px; background-color: rgba(16, 185, 129, 0.1); color: #10b981;">
+                  <i class="bi bi-check-circle-fill fs-4"></i>
+                </div>
+                <span class="text-muted small">{{ 'UPDATED' | translate }}</span>
+              </div>
+              <h3 class="fw-bold mb-1 text-dark">{{ stats()?.completed_chapters || 0 }}</h3>
+              <span class="text-uppercase text-secondary fw-semibold"
+                style="font-size: 11px; letter-spacing: 0.05em;">{{ 'LESSONS_COMPLETED' | translate }}</span>
+            </div>
+          </div>
+          <!-- Card 3 -->
+          <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                  style="width: 48px; height: 48px; background-color: rgba(245, 158, 11, 0.1); color: #f59e0b;">
+                  <i class="bi bi-fire fs-4"></i>
+                </div>
+                <span class="text-warning small fw-bold">🔥 {{ 'STREAK' | translate }}</span>
+              </div>
+              <h3 class="fw-bold mb-1 text-dark">{{ stats()?.streak || 0 }}</h3>
+              <span class="text-uppercase text-secondary fw-semibold"
+                style="font-size: 11px; letter-spacing: 0.05em;">{{ 'CURRENT_STREAK' | translate }}</span>
+            </div>
+          </div>
+          <!-- Card 4 -->
+          <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center"
+                  style="width: 48px; height: 48px; background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                  <i class="bi bi-graph-up-arrow fs-4"></i>
+                </div>
+                <span class="text-primary small fw-semibold">{{ 'TARGET' | translate }} 80%</span>
+              </div>
+              <h3 class="fw-bold mb-1 text-dark">{{ stats()?.completion_percentage || 0 }}%</h3>
+              <span class="text-uppercase text-secondary fw-semibold"
+                style="font-size: 11px; letter-spacing: 0.05em;">{{ 'OVERALL_PROGRESS' | translate }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom Columns: Active Courses & Charts -->
+        <div class="row g-4">
+          <!-- Active Courses Section (2/3 width on large) -->
+          <div class="col-lg-8">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+              <h4 class="fw-bold mb-0 text-dark" style="letter-spacing: -0.01em;">{{ 'ACTIVE_COURSES' | translate }}
+              </h4>
+              <button class="btn btn-link text-primary text-decoration-none fw-bold p-0"
+                (click)="switchScreen('courses')">{{ 'VIEW_ALL' | translate }} →</button>
+            </div>
+
+            <div class="d-flex flex-column gap-3">
+              @for (course of courses(); track course.id) {
+              <div class="card border-0 shadow-sm rounded-4 p-3 bg-white course-item-row hover-shadow transition-all"
+                (click)="selectCourse(course.id)" style="cursor: pointer;">
+                <div class="d-flex align-items-center gap-3">
+                  <!-- Image Thumbnail (Unsplash placeholders) -->
+                  <div class="position-relative overflow-hidden rounded-3 flex-shrink-0"
+                    style="width: 100px; height: 68px;">
+                    <img
+                      [src]="course.name.includes('Tamil') || course.name.includes('Purananuru') ? 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80' : 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80'"
+                      class="w-100 h-100 object-cover" alt="Course Thumbnail">
+                    <div
+                      class="position-absolute inset-0 bg-dark bg-opacity-20 d-flex align-items-center justify-content-center opacity-0 hover-opacity-100 transition-all">
+                      <i class="bi bi-play-circle-fill text-white fs-3"></i>
+                    </div>
+                  </div>
+
+                  <div class="flex-grow-1 text-truncate">
+                    <span class="badge bg-primary bg-opacity-10 text-primary text-uppercase fw-bold mb-1"
+                      style="font-size: 9px;">
+                      {{ course.name.includes('Tamil') || course.name.includes('Purananuru') ? ('LITERATURE' |
+                      translate) : ('GENERAL' | translate) }}
+                    </span>
+                    <h6 class="fw-bold mb-1 text-dark text-truncate">{{ course.name }}</h6>
+                    <!-- Mini progress bar -->
+                    <div class="d-flex align-items-center gap-2 mt-2">
+                      <div class="progress flex-grow-1" style="height: 6px;">
+                        <div class="progress-bar ariga-primary-gradient"
+                          [style.width.%]="course.name.includes('Tamil') || course.name.includes('Purananuru') ? (stats()?.completion_percentage || 0) : 0">
+                        </div>
+                      </div>
+                      <span class="small fw-bold text-secondary" style="font-size: 11px;">{{
+                        course.name.includes('Tamil') || course.name.includes('Purananuru') ?
+                        (stats()?.completion_percentage || 0) : 0 }}%</span>
+                    </div>
+                  </div>
+
+                  <!-- Last accessed metadata -->
+                  <div class="d-none d-sm-flex align-items-center gap-1 text-secondary flex-shrink-0"
+                    style="font-size: 11px;">
+                    <i class="bi bi-clock"></i>
+                    <span>{{ 'LAST_ACCESSED' | translate }}</span>
+                  </div>
+                </div>
+              </div>
+              }
+            </div>
+          </div>
+
+          <!-- Right Column (1/3 width): Activity Chart & Achievements -->
+          <div class="col-lg-4">
+            <!-- Weekly Activity -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+              <h5 class="fw-bold text-dark mb-3">{{ 'WEEKLY_ACTIVITY' | translate }}</h5>
+              <!-- Vector SVG Area Chart representing Mon-Sun -->
+              <div class="position-relative" style="height: 120px;">
+                <svg viewBox="0 0 100 30" class="w-100 h-100 overflow-visible">
+                  <defs>
+                    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#6c47ff" stop-opacity="0.4" />
+                      <stop offset="100%" stop-color="#6c47ff" stop-opacity="0" />
+                    </linearGradient>
+                  </defs>
+                  <!-- Area Path -->
+                  <path [attr.d]="monthlyActivityPath().fillPath" fill="url(#areaGrad)" />
+                  <!-- Line Path -->
+                  <path [attr.d]="monthlyActivityPath().linePath" fill="none" stroke="#6c47ff" stroke-width="1.5"
+                    stroke-linecap="round" />
+                  <!-- Dots -->
+                  @for (pt of monthlyActivityPath().points; track pt.month) {
+                  <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="1" fill="#6c47ff" />
+                  }
+                </svg>
+              </div>
+              <div class="d-flex justify-content-between text-secondary mt-2" style="font-size: 10px;">
+                <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
+              </div>
+            </div>
+
+            <!-- Achievements Panel -->
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="fw-bold text-dark mb-0">{{ 'ACHIEVEMENTS' | translate }}</h5>
+                <button class="btn btn-link text-primary text-decoration-none fw-bold p-0 small"
+                  style="font-size: 12px;" (click)="switchScreen('achievements')">{{ 'VIEW_ALL' | translate }}</button>
+              </div>
+
+              <div class="d-flex flex-column gap-3">
+                <div class="d-flex align-items-center gap-3">
+                  <div
+                    class="rounded-circle d-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning"
+                    style="width: 40px; height: 40px;">
+                    <i class="bi bi-award fs-5"></i>
+                  </div>
+                  <div>
+                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 13px;">{{ 'CERTIFICATES' | translate }}</h6>
+                    <span class="text-secondary" style="font-size: 11px;">{{ stats()?.certificates?.length || 0 }} {{
+                      'CERTIFICATES_EARNED' | translate }}</span>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                  <div class="rounded-circle d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px; background-color: rgba(108, 71, 255, 0.1); color: #6c47ff;">
+                    <i class="bi bi-star-fill fs-5"></i>
+                  </div>
+                  <div>
+                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 13px;">{{ 'GOLD_BADGES' | translate }}</h6>
+                    <span class="text-secondary" style="font-size: 11px;">{{ getUnlockedBadgesCount() }} {{
+                      'BADGES_UNLOCKED' | translate }}</span>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                  <div
+                    class="rounded-circle d-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success"
+                    style="width: 40px; height: 40px;">
+                    <i class="bi bi-zap-fill fs-5"></i>
+                  </div>
+                  <div>
+                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 13px;">{{ 'XP_POINTS' | translate }}</h6>
+                    <span class="text-secondary" style="font-size: 11px;">{{ stats()?.xp_points || 0 }} {{
+                      'POINTS_ACCRUED' | translate }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- SCREEN 2: MY COURSES -->
+      @if (courseId() === null && currentScreen() === 'courses') {
+      <div class="max-w-5xl mx-auto animate-fade-in">
+        <div class="mb-4">
+          <h2 class="fw-bold text-dark mb-1">My Courses</h2>
+          <p class="text-secondary">{{ courses().length || 12 }} courses enrolled in this semester</p>
+        </div>
+
+        <!-- Search & Filters -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-8">
+            <div class="position-relative">
+              <i class="bi bi-search position-absolute text-secondary"
+                style="left: 16px; top: 50%; transform: translateY(-50%);"></i>
+              <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)"
+                class="form-control rounded-4 py-2 ps-5 border-0 shadow-sm"
+                placeholder="Search by course title or instructor...">
+            </div>
+          </div>
+          <div class="col-md-4">
+            <button
+              class="btn btn-white w-100 rounded-4 py-2 d-flex align-items-center justify-content-center gap-2 fw-semibold shadow-sm">
+              <i class="bi bi-sliders"></i>
+              <span>Filter Options</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Category filter pills -->
+        <div class="d-flex flex-wrap gap-2 mb-4">
+          @for (cat of courseCategories(); track cat) {
+          <button class="btn filter-pill rounded-pill px-4 py-2" [class.active]="selectedCategory() === cat"
+            (click)="selectedCategory.set(cat)">
+            {{ cat }}
+          </button>
+          }
+        </div>
+
+        <!-- Course Grid -->
+        <div class="row g-4">
+          @for (course of filteredCourses(); track course.id) {
+          <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white h-100 course-card transition-all"
+              (click)="selectCourse(course.id)">
+              <div class="position-relative overflow-hidden" style="height: 160px;">
+                @if (course.name.includes('Tamil') || course.name.includes('Purananuru')) {
+                <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80"
+                  class="w-100 h-100 object-cover" alt="Course Thumbnail">
+                } @else if (course.name.includes('Kural') || course.name.includes('Thirukkural')) {
+                <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80"
+                  class="w-100 h-100 object-cover" alt="Course Thumbnail">
+                } @else {
+                <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=600&q=80"
+                  class="w-100 h-100 object-cover" alt="Course Thumbnail">
+                }
+
+                <span class="position-absolute badge bg-primary rounded-pill px-3 py-2 fw-bold text-white shadow-sm"
+                  style="top: 12px; left: 12px;">Active</span>
+                <div
+                  class="position-absolute bg-dark bg-opacity-40 d-flex align-items-center justify-content-center inset-0 opacity-0 hover-opacity-100 transition-all">
+                  <i class="bi bi-play-circle-fill text-white fs-1"></i>
+                </div>
+              </div>
+              <div class="p-4 d-flex flex-column h-100">
+                <span class="text-uppercase text-primary fw-bold" style="font-size: 10px;">
+                  {{ course.name.includes('Tamil') || course.name.includes('Purananuru') ? 'Language & Literature' :
+                  'LMS Course' }}
+                </span>
+                <h6 class="fw-bold mb-2 text-dark mt-1">{{ course.name }}</h6>
+                <p class="text-secondary small mb-3 flex-grow-1"
+                  style="display: -webkit-box; -webkit-line-clamp: 2;line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;">
+                  {{ course.description || 'Expand your skills and knowledge with this guided course curriculum.' }}
+                </p>
+
+                <div class="d-flex align-items-center justify-content-between mt-auto pt-3 border-top">
+                  <span class="small text-primary fw-bold">Open Course</span>
+                  <i class="bi bi-arrow-right text-primary"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          } @empty {
+          <div class="col-12 text-center py-5 text-secondary">
+            <i class="bi bi-search fs-1 d-block mb-3 text-secondary-50"></i>
+            <p class="fw-semibold mb-1">No courses match your query</p>
+            <p class="small text-secondary-50">Try checking spelling or changing category filters</p>
+          </div>
+          }
+        </div>
+      </div>
+      }
+
+      <!-- SCREEN 8: ACHIEVEMENTS -->
+      @if (courseId() === null && currentScreen() === 'achievements') {
+      <div class="max-w-5xl mx-auto animate-fade-in">
+        <div class="mb-4">
+          <h2 class="fw-bold text-dark mb-1">My Achievements</h2>
+          <p class="text-secondary">Track your milestones, unlocked badges, and verified course credentials.</p>
+        </div>
+
+        <!-- Achievements Stats Banner -->
+        <div class="row g-4 mb-5">
+          <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
+              <span class="text-uppercase text-secondary fw-semibold mb-2 d-block"
+                style="font-size: 10px; letter-spacing: 0.05em;">Total XP</span>
+              <h2 class="fw-extrabold text-primary mb-0">{{ stats()?.xp_points || 0 }}</h2>
+            </div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
+              <span class="text-uppercase text-secondary fw-semibold mb-2 d-block"
+                style="font-size: 10px; letter-spacing: 0.05em;">Badges</span>
+              <h2 class="fw-extrabold text-primary mb-0">{{ getUnlockedBadgesCount() }}</h2>
+            </div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
+              <span class="text-uppercase text-secondary fw-semibold mb-2 d-block"
+                style="font-size: 10px; letter-spacing: 0.05em;">Certificates</span>
+              <h2 class="fw-extrabold text-primary mb-0">{{ stats()?.certificates?.length || 0 }}</h2>
+            </div>
+          </div>
+          <div class="col-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
+              <span class="text-uppercase text-secondary fw-semibold mb-2 d-block"
+                style="font-size: 10px; letter-spacing: 0.05em;">Best Streak</span>
+              <h2 class="fw-extrabold text-primary mb-0">{{ stats()?.study_streak || 0 }} Days</h2>
+            </div>
+          </div>
+        </div>
+
+        <!-- Unlocked Badges Grid -->
+        <h5 class="fw-bold text-dark mb-4">Earned Badges</h5>
+        <div class="row g-4 mb-5">
+          @for (badge of stats()?.badges; track badge.name) {
+          @if (badge.unlocked) {
+          <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white text-center h-100 hover-shadow transition-all">
+              <div class="fs-1 mb-2">{{ badge.icon || '🏅' }}</div>
+              <h6 class="fw-bold text-dark mb-1">{{ badge.name }}</h6>
+              <p class="text-secondary small mb-3">{{ badge.description }}</p>
+              <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-1 fw-bold align-self-center"
+                style="font-size: 10px;">
+                <i class="bi bi-zap-fill me-1"></i>Unlocked
+              </span>
+            </div>
+          </div>
+          }
+          } @empty {
+          <div class="col-12 text-center text-secondary py-4">No badges earned yet. Complete your first topic!</div>
+          }
+        </div>
+
+        <!-- Locked Badges -->
+        <h5 class="fw-bold text-dark mb-4">Locked Milestones</h5>
+        <div class="row g-4 mb-5">
+          @for (badge of stats()?.badges; track badge.name) {
+          @if (!badge.unlocked) {
+          <div class="col-md-4" style="opacity: 0.65;">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white d-flex flex-row align-items-center gap-3">
+              <div class="fs-2 grayscale">{{ badge.icon || '🔒' }}</div>
+              <div>
+                <h6 class="fw-bold text-dark mb-0">{{ badge.name }}</h6>
+                <span class="text-secondary small">{{ badge.description }}</span>
+                <div class="small fw-bold text-primary mt-1">Locked</div>
+              </div>
+            </div>
+          </div>
+          }
+          } @empty {
+          <div class="col-12 text-center text-success py-4">Congratulations! You have unlocked all badges.</div>
+          }
+        </div>
+
+        <!-- Skill Mastery Radar Chart & XP Level Card -->
+        <div class="row g-4 mb-5">
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+              <h5 class="fw-bold text-dark mb-4">Skill Mastery</h5>
+              <!-- Vector SVG Radar Chart representing course skill scores -->
+              <div class="d-flex align-items-center justify-content-center" style="height: 200px;">
+                <svg viewBox="0 0 100 100" class="overflow-visible" style="width: 200px; height: 200px;">
+                  <!-- Outer Hexagon Grid -->
+                  <polygon points="50,10 85,30 85,70 50,90 15,70 15,30" fill="none" stroke="#e2e8f0"
+                    stroke-width="0.5" />
+                  <polygon points="50,25 76,37 76,63 50,75 24,63 24,37" fill="none" stroke="#e2e8f0"
+                    stroke-width="0.5" />
+                  <polygon points="50,40 67,45 67,55 50,60 33,55 33,45" fill="none" stroke="#e2e8f0"
+                    stroke-width="0.5" />
+
+                  <!-- Axis lines -->
+                  <line x1="50" y1="10" x2="50" y2="90" stroke="#e2e8f0" stroke-width="0.5" />
+                  <line x1="15" y1="30" x2="85" y2="70" stroke="#e2e8f0" stroke-width="0.5" />
+                  <line x1="15" y1="70" x2="85" y2="30" stroke="#e2e8f0" stroke-width="0.5" />
+
+                  <!-- Poly Data dynamically calculated -->
+                  <polygon [attr.points]="radarPolygonPoints()" fill="rgba(108, 71, 255, 0.18)" stroke="#6c47ff"
+                    stroke-width="1.5" />
+
+                  <!-- Labels -->
+                  <text x="50" y="5" font-size="5" text-anchor="middle" font-weight="bold"
+                    fill="#0f0a2e">Literature</text>
+                  <text x="92" y="30" font-size="5" text-anchor="start" font-weight="bold" fill="#0f0a2e">Ethics</text>
+                  <text x="92" y="73" font-size="5" text-anchor="start" font-weight="bold" fill="#0f0a2e">Culture</text>
+                  <text x="50" y="97" font-size="5" text-anchor="middle" font-weight="bold" fill="#0f0a2e">Wisdom</text>
+                  <text x="8" y="73" font-size="5" text-anchor="end" font-weight="bold" fill="#0f0a2e">Poetry</text>
+                  <text x="8" y="30" font-size="5" text-anchor="end" font-weight="bold" fill="#0f0a2e">Conduct</text>
                 </svg>
               </div>
             </div>
           </div>
 
-          <!-- Statistics Cards Grid -->
-          <div class="row g-4 mb-5">
-            <!-- Card 1 -->
-            <div class="col-sm-6 col-lg-3">
-              <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+          <div class="col-md-6">
+            <div
+              class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-between">
+              <div>
                 <div class="d-flex align-items-center justify-content-between mb-3">
-                  <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(108, 71, 255, 0.1); color: #6c47ff;">
-                    <i class="bi bi-book-half fs-4"></i>
-                  </div>
-                  <span class="text-success small fw-bold"><i class="bi bi-arrow-up-short"></i>{{ 'ACTIVE' | translate }}</span>
+                  <h5 class="fw-bold text-dark mb-0">XP Progress</h5>
+                  <span class="badge bg-primary rounded-pill px-3 py-1 fw-bold" style="font-size: 11px;">🌟 {{
+                    xpLevelInfo().rank }}</span>
                 </div>
-                <h3 class="fw-bold mb-1 text-dark">{{ courses().length || 0 }}</h3>
-                <span class="text-uppercase text-secondary fw-semibold" style="font-size: 11px; letter-spacing: 0.05em;">{{ 'COURSES_ENROLLED' | translate }}</span>
-              </div>
-            </div>
-            <!-- Card 2 -->
-            <div class="col-sm-6 col-lg-3">
-              <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(16, 185, 129, 0.1); color: #10b981;">
-                    <i class="bi bi-check-circle-fill fs-4"></i>
-                  </div>
-                  <span class="text-muted small">{{ 'UPDATED' | translate }}</span>
-                </div>
-                <h3 class="fw-bold mb-1 text-dark">{{ stats()?.completed_chapters || 0 }}</h3>
-                <span class="text-uppercase text-secondary fw-semibold" style="font-size: 11px; letter-spacing: 0.05em;">{{ 'LESSONS_COMPLETED' | translate }}</span>
-              </div>
-            </div>
-            <!-- Card 3 -->
-            <div class="col-sm-6 col-lg-3">
-              <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(245, 158, 11, 0.1); color: #f59e0b;">
-                    <i class="bi bi-fire fs-4"></i>
-                  </div>
-                  <span class="text-warning small fw-bold">🔥 {{ 'STREAK' | translate }}</span>
-                </div>
-                <h3 class="fw-bold mb-1 text-dark">{{ stats()?.streak || 0 }}</h3>
-                <span class="text-uppercase text-secondary fw-semibold" style="font-size: 11px; letter-spacing: 0.05em;">{{ 'CURRENT_STREAK' | translate }}</span>
-              </div>
-            </div>
-            <!-- Card 4 -->
-            <div class="col-sm-6 col-lg-3">
-              <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; background-color: rgba(59, 130, 246, 0.1); color: #3b82f6;">
-                    <i class="bi bi-graph-up-arrow fs-4"></i>
-                  </div>
-                  <span class="text-primary small fw-semibold">{{ 'TARGET' | translate }} 80%</span>
-                </div>
-                <h3 class="fw-bold mb-1 text-dark">{{ stats()?.completion_percentage || 0 }}%</h3>
-                <span class="text-uppercase text-secondary fw-semibold" style="font-size: 11px; letter-spacing: 0.05em;">{{ 'OVERALL_PROGRESS' | translate }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Bottom Columns: Active Courses & Charts -->
-          <div class="row g-4">
-            <!-- Active Courses Section (2/3 width on large) -->
-            <div class="col-lg-8">
-              <div class="d-flex align-items-center justify-content-between mb-4">
-                <h4 class="fw-bold mb-0 text-dark" style="letter-spacing: -0.01em;">{{ 'ACTIVE_COURSES' | translate }}</h4>
-                <button class="btn btn-link text-primary text-decoration-none fw-bold p-0" (click)="switchScreen('courses')">{{ 'VIEW_ALL' | translate }} →</button>
+                <h4 class="fw-extrabold text-dark mb-1">Level {{ xpLevelInfo().level }} — {{ xpLevelInfo().rank }}</h4>
+                <p class="text-secondary small">Gain {{ xpLevelInfo().requiredXp - xpLevelInfo().currentLevelXp }} more
+                  XP points to unlock next level privileges.</p>
               </div>
 
-              <div class="d-flex flex-column gap-3">
-                @for (course of courses(); track course.id) {
-                  <div class="card border-0 shadow-sm rounded-4 p-3 bg-white course-item-row hover-shadow transition-all" (click)="selectCourse(course.id)" style="cursor: pointer;">
-                    <div class="d-flex align-items-center gap-3">
-                      <!-- Image Thumbnail (Unsplash placeholders) -->
-                      <div class="position-relative overflow-hidden rounded-3 flex-shrink-0" style="width: 100px; height: 68px;">
-                        <img [src]="course.name.includes('Tamil') || course.name.includes('Purananuru') ? 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80' : 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80'" class="w-100 h-100 object-cover" alt="Course Thumbnail">
-                        <div class="position-absolute inset-0 bg-dark bg-opacity-20 d-flex align-items-center justify-content-center opacity-0 hover-opacity-100 transition-all">
-                          <i class="bi bi-play-circle-fill text-white fs-3"></i>
-                        </div>
-                      </div>
-
-                      <div class="flex-grow-1 text-truncate">
-                        <span class="badge bg-primary bg-opacity-10 text-primary text-uppercase fw-bold mb-1" style="font-size: 9px;">
-                          {{ course.name.includes('Tamil') || course.name.includes('Purananuru') ? ('LITERATURE' | translate) : ('GENERAL' | translate) }}
-                        </span>
-                        <h6 class="fw-bold mb-1 text-dark text-truncate">{{ course.name }}</h6>
-                        <!-- Mini progress bar -->
-                        <div class="d-flex align-items-center gap-2 mt-2">
-                          <div class="progress flex-grow-1" style="height: 6px;">
-                            <div class="progress-bar ariga-primary-gradient" [style.width.%]="course.name.includes('Tamil') || course.name.includes('Purananuru') ? (stats()?.completion_percentage || 0) : 0"></div>
-                          </div>
-                          <span class="small fw-bold text-secondary" style="font-size: 11px;">{{ course.name.includes('Tamil') || course.name.includes('Purananuru') ? (stats()?.completion_percentage || 0) : 0 }}%</span>
-                        </div>
-                      </div>
-
-                      <!-- Last accessed metadata -->
-                      <div class="d-none d-sm-flex align-items-center gap-1 text-secondary flex-shrink-0" style="font-size: 11px;">
-                        <i class="bi bi-clock"></i>
-                        <span>{{ 'LAST_ACCESSED' | translate }}</span>
-                      </div>
-                    </div>
-                  </div>
-                }
-              </div>
-            </div>
-
-            <!-- Right Column (1/3 width): Activity Chart & Achievements -->
-            <div class="col-lg-4">
-              <!-- Weekly Activity -->
-              <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
-                <h5 class="fw-bold text-dark mb-3">{{ 'WEEKLY_ACTIVITY' | translate }}</h5>
-                <!-- Vector SVG Area Chart representing Mon-Sun -->
-                <div class="position-relative" style="height: 120px;">
-                  <svg viewBox="0 0 100 30" class="w-100 h-100 overflow-visible">
-                    <defs>
-                      <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#6c47ff" stop-opacity="0.4"/>
-                        <stop offset="100%" stop-color="#6c47ff" stop-opacity="0"/>
-                      </linearGradient>
-                    </defs>
-                    <!-- Area Path -->
-                    <path [attr.d]="monthlyActivityPath().fillPath" fill="url(#areaGrad)"/>
-                    <!-- Line Path -->
-                    <path [attr.d]="monthlyActivityPath().linePath" fill="none" stroke="#6c47ff" stroke-width="1.5" stroke-linecap="round"/>
-                    <!-- Dots -->
-                    @for (pt of monthlyActivityPath().points; track pt.month) {
-                      <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="1" fill="#6c47ff"/>
-                    }
-                  </svg>
+              <div class="mt-4">
+                <div class="progress mb-2" style="height: 10px;">
+                  <div class="progress-bar ariga-primary-gradient" [style.width.%]="xpLevelInfo().percentage"></div>
                 </div>
-                <div class="d-flex justify-content-between text-secondary mt-2" style="font-size: 10px;">
-                  <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>
-                </div>
-              </div>
-
-              <!-- Achievements Panel -->
-              <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                  <h5 class="fw-bold text-dark mb-0">{{ 'ACHIEVEMENTS' | translate }}</h5>
-                  <button class="btn btn-link text-primary text-decoration-none fw-bold p-0 small" style="font-size: 12px;" (click)="switchScreen('achievements')">{{ 'VIEW_ALL' | translate }}</button>
-                </div>
-
-                <div class="d-flex flex-column gap-3">
-                  <div class="d-flex align-items-center gap-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning" style="width: 40px; height: 40px;">
-                      <i class="bi bi-award fs-5"></i>
-                    </div>
-                    <div>
-                      <h6 class="fw-bold mb-0 text-dark" style="font-size: 13px;">{{ 'CERTIFICATES' | translate }}</h6>
-                      <span class="text-secondary" style="font-size: 11px;">{{ stats()?.certificates?.length || 0 }} {{ 'CERTIFICATES_EARNED' | translate }}</span>
-                    </div>
-                  </div>
-                  <div class="d-flex align-items-center gap-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: rgba(108, 71, 255, 0.1); color: #6c47ff;">
-                      <i class="bi bi-star-fill fs-5"></i>
-                    </div>
-                    <div>
-                      <h6 class="fw-bold mb-0 text-dark" style="font-size: 13px;">{{ 'GOLD_BADGES' | translate }}</h6>
-                      <span class="text-secondary" style="font-size: 11px;">{{ getUnlockedBadgesCount() }} {{ 'BADGES_UNLOCKED' | translate }}</span>
-                    </div>
-                  </div>
-                  <div class="d-flex align-items-center gap-3">
-                    <div class="rounded-circle d-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success" style="width: 40px; height: 40px;">
-                      <i class="bi bi-zap-fill fs-5"></i>
-                    </div>
-                    <div>
-                      <h6 class="fw-bold mb-0 text-dark" style="font-size: 13px;">{{ 'XP_POINTS' | translate }}</h6>
-                      <span class="text-secondary" style="font-size: 11px;">{{ stats()?.xp_points || 0 }} {{ 'POINTS_ACCRUED' | translate }}</span>
-                    </div>
-                  </div>
+                <div class="d-flex justify-content-between text-secondary" style="font-size: 11px;">
+                  <span>{{ xpLevelInfo().xp }} XP</span>
+                  <span>Next Level at {{ xpLevelInfo().level * 500 }} XP</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      }
 
-      <!-- SCREEN 2: MY COURSES -->
-      @if (courseId() === null && currentScreen() === 'courses') {
-        <div class="max-w-5xl mx-auto animate-fade-in">
-          <div class="mb-4">
-            <h2 class="fw-bold text-dark mb-1">My Courses</h2>
-            <p class="text-secondary">{{ courses().length || 12 }} courses enrolled in this semester</p>
-          </div>
-
-          <!-- Search & Filters -->
-          <div class="row g-3 mb-4">
-            <div class="col-md-8">
-              <div class="position-relative">
-                <i class="bi bi-search position-absolute text-secondary" style="left: 16px; top: 50%; transform: translateY(-50%);"></i>
-                <input type="text" [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" class="form-control rounded-4 py-2 ps-5 border-0 shadow-sm" placeholder="Search by course title or instructor...">
-              </div>
-            </div>
-            <div class="col-md-4">
-              <button class="btn btn-white w-100 rounded-4 py-2 d-flex align-items-center justify-content-center gap-2 fw-semibold shadow-sm">
-                <i class="bi bi-sliders"></i>
-                <span>Filter Options</span>
-              </button>
+        <!-- Verified Certificates -->
+        <h5 class="fw-bold text-dark mb-4">My Course Credentials</h5>
+        <div class="row g-4">
+          @for (cert of stats()?.certificates; track cert.id) {
+          <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-white bg-dark h-100"
+              style="background: linear-gradient(135deg, #1e1048 0%, #312e81 100%);">
+              <span class="text-uppercase fw-bold text-warning" style="font-size: 9px;">{{ cert.id }}</span>
+              <h5 class="fw-bold mb-3 mt-1">{{ cert.course_name }}</h5>
+              <p class="small opacity-75 mb-4">Issued: {{ cert.issued_at }}<br>Status: Verified</p>
+              <button class="btn btn-outline-light btn-sm rounded-3 w-100 mt-auto">View Certificate</button>
             </div>
           </div>
-
-          <!-- Category filter pills -->
-          <div class="d-flex flex-wrap gap-2 mb-4">
-            @for (cat of courseCategories(); track cat) {
-              <button class="btn filter-pill rounded-pill px-4 py-2" [class.active]="selectedCategory() === cat" (click)="selectedCategory.set(cat)">
-                {{ cat }}
-              </button>
-            }
-          </div>
-
-          <!-- Course Grid -->
-          <div class="row g-4">
-            @for (course of filteredCourses(); track course.id) {
-              <div class="col-md-6 col-lg-4">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white h-100 course-card transition-all" (click)="selectCourse(course.id)">
-                  <div class="position-relative overflow-hidden" style="height: 160px;">
-                    @if (course.name.includes('Tamil') || course.name.includes('Purananuru')) {
-                      <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?auto=format&fit=crop&w=600&q=80" class="w-100 h-100 object-cover" alt="Course Thumbnail">
-                    } @else if (course.name.includes('Kural') || course.name.includes('Thirukkural')) {
-                      <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80" class="w-100 h-100 object-cover" alt="Course Thumbnail">
-                    } @else {
-                      <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=600&q=80" class="w-100 h-100 object-cover" alt="Course Thumbnail">
-                    }
-                    
-                    <span class="position-absolute badge bg-primary rounded-pill px-3 py-2 fw-bold text-white shadow-sm" style="top: 12px; left: 12px;">Active</span>
-                    <div class="position-absolute bg-dark bg-opacity-40 d-flex align-items-center justify-content-center inset-0 opacity-0 hover-opacity-100 transition-all">
-                      <i class="bi bi-play-circle-fill text-white fs-1"></i>
-                    </div>
-                  </div>
-                  <div class="p-4 d-flex flex-column h-100">
-                    <span class="text-uppercase text-primary fw-bold" style="font-size: 10px;">
-                      {{ course.name.includes('Tamil') || course.name.includes('Purananuru') ? 'Language & Literature' : 'LMS Course' }}
-                    </span>
-                    <h6 class="fw-bold mb-2 text-dark mt-1">{{ course.name }}</h6>
-                    <p class="text-secondary small mb-3 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-                      {{ course.description || 'Expand your skills and knowledge with this guided course curriculum.' }}
-                    </p>
-                    
-                    <div class="d-flex align-items-center justify-content-between mt-auto pt-3 border-top">
-                      <span class="small text-primary fw-bold">Open Course</span>
-                      <i class="bi bi-arrow-right text-primary"></i>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            } @empty {
-              <div class="col-12 text-center py-5 text-secondary">
-                <i class="bi bi-search fs-1 d-block mb-3 text-secondary-50"></i>
-                <p class="fw-semibold mb-1">No courses match your query</p>
-                <p class="small text-secondary-50">Try checking spelling or changing category filters</p>
-              </div>
-            }
-          </div>
+          } @empty {
+          <div class="col-12 text-center text-secondary py-4">No certificates earned yet. Complete all chapters of a
+            course to earn your verified credential!</div>
+          }
         </div>
-      }
-
-      <!-- SCREEN 8: ACHIEVEMENTS -->
-      @if (courseId() === null && currentScreen() === 'achievements') {
-        <div class="max-w-5xl mx-auto animate-fade-in">
-          <div class="mb-4">
-            <h2 class="fw-bold text-dark mb-1">My Achievements</h2>
-            <p class="text-secondary">Track your milestones, unlocked badges, and verified course credentials.</p>
-          </div>
-
-          <!-- Achievements Stats Banner -->
-          <div class="row g-4 mb-5">
-            <div class="col-6 col-lg-3">
-              <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
-                <span class="text-uppercase text-secondary fw-semibold mb-2 d-block" style="font-size: 10px; letter-spacing: 0.05em;">Total XP</span>
-                <h2 class="fw-extrabold text-primary mb-0">{{ stats()?.xp_points || 0 }}</h2>
-              </div>
-            </div>
-            <div class="col-6 col-lg-3">
-              <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
-                <span class="text-uppercase text-secondary fw-semibold mb-2 d-block" style="font-size: 10px; letter-spacing: 0.05em;">Badges</span>
-                <h2 class="fw-extrabold text-primary mb-0">{{ getUnlockedBadgesCount() }}</h2>
-              </div>
-            </div>
-            <div class="col-6 col-lg-3">
-              <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
-                <span class="text-uppercase text-secondary fw-semibold mb-2 d-block" style="font-size: 10px; letter-spacing: 0.05em;">Certificates</span>
-                <h2 class="fw-extrabold text-primary mb-0">{{ stats()?.certificates?.length || 0 }}</h2>
-              </div>
-            </div>
-            <div class="col-6 col-lg-3">
-              <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
-                <span class="text-uppercase text-secondary fw-semibold mb-2 d-block" style="font-size: 10px; letter-spacing: 0.05em;">Best Streak</span>
-                <h2 class="fw-extrabold text-primary mb-0">{{ stats()?.study_streak || 0 }} Days</h2>
-              </div>
-            </div>
-          </div>
-
-          <!-- Unlocked Badges Grid -->
-          <h5 class="fw-bold text-dark mb-4">Earned Badges</h5>
-          <div class="row g-4 mb-5">
-            @for (badge of stats()?.badges; track badge.name) {
-              @if (badge.unlocked) {
-                <div class="col-sm-6 col-md-4 col-lg-3">
-                  <div class="card border-0 shadow-sm rounded-4 p-4 bg-white text-center h-100 hover-shadow transition-all">
-                    <div class="fs-1 mb-2">{{ badge.icon || '🏅' }}</div>
-                    <h6 class="fw-bold text-dark mb-1">{{ badge.name }}</h6>
-                    <p class="text-secondary small mb-3">{{ badge.description }}</p>
-                    <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-1 fw-bold align-self-center" style="font-size: 10px;">
-                      <i class="bi bi-zap-fill me-1"></i>Unlocked
-                    </span>
-                  </div>
-                </div>
-              }
-            } @empty {
-              <div class="col-12 text-center text-secondary py-4">No badges earned yet. Complete your first topic!</div>
-            }
-          </div>
-
-          <!-- Locked Badges -->
-          <h5 class="fw-bold text-dark mb-4">Locked Milestones</h5>
-          <div class="row g-4 mb-5">
-            @for (badge of stats()?.badges; track badge.name) {
-              @if (!badge.unlocked) {
-                <div class="col-md-4" style="opacity: 0.65;">
-                  <div class="card border-0 shadow-sm rounded-4 p-4 bg-white d-flex flex-row align-items-center gap-3">
-                    <div class="fs-2 grayscale">{{ badge.icon || '🔒' }}</div>
-                    <div>
-                      <h6 class="fw-bold text-dark mb-0">{{ badge.name }}</h6>
-                      <span class="text-secondary small">{{ badge.description }}</span>
-                      <div class="small fw-bold text-primary mt-1">Locked</div>
-                    </div>
-                  </div>
-                </div>
-              }
-            } @empty {
-              <div class="col-12 text-center text-success py-4">Congratulations! You have unlocked all badges.</div>
-            }
-          </div>
-
-          <!-- Skill Mastery Radar Chart & XP Level Card -->
-          <div class="row g-4 mb-5">
-            <div class="col-md-6">
-              <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                <h5 class="fw-bold text-dark mb-4">Skill Mastery</h5>
-                <!-- Vector SVG Radar Chart representing course skill scores -->
-                <div class="d-flex align-items-center justify-content-center" style="height: 200px;">
-                  <svg viewBox="0 0 100 100" class="overflow-visible" style="width: 200px; height: 200px;">
-                    <!-- Outer Hexagon Grid -->
-                    <polygon points="50,10 85,30 85,70 50,90 15,70 15,30" fill="none" stroke="#e2e8f0" stroke-width="0.5"/>
-                    <polygon points="50,25 76,37 76,63 50,75 24,63 24,37" fill="none" stroke="#e2e8f0" stroke-width="0.5"/>
-                    <polygon points="50,40 67,45 67,55 50,60 33,55 33,45" fill="none" stroke="#e2e8f0" stroke-width="0.5"/>
-                    
-                    <!-- Axis lines -->
-                    <line x1="50" y1="10" x2="50" y2="90" stroke="#e2e8f0" stroke-width="0.5"/>
-                    <line x1="15" y1="30" x2="85" y2="70" stroke="#e2e8f0" stroke-width="0.5"/>
-                    <line x1="15" y1="70" x2="85" y2="30" stroke="#e2e8f0" stroke-width="0.5"/>
-                    
-                    <!-- Poly Data dynamically calculated -->
-                    <polygon [attr.points]="radarPolygonPoints()" fill="rgba(108, 71, 255, 0.18)" stroke="#6c47ff" stroke-width="1.5"/>
-                    
-                    <!-- Labels -->
-                    <text x="50" y="5" font-size="5" text-anchor="middle" font-weight="bold" fill="#0f0a2e">Literature</text>
-                    <text x="92" y="30" font-size="5" text-anchor="start" font-weight="bold" fill="#0f0a2e">Ethics</text>
-                    <text x="92" y="73" font-size="5" text-anchor="start" font-weight="bold" fill="#0f0a2e">Culture</text>
-                    <text x="50" y="97" font-size="5" text-anchor="middle" font-weight="bold" fill="#0f0a2e">Wisdom</text>
-                    <text x="8" y="73" font-size="5" text-anchor="end" font-weight="bold" fill="#0f0a2e">Poetry</text>
-                    <text x="8" y="30" font-size="5" text-anchor="end" font-weight="bold" fill="#0f0a2e">Conduct</text>
-                  </svg>
-                </div>
-              </div>
-            </div>
-            
-            <div class="col-md-6">
-              <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100 d-flex flex-column justify-content-between">
-                <div>
-                  <div class="d-flex align-items-center justify-content-between mb-3">
-                    <h5 class="fw-bold text-dark mb-0">XP Progress</h5>
-                    <span class="badge bg-primary rounded-pill px-3 py-1 fw-bold" style="font-size: 11px;">🌟 {{ xpLevelInfo().rank }}</span>
-                  </div>
-                  <h4 class="fw-extrabold text-dark mb-1">Level {{ xpLevelInfo().level }} — {{ xpLevelInfo().rank }}</h4>
-                  <p class="text-secondary small">Gain {{ xpLevelInfo().requiredXp - xpLevelInfo().currentLevelXp }} more XP points to unlock next level privileges.</p>
-                </div>
-                
-                <div class="mt-4">
-                  <div class="progress mb-2" style="height: 10px;">
-                    <div class="progress-bar ariga-primary-gradient" [style.width.%]="xpLevelInfo().percentage"></div>
-                  </div>
-                  <div class="d-flex justify-content-between text-secondary" style="font-size: 11px;">
-                    <span>{{ xpLevelInfo().xp }} XP</span>
-                    <span>Next Level at {{ xpLevelInfo().level * 500 }} XP</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Verified Certificates -->
-          <h5 class="fw-bold text-dark mb-4">My Course Credentials</h5>
-          <div class="row g-4">
-            @for (cert of stats()?.certificates; track cert.id) {
-              <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4 p-4 text-white bg-dark h-100" style="background: linear-gradient(135deg, #1e1048 0%, #312e81 100%);">
-                  <span class="text-uppercase fw-bold text-warning" style="font-size: 9px;">{{ cert.id }}</span>
-                  <h5 class="fw-bold mb-3 mt-1">{{ cert.course_name }}</h5>
-                  <p class="small opacity-75 mb-4">Issued: {{ cert.issued_at }}<br>Status: Verified</p>
-                  <button class="btn btn-outline-light btn-sm rounded-3 w-100 mt-auto">View Certificate</button>
-                </div>
-              </div>
-            } @empty {
-              <div class="col-12 text-center text-secondary py-4">No certificates earned yet. Complete all chapters of a course to earn your verified credential!</div>
-            }
-          </div>
-        </div>
+      </div>
       }
 
       <!-- SCREEN 9: PROGRESS -->
       @if (courseId() === null && currentScreen() === 'progress') {
-        <div class="max-w-5xl mx-auto animate-fade-in">
-          <div class="mb-4">
-            <h2 class="fw-bold text-dark mb-1">Learning Metrics</h2>
-            <p class="text-secondary">Analyze your study patterns, metrics, and syllabus coverage calendars.</p>
-          </div>
+      <div class="max-w-5xl mx-auto animate-fade-in">
+        <div class="mb-4">
+          <h2 class="fw-bold text-dark mb-1">Learning Metrics</h2>
+          <p class="text-secondary">Analyze your study patterns, metrics, and syllabus coverage calendars.</p>
+        </div>
 
-          <!-- Area chart learning hours -->
-          <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
-            <h5 class="fw-bold text-dark mb-3">Monthly Study Hours</h5>
-            <div class="position-relative" style="height: 180px;">
-              <svg viewBox="0 0 100 25" class="w-100 h-100 overflow-visible">
-                <path [attr.d]="monthlyActivityPath().fillPath" fill="rgba(108, 71, 255, 0.1)"/>
-                <path [attr.d]="monthlyActivityPath().linePath" fill="none" stroke="#6c47ff" stroke-width="1"/>
-                @for (pt of monthlyActivityPath().points; track pt.month) {
-                  <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="1.5" fill="#6c47ff"/>
-                }
-              </svg>
-            </div>
-            <div class="d-flex justify-content-between text-secondary mt-3 px-2" style="font-size: 11px;">
+        <!-- Area chart learning hours -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+          <h5 class="fw-bold text-dark mb-3">Monthly Study Hours</h5>
+          <div class="position-relative" style="height: 180px;">
+            <svg viewBox="0 0 100 25" class="w-100 h-100 overflow-visible">
+              <path [attr.d]="monthlyActivityPath().fillPath" fill="rgba(108, 71, 255, 0.1)" />
+              <path [attr.d]="monthlyActivityPath().linePath" fill="none" stroke="#6c47ff" stroke-width="1" />
               @for (pt of monthlyActivityPath().points; track pt.month) {
-                <span>{{ pt.month }} ({{ pt.hours }}h)</span>
+              <circle [attr.cx]="pt.x" [attr.cy]="pt.y" r="1.5" fill="#6c47ff" />
               }
-            </div>
+            </svg>
           </div>
+          <div class="d-flex justify-content-between text-secondary mt-3 px-2" style="font-size: 11px;">
+            @for (pt of monthlyActivityPath().points; track pt.month) {
+            <span>{{ pt.month }} ({{ pt.hours }}h)</span>
+            }
+          </div>
+        </div>
 
-          <!-- Course-by-course list progress bars -->
-          <div class="row g-4">
-            <div class="col-md-6">
-              <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                <h5 class="fw-bold text-dark mb-4">Course Mastery Progression</h5>
-                <div class="d-flex flex-column gap-4">
-                  @for (cp of stats()?.course_progress; track cp.course_name) {
-                    <div>
-                      <div class="d-flex justify-content-between text-dark fw-semibold small mb-2">
-                        <span>{{ cp.course_name }}</span>
-                        <span>{{ cp.percentage }}%</span>
-                      </div>
-                      <div class="progress" style="height: 6px;">
-                        <div class="progress-bar ariga-primary-gradient" [style.width.%]="cp.percentage"></div>
-                      </div>
-                    </div>
-                  } @empty {
-                    <div class="text-secondary py-4 text-center">No enrolled courses found.</div>
-                  }
+        <!-- Course-by-course list progress bars -->
+        <div class="row g-4">
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+              <h5 class="fw-bold text-dark mb-4">Course Mastery Progression</h5>
+              <div class="d-flex flex-column gap-4">
+                @for (cp of stats()?.course_progress; track cp.course_name) {
+                <div>
+                  <div class="d-flex justify-content-between text-dark fw-semibold small mb-2">
+                    <span>{{ cp.course_name }}</span>
+                    <span>{{ cp.percentage }}%</span>
+                  </div>
+                  <div class="progress" style="height: 6px;">
+                    <div class="progress-bar ariga-primary-gradient" [style.width.%]="cp.percentage"></div>
+                  </div>
                 </div>
+                } @empty {
+                <div class="text-secondary py-4 text-center">No enrolled courses found.</div>
+                }
               </div>
             </div>
+          </div>
 
-            <!-- Learning calendar streak map -->
-            <div class="col-md-6">
-              <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
-                <h5 class="fw-bold text-dark mb-3">Study Streak Grid (June 2026)</h5>
-                
-                <div class="streak-calendar-grid mb-3">
-                  <!-- Weekday headers -->
-                  <div class="text-center text-secondary fw-semibold" style="font-size: 10px;">S</div>
-                  <div class="text-center text-secondary fw-semibold" style="font-size: 10px;">M</div>
-                  <div class="text-center text-secondary fw-semibold" style="font-size: 10px;">T</div>
-                  <div class="text-center text-secondary fw-semibold" style="font-size: 10px;">W</div>
-                  <div class="text-center text-secondary fw-semibold" style="font-size: 10px;">T</div>
-                  <div class="text-center text-secondary fw-semibold" style="font-size: 10px;">F</div>
-                  <div class="text-center text-secondary fw-semibold" style="font-size: 10px;">S</div>
+          <!-- Learning calendar streak map -->
+          <div class="col-md-6">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-white h-100">
+              <h5 class="fw-bold text-dark mb-3">Study Streak Grid (June 2026)</h5>
 
-                  <!-- Cells -->
-                  @for (cell of streakCalendarDays(); track cell.day) {
-                    <div class="streak-day-cell" [className]="'streak-day-cell streak-level-' + cell.level">
-                      {{ cell.day }}
-                    </div>
-                  }
+              <div class="streak-calendar-grid mb-3">
+                <!-- Weekday headers -->
+                <div class="text-center text-secondary fw-semibold" style="font-size: 10px;">S</div>
+                <div class="text-center text-secondary fw-semibold" style="font-size: 10px;">M</div>
+                <div class="text-center text-secondary fw-semibold" style="font-size: 10px;">T</div>
+                <div class="text-center text-secondary fw-semibold" style="font-size: 10px;">W</div>
+                <div class="text-center text-secondary fw-semibold" style="font-size: 10px;">T</div>
+                <div class="text-center text-secondary fw-semibold" style="font-size: 10px;">F</div>
+                <div class="text-center text-secondary fw-semibold" style="font-size: 10px;">S</div>
+
+                <!-- Cells -->
+                @for (cell of streakCalendarDays(); track cell.day) {
+                <div class="streak-day-cell" [className]="'streak-day-cell streak-level-' + cell.level">
+                  {{ cell.day }}
                 </div>
+                }
+              </div>
 
-                <!-- Legend -->
-                <div class="d-flex align-items-center justify-content-end gap-2 text-secondary" style="font-size: 10px;">
-                  <span>Less</span>
-                  <div style="width: 10px; height: 10px; border-radius: 2px;" class="streak-level-0"></div>
-                  <div style="width: 10px; height: 10px; border-radius: 2px;" class="streak-level-1"></div>
-                  <div style="width: 10px; height: 10px; border-radius: 2px;" class="streak-level-2"></div>
-                  <div style="width: 10px; height: 10px; border-radius: 2px;" class="streak-level-3"></div>
-                  <span>More</span>
-                </div>
+              <!-- Legend -->
+              <div class="d-flex align-items-center justify-content-end gap-2 text-secondary" style="font-size: 10px;">
+                <span>Less</span>
+                <div style="width: 10px; height: 10px; border-radius: 2px;" class="streak-level-0"></div>
+                <div style="width: 10px; height: 10px; border-radius: 2px;" class="streak-level-1"></div>
+                <div style="width: 10px; height: 10px; border-radius: 2px;" class="streak-level-2"></div>
+                <div style="width: 10px; height: 10px; border-radius: 2px;" class="streak-level-3"></div>
+                <span>More</span>
               </div>
             </div>
           </div>
         </div>
+      </div>
       }
 
       <!-- SCREEN 10: SETTINGS -->
       @if (courseId() === null && currentScreen() === 'settings') {
-        <div class="max-w-5xl mx-auto animate-fade-in">
-          <div class="mb-4">
-            <h2 class="fw-bold text-dark mb-1">Account Settings</h2>
-            <p class="text-secondary">Manage your profile details and select learning language preferences.</p>
-          </div>
-
-          <div class="card border-0 shadow-sm rounded-4 p-5 bg-white max-w-xl">
-            <div class="mb-4">
-              <label class="form-label text-uppercase fw-bold text-secondary" style="font-size: 11px; letter-spacing: 0.05em;">Display Name</label>
-              <input type="text" [ngModel]="settingsName()" (ngModelChange)="settingsName.set($event)" class="form-control rounded-3 py-2 border-light-subtle" style="font-size: 14px;">
-            </div>
-
-            <div class="mb-4">
-              <label class="form-label text-uppercase fw-bold text-secondary" style="font-size: 11px; letter-spacing: 0.05em;">Email Address</label>
-              <input type="email" [ngModel]="settingsEmail()" (ngModelChange)="settingsEmail.set($event)" class="form-control rounded-3 py-2 border-light-subtle" style="font-size: 14px;">
-            </div>
-
-            <div class="mb-4">
-              <label class="form-label text-uppercase fw-bold text-secondary d-block" style="font-size: 11px; letter-spacing: 0.05em;">Interface Language</label>
-              <div class="form-check form-check-inline mt-2">
-                <input class="form-check-input" type="radio" name="settingsLangRadio" id="langEn" value="en" [checked]="currentLang() === 'en'" (change)="updateLanguage('en')">
-                <label class="form-check-label fw-semibold text-dark" for="langEn" style="font-size: 14px;">English (EN)</label>
-              </div>
-              <div class="form-check form-check-inline mt-2 ms-3">
-                <input class="form-check-input" type="radio" name="settingsLangRadio" id="langTa" value="ta" [checked]="currentLang() === 'ta'" (change)="updateLanguage('ta')">
-                <label class="form-check-label fw-semibold text-dark" for="langTa" style="font-size: 14px;">Tamil (தமிழ்)</label>
-              </div>
-            </div>
-
-            <button class="btn btn-primary w-100 rounded-3 py-2 fw-bold mt-3 hover-scale-btn" (click)="saveSettingsChanges()">
-              Save Changes
-            </button>
-          </div>
+      <div class="max-w-5xl mx-auto animate-fade-in">
+        <div class="mb-4">
+          <h2 class="fw-bold text-dark mb-1">Account Settings</h2>
+          <p class="text-secondary">Manage your profile details and select learning language preferences.</p>
         </div>
+
+        <div class="card border-0 shadow-sm rounded-4 p-5 bg-white max-w-xl">
+          <div class="mb-4">
+            <label class="form-label text-uppercase fw-bold text-secondary"
+              style="font-size: 11px; letter-spacing: 0.05em;">Display Name</label>
+            <input type="text" [ngModel]="settingsName()" (ngModelChange)="settingsName.set($event)"
+              class="form-control rounded-3 py-2 border-light-subtle" style="font-size: 14px;">
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label text-uppercase fw-bold text-secondary"
+              style="font-size: 11px; letter-spacing: 0.05em;">Email Address</label>
+            <input type="email" [ngModel]="settingsEmail()" (ngModelChange)="settingsEmail.set($event)"
+              class="form-control rounded-3 py-2 border-light-subtle" style="font-size: 14px;">
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label text-uppercase fw-bold text-secondary d-block"
+              style="font-size: 11px; letter-spacing: 0.05em;">Interface Language</label>
+            <div class="form-check form-check-inline mt-2">
+              <input class="form-check-input" type="radio" name="settingsLangRadio" id="langEn" value="en"
+                [checked]="currentLang() === 'en'" (change)="updateLanguage('en')">
+              <label class="form-check-label fw-semibold text-dark" for="langEn" style="font-size: 14px;">English
+                (EN)</label>
+            </div>
+            <div class="form-check form-check-inline mt-2 ms-3">
+              <input class="form-check-input" type="radio" name="settingsLangRadio" id="langTa" value="ta"
+                [checked]="currentLang() === 'ta'" (change)="updateLanguage('ta')">
+              <label class="form-check-label fw-semibold text-dark" for="langTa" style="font-size: 14px;">Tamil
+                (தமிழ்)</label>
+            </div>
+          </div>
+
+          <button class="btn btn-primary w-100 rounded-3 py-2 fw-bold mt-3 hover-scale-btn"
+            (click)="saveSettingsChanges()">
+            Save Changes
+          </button>
+        </div>
+      </div>
       }
 
       <!-- SCREEN 3: COURSE OVERVIEW -->
       @if (courseId() !== null && activeContentId() === null && courseStructure(); as structure) {
-        <div class="p-0 animate-fade-in">
-          <!-- Back button -->
-          <button class="btn btn-link text-primary text-decoration-none fw-bold p-0 mb-4 d-flex align-items-center gap-1 hover-translate-x" (click)="goBackToDashboard()">
-            <i class="bi bi-arrow-left"></i>
-            <span>Back to Courses</span>
-          </button>
+      <div class="p-0 animate-fade-in">
+        <!-- Back button -->
+        <button
+          class="btn btn-link text-primary text-decoration-none fw-bold p-0 mb-4 d-flex align-items-center gap-1 hover-translate-x"
+          (click)="goBackToDashboard()">
+          <i class="bi bi-arrow-left"></i>
+          <span>Back to Courses</span>
+        </button>
 
-          <!-- Course Hero Banner -->
-          <div class="ariga-hero-gradient p-5 text-white rounded-4 mb-4 position-relative overflow-hidden shadow-lg">
-            <div class="position-absolute bg-white opacity-10 rounded-circle" style="width: 250px; height: 250px; top: -50px; right: -50px; filter: blur(35px);"></div>
-            
-            <div class="position-relative" style="z-index: 2;">
-              <span class="badge bg-warning text-dark text-uppercase fw-bold px-3 py-2 rounded-pill mb-3" style="font-size: 0.7rem;">
-                📚 {{ structure.name.includes('Tamil') || structure.name.includes('Purananuru') ? 'Language & Literature' : 'LMS Course' }}
-              </span>
-              <h2 class="fw-extrabold display-6 mb-3" style="letter-spacing: -0.02em;">{{ structure.name }}</h2>
-              <p class="opacity-75 mb-4 text-white-50" style="max-width: 600px; font-size: 15px; line-height: 1.6;">
-                {{ structure.description || 'Welcome to this learning journey. Expand and view the curriculum levels below to begin or resume your lessons.' }}
-              </p>
-              
-              <div class="d-flex align-items-center gap-4 text-white-50 mb-4" style="font-size: 13px;">
-                <span class="d-flex align-items-center gap-2"><i class="bi bi-book-fill text-warning"></i> {{ courseProgress().total }} Chapters</span>
-                <span class="d-flex align-items-center gap-2"><i class="bi bi-bar-chart-fill text-warning"></i> {{ courseProgress().completed }} Completed</span>
-              </div>
+        <!-- Course Hero Banner -->
+        <div class="ariga-hero-gradient p-5 text-white rounded-4 mb-4 position-relative overflow-hidden shadow-lg">
+          <div class="position-absolute bg-white opacity-10 rounded-circle"
+            style="width: 250px; height: 250px; top: -50px; right: -50px; filter: blur(35px);"></div>
 
-              <!-- Progress bar in hero -->
-              <div class="d-flex align-items-center gap-3" style="max-width: 500px;">
-                <div class="progress flex-grow-1" style="height: 8px; background-color: rgba(255,255,255,0.2);">
-                  <div class="progress-bar bg-info" [style.width.%]="courseProgress().percentage"></div>
-                </div>
-                <span class="fw-bold" style="font-size: 14px;">{{ courseProgress().percentage }}%</span>
-              </div>
-              
-              <button class="btn btn-white rounded-pill px-4 py-2 fw-bold mt-4 d-inline-flex align-items-center gap-2 hover-scale-btn" (click)="continueCourse()">
-                <i class="bi bi-play-circle-fill fs-5 text-primary"></i>
-                <span class="text-primary">{{ 'CONTINUE_LEARNING' | translate }}</span>
-              </button>
+          <div class="position-relative" style="z-index: 2;">
+            <span class="badge bg-warning text-dark text-uppercase fw-bold px-3 py-2 rounded-pill mb-3"
+              style="font-size: 0.7rem;">
+              📚 {{ structure.name.includes('Tamil') || structure.name.includes('Purananuru') ? 'Language & Literature'
+              : 'LMS Course' }}
+            </span>
+            <h2 class="fw-extrabold display-6 mb-3" style="letter-spacing: -0.02em;">{{ structure.name }}</h2>
+            <p class="opacity-75 mb-4 text-white-50" style="max-width: 600px; font-size: 15px; line-height: 1.6;">
+              {{ structure.description || 'Welcome to this learning journey. Expand and view the curriculum levels below
+              to begin or resume your lessons.' }}
+            </p>
+
+            <div class="d-flex align-items-center gap-4 text-white-50 mb-4" style="font-size: 13px;">
+              <span class="d-flex align-items-center gap-2"><i class="bi bi-book-fill text-warning"></i> {{
+                courseProgress().total }} Chapters</span>
+              <span class="d-flex align-items-center gap-2"><i class="bi bi-bar-chart-fill text-warning"></i> {{
+                courseProgress().completed }} Completed</span>
             </div>
-          </div>
 
-          <!-- Course Metrics Row -->
-          <div class="row g-4 mb-5">
-            <div class="col-sm-6 col-lg-3">
-              <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
-                <div class="rounded-circle d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary mx-auto mb-2" style="width: 44px; height: 44px;">
-                  <i class="bi bi-bar-chart-fill"></i>
-                </div>
-                <span class="small text-secondary d-block">Progress</span>
-                <h5 class="fw-bold mb-0 text-dark">{{ courseProgress().percentage }}%</h5>
+            <!-- Progress bar in hero -->
+            <div class="d-flex align-items-center gap-3" style="max-width: 500px;">
+              <div class="progress flex-grow-1" style="height: 8px; background-color: rgba(255,255,255,0.2);">
+                <div class="progress-bar bg-info" [style.width.%]="courseProgress().percentage"></div>
               </div>
+              <span class="fw-bold" style="font-size: 14px;">{{ courseProgress().percentage }}%</span>
             </div>
-            <div class="col-sm-6 col-lg-3">
-              <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
-                <div class="rounded-circle d-flex align-items-center justify-content-center bg-info bg-opacity-10 text-info mx-auto mb-2" style="width: 44px; height: 44px;">
-                  <i class="bi bi-book-fill"></i>
-                </div>
-                <span class="small text-secondary d-block">Chapters Done</span>
-                <h5 class="fw-bold mb-0 text-dark">{{ courseProgress().completed }} / {{ courseProgress().total }}</h5>
-              </div>
-            </div>
-            <div class="col-sm-6 col-lg-3">
-              <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
-                <div class="rounded-circle d-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success mx-auto mb-2" style="width: 44px; height: 44px;">
-                  <i class="bi bi-check-circle-fill"></i>
-                </div>
-                <span class="small text-secondary d-block">Assessments Passed</span>
-                <h5 class="fw-bold mb-0 text-dark">{{ stats()?.passed_attempts || 0 }} / {{ totalAssessments() }}</h5>
-              </div>
-            </div>
-            <div class="col-sm-6 col-lg-3">
-              <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
-                <div class="rounded-circle d-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning mx-auto mb-2" style="width: 44px; height: 44px;">
-                  <i class="bi bi-award-fill"></i>
-                </div>
-                <span class="small text-secondary d-block">Average Test Score</span>
-                <h5 class="fw-bold mb-0 text-dark">{{ stats()?.average_score || 0 }}%</h5>
-              </div>
-            </div>
-          </div>
 
-          <!-- Curriculum Levels and Chapters -->
-          <div class="curriculum-container">
-            <h4 class="fw-bold text-dark mb-4">Course Curriculum</h4>
-
-            @for (level of structure.levels; track level.id) {
-              <div class="mb-4 animate-fade-in">
-                <span class="text-uppercase fw-bold text-primary px-2 border-start border-3 border-primary mb-3 d-block" style="font-size: 13px; letter-spacing: 0.05em;">
-                  {{ level.name }}
-                </span>
-                
-                @for (chapter of level.chapters; track chapter.id) {
-                  <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-3 hover-shadow transition-all">
-                    <div class="d-flex align-items-center justify-content-between accordion-header-custom" style="cursor: pointer;" (click)="toggleChapter(chapter)">
-                      <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary" style="width: 38px; height: 38px;">
-                          <i class="bi bi-journal-check"></i>
-                        </div>
-                        <div>
-                          <h6 class="fw-bold text-dark mb-0">{{ chapter.name }}</h6>
-                          <span class="text-secondary small">{{ chapter.contents.length || 0 }} topics</span>
-                        </div>
-                      </div>
-                      <div class="d-flex align-items-center gap-2">
-                        <span class="badge rounded-pill px-3 py-1 fw-bold"
-                          [class.bg-success]="stats()?.completed_chapter_ids?.includes(chapter.id)"
-                          [class.bg-opacity-10]="true"
-                          [class.text-success]="stats()?.completed_chapter_ids?.includes(chapter.id)"
-                          [class.bg-primary]="!stats()?.completed_chapter_ids?.includes(chapter.id)"
-                          [class.text-primary]="!stats()?.completed_chapter_ids?.includes(chapter.id)">
-                          @if (stats()?.completed_chapter_ids?.includes(chapter.id)) {
-                            <i class="bi bi-check-circle-fill me-1"></i>Completed
-                          } @else {
-                            <i class="bi bi-circle me-1"></i>In-Progress
-                          }
-                        </span>
-                        <i class="bi" [class.bi-chevron-down]="!chapter.is_expanded" [class.bi-chevron-up]="chapter.is_expanded"></i>
-                      </div>
-                    </div>
-
-                    @if (chapter.is_expanded) {
-                      <div class="border-top mt-3 pt-3">
-                        <div class="d-flex flex-column gap-2 animate-slide-down">
-                          @for (topic of chapter.contents; track topic.id) {
-                            <div class="d-flex align-items-center justify-content-between p-2.5 rounded lesson-row-custom hover-bg-light" style="font-size: 13.5px; cursor: pointer;" (click)="selectTopic(topic.id)">
-                              <span class="text-dark d-flex align-items-center gap-2">
-                                <i class="bi bi-play-circle text-primary fs-5"></i>
-                                <span>{{ topic.title || topic.name }}</span>
-                              </span>
-                              <span class="badge bg-light text-secondary rounded-pill px-2.5 py-1" style="font-size: 10px;">Topic</span>
-                            </div>
-                          }
-                          
-                          @for (assessment of chapter.assessments; track assessment.id) {
-                            <div class="d-flex align-items-center justify-content-between p-2.5 rounded lesson-row-custom border-top border-dashed hover-bg-light" style="font-size: 13.5px; cursor: pointer;" (click)="selectAssessment(assessment.id, chapter)">
-                              <span class="text-dark d-flex align-items-center gap-2">
-                                <i class="bi bi-award-fill text-warning fs-5"></i>
-                                <span>{{ assessment.title }}</span>
-                              </span>
-                              <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2.5 py-1" style="font-size: 10px;">Test</span>
-                            </div>
-                          }
-                        </div>
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-            } @empty {
-              <div class="text-center py-5 text-secondary">
-                <i class="bi bi-journal-x fs-1 d-block mb-3"></i>
-                <p>No levels or chapters found in this course.</p>
-              </div>
-            }
+            <button
+              class="btn btn-white rounded-pill px-4 py-2 fw-bold mt-4 d-inline-flex align-items-center gap-2 hover-scale-btn"
+              (click)="continueCourse()">
+              <i class="bi bi-play-circle-fill fs-5 text-primary"></i>
+              <span class="text-primary">{{ 'CONTINUE_LEARNING' | translate }}</span>
+            </button>
           </div>
         </div>
+
+        <!-- Course Metrics Row -->
+        <div class="row g-4 mb-5">
+          <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
+              <div
+                class="rounded-circle d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary mx-auto mb-2"
+                style="width: 44px; height: 44px;">
+                <i class="bi bi-bar-chart-fill"></i>
+              </div>
+              <span class="small text-secondary d-block">Progress</span>
+              <h5 class="fw-bold mb-0 text-dark">{{ courseProgress().percentage }}%</h5>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
+              <div
+                class="rounded-circle d-flex align-items-center justify-content-center bg-info bg-opacity-10 text-info mx-auto mb-2"
+                style="width: 44px; height: 44px;">
+                <i class="bi bi-book-fill"></i>
+              </div>
+              <span class="small text-secondary d-block">Chapters Done</span>
+              <h5 class="fw-bold mb-0 text-dark">{{ courseProgress().completed }} / {{ courseProgress().total }}</h5>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
+              <div
+                class="rounded-circle d-flex align-items-center justify-content-center bg-success bg-opacity-10 text-success mx-auto mb-2"
+                style="width: 44px; height: 44px;">
+                <i class="bi bi-check-circle-fill"></i>
+              </div>
+              <span class="small text-secondary d-block">Assessments Passed</span>
+              <h5 class="fw-bold mb-0 text-dark">{{ stats()?.passed_attempts || 0 }} / {{ totalAssessments() }}</h5>
+            </div>
+          </div>
+          <div class="col-sm-6 col-lg-3">
+            <div class="card border-0 shadow-sm rounded-4 p-4 text-center bg-white h-100">
+              <div
+                class="rounded-circle d-flex align-items-center justify-content-center bg-warning bg-opacity-10 text-warning mx-auto mb-2"
+                style="width: 44px; height: 44px;">
+                <i class="bi bi-award-fill"></i>
+              </div>
+              <span class="small text-secondary d-block">Average Test Score</span>
+              <h5 class="fw-bold mb-0 text-dark">{{ stats()?.average_score || 0 }}%</h5>
+            </div>
+          </div>
+        </div>
+
+        <!-- Curriculum Levels and Chapters -->
+        <div class="curriculum-container">
+          <h4 class="fw-bold text-dark mb-4">Course Curriculum</h4>
+
+          @for (level of structure.levels; track level.id) {
+          <div class="mb-4 animate-fade-in">
+            <span class="text-uppercase fw-bold text-primary px-2 border-start border-3 border-primary mb-3 d-block"
+              style="font-size: 13px; letter-spacing: 0.05em;">
+              {{ level.name }}
+            </span>
+
+            @for (chapter of level.chapters; track chapter.id) {
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white mb-3 hover-shadow transition-all">
+              <div class="d-flex align-items-center justify-content-between accordion-header-custom"
+                style="cursor: pointer;" (click)="toggleChapter(chapter)">
+                <div class="d-flex align-items-center gap-3">
+                  <div
+                    class="rounded-circle d-flex align-items-center justify-content-center bg-primary bg-opacity-10 text-primary"
+                    style="width: 38px; height: 38px;">
+                    <i class="bi bi-journal-check"></i>
+                  </div>
+                  <div>
+                    <h6 class="fw-bold text-dark mb-0">{{ chapter.name }}</h6>
+                    <span class="text-secondary small">{{ chapter.contents.length || 0 }} topics</span>
+                  </div>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge rounded-pill px-3 py-1 fw-bold"
+                    [class.bg-success]="stats()?.completed_chapter_ids?.includes(chapter.id)"
+                    [class.bg-opacity-10]="true"
+                    [class.text-success]="stats()?.completed_chapter_ids?.includes(chapter.id)"
+                    [class.bg-primary]="!stats()?.completed_chapter_ids?.includes(chapter.id)"
+                    [class.text-primary]="!stats()?.completed_chapter_ids?.includes(chapter.id)">
+                    @if (stats()?.completed_chapter_ids?.includes(chapter.id)) {
+                    <i class="bi bi-check-circle-fill me-1"></i>Completed
+                    } @else {
+                    <i class="bi bi-circle me-1"></i>In-Progress
+                    }
+                  </span>
+                  <i class="bi" [class.bi-chevron-down]="!chapter.is_expanded"
+                    [class.bi-chevron-up]="chapter.is_expanded"></i>
+                </div>
+              </div>
+
+              @if (chapter.is_expanded) {
+              <div class="border-top mt-3 pt-3">
+                <div class="d-flex flex-column gap-2 animate-slide-down">
+                  @for (topic of chapter.contents; track topic.id) {
+                  <div
+                    class="d-flex align-items-center justify-content-between p-2.5 rounded lesson-row-custom hover-bg-light"
+                    style="font-size: 13.5px; cursor: pointer;" (click)="selectTopic(topic.id)">
+                    <span class="text-dark d-flex align-items-center gap-2">
+                      <i class="bi bi-play-circle text-primary fs-5"></i>
+                      <span>{{ topic.title || topic.name }}</span>
+                    </span>
+                    <span class="badge bg-light text-secondary rounded-pill px-2.5 py-1"
+                      style="font-size: 10px;">Topic</span>
+                  </div>
+                  }
+
+                  @for (assessment of chapter.assessments; track assessment.id) {
+                  <div
+                    class="d-flex align-items-center justify-content-between p-2.5 rounded lesson-row-custom border-top border-dashed hover-bg-light"
+                    style="font-size: 13.5px; cursor: pointer;" (click)="selectAssessment(assessment.id, chapter)">
+                    <span class="text-dark d-flex align-items-center gap-2">
+                      <i class="bi bi-award-fill text-warning fs-5"></i>
+                      <span>{{ assessment.title }}</span>
+                    </span>
+                    <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-2.5 py-1"
+                      style="font-size: 10px;">Test</span>
+                  </div>
+                  }
+                </div>
+              </div>
+              }
+            </div>
+            }
+          </div>
+          } @empty {
+          <div class="text-center py-5 text-secondary">
+            <i class="bi bi-journal-x fs-1 d-block mb-3"></i>
+            <p>No levels or chapters found in this course.</p>
+          </div>
+          }
+        </div>
+      </div>
       }
 
       <!-- SCREEN 4: LESSON PLAYER / STEP NAVIGATOR -->
       @if (courseId() !== null && activeContentId() !== null && activeContent(); as content) {
-        <div class="p-0">
-          
-          <!-- Content Header with Step Indicator -->
-          <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
-              <button class="btn btn-outline-primary btn-sm rounded-3 py-2 px-3 fw-bold d-inline-flex align-items-center gap-2" (click)="activeContentId.set(null); selectedChapterId.set(null);">
-                <i class="bi bi-arrow-left"></i>
-                <span>Back to Overview</span>
-              </button>
+      <div class="p-0">
 
-              <!-- Stepper Navigation Pills -->
-              <div class="step-navigation-pillbar shadow-sm">
-                <button class="step-nav-pill" [class.active]="activeStep() === 'lesson'" (click)="activeStep.set('lesson')">
-                  📚 Lesson
-                </button>
-                <button class="step-nav-pill" [class.active]="activeStep() === 'activity'" (click)="activeStep.set('activity')">
-                  🎮 Activity
-                </button>
-                <button class="step-nav-pill" [class.active]="activeStep() === 'ai'" (click)="activeStep.set('ai')">
-                  🤖 AI Tutor
-                </button>
-                <button class="step-nav-pill" [class.active]="activeStep() === 'assessment'" (click)="activeStep.set('assessment')">
-                  📝 Assessment
-                </button>
-              </div>
+        <!-- Content Header with Step Indicator -->
+        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <button
+              class="btn btn-outline-primary btn-sm rounded-3 py-2 px-3 fw-bold d-inline-flex align-items-center gap-2"
+              (click)="activeContentId.set(null); selectedChapterId.set(null);">
+              <i class="bi bi-arrow-left"></i>
+              <span>Back to Overview</span>
+            </button>
+
+            <!-- Stepper Navigation Pills -->
+            <div class="step-navigation-pillbar shadow-sm">
+              <button class="step-nav-pill" [class.active]="activeStep() === 'lesson'"
+                (click)="activeStep.set('lesson')">
+                📚 Lesson
+              </button>
+              <button class="step-nav-pill" [class.active]="activeStep() === 'activity'"
+                (click)="activeStep.set('activity')">
+                🎮 Activity
+              </button>
+              <button class="step-nav-pill" [class.active]="activeStep() === 'ai'" (click)="activeStep.set('ai')">
+                🤖 AI Tutor
+              </button>
+              <button class="step-nav-pill" [class.active]="activeStep() === 'assessment'"
+                (click)="activeStep.set('assessment')">
+                📝 Assessment
+              </button>
             </div>
           </div>
+        </div>
 
-          <!-- STEP 1: LESSON SCREEN -->
-          @if (activeStep() === 'lesson') {
-            <div class="max-w-4xl mx-auto animate-fade-in">
-              <!-- Topic Banner -->
-              <div class="mb-4">
-                <span class="badge bg-primary bg-opacity-10 text-primary text-uppercase px-3 py-2 rounded-pill fw-bold mb-2" style="font-size: 11px;">
-                  <i class="bi bi-book-half me-1"></i> LEARNING TOPIC
-                </span>
-                <h2 class="fw-extrabold text-dark mb-1">{{ content.title || content.name }}</h2>
-                <p class="text-secondary small mb-0">Topic Code: {{ content.name }}</p>
-              </div>
+        <!-- STEP 1: LESSON SCREEN -->
+        @if (activeStep() === 'lesson') {
+        <div class="max-w-4xl mx-auto animate-fade-in">
+          <!-- Topic Banner -->
+          <div class="mb-4">
+            <span class="badge bg-primary bg-opacity-10 text-primary text-uppercase px-3 py-2 rounded-pill fw-bold mb-2"
+              style="font-size: 11px;">
+              <i class="bi bi-book-half me-1"></i> LEARNING TOPIC
+            </span>
+            <h2 class="fw-extrabold text-dark mb-1">{{ content.title || content.name }}</h2>
+            <p class="text-secondary small mb-0">Topic Code: {{ content.name }}</p>
+          </div>
 
-              <!-- Video Player / Poster -->
-              <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-dark" style="aspect-ratio: 16/9; width: 100%; position: relative;">
-                @if (videoUrl()) {
-                  @if (isVideoLocal()) {
-                    <video [src]="videoUrl()" controls class="w-100 h-100" style="object-fit: contain; z-index: 2; position: relative;"></video>
-                  } @else if (youtubeEmbedUrl()) {
-                    <iframe [src]="youtubeEmbedUrl()" frameborder="0" allowfullscreen class="w-100 h-100" style="z-index: 2; position: relative;"></iframe>
-                  } @else {
-                    <a [href]="videoUrl()" target="_blank" class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-white text-decoration-none" style="z-index: 2; position: relative;">
-                      <i class="bi bi-play-circle-fill display-1 mb-2 text-warning"></i>
-                      <span class="fw-bold">Click to Open External Resource Video</span>
-                    </a>
-                  }
-                } @else {
-                  <!-- Blurred background placeholder for video poster -->
-                  <div class="position-absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=600&q=80'); filter: blur(4px) brightness(0.5);"></div>
-                  
-                  <div class="position-relative w-100 h-100 d-flex flex-column justify-content-between p-4" style="z-index: 2;">
-                    <div class="d-flex justify-content-between align-items-center text-white">
-                      <span class="small fw-semibold">Interactive Classroom</span>
-                      <button class="btn btn-primary btn-sm rounded-pill px-3" (click)="activeStep.set('ai')"><i class="bi bi-robot me-1"></i>Ask AI Tutor</button>
-                    </div>
-
-                    <!-- Decorative Icon -->
-                    <div class="d-flex align-items-center justify-content-center flex-grow-1">
-                      <div class="rounded-circle bg-white bg-opacity-20 text-white d-flex align-items-center justify-content-center" style="width: 70px; height: 70px;">
-                        <i class="bi bi-book-half fs-2"></i>
-                      </div>
-                    </div>
-
-                    <div class="text-white text-center pb-2">
-                      <h6 class="fw-bold mb-0">{{ content.title || content.name }}</h6>
-                      <span class="text-white-50" style="font-size: 12px;">Review the lecture notes below</span>
-                    </div>
-                  </div>
-                }
-              </div>
-
-              <!-- Lesson Content Card -->
-              <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-4">
-                @if (isJsonContent()) {
-                  <div class="json-content-renderer animate-fade-in">
-                    @for (block of parsedBlocks(); track $index) {
-                      @if (block.type === 'paragraph') {
-                        <p class="text-secondary fs-5 mb-4" [innerHTML]="block.data.text" style="line-height: 1.75;"></p>
-                      } @else if (block.type === 'header') {
-                        <h4 class="fw-bold text-dark mb-3 mt-4" [innerHTML]="block.data.text"></h4>
-                      } @else if (block.type === 'code') {
-                        <div class="p-4 rounded-4 bg-dark text-white font-monospace mb-4 mt-3" style="font-size: 13px;">
-                          <pre class="m-0 text-white"><code>{{ block.data.code }}</code></pre>
-                        </div>
-                      } @else if (block.type === 'list') {
-                        @if (block.data.style === 'ordered') {
-                          <ol class="text-secondary fs-5 mb-4 ms-3" style="line-height: 1.75;">
-                            @for (item of block.data.items; track $index) {
-                              <li class="mb-2" [innerHTML]="item && item.content !== undefined ? item.content : item"></li>
-                            }
-                          </ol>
-                        } @else {
-                          <ul class="text-secondary fs-5 mb-4 ms-3" style="line-height: 1.75;">
-                            @for (item of block.data.items; track $index) {
-                              <li class="mb-2" [innerHTML]="item && item.content !== undefined ? item.content : item"></li>
-                            }
-                          </ul>
-                        }
-                      } @else {
-                        <div [innerHTML]="block.data?.text || block.data?.html || ''"></div>
-                      }
-                    }
-                  </div>
-                } @else {
-                  <div class="html-content-renderer animate-fade-in fs-5 text-secondary" style="line-height: 1.75;" [innerHTML]="content.text_content || 'No content text available for this lesson topic.'"></div>
-                }
-
-                <!-- Attachments Grid -->
-                @if (content.attachments && content.attachments.length > 0) {
-                  <h6 class="fw-bold text-secondary text-uppercase mb-3 mt-4" style="font-size: 11px;">Attachments & References</h6>
-                  <div class="row g-3">
-                    @for (attachment of content.attachments; track attachment.id) {
-                      <div class="col-md-4">
-                        <div class="card border border-light-subtle rounded-3 p-3 h-100 hover-shadow transition-all">
-                          <div class="d-flex align-items-center gap-2 mb-3">
-                            <i class="bi bi-file-earmark-arrow-down fs-4 text-primary"></i>
-                            <div class="text-truncate">
-                              <h6 class="fw-bold mb-0 text-dark small text-truncate">{{ attachment.name || 'Resource File' }}</h6>
-                              <span class="text-secondary" style="font-size: 11px;">Download Resource</span>
-                            </div>
-                          </div>
-                          <a [href]="environment.baseUrl + '/' + attachment.file_path" target="_blank" class="btn btn-outline-primary btn-sm rounded-3 w-100">
-                            <i class="bi bi-download me-1"></i>Download
-                          </a>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-
-              <!-- Bottom Navigation -->
-              <div class="d-flex align-items-center justify-content-between mb-5">
-                <button class="btn btn-white rounded-3 px-4 py-2 fw-semibold" (click)="activeContentId.set(null)">
-                  <i class="bi bi-arrow-left me-1"></i> Back to Overview
-                </button>
-                <button class="btn btn-primary rounded-3 px-4 py-2 fw-bold" (click)="activeStep.set('activity')">
-                  Complete & Continue <i class="bi bi-arrow-right ms-1"></i>
-                </button>
-              </div>
+          <!-- Video Player / Poster -->
+          <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-dark"
+            style="aspect-ratio: 16/9; width: 100%; position: relative;">
+            @if (videoUrl()) {
+            @if (isVideoLocal()) {
+            <video [src]="videoUrl()" controls class="w-100 h-100"
+              style="object-fit: contain; z-index: 2; position: relative;"></video>
+            } @else if (youtubeEmbedUrl()) {
+            <iframe [src]="youtubeEmbedUrl()" frameborder="0" allowfullscreen class="w-100 h-100"
+              style="z-index: 2; position: relative;"></iframe>
+            } @else {
+            <a [href]="videoUrl()" target="_blank"
+              class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-white text-decoration-none"
+              style="z-index: 2; position: relative;">
+              <i class="bi bi-play-circle-fill display-1 mb-2 text-warning"></i>
+              <span class="fw-bold">Click to Open External Resource Video</span>
+            </a>
+            }
+            } @else {
+            <!-- Blurred background placeholder for video poster -->
+            <div class="position-absolute inset-0 bg-cover bg-center"
+              style="background-image: url('https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=600&q=80'); filter: blur(4px) brightness(0.5);">
             </div>
-            
-            <!-- Sticky bottom progress indicator -->
-            <div class="position-fixed bottom-0 start-0 w-100 bg-light-subtle" style="height: 4px; z-index: 99;">
-              <div class="progress-bar ariga-primary-gradient h-100" [style.width.%]="courseProgress().percentage"></div>
-            </div>
-          }
 
-          <!-- STEP 2: INTERACTIVE ACTIVITIES -->
-          @if (activeStep() === 'activity') {
-            <div class="max-w-4xl mx-auto animate-fade-in">
-              <div class="d-flex align-items-center justify-content-between mb-4">
-                <h4 class="fw-bold text-dark mb-0">Interactive Activities</h4>
+            <div class="position-relative w-100 h-100 d-flex flex-column justify-content-between p-4"
+              style="z-index: 2;">
+              <div class="d-flex justify-content-between align-items-center text-white">
+                <span class="small fw-semibold">Interactive Classroom</span>
+                <button class="btn btn-primary btn-sm rounded-pill px-3" (click)="activeStep.set('ai')"><i
+                    class="bi bi-robot me-1"></i>Ask AI Tutor</button>
               </div>
 
-              @if (activityBlocks().length > 0) {
-                <div class="d-flex flex-column gap-4">
-                  @for (block of activityBlocks(); track $index) {
-                    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white animate-fade-in">
-                      <app-activity-renderer [activity]="block.data" [showFeedback]="true"></app-activity-renderer>
-                    </div>
-                  }
+              <!-- Decorative Icon -->
+              <div class="d-flex align-items-center justify-content-center flex-grow-1">
+                <div
+                  class="rounded-circle bg-white bg-opacity-20 text-white d-flex align-items-center justify-content-center"
+                  style="width: 70px; height: 70px;">
+                  <i class="bi bi-book-half fs-2"></i>
                 </div>
+              </div>
+
+              <div class="text-white text-center pb-2">
+                <h6 class="fw-bold mb-0">{{ content.title || content.name }}</h6>
+                <span class="text-white-50" style="font-size: 12px;">Review the lecture notes below</span>
+              </div>
+            </div>
+            }
+          </div>
+
+          <!-- Lesson Content Card -->
+          <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white mb-4">
+            @if (isJsonContent()) {
+            <div class="json-content-renderer animate-fade-in">
+              @for (block of parsedBlocks(); track $index) {
+              @if (block.type === 'paragraph') {
+              <p class="text-secondary fs-5 mb-4" [innerHTML]="block.data.text" style="line-height: 1.75;"></p>
+              } @else if (block.type === 'header') {
+              <h4 class="fw-bold text-dark mb-3 mt-4" [innerHTML]="block.data.text"></h4>
+              } @else if (block.type === 'code') {
+              <div class="p-4 rounded-4 bg-dark text-white font-monospace mb-4 mt-3" style="font-size: 13px;">
+                <pre class="m-0 text-white"><code>{{ block.data.code }}</code></pre>
+              </div>
+              } @else if (block.type === 'list') {
+              @if (block.data.style === 'ordered') {
+              <ol class="text-secondary fs-5 mb-4 ms-3" style="line-height: 1.75;">
+                @for (item of block.data.items; track $index) {
+                <li class="mb-2" [innerHTML]="item && item.content !== undefined ? item.content : item"></li>
+                }
+              </ol>
               } @else {
-                <div class="card border-0 shadow-sm rounded-4 p-5 bg-white text-center animate-fade-in text-secondary">
-                  <div class="fs-1 mb-3 opacity-50">📝</div>
-                  <h5 class="fw-bold text-dark mb-2">No Activities Found</h5>
-                  <p class="mb-0">There are no embedded interactive activities for this lesson topic.</p>
-                </div>
+              <ul class="text-secondary fs-5 mb-4 ms-3" style="line-height: 1.75;">
+                @for (item of block.data.items; track $index) {
+                <li class="mb-2" [innerHTML]="item && item.content !== undefined ? item.content : item"></li>
+                }
+              </ul>
+              }
+              } @else {
+              <div [innerHTML]="block.data?.text || block.data?.html || ''"></div>
+              }
               }
             </div>
-          }
+            } @else {
+            <div class="html-content-renderer animate-fade-in fs-5 text-secondary" style="line-height: 1.75;"
+              [innerHTML]="content.text_content || 'No content text available for this lesson topic.'"></div>
+            }
 
-          <!-- STEP 3: FULL PAGE AI TUTOR PANEL -->
-          @if (activeStep() === 'ai') {
-            <div class="max-w-4xl mx-auto animate-fade-in">
-              <app-ai-tutor-chat [activeContentId]="activeContentId()" [courseId]="courseId()"></app-ai-tutor-chat>
-            </div>
-          }
-
-          <!-- STEP 4: ASSESSMENT PLAYER -->
-          @if (activeStep() === 'assessment') {
-            <div class="max-w-4xl mx-auto animate-fade-in">
-              @if (selectedAssessmentId()) {
-                <app-assessment-player 
-                  [inputAssessmentId]="selectedAssessmentId()" 
-                  (assessmentCompleted)="onAssessmentCompleted($event)">
-                </app-assessment-player>
-              } @else if (activeContent()?.assessments && activeContent()!.assessments!.length > 0) {
-                <!-- Show list of available assessments for this chapter -->
-                <div class="card border-0 shadow-sm rounded-4 p-5 bg-white text-center">
-                  <div class="fs-1 mb-3">📝</div>
-                  <h4 class="fw-bold text-dark mb-3">Chapter Assessments</h4>
-                  <p class="text-secondary mb-4">Select an assessment to begin your evaluation.</p>
-                  <div class="d-flex flex-column gap-3 mx-auto" style="max-width: 400px;">
-                    @for (assessment of activeContent()!.assessments; track assessment.id) {
-                      <button class="btn btn-outline-primary rounded-3 p-3 d-flex align-items-center gap-3 text-start" (click)="selectedAssessmentId.set(assessment.id)">
-                        <i class="bi bi-award-fill fs-4 text-warning"></i>
-                        <div>
-                          <div class="fw-bold">{{ assessment.title }}</div>
-                          <div class="text-secondary small">{{ assessment.description || 'Timed evaluation' }}</div>
-                        </div>
-                        <i class="bi bi-chevron-right ms-auto"></i>
-                      </button>
-                    }
+            <!-- Attachments Grid -->
+            @if (content.attachments && content.attachments.length > 0) {
+            <h6 class="fw-bold text-secondary text-uppercase mb-3 mt-4" style="font-size: 11px;">Attachments &
+              References</h6>
+            <div class="row g-3">
+              @for (attachment of content.attachments; track attachment.id) {
+              <div class="col-md-4">
+                <div class="card border border-light-subtle rounded-3 p-3 h-100 hover-shadow transition-all">
+                  <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-file-earmark-arrow-down fs-4 text-primary"></i>
+                    <div class="text-truncate">
+                      <h6 class="fw-bold mb-0 text-dark small text-truncate">{{ attachment.name || 'Resource File' }}
+                      </h6>
+                      <span class="text-secondary" style="font-size: 11px;">Download Resource</span>
+                    </div>
                   </div>
+                  <a [href]="environment.baseUrl + '/' + attachment.file_path" target="_blank"
+                    class="btn btn-outline-primary btn-sm rounded-3 w-100">
+                    <i class="bi bi-download me-1"></i>Download
+                  </a>
                 </div>
-              } @else {
-                <div class="card border-0 shadow-sm rounded-4 p-5 bg-white text-center">
-                  <div class="fs-1 mb-3">📋</div>
-                  <h5 class="fw-bold text-dark mb-2">No Assessments Available</h5>
-                  <p class="text-secondary">This topic doesn't have any assessments yet. Complete the lesson and activities to earn XP!</p>
-                  <button class="btn btn-primary rounded-3 px-4 py-2 mt-3" (click)="activeStep.set('lesson')">
-                    <i class="bi bi-arrow-left me-1"></i> Back to Lesson
-                  </button>
-                </div>
+              </div>
               }
             </div>
+            }
+          </div>
+
+          <!-- Bottom Navigation -->
+          <div class="d-flex align-items-center justify-content-between mb-5">
+            <button class="btn btn-white rounded-3 px-4 py-2 fw-semibold" (click)="activeContentId.set(null)">
+              <i class="bi bi-arrow-left me-1"></i> Back to Overview
+            </button>
+            <button class="btn btn-primary rounded-3 px-4 py-2 fw-bold" (click)="activeStep.set('activity')">
+              Complete & Continue <i class="bi bi-arrow-right ms-1"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sticky bottom progress indicator -->
+        <div class="position-fixed bottom-0 start-0 w-100 bg-light-subtle" style="height: 4px; z-index: 99;">
+          <div class="progress-bar ariga-primary-gradient h-100" [style.width.%]="courseProgress().percentage"></div>
+        </div>
+        }
+
+        <!-- STEP 2: INTERACTIVE ACTIVITIES -->
+        @if (activeStep() === 'activity') {
+        <div class="max-w-4xl mx-auto animate-fade-in">
+          <div class="d-flex align-items-center justify-content-between mb-4">
+            <h4 class="fw-bold text-dark mb-0">Interactive Activities</h4>
+          </div>
+
+          @if (activityBlocks().length > 0) {
+          <div class="d-flex flex-column gap-4">
+            @for (block of activityBlocks(); track $index) {
+            <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white animate-fade-in">
+              <app-activity-renderer [activity]="block.data" [showFeedback]="true"
+                (answered)="onActivityAnswered($event)"></app-activity-renderer>
+            </div>
+            }
+          </div>
+          } @else {
+          <div class="card border-0 shadow-sm rounded-4 p-5 bg-white text-center animate-fade-in text-secondary">
+            <div class="fs-1 mb-3 opacity-50">📝</div>
+            <h5 class="fw-bold text-dark mb-2">No Activities Found</h5>
+            <p class="mb-0">There are no embedded interactive activities for this lesson topic.</p>
+          </div>
           }
         </div>
+        }
+
+        <!-- STEP 3: FULL PAGE AI TUTOR PANEL -->
+        @if (activeStep() === 'ai') {
+        <div class="max-w-4xl mx-auto animate-fade-in">
+          <app-ai-tutor-chat [activeContentId]="activeContentId()" [courseId]="courseId()"></app-ai-tutor-chat>
+        </div>
+        }
+
+        <!-- STEP 4: ASSESSMENT PLAYER -->
+        @if (activeStep() === 'assessment') {
+        <div class="max-w-4xl mx-auto animate-fade-in">
+          @if (selectedAssessmentId()) {
+          <app-assessment-player [inputAssessmentId]="selectedAssessmentId()"
+            (assessmentCompleted)="onAssessmentCompleted($event)">
+          </app-assessment-player>
+          } @else if (activeContent()?.assessments && activeContent()!.assessments!.length > 0) {
+          <!-- Show list of available assessments for this chapter -->
+          <div class="card border-0 shadow-sm rounded-4 p-5 bg-white text-center">
+            <div class="fs-1 mb-3">📝</div>
+            <h4 class="fw-bold text-dark mb-3">Chapter Assessments</h4>
+            <p class="text-secondary mb-4">Select an assessment to begin your evaluation.</p>
+            <div class="d-flex flex-column gap-3 mx-auto" style="max-width: 400px;">
+              @for (assessment of activeContent()!.assessments; track assessment.id) {
+              <button class="btn btn-outline-primary rounded-3 p-3 d-flex align-items-center gap-3 text-start"
+                (click)="selectedAssessmentId.set(assessment.id)">
+                <i class="bi bi-award-fill fs-4 text-warning"></i>
+                <div>
+                  <div class="fw-bold">{{ assessment.title }}</div>
+                  <div class="text-secondary small">{{ assessment.description || 'Timed evaluation' }}</div>
+                </div>
+                <i class="bi bi-chevron-right ms-auto"></i>
+              </button>
+              }
+            </div>
+          </div>
+          } @else {
+          <div class="card border-0 shadow-sm rounded-4 p-5 bg-white text-center">
+            <div class="fs-1 mb-3">📋</div>
+            <h5 class="fw-bold text-dark mb-2">No Assessments Available</h5>
+            <p class="text-secondary">This topic doesn't have any assessments yet. Complete the lesson and activities to
+              earn XP!</p>
+            <button class="btn btn-primary rounded-3 px-4 py-2 mt-3" (click)="activeStep.set('lesson')">
+              <i class="bi bi-arrow-left me-1"></i> Back to Lesson
+            </button>
+          </div>
+          }
+        </div>
+        }
+      </div>
       }
     </main>
   </div>
@@ -1140,31 +1313,233 @@
   <!-- FLOATING AI TUTOR POPUP PANEL & TRIGGER -->
   <!-- Render FAB trigger only when not viewing AI Tutor screen -->
   @if (courseId() === null || activeStep() !== 'ai') {
-    <button class="ai-tutor-fab" [class.active]="isChatOpen()" (click)="toggleChat()">
-      @if (!isChatOpen()) {
-        <i class="bi bi-robot"></i>
-      } @else {
-        <i class="bi bi-x-lg"></i>
-      }
-    </button>
+  <button class="ai-tutor-fab" [class.active]="isChatOpen()" (click)="toggleChat()">
+    @if (!isChatOpen()) {
+    <i class="bi bi-robot"></i>
+    } @else {
+    <i class="bi bi-x-lg"></i>
+    }
+  </button>
 
-    <!-- Floating Chat Window -->
-    <div class="card border-0 shadow-lg rounded-4 overflow-hidden ai-chat-panel d-flex flex-column" [class.open]="isChatOpen()">
-      <!-- Header -->
-      <div class="ariga-primary-gradient p-3 text-white d-flex align-items-center justify-content-between flex-shrink-0">
-        <div class="d-flex align-items-center gap-2">
-          <div class="rounded-3 bg-white bg-opacity-20 d-flex align-items-center justify-content-center text-white" style="width: 34px; height: 34px;">
-            <i class="bi bi-robot"></i>
-          </div>
-          <div>
-            <h6 class="fw-bold mb-0 text-white" style="font-size: 13px;">AI Assistant</h6>
-            <span class="text-white-50 d-block" style="font-size: 10px;">Always ready to help</span>
-          </div>
+  <!-- Floating Chat Window -->
+  <div class="card border-0 shadow-lg rounded-4 overflow-hidden ai-chat-panel d-flex flex-column"
+    [class.open]="isChatOpen()">
+    <!-- Header -->
+    <div class="ariga-primary-gradient p-3 text-white d-flex align-items-center justify-content-between flex-shrink-0">
+      <div class="d-flex align-items-center gap-2">
+        <div class="rounded-3 bg-white bg-opacity-20 d-flex align-items-center justify-content-center text-white"
+          style="width: 34px; height: 34px;">
+          <i class="bi bi-robot"></i>
         </div>
-        <button class="btn btn-link text-white p-0" (click)="toggleChat()"><i class="bi bi-x-lg"></i></button>
+        <div>
+          <h6 class="fw-bold mb-0 text-white" style="font-size: 13px;">AI Assistant</h6>
+          <span class="text-white-50 d-block" style="font-size: 10px;">Always ready to help</span>
+        </div>
       </div>
-
-      <app-ai-tutor-chat class="flex-grow-1 d-flex flex-column overflow-hidden" [activeContentId]="activeContentId()" [courseId]="courseId()" [isFloating]="true"></app-ai-tutor-chat>
+      <button class="btn btn-link text-white p-0" (click)="toggleChat()"><i class="bi bi-x-lg"></i></button>
     </div>
+
+    <app-ai-tutor-chat class="flex-grow-1 d-flex flex-column overflow-hidden" [activeContentId]="activeContentId()"
+      [courseId]="courseId()" [isFloating]="true"></app-ai-tutor-chat>
+  </div>
   }
 </div>
+} @else {
+<!-- Adventure UI Layout -->
+<div class="adventure-theme-wrapper w-100 position-relative overflow-hidden bg-light" style="height: 100vh;">
+  <!-- Mascot Progression Warning Bubble -->
+  @if (showMascotWarning()) {
+  <div
+    class="mascot-warning-toast position-fixed top-0 start-50 translate-middle-x mt-5 p-3 rounded-4 shadow-lg border border-3 border-danger d-flex align-items-center gap-3 animate-pop-in z-5"
+    style="background: #FFF9C4; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;">
+    <div style="font-size: 2.2rem;">🦉</div>
+    <div>
+      <p class="mb-0 fw-bold text-dark fs-6" style="line-height: 1.3;">{{ mascotWarning() }}</p>
+    </div>
+  </div>
+  }
+
+  <!-- DYNAMIC VIEWS -->
+  @if (activeContentId() === null && selectedAssessmentId() === null) {
+  <!-- Kids Dashboard Map -->
+  <app-kids-dashboard [structure]="courseStructure()" [currentView]="kidsCurrentView()"
+    [activeLevelId]="kidsActiveLevelId()" [activeChapterId]="activeContentId()"
+    [completedChapters]="stats()?.completed_chapter_ids || []" (selectLevel)="onKidsSelectLevel($event)"
+    (selectChapterNode)="onKidsSelectChapterNode($event)">
+  </app-kids-dashboard>
+
+  <!-- Back to Courses button floating in Kids Dashboard -->
+  <button
+    class="btn btn-warning rounded-pill shadow-lg position-absolute d-flex align-items-center justify-content-center fw-bold hover-lift z-3"
+    style="top: 20px; left: 20px; border: 3px solid white;" (click)="goBackToDashboard()">
+    <i class="bi bi-arrow-left me-2"></i> Back to Courses
+  </button>
+  } @else {
+  <!-- Lesson Player / Content View -->
+  <div
+    class="lesson-player w-100 h-100 lesson-bg-pattern d-flex flex-column position-absolute top-0 start-0 z-3 animate-slide-up overflow-hidden">
+    <!-- Top HUD (Floating widgets) -->
+    <header class="position-absolute top-0 start-0 w-100 h-100 pe-none" style="z-index: 1000;">
+      <!-- Quit Button (Floating Top Left) -->
+      <button
+        class="btn btn-light rounded-circle shadow-lg position-absolute d-flex align-items-center justify-content-center border border-2 border-secondary hover-lift pe-auto"
+        style="width: 45px; height: 45px; top: 15px; left: 15px;"
+        (click)="activeContentId.set(null); selectedAssessmentId.set(null);">
+        <i class="bi bi-x-lg fw-bold text-secondary fs-5"></i>
+      </button>
+
+      <!-- Progress Bar (Floating Top Center) -->
+      <div class="position-absolute pe-auto"
+        style="top: 30px; left: 50%; transform: translateX(-50%); width: 40%; min-width: 200px; max-width: 400px;">
+        <div class="progress rounded-pill bg-light border border-2 border-secondary overflow-hidden"
+          style="height: 18px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+          <div class="progress-bar bg-success rounded-pill transition-all" [style.width.%]="courseProgress().percentage"
+            style="transition: width 0.5s ease-out;">
+            <div class="w-100 h-25 bg-white opacity-25 mt-1 rounded-pill mx-auto" style="max-width: 90%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Hearts (Floating Top Right) -->
+      <div
+        class="position-absolute d-flex align-items-center gap-2 text-danger fw-bold fs-5 pe-auto bg-white rounded-pill px-3 py-1 shadow-sm border border-2 border-danger"
+        style="top: 15px; right: 15px;">
+        <i class="bi bi-suit-heart-fill animate-pulse"></i>
+        <span>{{ hearts() }}</span>
+      </div>
+    </header>
+
+    <!-- CENTER STAGE (Main Content Area) -->
+    <main
+      class="flex-grow-1 overflow-auto d-flex flex-column align-items-center justify-content-start px-3 px-md-4 w-100 mx-auto"
+      style="padding-top: 100px; padding-bottom: 50px;">
+
+      @if (showGameOver()) {
+      <!-- OUT OF HEARTS SCREEN -->
+      <div class="text-center animate-pop-in w-100 max-w-md mx-auto py-5 bg-white rounded-4 shadow p-4 mt-5">
+        <i class="bi bi-heartbreak-fill text-danger mb-4"
+          style="font-size: 6rem; filter: drop-shadow(0 4px 0 #c62828);"></i>
+        <h2 class="fw-bold text-dark mb-3">Out of Hearts!</h2>
+        <p class="fs-5 text-secondary mb-5">You made too many mistakes. Don't worry, refill your hearts and try again!
+        </p>
+        <button
+          class="btn btn-warning btn-lg rounded-pill w-100 py-3 fw-bold text-dark shadow-sm border border-2 border-white hover-lift mb-3"
+          (click)="retryActivity()">
+          <i class="bi bi-suit-heart-fill text-danger me-2"></i> Refill Hearts
+        </button>
+        <button class="btn btn-outline-secondary rounded-pill w-100 py-3 fw-bold hover-lift"
+          (click)="activeContentId.set(null); selectedAssessmentId.set(null);">
+          Quit to Map
+        </button>
+      </div>
+      } @else if (selectedAssessmentId()) {
+      <!-- Assessment Player inside Adventure UI -->
+      <div class="w-100 max-w-4xl bg-white bg-opacity-90 rounded-4 shadow-lg p-4 p-md-5 border border-4 border-warning">
+        <app-assessment-player [inputAssessmentId]="selectedAssessmentId()"
+          (assessmentCompleted)="onAssessmentCompleted($event)">
+        </app-assessment-player>
+      </div>
+      } @else if (activeContent(); as content) {
+      <!-- Topic / Step Player in Adventure UI -->
+      <div
+        class="w-100 max-w-4xl bg-white bg-opacity-95 rounded-4 shadow-lg p-4 p-md-5 border border-5 border-success position-relative">
+        <!-- Read Aloud Button -->
+        <button
+          class="btn btn-warning rounded-circle shadow-lg position-absolute d-flex align-items-center justify-content-center hover-lift"
+          style="top: -25px; right: -25px; width: 60px; height: 60px; border: 4px solid white; z-index: 15;"
+          (click)="speakText(content.text_content || '')">
+          <i class="bi bi-volume-up-fill fs-3 text-dark"></i>
+        </button>
+
+        <div class="mb-4">
+          <span class="badge bg-success bg-opacity-10 text-success text-uppercase px-3 py-2 rounded-pill fw-bold mb-2">
+            🌲 ADVENTURE QUEST
+          </span>
+          <h2 class="fw-extrabold text-dark mb-1">{{ content.title || content.name }}</h2>
+        </div>
+
+        <!-- Step Navigation Tabbar styled for Adventure -->
+        <div class="d-flex justify-content-center mb-4">
+          <div class="step-navigation-pillbar shadow-sm bg-success bg-opacity-10 p-1.5 rounded-pill">
+            <button class="step-nav-pill rounded-pill" [class.active]="activeStep() === 'lesson'"
+              (click)="activeStep.set('lesson')">
+              📚 Lesson
+            </button>
+            <button class="step-nav-pill rounded-pill" [class.active]="activeStep() === 'activity'"
+              (click)="activeStep.set('activity')">
+              🎮 Play Activity
+            </button>
+            <button class="step-nav-pill rounded-pill" [class.active]="activeStep() === 'ai'"
+              (click)="activeStep.set('ai')">
+              🤖 Ask AI
+            </button>
+          </div>
+        </div>
+
+        <!-- Step Content -->
+        @if (activeStep() === 'lesson') {
+        <div class="animate-fade-in fs-5 text-secondary" style="line-height: 1.8;">
+          @if (isJsonContent()) {
+          <div class="json-content-renderer">
+            @for (block of parsedBlocks(); track $index) {
+            @if (block.type === 'paragraph') {
+            <p class="mb-4" [innerHTML]="block.data.text"></p>
+            } @else if (block.type === 'header') {
+            <h3 class="fw-bold text-dark mb-3 mt-4" [innerHTML]="block.data.text"></h3>
+            } @else if (block.type === 'code') {
+            <pre class="bg-dark text-white p-3 rounded-3"><code>{{ block.data.code }}</code></pre>
+            } @else if (block.type === 'list') {
+            <ul>
+              @for (item of block.data.items; track $index) {
+              <li class="mb-2" [innerHTML]="item"></li>
+              }
+            </ul>
+            }
+            }
+          </div>
+          } @else {
+          <div [innerHTML]="content.text_content || 'No text available.'"></div>
+          }
+
+          <button class="btn btn-success w-100 rounded-pill py-3 fw-bold mt-5 shadow hover-lift"
+            (click)="activeStep.set('activity')">
+            I am Ready to Play! <i class="bi bi-arrow-right ms-1"></i>
+          </button>
+        </div>
+        }
+
+        @if (activeStep() === 'activity') {
+        <div class="animate-fade-in w-100">
+          @if (activityBlocks().length > 0) {
+          <div class="d-flex flex-column gap-4">
+            @for (block of activityBlocks(); track $index) {
+            <div class="card border-0 bg-transparent">
+              <app-activity-renderer [activity]="block.data" [showFeedback]="true"
+                (answered)="onActivityAnswered($event)"></app-activity-renderer>
+            </div>
+            }
+          </div>
+          } @else {
+          <div class="text-center py-4 text-secondary">
+            <h5>No interactive games for this quest. Go ahead and test your knowledge!</h5>
+            <button class="btn btn-primary rounded-pill px-4 py-2 mt-3"
+              (click)="markChapterCompleted(); activeContentId.set(null)">
+              Mark Quest Complete
+            </button>
+          </div>
+          }
+        </div>
+        }
+
+        @if (activeStep() === 'ai') {
+        <div class="animate-fade-in w-100">
+          <app-ai-tutor-chat [activeContentId]="activeContentId()" [courseId]="courseId()"></app-ai-tutor-chat>
+        </div>
+        }
+      </div>
+      }
+    </main>
+  </div>
+  }
+</div>
+}

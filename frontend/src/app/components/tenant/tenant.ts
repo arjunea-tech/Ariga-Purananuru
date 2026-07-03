@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { TenantService, TenantData } from '../../services/tenant';
+import { NotificationService } from '../../services/notification.service';
 import {
   McvInputField,
   McvPhoneField,
@@ -31,6 +32,7 @@ export class Tenant implements OnInit {
   private fb = inject(FormBuilder);
   private tenantService = inject(TenantService);
   private cdr = inject(ChangeDetectorRef);
+  private notificationService = inject(NotificationService);
 
   @ViewChild('phoneField') phoneField?: ElementRef;
 
@@ -39,7 +41,6 @@ export class Tenant implements OnInit {
   isEditMode = signal(false);
   isFormVisible = signal(false); // Default to table view
   currentTenantId = signal<number | null>(null);
-  feedbackMessage = signal<{ type: 'success' | 'error', text: string } | null>(null);
 
   constructor() {
     this.tenantForm = this.fb.group({
@@ -188,7 +189,7 @@ export class Tenant implements OnInit {
     if (confirm('Are you sure you want to delete this tenant?')) {
       this.tenantService.delete(id).subscribe({
         next: () => {
-          this.showFeedback('success', 'Tenant deleted successfully');
+          this.showFeedback('error', 'Tenant deleted successfully');
           this.loadTenants();
         },
         error: (err) => this.showFeedback('error', 'Failed to delete tenant'),
@@ -210,7 +211,6 @@ export class Tenant implements OnInit {
   }
 
   private showFeedback(type: 'success' | 'error', text: string): void {
-    this.feedbackMessage.set({ type, text });
-    setTimeout(() => this.feedbackMessage.set(null), 5000);
+    this.notificationService.show(type, text);
   }
 }

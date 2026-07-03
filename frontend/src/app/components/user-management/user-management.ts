@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth';
 import { TenantService, TenantData } from '../../services/tenant';
+import { NotificationService } from '../../services/notification.service';
 
 interface User {
   id: number;
@@ -14,6 +15,7 @@ interface User {
   role: string;
   is_active?: boolean;
   tenant_id?: number;
+  dob?: string | null;
   tenant?: {
     id: number;
     tenant_name: string;
@@ -44,10 +46,10 @@ export class UserManagement implements OnInit {
   selectedRoleFilter = signal<string>('all');
   selectedTenantFilter = signal<string>('all');
   importing = false;
-  feedbackMessage = signal<{ type: 'success' | 'error'; text: string } | null>(null);
 
   protected authService = inject(AuthService);
   private tenantService = inject(TenantService);
+  private notificationService = inject(NotificationService);
   private fb = inject(FormBuilder);
 
   showAddUserModal = false;
@@ -156,7 +158,6 @@ export class UserManagement implements OnInit {
     formData.append('file', file);
 
     this.importing = true;
-    this.feedbackMessage.set(null);
     this.importedResults.set([]);
     this.importErrors.set([]);
 
@@ -205,7 +206,8 @@ export class UserManagement implements OnInit {
       login: ['', [Validators.required, Validators.minLength(3)]],
       role: [defaultRole, [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      password_confirmation: ['', [Validators.required]]
+      password_confirmation: ['', [Validators.required]],
+      dob: [null]
     }, { validators: this.passwordMatchValidator });
 
     // Handle dynamic validation for name field based on role selection
@@ -270,7 +272,8 @@ export class UserManagement implements OnInit {
     this.editUserForm = this.fb.group({
       name: [user.name, [Validators.required, Validators.minLength(3)]],
       username: [user.username, [Validators.required, Validators.minLength(3)]],
-      password: ['', [Validators.minLength(6)]] // optional for edit
+      password: ['', [Validators.minLength(6)]], // optional for edit
+      dob: [user.dob || null]
     });
   }
 
@@ -334,8 +337,19 @@ export class UserManagement implements OnInit {
     });
   }
 
+  calculateAge(dob: string | null | undefined): string {
+    if (!dob) return '-';
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age >= 0 ? `${age} yrs` : '-';
+  }
+
   private showFeedback(type: 'success' | 'error', text: string): void {
-    this.feedbackMessage.set({ type, text });
-    setTimeout(() => this.feedbackMessage.set(null), 5000);
+    this.notificationService.show(type, text);
   }
 }

@@ -3,6 +3,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { LearningModeService, LearningModeData } from '../../services/learning-mode';
+import { NotificationService } from '../../services/notification.service';
 import {
   McvInputField,
   McvTextArea,
@@ -26,13 +27,13 @@ import {
 export class LearningMode implements OnInit {
   private fb = inject(FormBuilder);
   private learningModeService = inject(LearningModeService);
+  private notificationService = inject(NotificationService);
 
   learningModeForm: FormGroup;
   learningModes = signal<LearningModeData[]>([]);
   isEditMode = signal(false);
   isFormVisible = signal(false);
   currentLearningModeId = signal<number | null>(null);
-  feedbackMessage = signal<{ type: 'success' | 'error', text: string } | null>(null);
 
   constructor() {
     this.learningModeForm = this.fb.group({
@@ -117,7 +118,7 @@ export class LearningMode implements OnInit {
     if (confirm('Are you sure you want to delete this learning mode?')) {
       this.learningModeService.delete(id).subscribe({
         next: () => {
-          this.showFeedback('success', 'Learning mode deleted successfully');
+          this.showFeedback('error', 'Learning mode deleted successfully');
           this.loadLearningModes();
         },
         error: (err) => this.showFeedback('error', 'Failed to delete learning mode'),
@@ -137,7 +138,6 @@ export class LearningMode implements OnInit {
   }
 
   private showFeedback(type: 'success' | 'error', text: string): void {
-    this.feedbackMessage.set({ type, text });
-    setTimeout(() => this.feedbackMessage.set(null), 5000);
+    this.notificationService.show(type, text);
   }
 }
