@@ -6,7 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 export interface LessonStep {
-  type: 'video' | 'pdf' | 'reading' | 'activity' | 'assessment';
+  type: 'video' | 'pdf' | 'reading' | 'activity' | 'assessment' | 'practice';
   title: string;
   data: any;
 }
@@ -378,8 +378,11 @@ export class CoursePlayer implements OnInit, OnDestroy {
 
         if (isJson) {
           const videoBlocks = blocks.filter((b: any) => b.type === 'video' || b.type === 'embed');
-          const readingBlocks = blocks.filter((b: any) => b.type !== 'activity' && b.type !== 'video' && b.type !== 'embed');
+          const pdfBlocks = blocks.filter((b: any) => b.type === 'pdf');
+          const readingBlocks = blocks.filter((b: any) => b.type !== 'activity' && b.type !== 'video' && b.type !== 'embed' && b.type !== 'practice' && b.type !== 'pdf' && b.type !== 'assessment');
+          const practiceBlocks = blocks.filter((b: any) => b.type === 'practice');
           const activityBlocks = blocks.filter((b: any) => b.type === 'activity');
+          const assessmentBlocks = blocks.filter((b: any) => b.type === 'assessment');
 
           if (videoBlocks.length > 0) {
             videoBlocks.forEach((block: any, idx: number) => {
@@ -387,6 +390,16 @@ export class CoursePlayer implements OnInit, OnDestroy {
                 type: 'video',
                 title: (content.title || content.name) + (videoBlocks.length > 1 ? ` - Video ${idx + 1}` : ' - Video'),
                 data: block.data.url || block.data.embed
+              });
+            });
+          }
+
+          if (pdfBlocks.length > 0) {
+            pdfBlocks.forEach((block: any, idx: number) => {
+              steps.push({
+                type: 'pdf',
+                title: (content.title || content.name) + (pdfBlocks.length > 1 ? ` - Document ${idx + 1}` : ' - Document'),
+                data: block.data.url
               });
             });
           }
@@ -412,6 +425,58 @@ export class CoursePlayer implements OnInit, OnDestroy {
               data: { isJson: true, blocks: groupedBlocks }
             });
           }
+
+          if (practiceBlocks.length > 0) {
+            practiceBlocks.forEach((block: any, idx: number) => {
+              steps.push({
+                type: 'practice',
+                title: 'Practice Mode - ' + (block.data?.topic || 'Grammar'),
+                data: block.data
+              });
+            });
+          } else {
+            // AUTO INJECT PRACTICE MODE FOR TAMIL YAAPPU COURSE
+            const courseName = this.courseStructure()?.name?.toLowerCase() || '';
+            const cNameOrig = this.courseStructure()?.name || '';
+            if (courseName.includes('yappu') || cNameOrig.includes('யாப்பு')) {
+              let topic = 'alahidu';
+              let word = 'தமிழ்';
+              const cTitle = (content.title || content.name).toLowerCase();
+              if (cTitle.includes('எழுத்து') || cTitle.includes('eluthu')) { 
+                topic = 'eluthu'; 
+                const words = ['கல்வி', 'அம்மா', 'பள்ளி', 'நூல்', 'தமிழ்', 'இலக்கணம்'];
+                word = words[Math.floor(Math.random() * words.length)]; 
+              }
+              else if (cTitle.includes('அசை') || cTitle.includes('asai')) { 
+                topic = 'asai'; 
+                const words = ['அகழ்வாரைத்', 'தாங்கும்', 'நிலம்போலத்', 'தம்மை', 'இகழ்வார்ப்', 'பொறுத்தல்', 'தலை'];
+                word = words[Math.floor(Math.random() * words.length)]; 
+              }
+              else if (cTitle.includes('சீர்') || cTitle.includes('seer')) { 
+                topic = 'seer'; 
+                const words = ['தேமாங்காய்', 'புளிமாங்காய்', 'கருவிளங்காய்', 'கூவிளங்காய்', 'தேமா', 'புளிமா', 'கருவிளம்', 'கூவிளம்'];
+                word = words[Math.floor(Math.random() * words.length)]; 
+              }
+              else if (cTitle.includes('தளை') || cTitle.includes('thalai')) { 
+                topic = 'thalai'; 
+                word = 'துப்பார்க்குத் துப்பாய'; 
+              }
+              else if (cTitle.includes('அலகிடு') || cTitle.includes('alahidu')) { 
+                topic = 'alahidu'; 
+                word = 'அகழ்வாரைத் தாங்கும் நிலம்போலத் தம்மை'; 
+              }
+
+              // Inject practice step before activity
+              if (readingBlocks.length > 0 || activityBlocks.length > 0) {
+                  steps.push({
+                    type: 'practice',
+                    title: 'Practice Mode - ' + topic,
+                    data: { topic: topic, word: word }
+                  });
+              }
+            }
+          }
+
           if (activityBlocks.length > 0) {
             activityBlocks.forEach((block: any, idx: number) => {
               let actName = 'Unknown';
@@ -423,6 +488,16 @@ export class CoursePlayer implements OnInit, OnDestroy {
               steps.push({
                 type: 'activity',
                 title: `${idx + 1}. Activity - ${actName}`,
+                data: block
+              });
+            });
+          }
+
+          if (assessmentBlocks.length > 0) {
+            assessmentBlocks.forEach((block: any, idx: number) => {
+              steps.push({
+                type: 'assessment',
+                title: 'Final Assessment',
                 data: block
               });
             });
@@ -480,6 +555,8 @@ export class CoursePlayer implements OnInit, OnDestroy {
       }
     } else if (step.type === 'video') {
       this.isStepCompleted.set(this.isVideoCompleted());
+    } else if (step.type === 'practice') {
+      this.isStepCompleted.set(false); // KidsLessonPlayer emits practiceCompleted
     } else {
       this.isStepCompleted.set(false);
     }

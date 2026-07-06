@@ -21,6 +21,7 @@ import { roleGuard } from './guards/role.guard';
 import { guestGuard } from './guards/guest.guard';
 import { AdminUploadComponent } from './components/admin-upload/admin-upload.component';
 import { ActivityBuilder } from './components/activity-builder/activity-builder';
+import { PracticeEngineComponent } from './components/practice-engine/practice-engine.component';
 
 export const routes: Routes = [
   // Public Login route
@@ -157,6 +158,11 @@ export const routes: Routes = [
   { 
     path: 'learn/play/:courseId', 
     component: CoursePlayer, 
+    canActivate: [roleGuard(['student', 'super_admin', 'admin', 'staff'])] 
+  },
+  { 
+    path: 'learn/practice', 
+    component: PracticeEngineComponent, 
     canActivate: [roleGuard(['student', 'super_admin', 'admin', 'staff'])] 
   },
   { 

@@ -1,12 +1,13 @@
 import { Component, input, Output, EventEmitter, OnInit, OnDestroy, signal, effect, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivityRenderer } from '../activity-engine/activity-renderer/activity-renderer';
+import { PracticeEngineComponent } from '../practice-engine/practice-engine.component';
 import { AudioService } from '../../services/audio.service';
 import confetti from 'canvas-confetti';
 import { gsap } from 'gsap';
 
 export interface LessonStep {
-  type: 'video' | 'pdf' | 'reading' | 'activity' | 'assessment';
+  type: 'video' | 'pdf' | 'reading' | 'practice' | 'activity' | 'assessment';
   title: string;
   data: any;
 }
@@ -14,7 +15,7 @@ export interface LessonStep {
 @Component({
   selector: 'app-kids-lesson-player',
   standalone: true,
-  imports: [CommonModule, ActivityRenderer],
+  imports: [CommonModule, ActivityRenderer, PracticeEngineComponent],
   templateUrl: './kids-lesson-player.html',
   styleUrls: ['./kids-lesson-player.css']
 })
@@ -35,6 +36,7 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
   @Output() nextStep = new EventEmitter<void>();
   @Output() prevStep = new EventEmitter<void>();
   @Output() activityAnswered = new EventEmitter<any>();
+  @Output() practiceCompleted = new EventEmitter<void>();
   @Output() continueFeedback = new EventEmitter<void>();
 
   private audioService = inject(AudioService);
@@ -62,7 +64,7 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
         if (!pageData) return '';
 
         const renderBlock = (block: any) => {
-          if (block.type === 'paragraph') return `<div class="opacity-75 mb-4">${block.data.text}</div>`;
+          if (block.type === 'paragraph' || block.type === 'text') return `<div class="opacity-75 mb-4" style="text-align: left;">${block.data.text}</div>`;
           else if (block.type === 'header') return `<h3 class="fw-bold text-primary mb-3" style="font-size: 1.7rem;">${block.data.text}</h3>`;
           else if (block.type === 'list') {
             return `<ul class="mb-4 ps-4 opacity-75 text-start d-inline-block">` + block.data.items.map((i: any) => `<li class="mb-2">${typeof i === 'string' ? i : (i.content || '')}</li>`).join('') + `</ul>`;
@@ -194,6 +196,11 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
 
   onActivityAnswered(event: any) {
     this.activityAnswered.emit(event);
+  }
+
+  onPracticeCompleted() {
+    this.practiceCompleted.emit();
+    this.nextLessonStep(); // Automatically proceed to the next step (Activity)
   }
 
   continueFromFeedback() {

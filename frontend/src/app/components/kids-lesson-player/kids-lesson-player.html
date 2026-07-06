@@ -219,6 +219,18 @@
       </div>
       }
 
+      @if (step.type === 'practice') {
+      <div class="w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-center mx-auto"
+        style="max-width: 1200px; width: 95%;">
+        <!-- We pass the title or topic as practiceType and word as practiceContent -->
+        <app-practice-engine 
+          [practiceType]="step.data?.topic || 'asai'" 
+          [practiceContent]="step.data?.word || 'தமிழ்'"
+          (practiceCompleted)="onPracticeCompleted()" 
+          class="w-100 h-100"></app-practice-engine>
+      </div>
+      }
+
       @if (step.type === 'assessment') {
       <!-- Premium Boss Challenge -->
       <div

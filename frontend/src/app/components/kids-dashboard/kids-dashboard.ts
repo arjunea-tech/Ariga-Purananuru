@@ -86,14 +86,14 @@ export class KidsDashboard implements OnChanges, AfterViewInit {
     gsap.to('.sparkles-container', { x: x * -30, y: y * -30, duration: 1.5, ease: 'power1.out' });
   }
 
-  selectedLevel = computed(() => {
+  selectedLevel() {
     const struct = this.structure;
     const levId = this.activeLevelId;
     if (!struct || !levId) return null;
     return struct.levels.find((l: any) => l.id === levId) || null;
-  });
+  }
 
-  levelChaptersMap = computed(() => {
+  levelChaptersMap() {
     const level = this.selectedLevel();
     const map = new Map<number, { globalNumber: number; globalIndex: number; xOffset: number }>();
     if (!level) return map;
@@ -110,11 +110,11 @@ export class KidsDashboard implements OnChanges, AfterViewInit {
     });
 
     return map;
-  });
+  }
 
   // Dynamically generate the SVG path string connecting the nodes
   // Based on a fixed vertical spacing of 160px between nodes
-  svgPathData = computed(() => {
+  svgPathData() {
     const level = this.selectedLevel();
     if (!level || level.chapters.length === 0) return '';
     
@@ -147,7 +147,7 @@ export class KidsDashboard implements OnChanges, AfterViewInit {
     });
     
     return d;
-  });
+  }
 
   // Mock function to generate 1-3 stars for completed chapters
   getChapterStars(chapterId: number): number {
@@ -161,7 +161,7 @@ export class KidsDashboard implements OnChanges, AfterViewInit {
   }
 
   // Calculate which chapter should be the glowing "active" one (the next to play)
-  currentPlayableChapterId = computed(() => {
+  currentPlayableChapterId() {
     const level = this.selectedLevel();
     if (!level) return null;
     
@@ -171,7 +171,7 @@ export class KidsDashboard implements OnChanges, AfterViewInit {
     
     // If all completed, return the last chapter
     return level.chapters.length > 0 ? level.chapters[level.chapters.length - 1].id : null;
-  });
+  }
 
   isChapterUnlocked(chapterId: number): boolean {
     return true;

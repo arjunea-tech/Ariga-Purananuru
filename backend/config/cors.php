@@ -21,7 +21,7 @@ return [
 
     'allowed_origins' => explode(',', env('ALLOWED_ORIGINS', 'http://localhost:4200,https://ariga-purananuru-frontend.vercel.app')),
 
-    'allowed_origins_patterns' => [],
+    'allowed_origins_patterns' => ['#^http://localhost:\d+$#'],
 
     'allowed_headers' => ['*'],
 
