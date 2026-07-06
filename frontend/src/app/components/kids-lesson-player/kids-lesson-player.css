@@ -1,0 +1,83 @@
+/* ── LESSON PLAYER BACKGROUND ── */
+.lesson-bg-pattern {
+  background-color: #f0fdf4; /* Soft mint/green-ish background */
+  background-image: radial-gradient(#dcfce7 20%, transparent 20%), radial-gradient(#dcfce7 20%, transparent 20%);
+  background-size: 60px 60px;
+  background-position: 0 0, 30px 30px;
+}
+
+/* Overlay & Parchment Content Styles */
+.overlay-view {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.premium-card {
+  background: #FFF9C4 !important; /* Parchment yellow */
+  border: 6px solid #FBC02D !important;
+  border-radius: 24px !important;
+  box-shadow: 0 10px 0 rgba(251, 192, 45, 0.5), 0 25px 50px rgba(0,0,0,0.5) !important;
+  color: #5D4037 !important;
+}
+
+.premium-card::-webkit-scrollbar {
+  width: 12px;
+}
+.premium-card::-webkit-scrollbar-track {
+  background: rgba(251, 192, 45, 0.2);
+  border-radius: 10px;
+}
+.premium-card::-webkit-scrollbar-thumb {
+  background: #FBC02D;
+  border-radius: 10px;
+  border: 3px solid #FFF9C4;
+}
+
+.text-dark {
+  color: #3E2723 !important;
+}
+
+.text-secondary {
+  color: #5D4037 !important;
+}
+
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.hover-lift:hover {
+  transform: translateY(-5px) scale(1.02);
+}
+.hover-lift:active {
+  transform: translateY(2px) scale(0.98);
+}
+
+/* Animations */
+.animate-pop-in {
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes bounceIn {
+  from { opacity: 0; transform: scale(0.5) translateY(100px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface FlashcardData {
@@ -16,7 +16,7 @@ export interface FlashcardData {
   templateUrl: './flashcard.html',
   styleUrls: ['./flashcard.css']
 })
-export class FlashcardComponent {
+export class FlashcardComponent implements OnChanges {
   @Input() activity: FlashcardData | null = null;
   @Input() showFeedback: boolean = true;
 
@@ -29,7 +29,11 @@ export class FlashcardComponent {
   flipCard(): void {
     this.isFlipped.update(v => !v);
   }
-
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['activity']) {
+      this.reset();
+    }
+  }
   speakWord(event: Event): void {
     event.stopPropagation(); // Avoid flipping card
     if (!this.activity || !this.activity.front) return;

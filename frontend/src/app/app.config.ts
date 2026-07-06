@@ -6,11 +6,13 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { routes } from './app.routes';
 import { authInterceptor } from './interceptors/auth.interceptor';
+import { loaderInterceptor } from './services/loader.interceptor';
+import { provideLottieOptions } from 'ngx-lottie';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([authInterceptor, loaderInterceptor])),
     provideRouter(routes),
     provideTranslateService({
       fallbackLang: 'en'
@@ -18,6 +20,9 @@ export const appConfig: ApplicationConfig = {
     provideTranslateHttpLoader({
       prefix: './i18n/',
       suffix: '.json'
+    }),
+    provideLottieOptions({
+      player: () => import('lottie-web')
     })
   ]
 };

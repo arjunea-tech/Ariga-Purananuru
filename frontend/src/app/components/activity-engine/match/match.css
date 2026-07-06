@@ -225,7 +225,7 @@
    MATCHES MADE FEEDBACK (BOTTOM SECTION)
    ========================================================================== */
 .matched-pairs-section {
-  background: #ffffff;
+  background: transparent;
 }
 
 .matched-pair-card {

@@ -1,8 +1,6 @@
-    <div class="mb-4 glass-card">
-      <div class="mb-4">
-        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-          <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-2 text-uppercase fw-bold" style="letter-spacing: 0.05em; font-size: 0.75rem;">Fill in the Blanks</span>
-          
+    <div class="w-100 d-flex flex-column align-items-center justify-content-center text-center pb-4 pt-2">
+      <div class="mb-4 text-center">
+        <div class="d-flex align-items-center justify-content-center mb-3 flex-wrap gap-2">
           @if (activity?.audioUrl) {
             <button type="button" 
                     class="btn btn-warning d-flex align-items-center gap-2 rounded-pill px-4 py-2 border-0 shadow-sm text-dark font-semibold"
@@ -27,7 +25,7 @@
         }
       </div>
 
-      <div style="line-height: 2.2; font-size: 1.15rem; color: #1e293b; margin-bottom: 1.5rem; font-weight: 500;">
+      <div class="text-center" style="line-height: 2.2; font-size: 1.5rem; color: #1e293b; margin-bottom: 2rem; font-weight: 600; text-shadow: 1px 1px 0 rgba(255,255,255,0.7);">
         @for (segment of segments; track $index) {
           @if (segment.type === 'text') {
             <span style="white-space: pre-wrap;">{{ segment.value }}</span>
@@ -96,10 +94,10 @@
       @if (showFeedback && !hasSubmitted()) {
         <button 
           type="button" 
-          class="btn-check-answers" 
+          class="btn-action check-btn border-0 py-3 px-5 rounded-pill fw-bold text-white d-inline-flex align-items-center gap-2 mt-2 shadow"
           [disabled]="!isAnyAnswered()"
           (click)="checkAnswers()">
-          Check Answers
+          <i class="bi bi-shield-check"></i> Check Answers
         </button>
       }
 

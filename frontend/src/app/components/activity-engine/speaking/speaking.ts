@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface SpeakingData {
@@ -16,7 +16,7 @@ export interface SpeakingData {
   templateUrl: './speaking.html',
   styleUrls: ['./speaking.css']
 })
-export class SpeakingComponent implements OnDestroy {
+export class SpeakingComponent implements OnDestroy, OnChanges {
   @Input() activity: SpeakingData | null = null;
   @Input() showFeedback: boolean = true;
 
@@ -28,6 +28,12 @@ export class SpeakingComponent implements OnDestroy {
   isPlaying = signal<boolean>(false);
   matchScore = signal<number | null>(null);
   hasSubmitted = signal<boolean>(false);
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['activity']) {
+      this.reset();
+    }
+  }
 
   constructor() {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -90,14 +96,14 @@ export class SpeakingComponent implements OnDestroy {
 
   playSample(): void {
     if (!this.activity?.targetText) return;
-    
+
     window.speechSynthesis.cancel();
     const utter = new SpeechSynthesisUtterance(this.activity.targetText);
     utter.lang = 'en-US';
-    
+
     utter.onend = () => this.isPlaying.set(false);
     utter.onerror = () => this.isPlaying.set(false);
-    
+
     this.isPlaying.set(true);
     window.speechSynthesis.speak(utter);
   }
@@ -107,9 +113,9 @@ export class SpeakingComponent implements OnDestroy {
       this.matchScore.set(100);
       return;
     }
-    const cleanSpoken = spoken.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
-    const cleanTarget = this.activity.targetText.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g,"");
-    
+    const cleanSpoken = spoken.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
+    const cleanTarget = this.activity.targetText.trim().toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?]/g, "");
+
     if (cleanSpoken === cleanTarget) {
       this.matchScore.set(100);
       return;
@@ -118,7 +124,7 @@ export class SpeakingComponent implements OnDestroy {
     // Word-level matching
     const spokenWords = cleanSpoken.split(/\s+/);
     const targetWords = cleanTarget.split(/\s+/);
-    
+
     let matches = 0;
     targetWords.forEach(w => {
       if (spokenWords.includes(w)) {
@@ -133,7 +139,7 @@ export class SpeakingComponent implements OnDestroy {
   submitAnswer(): void {
     if (this.hasSubmitted()) return;
     this.hasSubmitted.set(true);
-    
+
     this.answered.emit({
       isCorrect: (this.matchScore() ?? 0) >= 60,
       score: this.matchScore(),
@@ -158,7 +164,7 @@ export class SpeakingComponent implements OnDestroy {
       this.recognition.onresult = null;
       try {
         this.recognition.stop();
-      } catch (e) {}
+      } catch (e) { }
     }
   }
 }

@@ -1,25 +1,14 @@
+import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ActivatedRoute, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import confetti from 'canvas-confetti';
-import { AudioService } from '../../services/audio.service';
-import { NotificationService } from '../../services/notification.service';
-import { KidsDashboard } from '../kids-dashboard/kids-dashboard';
+import { ActivatedRoute } from '@angular/router';
+import { forkJoin } from 'rxjs';
 
-interface Content {
-  id: number;
-  name: string;
-  title?: string;
-  text_content?: string;
-  attachments?: any[];
-  external_url?: any[];
-  assessments?: any[];
-  sort_order?: number;
-  is_active?: boolean;
+export interface LessonStep {
+  type: 'video' | 'pdf' | 'reading' | 'activity' | 'assessment';
+  title: string;
+  data: any;
 }
 
 interface Chapter {
@@ -44,550 +33,123 @@ interface CourseStructure {
   levels: Level[];
 }
 
-interface AiQuizQuestion {
-  question: string;
-  options: { text: string; isCorrect: boolean }[];
-  explanation: string;
-}
-
-import type { McvDatatreeNode } from 'mcv-ui-toolkit';
-import { RouterModule } from '@angular/router';
-import { AssessmentPlayerComponent } from '../activity-engine/assessment-player/assessment-player';
+import { RouterModule, Router } from '@angular/router';
 import { ActivityRenderer } from '../activity-engine/activity-renderer/activity-renderer';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { CourseService } from '../../services/course';
+import { KidsDashboard } from '../kids-dashboard/kids-dashboard';
+import { StudentDashboard } from '../student-dashboard/student-dashboard';
+import { KidsLessonPlayer } from '../kids-lesson-player/kids-lesson-player';
+import confetti from 'canvas-confetti';
+import { gsap } from 'gsap';
+import { AudioService } from '../../services/audio.service';
 import { AuthService } from '../../services/auth';
-import { AiTutorChatComponent } from '../ai-tutor-chat/ai-tutor-chat.component';
+
+interface Content {
+  id: number;
+  name: string;
+  title?: string;
+  text_content?: string;
+  attachments?: any[];
+  external_url?: any[];
+  assessments?: any[];
+  sort_order?: number;
+  is_active?: boolean;
+}
 
 @Component({
   selector: 'app-course-player',
   standalone: true,
-  imports: [CommonModule, RouterModule, AssessmentPlayerComponent, ActivityRenderer, TranslateModule, FormsModule, AiTutorChatComponent, KidsDashboard],
+  imports: [CommonModule, RouterModule, KidsDashboard, StudentDashboard, KidsLessonPlayer],
   templateUrl: './course-player.html',
   styleUrls: ['./course-player.css']
 })
 export class CoursePlayer implements OnInit, OnDestroy {
-  environment = environment;
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  protected authService = inject(AuthService);
-  private translate = inject(TranslateService);
-  private sanitizer = inject(DomSanitizer);
+  private courseService = inject(CourseService);
   private audioService = inject(AudioService);
-  private notificationService = inject(NotificationService);
-
-  uiTheme = signal<'classic' | 'adventure'>('classic');
-  kidsCurrentView = signal<string>('levels');
-  kidsActiveLevelId = signal<number | null>(null);
-
-  // Gamification stats
-  hearts = signal<number>(5);
-  coins = signal<number>(85);
-  xp = signal<number>(1250);
-  showGameOver = signal<boolean>(false);
-  activityFeedbackState = signal<'correct' | 'incorrect' | null>(null);
-
-  // Typewriter & Speech properties
-  typedContent = signal<string>('');
-  private typingTimeout: any;
-  private activeUtterances: SpeechSynthesisUtterance[] = [];
-  private speechStartTimeout: any;
-
-  // Mascot warning properties
-  showMascotWarning = signal<boolean>(false);
-  mascotWarning = signal<string>('');
-
-  currentLang = signal('en');
+  private authService = inject(AuthService);
 
   courseId = signal<number | null>(null);
   userId = signal<number>(1);
 
   courseStructure = signal<CourseStructure | null>(null);
-  treeData = signal<McvDatatreeNode[]>([]);
   activeContentId = signal<number | null>(null);
   fullContent = signal<Content | null>(null);
-
-  // Learning navigation steps
-  activeStep = signal<'lesson' | 'activity' | 'ai' | 'assessment'>('lesson');
+  isFullscreen = signal(false);
+  currentView = signal<'levels' | 'map' | 'content' | 'activity'>('levels');
+  theme = signal<'kids' | 'student'>('kids'); // New theme signal
   currentActivityIndex = signal<number>(0);
+  activeLevelId = signal<number | null>(null);
+  activeChapterId = signal<number | null>(null);
 
-  lessonBlocks = computed(() => {
-    return this.parsedBlocks().filter((b: any) => b.type !== 'activity');
-  });
+  completedLevelIds = signal<number[]>([]);
+  completedChapterIds = signal<number[]>([]);
 
-  activityBlocks = computed(() => {
-    return this.parsedBlocks().filter((b: any) => b.type === 'activity');
-  });
+  lessonSequence = signal<LessonStep[]>([]);
+  currentStepIndex = signal<number>(0);
+  learningMode = signal<'strict' | 'easy'>('easy'); // Strict mode prevents skipping activities
+  isStepCompleted = signal<boolean>(false);
+  isVideoCompleted = signal<boolean>(false);
+  lessonFinished = signal<boolean>(false);
 
-  // Student dashboard signals
-  stats = signal<any>(null);
-  courses = signal<any[]>([]);
-  isProfileDropdownOpen = signal<boolean>(false);
-  showTreeInline = signal<boolean>(true);
-  selectedChapterId = signal<number | null>(null);
+  hearts = signal<number>(5);
+  coins = signal<number>(85);
+  xp = signal<number>(1250);
+  showGameOver = signal<boolean>(false);
+  showCorrectSplash = signal<boolean>(false);
+  showIncorrectSplash = signal<boolean>(false);
+  activityFeedbackState = signal<'correct' | 'incorrect' | null>(null);
 
-  // Achievements for the achievements screen
-  achievements = signal<any[]>([]);
+  constructor() {}
 
-  // Sidebar collapse state
-  isSidebarCollapsed = signal<boolean>(false);
-  isCourseNavCollapsed = signal<boolean>(false);
+  mascotWarning = signal<string | null>(null);
+  showMascotWarning = signal<boolean>(false);
 
-  // Selected language (default from admin settings or localStorage)
-  selectedLang = signal<string>(localStorage.getItem('lang') || 'en');
-  allowedLearningModes = signal<any[]>([]);
-  tenantBranding = signal<any>(null);
-
-  currentScreen = signal<'dashboard' | 'courses' | 'achievements' | 'progress' | 'settings' | 'continue'>('dashboard');
-
-  // Interactive activities state
-  currentActivityQuestionIndex = signal<number>(0);
-  selectedOptionIndex = signal<number | null>(null);
-  isAnswered = signal<boolean>(false);
-  activityAnswers = signal<{ [key: number]: number }>({});
-  activityScore = signal<{ score: number, total: number } | null>(null);
-
-  // Flashcards state
-  currentFlashcardIndex = signal<number>(0);
-  isFlipped = signal<boolean>(false);
-
-  // Match the following state
-  selectedMatchTerm = signal<string | null>(null);
-  selectedMatchDef = signal<string | null>(null);
-  matchedPairs = signal<string[]>([]);
-  matchError = signal<boolean>(false);
-
-  // Assessment state
-  selectedAssessmentId = signal<number | null>(null);
-
-  // Course list search/filter
-  searchQuery = signal<string>('');
-  selectedCategory = signal<string>('All');
-
-  /** Switch UI language */
-  updateLanguage(lang: string): void {
-    this.selectedLang.set(lang);
-    this.translate.use(lang);
-    localStorage.setItem('lang', lang);
-    this.currentLang.set(lang);
+  triggerMascotWarning(message: string) {
+    this.mascotWarning.set(message);
+    this.showMascotWarning.set(true);
+    setTimeout(() => {
+      this.showMascotWarning.set(false);
+    }, 3000);
   }
 
-  loadAllowedLearningModes(): void {
-    const token = this.authService.getToken();
-    const headers = { 'Authorization': `Bearer ${token || ''}` };
-    this.http.get<any[]>(`${environment.apiUrl}/learning-modes`, { headers }).subscribe({
-      next: (modes) => {
-        this.allowedLearningModes.set(modes);
-        
-        if (modes.length > 0) {
-          const isCurrentAllowed = modes.some(m => {
-            const code = m.code.toLowerCase();
-            return (code === 'tamil' && this.selectedLang() === 'ta') ||
-                   (code === 'english' && this.selectedLang() === 'en');
-          });
-
-          if (!isCurrentAllowed) {
-            const firstMode = modes[0].code.toLowerCase();
-            if (firstMode === 'tamil') {
-              this.updateLanguage('ta');
-            } else if (firstMode === 'english') {
-              this.updateLanguage('en');
-            }
-          }
-        }
-      },
-      error: (err) => {
-        console.error('Failed to load allowed learning modes', err);
-      }
-    });
-  }
-
-  toggleLanguageCollapsed(): void {
-    const modes = this.allowedLearningModes();
-    if (modes.length < 2) return;
-
-    const targetLang = this.selectedLang() === 'en' ? 'ta' : 'en';
-    this.updateLanguage(targetLang);
-  }
-
-  toggleSidebar(): void {
-    this.isSidebarCollapsed.set(!this.isSidebarCollapsed());
-  }
-
-  toggleCourseNav(): void {
-    this.isCourseNavCollapsed.set(!this.isCourseNavCollapsed());
-  }
-
-  getCourseCategory(course: any): string {
-    const name = course.name || '';
-    if (name.includes('Tamil') || name.includes('Purananuru') || name.includes('Kural') || name.includes('தமிழ்') || name.includes('யாப்பு')) {
-      return 'Language & Literature';
-    }
-    return 'LMS Course';
-  }
-
-  getAgeFromDob(dob: string | null | undefined): number | null {
-    if (!dob) return null;
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age >= 0 ? age : null;
-  }
-
-  courseCategories = computed(() => {
-    const cats = new Set<string>();
-    cats.add('All');
-    for (const c of this.courses()) {
-      cats.add(this.getCourseCategory(c));
-    }
-    return Array.from(cats);
-  });
-
-  filteredCourses = computed(() => {
-    let list = this.courses();
-    const query = this.searchQuery().toLowerCase().trim();
-    const cat = this.selectedCategory();
-    
-    if (query) {
-      list = list.filter(c => 
-        (c.name && c.name.toLowerCase().includes(query)) ||
-        (c.description && c.description.toLowerCase().includes(query))
-      );
-    }
-    
-    if (cat !== 'All') {
-      list = list.filter(c => this.getCourseCategory(c) === cat);
-    }
-    
-    return list;
-  });
-
-  // Settings form bindings
-  settingsName = signal<string>('');
-  settingsEmail = signal<string>('');
-
-  // Dynamic activities signals
-  activeTopicActivities = signal<any | null>(null);
-  isLoadingActivities = signal<boolean>(false);
-  shuffledDefinitions = signal<string[]>([]);
-
-  // AI Tutor signals
-  isChatOpen = signal<boolean>(false);
-
-  // AI Quiz signals
-  isGeneratingQuiz = signal<boolean>(false);
-  aiQuizData = signal<AiQuizQuestion[]>([]);
-  aiQuizAnswers = signal<{ [key: number]: number }>({}); // Maps question index to selected option index
-  aiQuizScore = signal<{ score: number, total: number } | null>(null);
-
-  videoUrl = computed(() => {
-    const content = this.activeContent();
-    if (!content || !content.external_url) return null;
-
-    // Find the first URL that is either a video or a YouTube URL
-    for (const url of content.external_url) {
-      if (typeof url === 'string') {
-        let cleanedUrl = url.replace(/\\/g, '/'); // replace backslashes with forward slashes
-
-        // Check if it's a local absolute path
-        const publicIndex = cleanedUrl.indexOf('/public/');
-        if (publicIndex !== -1) {
-          cleanedUrl = cleanedUrl.substring(publicIndex + 8); // remove "/public/" prefix
-        } else if (cleanedUrl.includes('public/assets/')) {
-          cleanedUrl = cleanedUrl.substring(cleanedUrl.indexOf('public/') + 7); // remove "public/" prefix
-        } else if (/^[A-Za-z]:\//.test(cleanedUrl)) { // e.g. D:/... or C:/...
-          const assetsIndex = cleanedUrl.indexOf('/assets/');
-          if (assetsIndex !== -1) {
-            cleanedUrl = cleanedUrl.substring(assetsIndex + 1); // e.g. "assets/videos/..."
-          }
-        }
-
-        const lowerUrl = cleanedUrl.toLowerCase();
-        if (
-          lowerUrl.endsWith('.mp4') ||
-          lowerUrl.endsWith('.webm') ||
-          lowerUrl.endsWith('.ogg') ||
-          lowerUrl.includes('youtube.com') ||
-          lowerUrl.includes('youtu.be')
-        ) {
-          // Add leading slash for correct routing resolving if it is local asset and doesn't have one
-          if (!cleanedUrl.startsWith('http') && !cleanedUrl.startsWith('/')) {
-            cleanedUrl = '/' + cleanedUrl;
-          }
-          return cleanedUrl;
-        }
-      }
-    }
-    return null;
-  });
-
-  isVideoLocal = computed(() => {
-    const url = this.videoUrl();
-    if (!url) return false;
-    const lowerUrl = url.toLowerCase();
-    return lowerUrl.includes('/assets/videos/');
-  });
-
-  youtubeEmbedUrl = computed(() => {
-    const url = this.videoUrl();
-    if (!url) return null;
-    let videoId = '';
-    if (url.includes('youtube.com/watch')) {
-      const parts = url.split('v=');
-      if (parts.length > 1) {
-        videoId = parts[1].split('&')[0];
-      }
-    } else if (url.includes('youtu.be/')) {
-      const parts = url.split('youtu.be/');
-      if (parts.length > 1) {
-        videoId = parts[1].split('?')[0];
-      }
-    } else if (url.includes('youtube.com/embed/')) {
-      const parts = url.split('youtube.com/embed/');
-      if (parts.length > 1) {
-        videoId = parts[1].split('?')[0];
-      }
-    }
-    if (videoId) {
-      return this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.youtube.com/embed/${videoId}`);
-    }
-    return null;
-  });
-
-  activeChapterId = computed(() => {
-    const contentId = this.activeContentId();
+  selectedLevel = computed(() => {
     const structure = this.courseStructure();
-    if (!contentId || !structure) return null;
-    for (const level of structure.levels) {
-      for (const chapter of level.chapters) {
-        if (chapter.contents.some(c => c.id === contentId)) {
-          return chapter.id;
-        }
-      }
-    }
-    return null;
-  });
-
-  isChapterCompleted = computed(() => {
-    const chapterId = this.activeChapterId() || this.selectedChapterId();
-    const completedIds = this.stats()?.completed_chapter_ids;
-    if (!chapterId || !completedIds) return false;
-    return completedIds.includes(chapterId);
+    const levId = this.activeLevelId();
+    if (!structure || !levId) return null;
+    return structure.levels.find(l => l.id === levId) || null;
   });
 
   selectedChapter = computed(() => {
-    const chapterId = this.selectedChapterId();
-    const structure = this.courseStructure();
-    if (!chapterId || !structure) return null;
-
-    for (const level of structure.levels) {
-      const chapter = level.chapters.find(c => c.id === chapterId);
-      if (chapter) return chapter;
-    }
-    return null;
+    const level = this.selectedLevel();
+    const chapId = this.activeChapterId();
+    if (!level || !chapId) return null;
+    return level.chapters.find(c => c.id === chapId) || null;
   });
 
-  selectedChapterCompleted = computed(() => {
-    const id = this.selectedChapterId();
-    const completedIds = this.stats()?.completed_chapter_ids || [];
-    return id !== null && completedIds.includes(id);
-  });
-
-  courseProgress = computed(() => {
-    const structure = this.courseStructure();
-    const completedIds = this.stats()?.completed_chapter_ids || [];
-    if (!structure) return { completed: 0, total: 0, percentage: 0 };
-
-    let total = 0;
-    let completed = 0;
-
-    structure.levels.forEach(level => {
-      level.chapters.forEach(chapter => {
-        total++;
-        if (completedIds.includes(chapter.id)) {
-          completed++;
-        }
-      });
-    });
-
-    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
-    return { completed, total, percentage };
-  });
-
-  totalAssessments = computed(() => {
-    const structure = this.courseStructure();
-    if (!structure) return 0;
-    let count = 0;
-    structure.levels.forEach(level => {
-      level.chapters.forEach(chapter => {
-        if (chapter.assessments && chapter.assessments.length > 0) {
-          count += chapter.assessments.length;
-        }
-      });
-    });
-    return count;
-  });
-
-  getUnlockedBadgesCount(): number {
-    const badges = this.stats()?.badges || [];
-    return badges.filter((b: any) => b.unlocked).length;
-  }
-
-  radarPolygonPoints = computed(() => {
-    const mastery = this.stats()?.skill_mastery || {
-      sangam_literature: 0,
-      ancient_ethics: 0,
-      tamil_culture: 0,
-      historic_wisdom: 0,
-      heroic_poetry: 0,
-      social_conduct: 0
-    };
-
-    const s1 = (mastery.sangam_literature || 0) / 100 * 40;
-    const s2 = (mastery.ancient_ethics || 0) / 100 * 40;
-    const s3 = (mastery.tamil_culture || 0) / 100 * 40;
-    const s4 = (mastery.historic_wisdom || 0) / 100 * 40;
-    const s5 = (mastery.heroic_poetry || 0) / 100 * 40;
-    const s6 = (mastery.social_conduct || 0) / 100 * 40;
-
-    const p1 = `50,${50 - s1}`;
-    const p2 = `${50 + 0.866 * s2},${50 - 0.5 * s2}`;
-    const p3 = `${50 + 0.866 * s3},${50 + 0.5 * s3}`;
-    const p4 = `50,${50 + s4}`;
-    const p5 = `${50 - 0.866 * s5},${50 + 0.5 * s5}`;
-    const p6 = `${50 - 0.866 * s6},${50 - 0.5 * s6}`;
-
-    return `${p1} ${p2} ${p3} ${p4} ${p5} ${p6}`;
-  });
-
-  xpLevelInfo = computed(() => {
-    const xp = this.stats()?.xp_points || 0;
-    const level = Math.floor(xp / 500) + 1;
-    const currentLevelXp = xp % 500;
-    const requiredXp = 500;
-    const percentage = Math.min(100, Math.round((currentLevelXp / requiredXp) * 100));
-    
-    let rank = 'NOVICE';
-    if (level >= 8) rank = 'GRAND MASTER';
-    else if (level >= 5) rank = 'EXPERT';
-    else if (level >= 3) rank = 'SCHOLAR';
-
-    return {
-      level,
-      currentLevelXp,
-      requiredXp,
-      percentage,
-      rank,
-      xp
-    };
-  });
-
-  monthlyActivityPath = computed(() => {
-    const activity = this.stats()?.monthly_activity || [
-      { month: 'Jan', hours: 0 },
-      { month: 'Feb', hours: 0 },
-      { month: 'Mar', hours: 0 },
-      { month: 'Apr', hours: 0 },
-      { month: 'May', hours: 0 },
-      { month: 'Jun', hours: 0 }
-    ];
-
-    const points = activity.map((item: any, idx: number) => {
-      const x = idx * 20;
-      const y = 25 - ((item.hours || 0) / 40) * 20;
-      return { x, y, month: item.month, hours: item.hours };
-    });
-
-    const linePath = points.map((p: any, idx: number) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-    const fillPath = `${linePath} L 100 25 L 0 25 Z`;
-
-    return {
-      linePath,
-      fillPath,
-      points
-    };
-  });
-
-  streakCalendarDays = computed(() => {
-    const streak = this.stats()?.study_streak || 0;
-    const daysCount = 30;
-    const cells = [];
-    
-    for (let i = 1; i <= daysCount; i++) {
-      let level = 0;
-      if (i > daysCount - streak) {
-        level = 3;
-      } else {
-        level = (i * 7) % 5 === 0 ? 1 : ((i * 3) % 7 === 0 ? 2 : 0);
-      }
-      cells.push({ day: i, level });
-    }
-    return cells;
-  });
-
-  flatChapters = computed(() => {
-    const struct = this.courseStructure();
-    if (!struct) return [];
-    
-    const list: Chapter[] = [];
-    if (struct.levels) {
-      for (const level of struct.levels) {
-        if (level.chapters) {
-          for (const chapter of level.chapters) {
-            list.push(chapter);
-          }
-        }
-      }
-    }
-    return list;
-  });
-
-  isTopicCompleted(chapterId: number, topicId: number): boolean {
-    const completedIds = this.stats()?.completed_chapter_ids || [];
-    if (completedIds.includes(chapterId)) {
-      return true;
-    }
-    
-    const chapter = this.flatChapters().find(c => c.id === chapterId);
-    if (chapter) {
-      const activeId = this.activeContentId();
-      const activeIndex = chapter.contents.findIndex(c => c.id === activeId);
-      const topicIndex = chapter.contents.findIndex(c => c.id === topicId);
-      
-      if (activeIndex !== -1 && topicIndex !== -1 && topicIndex < activeIndex) {
-        return true;
-      }
-    }
-    
-    return false;
-  }
-
-  // Computed values
   activeContent = computed(() => {
     const id = this.activeContentId();
     const full = this.fullContent();
 
     if (!id || !this.courseStructure()) return null;
 
-    // If we have full content and its ID matches the active ID, return it
     if (full && full.id === id) {
-      // Find chapter assessments to append
       for (const level of this.courseStructure()!.levels) {
         for (const chapter of level.chapters) {
           const topic = chapter.contents.find(c => c.id === id);
           if (topic) {
-            return { ...full, assessments: chapter.assessments };
+            const contentAssessments = full.assessments || [];
+            const chapterAssessments = chapter.assessments || [];
+            const allAssessments = [...contentAssessments, ...chapterAssessments];
+            return { ...full, assessments: allAssessments };
           }
         }
       }
       return full;
     }
 
-    // Fallback to sidebar structure (titles only) while loading
     for (const level of this.courseStructure()!.levels) {
       for (const chapter of level.chapters) {
         const content = chapter.contents.find(c => c.id === id);
@@ -599,717 +161,360 @@ export class CoursePlayer implements OnInit, OnDestroy {
     return null;
   });
 
-  isJsonContent = computed(() => {
-    const content = this.activeContent();
-    if (!content || !content.text_content) return false;
-    const trimmed = content.text_content.trim();
-    return trimmed.startsWith('{') && trimmed.endsWith('}');
-  });
 
-  parsedBlocks = computed(() => {
-    const content = this.activeContent();
-    if (!content || !content.text_content) return [];
-    try {
-      const data = JSON.parse(content.text_content);
-      return data.blocks || [];
-    } catch (e) {
-      console.warn('Failed to parse text_content as JSON blocks, rendering as HTML instead.');
-      return [];
+  currentStep = computed(() => {
+    const seq = this.lessonSequence();
+    const idx = this.currentStepIndex();
+    if (seq.length > 0 && idx >= 0 && idx < seq.length) {
+      return seq[idx];
     }
+    return null;
   });
 
   ngOnInit(): void {
-    const savedLang = localStorage.getItem('lang') || 'en';
-    this.translate.setDefaultLang('en');
-    this.translate.use(savedLang);
-    this.selectedLang.set(savedLang);
-    this.currentLang.set(savedLang);
-    this.loadAllowedLearningModes();
-
-    // Fetch and apply branding based on user's active tenant
-    const user = this.authService.getUser();
-    const tenantCode = this.authService.getTenantCode();
-    if (user && user.tenant_id && tenantCode) {
-      this.http.get<any>(`${environment.apiUrl}/tenants/brand/${tenantCode}`).subscribe({
-        next: (brand) => {
-          this.tenantBranding.set(brand);
-          const root = document.documentElement;
-          if (brand.primary_color) {
-            root.style.setProperty('--primary-color', brand.primary_color);
-          }
-          if (brand.secondary_color) {
-            root.style.setProperty('--secondary-color', brand.secondary_color);
-          }
-          localStorage.setItem('tenant_branding', JSON.stringify(brand));
-        },
-        error: () => {
-          // Fallback to local storage if API call fails
-          const savedBranding = localStorage.getItem('tenant_branding');
-          if (savedBranding) {
-            try {
-              this.tenantBranding.set(JSON.parse(savedBranding));
-            } catch (e) {
-              console.error('Failed to parse saved branding', e);
-            }
-          }
-        }
-      });
-    } else {
-      // Clear branding if no tenant (e.g. super admin)
-      this.tenantBranding.set(null);
-      localStorage.removeItem('tenant_branding');
-      const root = document.documentElement;
-      root.style.removeProperty('--primary-color');
-      root.style.removeProperty('--secondary-color');
-    }
-
-    if (user) {
-      this.settingsName.set(user.name);
-      this.settingsEmail.set(user.email || '');
-
-      const roleLower = (user.role || '').toLowerCase();
-      const usernameLower = (user.username || '').toLowerCase();
-      const nameLower = (user.name || '').toLowerCase();
-      const calculatedAge = this.getAgeFromDob(user.dob);
-      
-      if (calculatedAge !== null) {
-        if (calculatedAge <= 15) {
-          this.uiTheme.set('adventure');
-        } else {
-          this.uiTheme.set('classic');
-        }
-      } else if (roleLower === 'student_kids' || usernameLower.includes('kid') || usernameLower.includes('primary') || nameLower.includes('kid') || nameLower.includes('primary')) {
-        this.uiTheme.set('adventure');
-      } else {
-        this.uiTheme.set('classic');
-      }
-    }
-    this.route.url.subscribe(() => {
-      const segments = this.route.snapshot.url;
-      const pathSegments = segments.map(s => s.path);
-      
-      if (pathSegments.includes('dashboard')) {
-        this.courseId.set(null);
-        this.currentScreen.set('dashboard');
-        this.loadStudentDashboardData(true);
-      } else if (pathSegments.includes('courses')) {
-        this.courseId.set(null);
-        this.currentScreen.set('courses');
-        this.loadStudentDashboardData(true);
-      } else if (pathSegments.includes('achievements')) {
-        this.courseId.set(null);
-        this.currentScreen.set('achievements');
-        this.loadStudentDashboardData(true);
-      } else if (pathSegments.includes('progress')) {
-        this.courseId.set(null);
-        this.currentScreen.set('progress');
-        this.loadStudentDashboardData(true);
-      } else if (pathSegments.includes('settings')) {
-        this.courseId.set(null);
-        this.currentScreen.set('settings');
-        this.loadStudentDashboardData(true);
-      } else if (pathSegments.includes('play')) {
-        const id = this.route.snapshot.paramMap.get('courseId');
-        if (id) {
-          this.courseId.set(+id);
-          this.loadStructure();
-        }
-      } else {
-        const id = this.route.snapshot.paramMap.get('courseId');
-        if (id) {
-          this.courseId.set(+id);
-          this.loadStructure();
-        } else {
-          this.courseId.set(null);
-          this.currentScreen.set('dashboard');
-          this.loadStudentDashboardData(false);
-        }
-      }
-    });
-  }
-
-  logout() {
-    this.authService.logout().subscribe({
-      complete: () => {
-        localStorage.removeItem('tenant_branding');
-        const root = document.documentElement;
-        root.style.removeProperty('--primary-color');
-        root.style.removeProperty('--secondary-color');
-        window.location.href = '/login';
-      },
-      error: () => {
-        this.authService.clearSession();
-        localStorage.removeItem('tenant_branding');
-        const root = document.documentElement;
-        root.style.removeProperty('--primary-color');
-        root.style.removeProperty('--secondary-color');
-        window.location.href = '/login';
-      }
-    });
-  }
-
-  checkQueryParams(): void {
-    this.route.queryParams.subscribe(params => {
-      if (params['id']) {
-        this.courseId.set(+params['id']);
+    this.route.params.subscribe(params => {
+      const cid = params['courseId'] ? +params['courseId'] : null;
+      if (cid && cid !== this.courseId()) {
+        this.courseId.set(cid);
         this.loadStructure();
-      } else {
-        this.courseId.set(null);
-        this.loadStudentDashboardData(false);
+      }
+    });
+
+    this.route.queryParams.subscribe(params => {
+      const qid = params['id'] ? +params['id'] : null;
+      if (qid && qid !== this.courseId()) {
+        this.courseId.set(qid);
+        this.loadStructure();
       }
     });
   }
-
-  loadStudentDashboardData(skipAutoSelect = false): void {
-    this.http.get<any>(`${environment.apiUrl}/student/dashboard`).subscribe({
-      next: (res) => this.stats.set(res),
-      error: (err) => console.error('Failed to load student dashboard stats', err)
-    });
-
-    this.http.get<any[]>(`${environment.apiUrl}/courses`).subscribe({
-      next: (res) => {
-        this.courses.set(res);
-      
-      // Load achievements if we are on the achievements screen
-      if (this.currentScreen() === 'achievements') {
-        this.http.get<any[]>(`${environment.apiUrl}/student/achievements`)
-          .subscribe({
-            next: (list) => this.achievements.set(list),
-            error: (err) => console.error('Failed to load achievements', err)
-          });
-      }
-    },
-      error: (err) => console.error('Failed to load courses list', err)
-    });
-  }
-
-  selectCourse(id: number): void {
-    this.router.navigate(['/learn/play', id]);
-  }
-
-  markChapterCompleted(): void {
-    const chapterId = this.activeChapterId();
-    if (!chapterId) return;
-
-    this.http.post<any>(`${environment.apiUrl}/chapters/${chapterId}/complete`, {}).subscribe({
-      next: () => {
-        this.loadStudentDashboardData(true);
-      },
-      error: (err) => console.error('Failed to mark chapter as completed:', err)
-    });
-  }
-
-
 
   loadStructure(): void {
     if (!this.courseId()) return;
 
-    const url = `${environment.apiUrl}/courses/${this.courseId()}/player-structure`;
-    this.http.get<CourseStructure>(url).subscribe({
-      next: (structure) => {
-        // Initialize expansion states
-        structure.levels.forEach((l) => {
-          l.is_expanded = true;
-          l.chapters.forEach((c, index) => {
-            const hasActiveTopic = this.activeContentId() && c.contents.some(t => t.id === this.activeContentId());
-            c.is_expanded = index === 0 || !!hasActiveTopic;
-          });
-        });
-        this.courseStructure.set(structure);
-        
-        // Age-based or course-based theme selection:
-        const user = this.authService.getUser();
-        let themeSet = false;
-        if (user) {
-          const calculatedAge = this.getAgeFromDob(user.dob);
-          if (calculatedAge !== null) {
-            if (calculatedAge <= 15) {
-              this.uiTheme.set('adventure');
-            } else {
-              this.uiTheme.set('classic');
-            }
-            themeSet = true;
-          } else {
-            const roleLower = (user.role || '').toLowerCase();
-            const usernameLower = (user.username || '').toLowerCase();
-            const nameLower = (user.name || '').toLowerCase();
-            
-            if (roleLower === 'super_admin' || roleLower === 'admin' || roleLower === 'staff') {
-              this.uiTheme.set('classic');
-              themeSet = true;
-            } else if (roleLower === 'student_kids' || usernameLower.includes('kid') || usernameLower.includes('primary') || nameLower.includes('kid') || nameLower.includes('primary')) {
-              this.uiTheme.set('adventure');
-              themeSet = true;
-            }
-          }
-        }
-
-        if (!themeSet) {
-          // Fallback to Course-based theme selection: Tamil course uses the gamified Adventure UI; other courses use the Classic UI
-          const courseName = (structure.name || '').toLowerCase();
-          if (courseName.includes('tamil') || courseName.includes('purananuru')) {
-            this.uiTheme.set('adventure');
-          } else {
-            this.uiTheme.set('classic');
-          }
-        }
-
-        this.treeData.set(this.mapStructureToTree(structure));
-
-      },
-      error: (err) => console.error('Failed to load course structure:', err)
-    });
-  }
-
-  continueCourse(): void {
-    const structure = this.courseStructure();
-    if (!structure) return;
-
-    const completedIds = this.stats()?.completed_chapter_ids || [];
-
-    // Find the first chapter that is NOT completed, and select its first content topic
-    for (const level of structure.levels) {
-      for (const chapter of level.chapters) {
-        if (!completedIds.includes(chapter.id) && chapter.contents.length > 0) {
-          this.selectTopic(chapter.contents[0].id);
-          return;
-        }
-      }
-    }
-
-    // Fallback: select the very first topic of the course if all are completed or none found
-    if (structure.levels[0]?.chapters[0]?.contents[0]) {
-      this.selectTopic(structure.levels[0].chapters[0].contents[0].id);
-    }
-  }
-
-  toggleCourseTree(id: number): void {
-    if (this.courseId() === id) {
-      this.showTreeInline.set(!this.showTreeInline());
+    if (this.courseService.cachedStructure && this.courseService.cachedStructure.id === this.courseId()) {
+      const structure = this.courseService.cachedStructure;
+      this.courseService.cachedStructure = null; // Clear from cache
+      this.initializeStructure(structure);
     } else {
-      this.courseId.set(id);
-      this.showTreeInline.set(true);
-      this.selectedChapterId.set(null);
-      this.activeContentId.set(null);
-      this.fullContent.set(null);
-
-      const url = `${environment.apiUrl}/courses/${id}/player-structure`;
+      const url = `${environment.apiUrl}/courses/${this.courseId()}/player-structure`;
       this.http.get<CourseStructure>(url).subscribe({
         next: (structure) => {
-          structure.levels.forEach((l) => {
-            l.is_expanded = true;
-            l.chapters.forEach((c, index) => {
-              const hasActiveTopic = this.activeContentId() && c.contents.some(t => t.id === this.activeContentId());
-              c.is_expanded = index === 0 || !!hasActiveTopic;
-            });
-          });
-          this.courseStructure.set(structure);
-          this.treeData.set(this.mapStructureToTree(structure));
-          this.continueCourse();
+          this.initializeStructure(structure);
         },
         error: (err) => console.error('Failed to load course structure:', err)
       });
     }
   }
-  startCourse(id: number): void {
-    this.toggleCourseTree(id);
+
+  initializeStructure(structure: CourseStructure): void {
+    structure.levels.forEach((l, idx) => {
+      l.is_expanded = idx === 0;
+      l.chapters.forEach((c, cidx) => {
+        c.is_expanded = idx === 0 && cidx === 0;
+      });
+    });
+    this.courseStructure.set(structure);
+    this.loadLocalProgress();
+  }
+
+  loadLocalProgress(): void {
+    const cid = this.courseId();
+    if (!cid) return;
+    const uid = this.userId();
+    try {
+      const levelsKey = `lang_app_completed_levels_${uid}_${cid}`;
+      const chaptersKey = `lang_app_completed_chapters_${uid}_${cid}`;
+      const storedLevels = localStorage.getItem(levelsKey);
+      const storedChapters = localStorage.getItem(chaptersKey);
+      this.completedLevelIds.set(storedLevels ? JSON.parse(storedLevels) : []);
+      this.completedChapterIds.set(storedChapters ? JSON.parse(storedChapters) : []);
+    } catch (e) {
+      console.error('Failed to load local progress:', e);
+    }
+  }
+
+  saveLocalProgress(): void {
+    const cid = this.courseId();
+    if (!cid) return;
+    const uid = this.userId();
+    try {
+      const levelsKey = `lang_app_completed_levels_${uid}_${cid}`;
+      const chaptersKey = `lang_app_completed_chapters_${uid}_${cid}`;
+      localStorage.setItem(levelsKey, JSON.stringify(this.completedLevelIds()));
+      localStorage.setItem(chaptersKey, JSON.stringify(this.completedChapterIds()));
+    } catch (e) {
+      console.error('Failed to save local progress:', e);
+    }
+  }
+
+  isLevelUnlocked(levelId: number): boolean {
+    return true;
+  }
+
+  isChapterUnlocked(chapterId: number): boolean {
+    return true;
+  }
+
+  isChapterCompleted(chapterId: number): boolean {
+    return this.completedChapterIds().includes(chapterId);
+  }
+
+  completeChapter(chapterId: number): void {
+    if (!this.completedChapterIds().includes(chapterId)) {
+      this.completedChapterIds.update(ids => [...ids, chapterId]);
+    }
+    const level = this.selectedLevel();
+    if (level) {
+      const allDone = level.chapters.every(c => this.isChapterCompleted(c.id));
+      if (allDone && !this.completedLevelIds().includes(level.id)) {
+        this.completedLevelIds.update(lids => [...lids, level.id]);
+      }
+    }
+    this.saveLocalProgress();
+  }
+
+  goBack() {
+    if (this.currentView() === 'levels') {
+      this.router.navigate(['/dashboard']);
+    } else if (this.currentView() === 'map') {
+      this.goToLevels();
+    } else if (this.currentView() === 'content') {
+      if (this.activeContentId() !== null) {
+        this.activeContentId.set(null);
+      } else {
+        this.goToMap();
+      }
+    } else if (this.currentView() === 'activity') {
+      this.currentView.set('content');
+    }
+  }
+
+  selectLevel(id: number) {
+    if (!this.isLevelUnlocked(id)) {
+      this.triggerMascotWarning('🔒 Level is locked! Complete all chapters of the previous level to unlock.');
+      return;
+    }
+    this.activeLevelId.set(id);
+    this.currentView.set('map');
+  }
+
+  selectChapterNode(id: number) {
+    if (!this.isChapterUnlocked(id)) {
+      this.triggerMascotWarning('🔒 Chapter is locked! Complete preceding chapters to unlock.');
+      return;
+    }
+    this.startLesson(id);
+  }
+
+  startLesson(chapterId: number) {
+    this.activeChapterId.set(chapterId);
+    this.currentView.set('content'); // Using 'content' view for the new Full-Screen Lesson Player
+    this.lessonSequence.set([]);
+    this.currentStepIndex.set(0);
+    this.isVideoCompleted.set(false);
+    this.hearts.set(5);
+    this.showGameOver.set(false);
+    this.lessonFinished.set(false);
+    this.activityFeedbackState.set(null);
+
+    const chapter = this.selectedChapter();
+    if (!chapter) return;
+
+    const contentIds = chapter.contents.map(c => c.id);
+    if (contentIds.length === 0) {
+      this.generateLessonSequence([], chapter.assessments || []);
+      return;
+    }
+
+    const requests = contentIds.map(id => this.http.get<Content>(`${environment.apiUrl}/contents/${id}`));
+    forkJoin(requests).subscribe({
+      next: (fullContents) => {
+        this.generateLessonSequence(fullContents, chapter.assessments || []);
+      },
+      error: (err) => console.error('Failed to load chapter contents', err)
+    });
+  }
+
+  generateLessonSequence(contents: Content[], chapterAssessments: any[]) {
+    const steps: LessonStep[] = [];
+
+    contents.forEach(content => {
+      if (content.id === 1) {
+        steps.push({
+          type: 'video',
+          title: 'Homophones Lesson',
+          data: 'assets/Homophones video .mp4'
+        });
+      }
+
+      if (content.external_url && content.external_url.length > 0) {
+        steps.push({
+          type: 'video',
+          title: content.title || content.name,
+          data: content.external_url[0] // Assume first URL is the video link
+        });
+      }
+
+      if (content.attachments && content.attachments.length > 0) {
+        steps.push({
+          type: 'pdf',
+          title: content.title || content.name + ' - Document',
+          data: content.attachments
+        });
+      }
+
+      if (content.text_content) {
+        let isJson = false;
+        let blocks = [];
+        const trimmed = content.text_content.trim();
+        if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+          try {
+            const data = JSON.parse(trimmed);
+            blocks = data.blocks || [];
+            isJson = true;
+          } catch (e) { }
+        }
+
+        if (isJson) {
+          const videoBlocks = blocks.filter((b: any) => b.type === 'video' || b.type === 'embed');
+          const readingBlocks = blocks.filter((b: any) => b.type !== 'activity' && b.type !== 'video' && b.type !== 'embed');
+          const activityBlocks = blocks.filter((b: any) => b.type === 'activity');
+
+          if (videoBlocks.length > 0) {
+            videoBlocks.forEach((block: any, idx: number) => {
+              steps.push({
+                type: 'video',
+                title: (content.title || content.name) + (videoBlocks.length > 1 ? ` - Video ${idx + 1}` : ' - Video'),
+                data: block.data.url || block.data.embed
+              });
+            });
+          }
+
+          if (readingBlocks.length > 0) {
+            let groupedBlocks = [];
+            let currentGroup = [];
+            for (let i = 0; i < readingBlocks.length; i++) {
+              let b = readingBlocks[i];
+              currentGroup.push(b);
+              if (currentGroup.length >= 3 && b.type !== 'header') {
+                groupedBlocks.push(currentGroup);
+                currentGroup = [];
+              }
+            }
+            if (currentGroup.length > 0) {
+              groupedBlocks.push(currentGroup);
+            }
+
+            steps.push({
+              type: 'reading',
+              title: content.title || content.name,
+              data: { isJson: true, blocks: groupedBlocks }
+            });
+          }
+          if (activityBlocks.length > 0) {
+            activityBlocks.forEach((block: any, idx: number) => {
+              let actName = 'Unknown';
+              if (block.data && block.data.type) {
+                actName = block.data.type.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                if (block.data.type === 'mcq') actName = 'Multiple Choice';
+              }
+
+              steps.push({
+                type: 'activity',
+                title: `${idx + 1}. Activity - ${actName}`,
+                data: block
+              });
+            });
+          }
+        } else {
+          steps.push({
+            type: 'reading',
+            title: content.title || content.name,
+            data: { isJson: false, text: content.text_content }
+          });
+        }
+      }
+
+      if (content.assessments && content.assessments.length > 0) {
+        steps.push({
+          type: 'assessment',
+          title: content.title || content.name + ' - Quiz',
+          data: content.assessments
+        });
+      }
+    });
+
+    if (chapterAssessments.length > 0) {
+      steps.push({
+        type: 'assessment',
+        title: 'Chapter Quiz',
+        data: chapterAssessments
+      });
+    }
+
+    this.lessonSequence.set(steps);
+    this.evaluateStepCompletion();
+  }
+
+  handleStepCompleted(isCompleted: boolean) {
+    this.isStepCompleted.set(isCompleted);
+  }
+
+  evaluateStepCompletion() {
+    const step = this.currentStep();
+    if (!step) return;
+
+    if (this.learningMode() === 'easy') {
+      this.isStepCompleted.set(true); // Easy mode allows skipping anything
+      return;
+    }
+
+    if (step.type === 'pdf') {
+      this.isStepCompleted.set(true);
+    } else if (step.type === 'reading') {
+      if (step.data.isJson && step.data.blocks && step.data.blocks.length > 0) {
+        this.isStepCompleted.set(false); // KidsLessonPlayer emits stepCompleted
+      } else {
+        this.isStepCompleted.set(true);
+      }
+    } else if (step.type === 'video') {
+      this.isStepCompleted.set(this.isVideoCompleted());
+    } else {
+      this.isStepCompleted.set(false);
+    }
+  }
+
+  goToLevels() {
+    this.currentView.set('levels');
   }
 
   selectTopic(id: number): void {
     this.activeContentId.set(id);
     this.fullContent.set(null); // Reset while loading
-    this.activeStep.set('lesson'); // Reset navigation step to lesson
-    this.currentActivityIndex.set(0); // Reset interactive activity index
-    this.selectedAssessmentId.set(null); // Reset assessment selection
 
-    // Fetch full content details
     const url = `${environment.apiUrl}/contents/${id}`;
     this.http.get<Content>(url).subscribe({
       next: (content) => {
         this.fullContent.set(content);
+        this.currentView.set('content'); // Switch to content overlay
       },
       error: (err) => console.error('Failed to load topic content:', err)
     });
-
-    this.loadTopicActivities(id);
   }
 
-  toggleLevel(level: Level): void {
-    level.is_expanded = !level.is_expanded;
+  goToMap(): void {
+    this.currentView.set('map');
   }
 
-  toggleChapter(chapter: Chapter): void {
-    chapter.is_expanded = !chapter.is_expanded;
-    // Trigger signal update so Angular detects it
-    this.courseStructure.update(s => s ? { ...s } : null);
+  goToActivity(): void {
+    this.hearts.set(5);
+    this.showGameOver.set(false);
+    this.currentActivityIndex.set(0);
+    this.currentView.set('activity');
   }
 
-  mapStructureToTree(structure: CourseStructure): McvDatatreeNode[] {
-    return structure.levels.map((level) => ({
-      id: `level-${level.id}`,
-      label: level.name,
-      expanded: level.is_expanded,
-      children: level.chapters.map((chapter) => ({
-        id: `chapter-${chapter.id}`,
-        label: chapter.name,
-        expanded: chapter.is_expanded,
-        children: chapter.contents.map((topic) => ({
-          id: `topic-${topic.id}`,
-          label: topic.title || topic.name,
-        })),
-      })),
-    }));
-  }
 
-  handleNodeClick(node: McvDatatreeNode): void {
-    if (node.id.startsWith('topic-')) {
-      const topicId = parseInt(node.id.replace('topic-', ''), 10);
-      this.selectedChapterId.set(null);
-      this.selectTopic(topicId);
-      // Reset quiz state on topic change
-      this.aiQuizData.set([]);
-      this.aiQuizAnswers.set({});
-      this.aiQuizScore.set(null);
-    } else if (node.id.startsWith('chapter-')) {
-      const chapterId = parseInt(node.id.replace('chapter-', ''), 10);
-      this.activeContentId.set(null);
-      this.fullContent.set(null);
-      this.selectedChapterId.set(chapterId);
-    }
-  }
-
-  toggleChat(): void {
-    this.isChatOpen.set(!this.isChatOpen());
-  }
-
-  generateAiQuiz(): void {
-    const contentId = this.activeContentId();
-    if (!contentId) return;
-
-    this.isGeneratingQuiz.set(true);
-    this.aiQuizData.set([]);
-    this.aiQuizAnswers.set({});
-    this.aiQuizScore.set(null);
-
-    const headers = {
-      'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
-    };
-
-    this.http.post<any>(`${environment.apiUrl}/ai-tutor/generate-quiz`, { content_id: contentId }, { headers }).subscribe({
-      next: (res) => {
-        this.isGeneratingQuiz.set(false);
-        if (res.quiz && Array.isArray(res.quiz)) {
-          this.aiQuizData.set(res.quiz);
-        }
-      },
-      error: (err) => {
-        console.error('AI Quiz Error:', err);
-        this.isGeneratingQuiz.set(false);
-        alert('Failed to generate practice quiz. Please try again.');
-      }
-    });
-  }
-
-  selectAiQuizOption(qIndex: number, oIndex: number): void {
-    if (this.aiQuizScore() !== null) return; // Prevent changing answer after submission
-    const current = this.aiQuizAnswers();
-    this.aiQuizAnswers.set({ ...current, [qIndex]: oIndex });
-  }
-
-  submitAiQuiz(): void {
-    const questions = this.aiQuizData();
-    const answers = this.aiQuizAnswers();
-    let score = 0;
-
-    questions.forEach((q, qIndex) => {
-      const selectedOptIndex = answers[qIndex];
-      if (selectedOptIndex !== undefined && q.options[selectedOptIndex]?.isCorrect) {
-        score++;
-      }
-    });
-
-    this.aiQuizScore.set({ score, total: questions.length });
-  }
-
-  // Load dynamic activities
-  loadTopicActivities(id: number): void {
-    this.isLoadingActivities.set(true);
-    this.activeTopicActivities.set(null);
-    this.shuffledDefinitions.set([]);
-    this.resetActivity();
-    this.resetMatch();
-
-    const headers = {
-      'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
-    };
-
-    this.http.post<any>(`${environment.apiUrl}/contents/${id}/activities`, {}, { headers }).subscribe({
-      next: (res) => {
-        this.isLoadingActivities.set(false);
-        if (res.activities) {
-          this.activeTopicActivities.set(res.activities);
-          // Shuffle match definitions
-          const matchPairs = res.activities.match || [];
-          const definitions = matchPairs.map((p: any) => p.definition);
-          for (let i = definitions.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [definitions[i], definitions[j]] = [definitions[j], definitions[i]];
-          }
-          this.shuffledDefinitions.set(definitions);
-        }
-      },
-      error: (err) => {
-        console.error('Failed to load topic activities:', err);
-        this.isLoadingActivities.set(false);
-      }
-    });
-  }
-
-  getCorrectOptionIndex(qIndex: number): number {
-    const mcqs = this.activeTopicActivities()?.mcq || [];
-    const mcq = mcqs[qIndex];
-    if (!mcq) return -1;
-    return mcq.options.findIndex((opt: any) => opt.isCorrect);
-  }
-
-  isDefinitionMatched(def: string): boolean {
-    const matchPairs = this.activeTopicActivities()?.match || [];
-    const pair = matchPairs.find((p: any) => p.definition === def);
-    return pair ? this.matchedPairs().includes(pair.term) : false;
-  }
-
-  // Interactive MCQ Activity methods
-  selectActivityOption(qIndex: number, oIndex: number): void {
-    if (this.isAnswered()) return;
-    this.selectedOptionIndex.set(oIndex);
-  }
-
-  submitActivityAnswer(qIndex: number, selectedIndex: number, correctIndex: number): void {
-    this.isAnswered.set(true);
-    const current = this.activityAnswers();
-    this.activityAnswers.set({ ...current, [qIndex]: selectedIndex });
-  }
-
-  nextActivityQuestion(totalQuestions: number): void {
-    this.isAnswered.set(false);
-    this.selectedOptionIndex.set(null);
-    const currentQ = this.currentActivityQuestionIndex();
-    if (currentQ < totalQuestions - 1) {
-      this.currentActivityQuestionIndex.set(currentQ + 1);
-    } else {
-      // Calculate scores
-      let correctCount = 0;
-      const answers = this.activityAnswers();
-      const mcqs = this.activeTopicActivities()?.mcq || [];
-      mcqs.forEach((mcq: any, idx: number) => {
-        const selectedIdx = answers[idx];
-        if (selectedIdx !== undefined && mcq.options[selectedIdx]?.isCorrect) {
-          correctCount++;
-        }
-      });
-      this.activityScore.set({ score: correctCount, total: totalQuestions });
-      
-      // Record XP and streak on backend
-      this.recordActivityXp('mcq', correctCount, totalQuestions);
-    }
-  }
-
-  recordActivityXp(type: string, score: number, total: number): void {
-    const contentId = this.activeContentId();
-    if (!contentId) return;
-
-    const headers = {
-      'Authorization': `Bearer ${localStorage.getItem('auth_token') || ''}`
-    };
-
-    this.http.post<any>(`${environment.apiUrl}/student/record-activity`, {
-      content_id: contentId,
-      activity_type: type,
-      score: score,
-      total: total
-    }, { headers }).subscribe({
-      next: () => {
-        // Refresh all stats including XP & streak
-        this.loadStudentDashboardData(true);
-      },
-      error: (err) => {
-        console.error('Failed to record activity XP:', err);
-        // Still refresh stats as fallback
-        this.loadStudentDashboardData(true);
-      }
-    });
-  }
-
-  resetActivity(): void {
-    this.currentActivityQuestionIndex.set(0);
-    this.selectedOptionIndex.set(null);
-    this.isAnswered.set(false);
-    this.activityAnswers.set({});
-    this.activityScore.set(null);
-  }
-
-  // Flashcards methods
-  toggleFlashcardFlip(): void {
-    this.isFlipped.set(!this.isFlipped());
-  }
-
-  nextFlashcard(totalCards: number): void {
-    this.isFlipped.set(false);
-    const idx = this.currentFlashcardIndex();
-    if (idx < totalCards - 1) {
-      this.currentFlashcardIndex.set(idx + 1);
-    } else {
-      this.currentFlashcardIndex.set(0);
-    }
-  }
-
-  prevFlashcard(totalCards: number): void {
-    this.isFlipped.set(false);
-    const idx = this.currentFlashcardIndex();
-    if (idx > 0) {
-      this.currentFlashcardIndex.set(idx - 1);
-    } else {
-      this.currentFlashcardIndex.set(totalCards - 1);
-    }
-  }
-
-  // Match the following methods
-  selectMatch(type: 'term' | 'def', value: string): void {
-    if (type === 'term') {
-      if (this.matchedPairs().includes(value)) return;
-      this.selectedMatchTerm.set(value);
-    } else {
-      this.selectedMatchDef.set(value);
-    }
-
-    const term = this.selectedMatchTerm();
-    const def = this.selectedMatchDef();
-
-    if (term && def) {
-      const correctMatches: { [key: string]: string } = {};
-      const matchPairs = this.activeTopicActivities()?.match || [];
-      matchPairs.forEach((pair: any) => {
-        correctMatches[pair.term] = pair.definition;
-      });
-
-      if (correctMatches[term] === def) {
-        this.matchedPairs.update(prev => [...prev, term]);
-        this.selectedMatchTerm.set(null);
-        this.selectedMatchDef.set(null);
-        this.matchError.set(false);
-        
-        // Refresh dashboard statistics on matching all
-        if (this.matchedPairs().length === matchPairs.length) {
-          this.recordActivityXp('match', matchPairs.length, matchPairs.length);
-        }
-      } else {
-        this.matchError.set(true);
-        setTimeout(() => {
-          this.selectedMatchTerm.set(null);
-          this.selectedMatchDef.set(null);
-          this.matchError.set(false);
-        }, 800);
-      }
-    }
-  }
-
-  resetMatch(): void {
-    this.selectedMatchTerm.set(null);
-    this.selectedMatchDef.set(null);
-    this.matchedPairs.set([]);
-    this.matchError.set(false);
-    
-    // Reshuffle definitions
-    const matchPairs = this.activeTopicActivities()?.match || [];
-    const definitions = matchPairs.map((p: any) => p.definition);
-    for (let i = definitions.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [definitions[i], definitions[j]] = [definitions[j], definitions[i]];
-    }
-    this.shuffledDefinitions.set(definitions);
-  }
-
-  // Settings
-  saveSettingsChanges(): void {
-    this.authService.updateProfile({
-      name: this.settingsName(),
-      email: this.settingsEmail()
-    }).subscribe({
-      next: (res) => {
-        alert('Settings saved successfully!');
-        const user = this.authService.getUser();
-        if (user) {
-          this.settingsName.set(user.name);
-          this.settingsEmail.set(user.email || '');
-        }
-        this.loadStudentDashboardData(true);
-      },
-      error: (err) => {
-        console.error('Failed to save settings:', err);
-        alert('Failed to update settings profile.');
-      }
-    });
-  }
-
-  // General navigation helpers
-  switchScreen(screen: 'dashboard' | 'courses' | 'achievements' | 'progress' | 'settings' | 'continue'): void {
-    if (screen === 'continue') {
-      this.continueLearning();
-    } else {
-      this.router.navigate(['/learn', screen]);
-    }
-  }
-
-  goBackToDashboard(): void {
-    this.router.navigate(['/learn/dashboard']);
-  }
-
-  continueLearning(): void {
-    const list = this.courses();
-    if (list && list.length > 0) {
-      this.currentScreen.set('continue');
-      this.selectCourse(list[0].id);
-    } else {
-      this.switchScreen('courses');
-    }
-  }
-
-  selectAssessment(assessmentId: number, chapter: Chapter): void {
-    // Select the first topic of the chapter so content context exists
-    if (chapter.contents && chapter.contents.length > 0) {
-      this.activeContentId.set(chapter.contents[0].id);
-    }
-    this.selectedAssessmentId.set(assessmentId);
-    this.activeStep.set('assessment');
-  }
-
-  onAssessmentCompleted(event: { score: number; passed: boolean }): void {
-    // Record XP for assessment completion
-    this.recordActivityXp('assessment', event.score, 100);
-  }
-
-  onKidsSelectLevel(levelId: number) {
-    this.kidsActiveLevelId.set(levelId);
-    this.kidsCurrentView.set('map');
-  }
-
-  onKidsSelectChapterNode(chapterId: number) {
-    const structure = this.courseStructure();
-    if (!structure) return;
-
-    for (const level of structure.levels) {
-      const chapter = level.chapters.find(c => c.id === chapterId);
-      if (chapter && chapter.contents.length > 0) {
-        this.selectTopic(chapter.contents[0].id);
-        return;
-      }
-    }
-
-    const chapter = this.flatChapters().find(c => c.id === chapterId);
-    if (chapter && chapter.assessments && chapter.assessments.length > 0) {
-      this.selectAssessment(chapter.assessments[0].id, chapter);
-    }
-  }
 
   onActivityAnswered(event: any) {
     if (event && event.isCorrect !== undefined) {
@@ -1325,12 +530,33 @@ export class CoursePlayer implements OnInit, OnDestroy {
 
         this.coins.update(c => c + 5);
         this.xp.update(x => x + 10);
-        this.notificationService.show('success', 'Correct! You earned 10 XP & 5 Coins! 🌟');
+        this.isStepCompleted.set(true);
+
+        setTimeout(() => {
+          gsap.fromTo('.stat-badge',
+            { scale: 1.3, boxShadow: '0 0 20px #fcd34d' },
+            { scale: 1, boxShadow: 'none', duration: 0.8, ease: 'elastic.out(1, 0.3)', stagger: 0.1 }
+          );
+
+          gsap.fromTo('.mascot-happy',
+            { y: 50, scaleY: 0.7, rotation: -15 },
+            { y: 0, scaleY: 1.1, rotation: 10, duration: 0.6, ease: 'back.out(1.7)' }
+          );
+          gsap.to('.mascot-happy', {
+            y: -8, rotation: 0, scaleY: 1, duration: 1.5, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 0.6
+          });
+        }, 50);
       } else {
         this.audioService.playError();
         this.hearts.update(h => Math.max(0, h - 1));
-        this.notificationService.show('error', 'Oops, incorrect! Try again! ❤️');
 
+        setTimeout(() => {
+          gsap.fromTo('.mascot-sad',
+            { x: -15, rotation: -20 },
+            { x: 15, rotation: 20, duration: 0.1, repeat: 5, yoyo: true, ease: 'sine.inOut' }
+          );
+          gsap.to('.mascot-sad', { x: 0, rotation: 0, duration: 0.3, delay: 0.6 });
+        }, 50);
         if (this.hearts() === 0) {
           this.showGameOver.set(true);
         }
@@ -1338,211 +564,144 @@ export class CoursePlayer implements OnInit, OnDestroy {
     }
   }
 
+  continueFromFeedback() {
+    const state = this.activityFeedbackState();
+    this.activityFeedbackState.set(null);
+
+    if (state === 'incorrect' && this.hearts() > 0) {
+      const currentStep = this.currentStep();
+      if (currentStep) {
+        this.lessonSequence.update(seq => [...seq, currentStep]);
+      }
+    }
+
+    if (this.hearts() > 0) {
+      this.nextLessonStep();
+    }
+  }
+
   retryActivity() {
     this.hearts.set(5);
     this.showGameOver.set(false);
     this.activityFeedbackState.set(null);
+    this.evaluateStepCompletion();
   }
 
-  stopSpeech() {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
+
+
+  nextLessonStep() {
+    const currentIdx = this.currentStepIndex();
+    if (currentIdx < this.lessonSequence().length - 1) {
+      this.currentStepIndex.set(currentIdx + 1);
+      this.isVideoCompleted.set(false);
+      this.evaluateStepCompletion();
+      this.activityFeedbackState.set(null);
+    } else {
+      this.lessonFinished.set(true);
     }
-    this.activeUtterances = [];
-    clearTimeout(this.speechStartTimeout);
   }
 
-  speakText(text: string) {
-    if (!text) return;
-    this.stopSpeech();
-
-    let cleanText = '';
-    try {
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = text;
-
-      const parts: string[] = [];
-      const traverse = (node: Node) => {
-        if (node.nodeType === Node.TEXT_NODE) {
-          const content = node.textContent?.trim();
-          if (content) {
-            parts.push(content);
-          }
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          const tagName = (node as Element).tagName.toLowerCase();
-          if (tagName === 'li') {
-            parts.push(', ');
-          }
-          for (let i = 0; i < node.childNodes.length; i++) {
-            traverse(node.childNodes[i]);
-          }
-          if (['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'div', 'li', 'tr'].includes(tagName)) {
-            parts.push('. ');
-          }
-        }
-      };
-
-      traverse(tempDiv);
-      cleanText = parts.join(' ')
-        .replace(/\s+/g, ' ')
-        .replace(/\.\s*\./g, '.')
-        .replace(/,\s*\./g, '.')
-        .trim();
-    } catch (e) {
-      cleanText = text.replace(/<[^>]*>?/gm, '');
+  prevLessonStep() {
+    const currentIdx = this.currentStepIndex();
+    if (currentIdx > 0) {
+      this.currentStepIndex.set(currentIdx - 1);
+      this.evaluateStepCompletion();
+      this.lessonFinished.set(false);
+      this.activityFeedbackState.set(null);
     }
+  }
 
-    if (!cleanText) return;
-
-    const isTamil = /[\u0B80-\u0BFF]/.test(cleanText);
-
-    let typewriterStarted = false;
-    const startTypewriterSafely = () => {
-      if (typewriterStarted) return;
-      typewriterStarted = true;
-      this.startTypewriter(text, isTamil);
-    };
-
-    this.speechStartTimeout = setTimeout(startTypewriterSafely, 800);
-
-    const rawSentences = cleanText.split(/([.?!:;]+)/);
-    const sentences: string[] = [];
-    for (let i = 0; i < rawSentences.length; i += 2) {
-      const textPart = rawSentences[i]?.trim();
-      const delim = rawSentences[i + 1] || '';
-      if (textPart) {
-        sentences.push(textPart + (delim ? delim + ' ' : ''));
+  logout() {
+    this.authService.logout().subscribe({
+      complete: () => {
+        window.location.href = '/login';
+      },
+      error: () => {
+        this.authService.clearSession();
+        window.location.href = '/login';
       }
-    }
-
-    if (sentences.length === 0) return;
-
-    const getTamilVoiceScore = (name: string): number => {
-      let score = 0;
-      const lower = name.toLowerCase();
-      if (lower.includes('kid') || lower.includes('child') || lower.includes('junior') || lower.includes('girl') || lower.includes('young')) score += 150;
-      if (lower.includes('natural') || lower.includes('neural')) score += 100;
-      if (lower.includes('online')) score += 50;
-      if (lower.includes('google')) score += 40;
-      if (lower.includes('lekha')) score += 30;
-      if (lower.includes('heera')) score += 25;
-      if (lower.includes('female') || lower.includes('girl') || lower.includes('woman') || lower.includes('pallavi') || lower.includes('kalpana') || lower.includes('siri')) score += 20;
-      if (lower.includes('valluvar')) score += 15;
-      if (lower.includes('microsoft')) score += 10;
-      return score;
-    };
-
-    const getEnglishVoiceScore = (name: string): number => {
-      let score = 0;
-      const lower = name.toLowerCase();
-      if (lower.includes('kid') || lower.includes('child') || lower.includes('junior') || lower.includes('girl') || lower.includes('young')) score += 150;
-      if (lower.includes('natural') || lower.includes('neural')) score += 100;
-      if (lower.includes('online')) score += 50;
-      if (lower.includes('google')) score += 40;
-      if (lower.includes('female') || lower.includes('girl') || lower.includes('woman') || lower.includes('zira') || lower.includes('samantha') || lower.includes('aria') || lower.includes('jenny') || lower.includes('siri')) score += 30;
-      if (lower.includes('microsoft') || lower.includes('david')) score += 10;
-      return score;
-    };
-
-    sentences.forEach((sentence, idx) => {
-      const utterance = new SpeechSynthesisUtterance(sentence);
-
-      if (isTamil) {
-        utterance.lang = 'ta-IN';
-        const voices = window.speechSynthesis.getVoices();
-        const tamilVoices = voices.filter(v => v.lang.startsWith('ta') || v.name.toLowerCase().includes('tamil'));
-        if (tamilVoices.length > 0) {
-          const bestTamilVoice = tamilVoices.reduce((prev, curr) => {
-            return getTamilVoiceScore(curr.name) > getTamilVoiceScore(prev.name) ? curr : prev;
-          });
-          utterance.voice = bestTamilVoice;
-        }
-      } else {
-        utterance.lang = 'en-US';
-        const voices = window.speechSynthesis.getVoices();
-        const englishVoices = voices.filter(v => v.lang.startsWith('en'));
-        if (englishVoices.length > 0) {
-          const bestEnglishVoice = englishVoices.reduce((prev, curr) => {
-            return getEnglishVoiceScore(curr.name) > getEnglishVoiceScore(prev.name) ? curr : prev;
-          });
-          utterance.voice = bestEnglishVoice;
-        }
-      }
-
-      utterance.rate = isTamil ? 0.82 : 0.85;
-      utterance.pitch = 1.35;
-
-      this.activeUtterances.push(utterance);
-
-      if (idx === 0) {
-        utterance.onstart = () => {
-          clearTimeout(this.speechStartTimeout);
-          startTypewriterSafely();
-        };
-      }
-
-      utterance.onend = () => {
-        this.activeUtterances = this.activeUtterances.filter(u => u !== utterance);
-      };
-      utterance.onerror = () => {
-        clearTimeout(this.speechStartTimeout);
-        startTypewriterSafely();
-        this.activeUtterances = this.activeUtterances.filter(u => u !== utterance);
-      };
-
-      window.speechSynthesis.speak(utterance);
     });
   }
 
-  startTypewriter(htmlContent: string, isTamil: boolean = false) {
-    this.typedContent.set('');
-    clearTimeout(this.typingTimeout);
 
-    let i = 0;
-    let isTag = false;
-    let currentText = '';
+  ngOnDestroy() {}
 
-    const charDelay = isTamil ? Math.random() * 30 + 55 : Math.random() * 20 + 35;
-    const sentenceDelay = isTamil ? 900 : 600;
-    const commaDelay = isTamil ? 450 : 300;
+  finishLesson() {
+    this.audioService.playSuccess();
 
-    const type = () => {
-      if (i < htmlContent.length) {
-        let char = htmlContent.charAt(i);
-        if (char === '<') isTag = true;
+    const duration = 3 * 1000;
+    const end = Date.now() + duration;
 
-        currentText += char;
-        i++;
+    const frame = () => {
+      confetti({
+        particleCount: 5,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0 },
+        colors: ['#4ade80', '#fcd34d', '#3b82f6', '#ec4899', '#8b5cf6']
+      });
+      confetti({
+        particleCount: 5,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1 },
+        colors: ['#4ade80', '#fcd34d', '#3b82f6', '#ec4899', '#8b5cf6']
+      });
 
-        if (isTag) {
-          while (i < htmlContent.length && htmlContent.charAt(i - 1) !== '>') {
-            currentText += htmlContent.charAt(i);
-            i++;
-          }
-          isTag = false;
-          this.typedContent.set(currentText);
-          this.typingTimeout = setTimeout(type, 0);
-        } else {
-          this.typedContent.set(currentText);
-          const delay = char === '.' || char === '!' || char === '?' ? sentenceDelay : (char === ',' ? commaDelay : charDelay);
-          this.typingTimeout = setTimeout(type, delay);
-        }
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
       }
     };
+    frame();
 
-    type();
-  }
+    const activeChapId = this.activeChapterId();
+    if (activeChapId) {
+      this.completeChapter(activeChapId);
+    }
 
-  triggerMascotWarning(msg: string) {
-    this.mascotWarning.set(msg);
-    this.showMascotWarning.set(true);
     setTimeout(() => {
-      this.showMascotWarning.set(false);
-    }, 4000);
+      this.goToMap();
+    }, 3500);
   }
 
-  ngOnDestroy() {
-    this.stopSpeech();
-    clearTimeout(this.typingTimeout);
+  completeActiveChapterAndGoToMap() {
+    const activeChapId = this.activeChapterId();
+    if (activeChapId) {
+      this.completeChapter(activeChapId);
+    }
+    this.goToMap();
   }
+
+  nextActivityPage(): void {
+    this.currentActivityIndex.update(v => v + 1);
+  }
+
+  prevActivityPage(): void {
+    this.currentActivityIndex.update(v => Math.max(0, v - 1));
+  }
+
+  toggleLevel(level: Level): void {
+    level.is_expanded = !level.is_expanded;
+  }
+
+  toggleChapter(chapter: Chapter): void {
+    chapter.is_expanded = !chapter.is_expanded;
+  }
+
+  toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => {
+        this.isFullscreen.set(true);
+      }).catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().then(() => {
+          this.isFullscreen.set(false);
+        });
+      }
+    }
+  }
+
 }

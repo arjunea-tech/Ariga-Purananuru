@@ -114,7 +114,7 @@ class AuthController extends Controller
 
         if (!$user) {
             throw ValidationException::withMessages([
-                'login' => ['Invalid credentials.'],
+                'login' => ['Username/Email not found.'],
             ]);
         }
 
@@ -135,7 +135,7 @@ class AuthController extends Controller
         // Verify password
         if (!Hash::check($validated['password'], $user->password)) {
             throw ValidationException::withMessages([
-                'login' => ['Invalid credentials.'],
+                'password' => ['Incorrect password.'],
             ]);
         }
 

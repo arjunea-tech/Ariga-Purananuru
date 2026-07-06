@@ -42,7 +42,9 @@
               [class.invalid]="loginForm.get('login')?.touched && loginForm.get('login')?.invalid"
             />
           </div>
-          @if (loginForm.get('login')?.touched && loginForm.get('login')?.invalid) {
+          @if (loginForm.get('login')?.hasError('serverError')) {
+            <small class="error-msg">{{ loginForm.get('login')?.errors?.['serverError'] }}</small>
+          } @else if (loginForm.get('login')?.touched && loginForm.get('login')?.invalid) {
             <small class="error-msg">Username or Email is required (min 3 chars).</small>
           }
         </div>
@@ -50,17 +52,27 @@
         <!-- Password -->
         <div class="form-group">
           <label for="password">Password</label>
-          <div class="input-wrapper">
+          <div class="input-wrapper" style="position: relative;">
             <span class="input-icon">🔑</span>
             <input
               id="password"
-              type="password"
+              [type]="showPassword ? 'text' : 'password'"
               formControlName="password"
               placeholder="••••••••"
               [class.invalid]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
+              style="padding-right: 40px;"
             />
+            <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()" tabindex="-1" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #6c757d;">
+              @if (showPassword) {
+                <span title="Hide password">👁️‍🗨️</span>
+              } @else {
+                <span title="Show password">👁️</span>
+              }
+            </button>
           </div>
-          @if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
+          @if (loginForm.get('password')?.hasError('serverError')) {
+            <small class="error-msg">{{ loginForm.get('password')?.errors?.['serverError'] }}</small>
+          } @else if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
             <small class="error-msg">Password is required (min 4 chars).</small>
           }
         </div>

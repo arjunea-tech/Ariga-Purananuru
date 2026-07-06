@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -24,7 +24,7 @@ interface Segment {
   templateUrl: './fill-blanks.html',
   styleUrls: ['./fill-blanks.css']
 })
-export class FillBlanksComponent implements OnInit {
+export class FillBlanksComponent implements OnInit, OnChanges {
   @Input() activity: FillBlanksData | null = null;
   @Input() showFeedback: boolean = true;
 
@@ -39,7 +39,11 @@ export class FillBlanksComponent implements OnInit {
   ngOnInit(): void {
     this.parseSentence();
   }
-
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['activity']) {
+      this.parseSentence();
+    }
+  }
   parseSentence(): void {
     if (!this.activity || !this.activity.text) return;
 

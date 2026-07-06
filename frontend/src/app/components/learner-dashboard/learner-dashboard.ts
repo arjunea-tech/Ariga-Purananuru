@@ -1,10 +1,12 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { RouterModule, Router } from '@angular/router';
 import { CourseService } from '../../services/course';
 import { AuthService } from '../../services/auth';
-import { environment } from '../../../environments/environment';
+import { LottieComponent, AnimationOptions } from 'ngx-lottie';
+import { gsap } from 'gsap';
 import confetti from 'canvas-confetti';
 
 interface Course {
@@ -17,7 +19,7 @@ interface Course {
 @Component({
   selector: 'app-learner-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, LottieComponent],
   templateUrl: './learner-dashboard.html',
   styleUrls: ['./learner-dashboard.css']
 })
@@ -26,50 +28,39 @@ export class LearnerDashboard implements OnInit {
   private router = inject(Router);
   private courseService = inject(CourseService);
   private authService = inject(AuthService);
-  
   courses = signal<Course[]>([]);
   isLoading = signal(true);
   isFullscreen = signal(false);
-  uiTheme = signal<'adventure' | 'classic'>('adventure');
+
+
 
   // Mascot Tip Messages
   mascotTip = signal<string>('Welcome back, adventurer! Click "Play" on a course to start your quest!');
   showMascotSpeech = signal(true);
+
+  // Mascot Lottie Configuration (Selective Mascot)
+  mascotLottieOptions: AnimationOptions = {
+    path: '/assets/mascot.json', // Guiding mascot
+    autoplay: true,
+    loop: true
+  };
+
+  // Achievement Lottie Configuration (Selective Achievement Popup)
+  achievementLottieOptions: AnimationOptions = {
+    path: '/assets/trophy.json', // Golden winner trophy
+    autoplay: false,
+    loop: false
+  };
   showAchievementModal = signal(false);
 
   ngOnInit() {
-    // Determine theme based on user's age from DOB
-    const user = this.authService.getUser();
-    if (user) {
-      const age = this.getAgeFromDob(user.dob);
-      if (age !== null) {
-        this.uiTheme.set(age <= 15 ? 'adventure' : 'classic');
-      } else {
-        // No DOB set — default to classic for non-student roles, adventure for students
-        const role = (user.role || '').toLowerCase();
-        this.uiTheme.set(role === 'student' ? 'adventure' : 'classic');
-      }
-    }
     this.fetchCourses();
-  }
-
-  getAgeFromDob(dob: string | null | undefined): number | null {
-    if (!dob) return null;
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age >= 0 ? age : null;
   }
 
   fetchCourses() {
     this.http.get<Course[]>(`${environment.apiUrl}/courses`).subscribe({
       next: (data) => {
-        const activeCourses = data.filter(c => c.is_active);
-        this.courses.set(activeCourses);
+        this.courses.set(data.filter(c => c.is_active));
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -107,6 +98,18 @@ export class LearnerDashboard implements OnInit {
     });
   }
 
+  logout() {
+    this.authService.logout().subscribe({
+      complete: () => {
+        window.location.href = '/login';
+      },
+      error: () => {
+        this.authService.clearSession();
+        window.location.href = '/login';
+      }
+    });
+  }
+
   toggleFullscreen() {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().then(() => {
@@ -117,22 +120,9 @@ export class LearnerDashboard implements OnInit {
     } else {
       if (document.exitFullscreen) {
         document.exitFullscreen().then(() => {
-          document.exitFullscreen().then(() => {
-            this.isFullscreen.set(false);
-          });
+          this.isFullscreen.set(false);
         });
       }
     }
-  }
-
-  logout() {
-    this.authService.logout().subscribe({
-      complete: () => {
-        window.location.href = '/login';
-      },
-      error: () => {
-        window.location.href = '/login';
-      }
-    });
   }
 }

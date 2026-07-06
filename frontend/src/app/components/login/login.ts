@@ -25,6 +25,11 @@ export class LoginComponent implements OnInit {
   successMessage = '';
   loading = false;
   tenantBranding: any = null;
+  showPassword = false;
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
 
   ngOnInit(): void {
     // Clear any previous active session when visiting login
@@ -97,28 +102,36 @@ export class LoginComponent implements OnInit {
         }
 
         // Redirect dynamically based on the user's role
-        setTimeout(() => {
-          if (role === 'student') {
-            this.router.navigate(['/learn']); // Student workspace
-          } else if (role === 'super_admin') {
-            this.router.navigate(['/tenants']); // Super Admin workspace
-          } else if (role === 'admin' || role === 'staff') {
-            this.router.navigate(['/admin-dashboard']); // Admin dashboard
-          } else {
-            this.router.navigate(['/learn']);
-          }
-        }, 1000);
+        if (role === 'student') {
+          this.router.navigate(['/learn']); // Student workspace
+        } else if (role === 'super_admin') {
+          this.router.navigate(['/tenants']); // Super Admin workspace
+        } else if (role === 'admin' || role === 'staff') {
+          this.router.navigate(['/admin-dashboard']); // Admin dashboard
+        } else {
+          this.router.navigate(['/learn']);
+        }
       },
       error: (err) => {
         this.loading = false;
-        // Laravel 422 validation errors come as: { errors: { login: ["msg"] } }
-        // Laravel 401/other errors come as: { message: "msg" }
-        this.errorMessage =
-          err.error?.errors?.login?.[0] ||
-          err.error?.errors?.password?.[0] ||
-          err.error?.message ||
-          err.error?.login?.[0] ||
-          'Authentication failed. Please verify credentials.';
+        const errors = err.error?.errors;
+        if (errors) {
+          let hasSpecificError = false;
+          if (errors.login) {
+            this.loginForm.get('login')?.setErrors({ serverError: errors.login[0] });
+            hasSpecificError = true;
+          }
+          if (errors.password) {
+            this.loginForm.get('password')?.setErrors({ serverError: errors.password[0] });
+            hasSpecificError = true;
+          }
+          
+          if (!hasSpecificError) {
+             this.errorMessage = 'Authentication failed. Please verify credentials.';
+          }
+        } else {
+          this.errorMessage = err.error?.message || 'Authentication failed. Please verify credentials.';
+        }
       },
     });
   }

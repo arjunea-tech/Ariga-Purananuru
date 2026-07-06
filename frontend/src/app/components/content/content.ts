@@ -21,7 +21,9 @@ export class SafeHtmlPipe implements PipeTransform {
 import { ContentService, ContentData, Attachment } from '../../services/content';
 import { ChapterService, ChapterData } from '../../services/chapter';
 import EditorJS from '@editorjs/editorjs';
+import ImageTool from '@editorjs/image';
 import { ActivityBlock } from '../../editor-plugins/activity-block';
+import { environment } from '../../../environments/environment';
 import { CustomList as List } from '../../editor-plugins/custom-list';
 import Table from '@editorjs/table';
 import { ActivityRenderer } from '../activity-engine/activity-renderer/activity-renderer';
@@ -157,6 +159,14 @@ export class Content implements OnInit {
           activity: {
             class: ActivityBlock,
             inlineToolbar: true
+          },
+          image: {
+            class: ImageTool,
+            config: {
+              endpoints: {
+                byFile: environment.apiUrl + '/contents/upload',
+              }
+            }
           },
           list: {
             class: List as any,

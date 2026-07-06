@@ -1,7 +1,5 @@
 <div class="mb-4 glass-card sequencing-container">
-  <div class="mb-3 d-flex align-items-center justify-content-between">
-    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-3 py-2 text-uppercase fw-bold" style="letter-spacing: 0.05em; font-size: 0.75rem;">Sequencing Task</span>
-    
+  <div class="mb-3 d-flex align-items-center justify-content-end">
     <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" [disabled]="hasSubmitted() && isCorrect()" (click)="reset()">
       <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
     </button>
@@ -78,7 +76,6 @@
       <div class="d-flex flex-column gap-2 text-secondary fw-semibold" style="font-size: 0.925rem;">
         @for (correctEvent of activity?.events; track correctEvent; let cIdx = $index) {
           <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-success bg-opacity-10 text-success rounded-circle p-1" style="width: 20px; height: 20px; display: inline-flex; justify-content: center; align-items: center; font-size: 0.7rem;">{{ cIdx + 1 }}</span>
             <span>{{ correctEvent }}</span>
           </div>
         }

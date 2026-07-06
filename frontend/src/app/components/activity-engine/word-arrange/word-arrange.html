@@ -1,17 +1,26 @@
-    <div class="mb-4 glass-card">
-      <div class="header mb-4">
-        <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2 text-uppercase fw-bold mb-2 d-inline-block" style="letter-spacing: 0.05em; font-size: 0.75rem;">Word Arrangement</span>
-        <h4 class="fw-bold text-dark m-0" style="font-size: 1.1rem;">{{ activity?.question || 'Arrange the words to form a correct sentence:' }}</h4>
+    <div class="w-100 d-flex flex-column align-items-center justify-content-center pb-4 pt-2 max-w-lg mx-auto" style="max-width: 800px;">
+      <div class="header mb-4 position-relative d-flex justify-content-between align-items-center w-100">
+        <div style="width: 120px;" class="d-none d-sm-block"></div>
+        <h3 class="fw-bold text-dark m-0 flex-grow-1 text-center fs-3" style="text-shadow: 0px 4px 10px rgba(255,255,255,0.8), 0px 8px 30px rgba(255,255,255,0.9);">{{ activity?.question || 'Arrange the words to form a correct sentence:' }}</h3>
+        <div style="width: 120px;" class="d-flex justify-content-end">
+          <button 
+            type="button" 
+            class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 fw-bold d-flex align-items-center gap-1 shadow-sm"
+            [disabled]="hasSubmitted() && isCorrect()"
+            (click)="resetPuzzle()">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset
+          </button>
+        </div>
       </div>
 
-      <!-- Arrangement Slot / Workspace -->
-      <div class="sentence-workspace border rounded-4 p-4 mb-4 bg-light d-flex flex-wrap gap-2 align-items-center"
+      <!-- Arrangement Slot / Workspace (Box-less) -->
+      <div class="sentence-workspace p-4 mb-5 d-flex flex-wrap gap-3 align-items-center justify-content-center w-100"
            [class.correct]="hasSubmitted() && isCorrect()"
            [class.incorrect]="hasSubmitted() && !isCorrect()"
-           style="min-height: 80px; transition: all 0.3s ease;">
+           style="min-height: 120px; transition: all 0.3s ease; border-bottom: 4px dashed rgba(255,255,255,0.4);">
         
         @if (arrangedWords().length === 0) {
-          <span class="text-secondary text-opacity-50 fw-medium select-none">Tap words below to arrange them...</span>
+          <span class="text-white fw-bold fs-4 select-none" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Tap words below to arrange them here...</span>
         } @else {
           @for (word of arrangedWords(); track word.id) {
             <button 
@@ -40,24 +49,16 @@
       </div>
 
       <!-- Controls -->
-      <div class="d-flex gap-3">
+      <div class="d-flex gap-3 justify-content-center mt-3">
         @if (showFeedback && !hasSubmitted()) {
           <button 
             type="button" 
-            class="btn-action check-btn border-0 py-3 px-4 rounded-3 fw-bold text-white d-inline-flex align-items-center gap-2"
+            class="btn-action check-btn border-0 py-3 px-5 rounded-pill fw-bold text-white d-inline-flex align-items-center gap-2 shadow"
             [disabled]="!isAnyWordArranged()"
             (click)="checkAnswers()">
             <i class="bi bi-shield-check"></i> Check Answers
           </button>
         }
-
-        <button 
-          type="button" 
-          class="btn-action reset-btn border py-3 px-4 rounded-3 fw-bold d-inline-flex align-items-center gap-2"
-          [disabled]="hasSubmitted() && isCorrect()"
-          (click)="resetPuzzle()">
-          <i class="bi bi-arrow-counterclockwise"></i> Reset
-        </button>
       </div>
 
       <!-- Success / Error Status Details -->

@@ -112,6 +112,10 @@ Route::middleware(['auth:sanctum', 'identify.tenant'])->group(function () {
         Route::put('learning-modes/{learning_mode}', [LearningModeController::class, 'update']);
         Route::delete('learning-modes/{learning_mode}', [LearningModeController::class, 'destroy']);
 
+        Route::post('activities', [App\Http\Controllers\ActivityController::class, 'store']);
+        Route::put('activities/{activity}', [App\Http\Controllers\ActivityController::class, 'update']);
+        Route::delete('activities/{activity}', [App\Http\Controllers\ActivityController::class, 'destroy']);
+
         // Level-Chapter mapping (Consolidated in LevelController)
         Route::post('levels/{levelId}/chapters', [LevelController::class, 'mapChapters']);
         Route::delete('levels/{levelId}/chapters/{chapterId}', [LevelController::class, 'unmapChapter']);
@@ -145,6 +149,9 @@ Route::middleware(['auth:sanctum', 'identify.tenant'])->group(function () {
 
     Route::get('learning-modes', [LearningModeController::class, 'index']);
     Route::get('learning-modes/{learning_mode}', [LearningModeController::class, 'show']);
+
+    Route::get('activities', [App\Http\Controllers\ActivityController::class, 'index']);
+    Route::get('activities/{activity}', [App\Http\Controllers\ActivityController::class, 'show']);
 
     Route::get('packages/{packageId}/levels', [PackageController::class, 'getLevels']);
 

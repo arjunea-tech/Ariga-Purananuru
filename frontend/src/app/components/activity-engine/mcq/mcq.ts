@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface MCQOption {
@@ -22,7 +22,7 @@ export interface MCQData {
   templateUrl: './mcq.html',
   styleUrls: ['./mcq.css']
 })
-export class MCQComponent {
+export class MCQComponent implements OnChanges {
   @Input() activity: MCQData | null = null;
   @Input() showFeedback: boolean = true;
 
@@ -33,11 +33,17 @@ export class MCQComponent {
   isPlaying = signal<boolean>(false);
   private currentAudio: HTMLAudioElement | null = null;
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['activity']) {
+      this.reset();
+    }
+  }
+
   selectOption(option: MCQOption): void {
     if (this.showFeedback && this.hasSubmitted()) return;
 
     this.selectedOptionId.set(option.id);
-    
+
     if (this.showFeedback) {
       this.hasSubmitted.set(true);
     }
@@ -60,12 +66,12 @@ export class MCQComponent {
 
     this.isPlaying.set(true);
     this.currentAudio = new Audio(this.activity.audioUrl);
-    
+
     this.currentAudio.onended = () => {
       this.isPlaying.set(false);
       this.currentAudio = null;
     };
-    
+
     this.currentAudio.onerror = () => {
       this.isPlaying.set(false);
       this.currentAudio = null;

@@ -4,6 +4,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from './services/auth';
 import { NotificationService } from './services/notification.service';
+import { LoaderService } from './services/loader.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../environments/environment';
 
@@ -20,6 +21,7 @@ export class App implements OnInit {
   private translate = inject(TranslateService);
   protected authService = inject(AuthService);
   protected notificationService = inject(NotificationService);
+  public loaderService = inject(LoaderService);
   private http = inject(HttpClient);
 
   currentLang = signal('en');

@@ -18,11 +18,13 @@ import { StudentProgressComponent } from './components/student-progress/student-
 import { AdminDashboardComponent } from './components/admin-dashboard/admin-dashboard';
 import { Announcements } from './components/announcements/announcements';
 import { roleGuard } from './guards/role.guard';
+import { guestGuard } from './guards/guest.guard';
 import { AdminUploadComponent } from './components/admin-upload/admin-upload.component';
+import { ActivityBuilder } from './components/activity-builder/activity-builder';
 
 export const routes: Routes = [
   // Public Login route
-  { path: 'login', component: LoginComponent },
+  { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   
   // Safe Fallback redirect
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -113,6 +115,11 @@ export const routes: Routes = [
     component: LearningMode, 
     canActivate: [roleGuard(['super_admin', 'admin', 'staff'])] 
   },
+  { 
+    path: 'activity-builder', 
+    component: ActivityBuilder, 
+    canActivate: [roleGuard(['super_admin', 'admin', 'staff'])] 
+  },
 
   /*
    * 🎓 Learning Workspace (Accessible by Students and Staff)
@@ -124,7 +131,7 @@ export const routes: Routes = [
   },
   { 
     path: 'learn/dashboard', 
-    component: CoursePlayer, 
+    component: LearnerDashboard, 
     canActivate: [roleGuard(['student', 'super_admin', 'admin', 'staff'])] 
   },
   { 

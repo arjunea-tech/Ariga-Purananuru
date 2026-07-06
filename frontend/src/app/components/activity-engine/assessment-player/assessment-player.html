@@ -99,6 +99,27 @@
     </div>
     }
 
+    <!-- ==================== ERROR SCREEN ==================== -->
+    @if (gameState() === 'error') {
+    <div
+      class="glass-container text-center animate-fade-in p-5 rounded-4 shadow-lg border border-secondary bg-opacity-25 bg-dark">
+      <div class="mb-4">
+        <div
+          class="bg-danger bg-opacity-25 text-danger rounded-circle d-flex align-items-center justify-content-center mx-auto"
+          style="width: 80px; height: 80px;">
+          <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+        </div>
+      </div>
+
+      <h1 class="display-6 fw-bold mb-3">Error</h1>
+      <p class="text-secondary fs-5 mb-5">{{ errorMessage() || 'The requested assessment could not be loaded.' }}</p>
+
+      <button type="button" class="btn btn-outline-light rounded-pill px-5 py-3 fw-bold fs-5 shadow-lg"
+        (click)="goBackToCourse()">
+        <i class="bi bi-arrow-left me-2"></i> Back to Course
+      </button>
+    </div>
+    }
     <!-- ==================== SCORECARD RESULTS VIEW ==================== -->
     @if (gameState() === 'results' && resultsData(); as results) {
     <div class="results-container animate-fade-in">

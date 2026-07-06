@@ -1,7 +1,5 @@
 <div class="mb-4 glass-card pos-container">
-  <div class="mb-3 d-flex align-items-center justify-content-between">
-    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2 text-uppercase fw-bold" style="letter-spacing: 0.05em; font-size: 0.75rem;">Parts of Speech</span>
-    
+  <div class="mb-3 d-flex align-items-center justify-content-end">
     <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" (click)="reset()">
       <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
     </button>
@@ -25,13 +23,7 @@
           
           <!-- Assigned tag label -->
           @if (chip.selectedTag) {
-            <span class="badge bg-secondary text-white tag-badge animate-fade-in"
-                  [class.bg-success]="showFeedback && hasSubmitted() && chip.selectedTag.toLowerCase() === chip.correctTag.toLowerCase()"
-                  [class.bg-danger]="showFeedback && hasSubmitted() && chip.selectedTag.toLowerCase() !== chip.correctTag.toLowerCase()"
-                  style="font-size: 0.7rem; font-weight: 700; margin-top: 4px;">
-              {{ chip.selectedTag }}
-            </span>
-          } @else {
+            } @else {
             <span class="text-muted text-xs font-semibold animate-pulse" style="font-size: 0.75rem; border-top: 1px dashed #cbd5e1; padding-top: 2px;">
               <i class="bi bi-tag-fill me-1 text-primary"></i>Tag word
             </span>
@@ -77,9 +69,8 @@
             <div class="d-flex align-items-center gap-2 flex-wrap">
               <span class="text-dark fw-bold">"{{ chip.text }}"</span>
               <span class="text-muted">should be tagged as</span>
-              <span class="badge bg-success text-white px-2 py-1 rounded">{{ chip.correctTag }}</span>
               @if (chip.selectedTag) {
-                <span class="text-muted">(you selected <span class="badge bg-danger text-white px-2 py-1 rounded">{{ chip.selectedTag }}</span>)</span>
+                <span class="text-muted">(you selected )</span>
               } @else {
                 <span class="text-muted">(left untagged)</span>
               }

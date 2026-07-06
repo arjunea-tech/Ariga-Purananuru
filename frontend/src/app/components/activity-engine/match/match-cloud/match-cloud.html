@@ -1,16 +1,10 @@
 <!-- CLOUD THEME LAYOUT -->
-<div class="sky-board p-4 rounded-4 position-relative overflow-hidden mb-3">
-  <div class="bg-cloud bg-cloud-1"></div>
-  <div class="bg-cloud bg-cloud-2"></div>
-  <div class="bg-cloud bg-cloud-3"></div>
+<div class="sky-board p-2 p-md-3 position-relative overflow-hidden mb-2 w-100">
+  <div class="row g-3 position-relative z-index-1 mt-0">
+    <!-- No Divider, organic floating layout -->
 
-  <div class="row g-5 position-relative z-index-1 mt-2">
     <!-- Left Column (Source Words inside Big Cloud) -->
     <div class="col-12 col-md-6 d-flex flex-column align-items-center">
-      <span class="column-header text-uppercase fw-bold pb-2 text-white border-bottom border-white border-opacity-25 w-75 text-center mb-4">
-        Left Column
-      </span>
-
       <div class="big-cloud-wrapper">
         <div class="big-cloud-container">
           @for (item of leftItems; track item.id; let idx = $index) {
@@ -36,7 +30,7 @@
             }
           }
           @if (isAllLeftMatched()) {
-            <div class="text-white small py-3 fw-bold animate-fade-in text-center w-100 d-flex align-items-center justify-content-center gap-2">
+            <div class="text-success small py-3 fw-bold animate-fade-in text-center w-100 d-flex align-items-center justify-content-center gap-2">
               <i class="bi bi-cloud-check-fill fs-5"></i> All words matched!
             </div>
           }
@@ -46,10 +40,6 @@
 
     <!-- Right Column (Target Words/Images inside Big Cloud) -->
     <div class="col-12 col-md-6 d-flex flex-column align-items-center">
-      <span class="column-header text-uppercase fw-bold pb-2 text-white border-bottom border-white border-opacity-25 w-75 text-center mb-4">
-        Right Column
-      </span>
-
       <div class="big-cloud-wrapper">
         <div class="big-cloud-container">
           @for (item of rightItems; track item.id) {
@@ -72,7 +62,7 @@
             }
           }
           @if (isAllRightMatched()) {
-            <div class="text-white small py-3 fw-bold animate-fade-in text-center w-100 d-flex align-items-center justify-content-center gap-2">
+            <div class="text-success small py-3 fw-bold animate-fade-in text-center w-100 d-flex align-items-center justify-content-center gap-2">
               <i class="bi bi-cloud-check-fill fs-5"></i> All matched!
             </div>
           }

@@ -8,8 +8,7 @@ export const roleGuard = (allowedRoles: string[]): CanActivateFn => {
     const router = inject(Router);
 
     if (!authService.isLoggedIn()) {
-      router.navigate(['/login']);
-      return false;
+      return router.createUrlTree(['/login']);
     }
 
     if (authService.hasRole(allowedRoles)) {
@@ -17,7 +16,6 @@ export const roleGuard = (allowedRoles: string[]): CanActivateFn => {
     }
 
     // Redirect to a safe fallback or a custom unauthorized page
-    router.navigate(['/unauthorized']);
-    return false;
+    return router.createUrlTree(['/unauthorized']);
   };
 };

@@ -1,20 +1,12 @@
-<div class="match-container mb-4 glass-card">
-  <!-- Header Badge & Instruction Text -->
-  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
-    <div>
-      <span class="badge rounded-pill px-3 py-2 text-uppercase fw-bold d-inline-block match-badge">
-        <i class="bi bi-controller me-1"></i> {{ theme() === 'cloud' ? 'Cloud Match' : 'Match It' }}
-      </span>
-      <p class="text-muted small mt-1 mb-0">
-        @if (allowDragDrop() && allowClickMatch()) {
-          Drag items or click pairs to match them!
-        } @else if (allowDragDrop()) {
-          Drag an item from the left and drop it on its pair on the right.
-        } @else {
-          Click an item on the left, then click its matching pair on the right.
-        }
-      </p>
-    </div>
+<div class="match-container w-100 pb-2 pt-1 position-relative">
+  <!-- Title is now handled by course-player as a single line -->
+  <div class="position-absolute end-0 z-3" style="top: -2.5rem;">
+    <button 
+      type="button" 
+      class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 fw-bold d-flex align-items-center gap-1 shadow-sm bg-white"
+      (click)="reset()">
+      <i class="bi bi-arrow-counterclockwise"></i> Reset
+    </button>
   </div>
 
   @if (theme() === 'cloud') {
@@ -54,33 +46,31 @@
   }
 
   <!-- Matched Pairs Checklist (Answers display below) -->
-  <div class="matched-pairs-section mt-4 mb-4 p-4 bg-white border border-light rounded-4 shadow-sm">
-    <h6 class="text-secondary text-uppercase fw-bold mb-3 d-flex align-items-center gap-2" style="font-size: 0.85rem; letter-spacing: 0.05em;">
-      <i class="bi bi-stars text-warning"></i> Matches Made
-    </h6>
-    <div class="d-flex flex-wrap justify-content-center gap-3">
-      @for (pair of matchedPairs(); track $index) {
-        @let leftText = getLeftItemText(pair.leftId);
-        @let rightText = getRightItemText(pair.rightId);
-        @let rightImg = getRightItemImage(pair.rightId);
-        
-        <div class="matched-pair-card color-pair-{{ pair.colorIndex }} d-flex align-items-center gap-3 px-4 py-2 rounded-pill shadow-sm border">
-          <span class="matched-word fw-bold">{{ leftText }}</span>
-          <span class="matched-separator text-secondary opacity-75"><i class="bi bi-arrow-left-right text-muted"></i></span>
+  @if (matchedPairs().length > 0) {
+    <div class="matched-pairs-section mt-4 mb-4 p-2 animate-fade-in">
+      <h6 class="text-secondary text-uppercase fw-bold mb-3 d-flex align-items-center justify-content-center gap-2" style="font-size: 0.9rem; letter-spacing: 0.05em;">
+        <i class="bi bi-stars text-warning"></i> Matches Made
+      </h6>
+      <div class="d-flex flex-wrap justify-content-center gap-3">
+        @for (pair of matchedPairs(); track $index) {
+          @let leftText = getLeftItemText(pair.leftId);
+          @let rightText = getRightItemText(pair.rightId);
+          @let rightImg = getRightItemImage(pair.rightId);
           
-          @if (rightImg) {
-            <img [src]="rightImg" alt="Matched" class="matched-img-mini" />
-          } @else {
-            <span class="matched-word fw-bold">{{ rightText }}</span>
-          }
-        </div>
-      } @empty {
-        <div class="text-muted small py-4 text-center w-100 opacity-75">
-          No matches made yet. Connect the left items with right items to pair them!
-        </div>
-      }
+          <div class="matched-pair-card color-pair-{{ pair.colorIndex }} d-flex align-items-center gap-3 px-4 py-2 rounded-pill shadow-sm border" style="animation: fadeIn 0.4s ease-out forwards;">
+            <span class="matched-word fw-bold">{{ leftText }}</span>
+            <span class="matched-separator text-secondary opacity-75"><i class="bi bi-arrow-left-right text-muted"></i></span>
+            
+            @if (rightImg) {
+              <img [src]="rightImg" alt="Matched" class="matched-img-mini" />
+            } @else {
+              <span class="matched-word fw-bold">{{ rightText }}</span>
+            }
+          </div>
+        }
+      </div>
     </div>
-  </div>
+  }
 
   <!-- Progress and Reset Controls -->
   <div class="d-flex justify-content-between align-items-center px-2">
@@ -89,13 +79,6 @@
         Pairs Matched: {{ matchedPairs().length }} / {{ activity?.pairs?.length || 0 }}
       </span>
     </div>
-    
-    <button 
-      type="button" 
-      class="btn btn-light btn-sm text-secondary fw-bold px-3 border shadow-sm"
-      (click)="reset()">
-      <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
-    </button>
   </div>
 
   <!-- Success & Explanation Box -->

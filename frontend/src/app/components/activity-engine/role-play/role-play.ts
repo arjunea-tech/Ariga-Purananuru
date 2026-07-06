@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface DialogueLine {
@@ -31,7 +31,7 @@ interface RenderedBubble {
   templateUrl: './role-play.html',
   styleUrls: ['./role-play.css']
 })
-export class RolePlayComponent implements OnInit, OnDestroy {
+export class RolePlayComponent implements OnInit, OnDestroy, OnChanges {
   @Input() activity: RolePlayData | null = null;
   @Input() showFeedback: boolean = true;
 
@@ -42,6 +42,12 @@ export class RolePlayComponent implements OnInit, OnDestroy {
   isRecording = signal<boolean>(false);
   recognition: any = null;
   hasSubmitted = signal<boolean>(false);
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['activity']) {
+      this.reset();
+    }
+  }
 
   constructor() {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -95,7 +101,7 @@ export class RolePlayComponent implements OnInit, OnDestroy {
         ...bubbles,
         { role: 'system', name: currentLine.name, text: currentLine.text }
       ]);
-      
+
       // Speak using SpeechSynthesis
       this.speakSystemLine(currentLine.text, () => {
         // After reading system line, increment and load next line
@@ -155,7 +161,7 @@ export class RolePlayComponent implements OnInit, OnDestroy {
 
   handleStudentSpeech(speechText: string): void {
     this.isRecording.set(false);
-    
+
     // Update the last bubble (which is the pending student bubble)
     this.renderedBubbles.update(bubbles => {
       const copy = [...bubbles];
@@ -197,7 +203,7 @@ export class RolePlayComponent implements OnInit, OnDestroy {
     if (this.recognition) {
       try {
         this.recognition.stop();
-      } catch(e){}
+      } catch (e) { }
     }
     this.isRecording.set(false);
     this.startDialogue();
@@ -211,7 +217,7 @@ export class RolePlayComponent implements OnInit, OnDestroy {
       this.recognition.onresult = null;
       try {
         this.recognition.stop();
-      } catch(e){}
+      } catch (e) { }
     }
   }
 }

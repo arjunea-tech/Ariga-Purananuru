@@ -1,7 +1,5 @@
 <div class="mb-4 glass-card mindmap-container">
-  <div class="mb-3 d-flex align-items-center justify-content-between">
-    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2 text-uppercase fw-bold" style="letter-spacing: 0.05em; font-size: 0.75rem;">Mind Mapping</span>
-    
+  <div class="mb-3 d-flex align-items-center justify-content-end">
     <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" (click)="reset()">
       <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
     </button>
@@ -100,9 +98,8 @@
             <div>
               <span class="text-muted">For Node <strong>"{{ n.label || 'Blank' }}"</strong>:</span>
               <span class="text-muted">Correct: </span>
-              <span class="badge bg-success text-white px-2 py-1 rounded">{{ n.correctValue }}</span>
               @if (n.userValue) {
-                <span class="text-muted"> (you typed: <span class="badge bg-danger text-white px-2 py-1 rounded">{{ n.userValue }}</span>)</span>
+                <span class="text-muted"> (you typed: )</span>
               } @else {
                 <span class="text-muted"> (left empty)</span>
               }

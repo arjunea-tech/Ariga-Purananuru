@@ -1,10 +1,8 @@
-import { environment } from '../../../../environments/environment';
-import { Component, OnInit, OnDestroy, inject, signal, computed, Input, Output, EventEmitter, SimpleChanges, OnChanges } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ActivityRenderer, NormalizedActivity } from '../activity-renderer/activity-renderer';
-import { AuthService } from '../../../services/auth';
 
 interface Option {
   id: number;
@@ -36,17 +34,15 @@ interface AssessmentData {
   templateUrl: './assessment-player.html',
   styleUrls: ['./assessment-player.css']
 })
-export class AssessmentPlayerComponent implements OnInit, OnDestroy, OnChanges {
+export class AssessmentPlayerComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
-  private authService = inject(AuthService);
 
-  @Input() inputAssessmentId: number | null = null;
-  @Output() assessmentCompleted = new EventEmitter<{ score: number; passed: boolean }>();
   assessmentId = signal<number | null>(null);
   assessment = signal<AssessmentData | null>(null);
-  gameState = signal<'start' | 'active' | 'results'>('start');
+  gameState = signal<'start' | 'active' | 'results' | 'error'>('start');
+  errorMessage = signal<string | null>(null);
 
   currentQuestionIdx = signal<number>(0);
   answersMap = new Map<number, number>(); // questionId -> selectedOptionId
@@ -70,33 +66,12 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy, OnChanges {
   });
 
   ngOnInit(): void {
-    // If @Input assessmentId is provided, use it directly
-    if (this.inputAssessmentId) {
-      this.assessmentId.set(this.inputAssessmentId);
-      this.loadAssessmentDetails();
-    } else {
-      // Otherwise, try route params
-      this.route.params.subscribe(params => {
-        if (params['assessmentId']) {
-          this.assessmentId.set(+params['assessmentId']);
-          this.loadAssessmentDetails();
-        }
-      });
-    }
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['inputAssessmentId'] && !changes['inputAssessmentId'].firstChange) {
-      const newId = changes['inputAssessmentId'].currentValue;
-      if (newId) {
-        this.assessmentId.set(newId);
-        this.gameState.set('start');
-        this.resultsData.set(null);
-        this.answersMap.clear();
-        this.currentQuestionIdx.set(0);
+    this.route.params.subscribe(params => {
+      if (params['assessmentId']) {
+        this.assessmentId.set(+params['assessmentId']);
         this.loadAssessmentDetails();
       }
-    }
+    });
   }
 
   ngOnDestroy(): void {
@@ -105,13 +80,18 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy, OnChanges {
 
   loadAssessmentDetails(): void {
     if (!this.assessmentId()) return;
+    this.errorMessage.set(null);
 
-    const url = `${environment.apiUrl}/assessments/${this.assessmentId()}`;
+    const url = `http://localhost:8000/api/assessments/${this.assessmentId()}`;
     this.http.get<AssessmentData>(url).subscribe({
       next: (data) => {
         this.assessment.set(data);
       },
-      error: (err) => console.error('Failed to fetch assessment details:', err)
+      error: (err) => {
+        console.error('Failed to fetch assessment details:', err);
+        this.errorMessage.set(err.status === 404 ? 'Assessment not found.' : 'Failed to load assessment details. Please try again.');
+        this.gameState.set('error');
+      }
     });
   }
 
@@ -192,15 +172,12 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy, OnChanges {
       };
     });
 
-    const user = this.authService.getUser();
-    const userId = user ? user.id : 1;
-
     const body = {
-      user_id: userId,
+      user_id: 1, // Simulated current authenticated student ID
       answers: answersPayload
     };
 
-    const url = `${environment.apiUrl}/assessments/${exam.id}/submit`;
+    const url = `http://localhost:8000/api/assessments/${exam.id}/submit`;
     this.http.post<any>(url, body).subscribe({
       next: (res) => {
         this.resultsData.set({
@@ -211,7 +188,6 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy, OnChanges {
           pass_percentage: res.pass_percentage
         });
         this.gameState.set('results');
-        this.assessmentCompleted.emit({ score: res.score, passed: res.passed });
       },
       error: (err) => {
         console.error('Failed to submit assessment answers:', err);
@@ -246,7 +222,6 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy, OnChanges {
       pass_percentage: exam.pass_percentage
     });
     this.gameState.set('results');
-    this.assessmentCompleted.emit({ score, passed });
   }
 
   getStrokeDashoffset(score: number): number {
