@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TamilNLPService, SeiyulAnalysis } from '../../services/tamil-nlp.service';
@@ -31,26 +31,39 @@ export class PracticeEngineComponent implements OnInit {
   
   // Game Mode variables (for when used inside a course player)
   isGameMode: boolean = false;
-  step: 'split' | 'classify' | 'classify_eluthu' | 'classify_asai' | 'classify_seer' | 'sandbox' | 'result' = 'split';
-  userSplitInput: string = '';
+  isFullscreen: boolean = false;
+  step: 'dashboard_menu' | 'dashboard_input' | 'select_mode' | 'input_word' | 'split_word' | 'analyze_word' | 'auto_explain' | 'sandbox' | 'result' | 'identify_seer' | 'identify_thalai' = 'select_mode';
+  
+  // Interactive flow variables
+  playMode: 'explain' | 'practice' = 'explain';
+  interactiveWord: string = '';
+  interactiveAnalysis: SeiyulAnalysis | null = null;
+  interactiveSplitInput: string = '';
+  interactiveParts: string[] = [];
+  interactiveCurrentPartIndex: number = 0;
+  interactiveValidationResults: {part: string, type: string, isCorrect: boolean, userGuess?: string, explanation?: string}[] = [];
+  
   feedbackMessage: string | null = null;
   feedbackType: 'success' | 'error' = 'success';
-  syllables: string[] = [];
-  userClassifications: { [index: number]: string } = {};
-  validationResults: any[] = [];
   allCorrect: boolean = false;
 
-  eluthuLetters: string[] = [];
-  eluthuClassifications: { [index: number]: string } = {};
+  interactiveCurrentWordIndex: number = 0;
+  interactiveSeerValidationResults: { word: string, expectedSeer: string, userGuess?: string, isCorrect: boolean }[] = [];
 
-  // --- SEER TOY GAME DATA ---
-  seerOptions: { pattern: string, name: string }[] = [
-    { pattern: 'நேர் நேர்', name: 'தேமா' },
-    { pattern: 'நிரை நேர்', name: 'புளிமா' },
-    { pattern: 'நிரை நிரை', name: 'கருவிளம்' },
-    { pattern: 'நேர் நிரை', name: 'கூவிளம்' }
-  ];
-  currentSeerQuestion: { pattern: string, name: string } = { pattern: '', name: '' };
+  interactiveCurrentThalaiIndex: number = 0;
+  interactiveThalaiValidationResults: { firstWord: string, secondWord: string, expectedThalai: string, userGuess?: string, isCorrect: boolean }[] = [];
+
+  hasCheckedInteractiveAsai: boolean = false;
+  interactiveAsaiGuesses: string[][] = [];
+  interactiveAsaiResults: (boolean | null)[][] = [];
+
+  hasCheckedInteractiveSeer = false;
+  interactiveSeerGuesses: string[] = []; // [wordIndex]
+  interactiveSeerResults: (boolean | null)[] = [];
+
+  sandboxTitle: string = 'வார்த்தையை உள்ளிடுக';
+  sandboxDesc: string = 'கீழே வார்த்தையை தட்டச்சு செய்து, பிரித்து காண்க பட்டனை அழுத்துக!';
+  sandboxPlaceholder: string = 'உதாரணம்: சீவகசிந்தாமணி';
 
   // All basic Tamil letters for random selection
   uyirKuril = ['அ', 'இ', 'உ', 'எ', 'ஒ'];
@@ -64,7 +77,10 @@ export class PracticeEngineComponent implements OnInit {
   nerAsaiWords = ['கல்', 'கால்', 'மா', 'பொன்', 'பூ', 'தீ', 'மெய்', 'நெய்', 'கை', 'கண்', 'நாள்'];
   niraiAsaiWords = ['பல', 'பலா', 'நிலம்', 'கனா', 'விழா', 'மலர்', 'குயில்', 'தமிழ்', 'உயிர்', 'புலி'];
 
-  constructor(private tamilNLP: TamilNLPService) {}
+  constructor(
+    private tamilNLP: TamilNLPService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   getRandomTamilLetter(): string {
     const types = ['uyir_kuril', 'uyir_nedil', 'mei', 'uyirmei_kuril', 'uyirmei_nedil'];
@@ -89,62 +105,408 @@ export class PracticeEngineComponent implements OnInit {
     return allWords[Math.floor(Math.random() * allWords.length)];
   }
 
-  getRandomSeerPattern() {
-    const randomOption = this.seerOptions[Math.floor(Math.random() * this.seerOptions.length)];
-    this.currentSeerQuestion = randomOption;
-    this.validationResults = [];
-    this.allCorrect = false;
-    this.feedbackMessage = null;
-  }
-
-  selectSeerAnswer(selectedSeerName: string) {
-    const isCorrect = selectedSeerName === this.currentSeerQuestion.name;
-    
-    this.validationResults = [{
-      syllable: this.currentSeerQuestion.pattern,
-      userClassification: selectedSeerName,
-      correctClassification: this.currentSeerQuestion.name,
-      isCorrect: isCorrect
-    }];
-
-    this.allCorrect = isCorrect;
-    
-    if (isCorrect) {
-      this.step = 'result';
-    } else {
-      this.feedbackMessage = 'தவறு! மீண்டும் முயற்சிக்கவும்.';
-    }
-  }
-
   ngOnInit() {
     if (this.practiceContent) {
       this.isGameMode = true;
       this.activeTab = this.practiceType;
-      this.userInput = this.practiceContent;
       
-      if (this.practiceType === 'eluthu') {
-         this.step = 'classify_eluthu';
-         // Instead of splitting the target word, we just pick ONE random letter!
-         this.userInput = this.getRandomTamilLetter();
-         this.eluthuLetters = [this.userInput]; 
-      }
-      else if (this.practiceType === 'asai') {
-         this.step = 'classify_asai';
-         this.userInput = this.getRandomAsaiWord();
-      }
-      else {
+      // Sandbox fallback for thalai/alahidu (which don't have interactive toy modes yet)
+      if (this.practiceType === 'thalai') {
          this.step = 'sandbox';
-         // Don't auto-analyze. Wait for the user to click the button.
          this.analysisResult = null;
+         
+         if (this.practiceType === 'thalai') {
+            this.sandboxTitle = 'தளை பயிற்சி';
+            this.sandboxDesc = 'கீழே ஒரு பாடலின் வரியை உள்ளிட்டு, தளைகளை அறியலாம்.';
+            this.sandboxPlaceholder = 'உதாரணம்: அகர முதல எழுத்தெல்லாம்';
+            this.userInput = this.practiceContent || ''; 
+         }
+         
+         if (this.userInput) {
+             this.analyzeText();
+         }
+      } else {
+         // Eluthu, Asai, Seer, Alahidu will use the new Interactive Flow
+         this.step = 'select_mode';
       }
     } else {
       // Standalone Dashboard mode
-      this.analyzeText();
+      this.step = 'dashboard_menu';
+      // Reset input as they start from menu
+      this.userInput = '';
+      this.analysisResult = null;
     }
+  }
+
+  // --- INTERACTIVE FLOW METHODS --- //
+
+  selectPlayMode(mode: 'explain' | 'practice') {
+    this.playMode = mode;
+    this.feedbackMessage = null;
+    this.step = 'input_word';
+    this.interactiveWord = '';
+  }
+
+  toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => {
+        this.isFullscreen = true;
+      }).catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen().then(() => {
+          this.isFullscreen = false;
+        });
+      }
+    }
+  }
+
+  goBackToInput() {
+    if (!this.isGameMode) {
+       this.step = 'dashboard_input';
+    } else {
+       this.step = 'select_mode';
+    }
+    this.interactiveWord = '';
+    this.interactiveAnalysis = null;
+    this.interactiveParts = [];
+    this.interactiveValidationResults = [];
+    this.interactiveCurrentPartIndex = 0;
+    this.hasCheckedInteractiveAsai = false;
+    this.interactiveCurrentWordIndex = 0;
+    this.interactiveSeerValidationResults = [];
+    this.hasCheckedInteractiveSeer = false;
+    this.interactiveSeerGuesses = [];
+    this.interactiveSeerResults = [];
+    this.interactiveCurrentThalaiIndex = 0;
+    this.interactiveThalaiValidationResults = [];
+    this.feedbackMessage = null;
+  }
+
+  submitUserWord() {
+    if (!this.interactiveWord.trim()) {
+      this.showFeedback('தயவுசெய்து ஒரு வார்த்தையை உள்ளிடவும்.', 'error');
+      return;
+    }
+
+    if (this.practiceType === 'eluthu') {
+      this.interactiveWord = this.interactiveWord.replace(/\//g, '').trim();
+      this.startAnalysis();
+      return;
+    }
+
+    if (this.playMode === 'explain') {
+      this.interactiveWord = this.interactiveWord.replace(/\//g, '').trim();
+      this.interactiveAnalysis = this.tamilNLP.analyzeSeiyulLine(this.interactiveWord);
+      this.step = 'auto_explain';
+    } else {
+      // PRACTICE MODE (User inputs split directly)
+      const userSplitAttempt = this.interactiveWord;
+      const baseWord = userSplitAttempt.replace(/\//g, '').trim();
+      
+      this.interactiveAnalysis = this.tamilNLP.analyzeSeiyulLine(baseWord);
+      if (!this.interactiveAnalysis || !this.interactiveAnalysis.word_analysis.length) return;
+      
+      const correctSplitRaw = this.interactiveAnalysis.word_analysis.map(w => w.asai_text).join(' / ');
+      
+      const normalizedUser = userSplitAttempt.replace(/\s+/g, '/').replace(/\/+/g, '/');
+      const normalizedCorrect = correctSplitRaw.replace(/\s+/g, '/').replace(/\/+/g, '/');
+
+      if (normalizedUser === normalizedCorrect) {
+        if (this.practiceType === 'seer') {
+          // Immediately show the result for Seer mode
+          this.step = 'result';
+          this.allCorrect = true;
+          this.practiceCompleted.emit();
+        } else {
+          // Asai Mode -> Move to Asai identification
+          this.interactiveParts = normalizedCorrect.split('/');
+          this.interactiveCurrentPartIndex = 0;
+          this.interactiveValidationResults = [];
+          this.hasCheckedInteractiveAsai = false;
+          
+          // Initialize the 2D arrays for per-word Asai guessing
+          this.interactiveAsaiGuesses = [];
+          this.interactiveAsaiResults = [];
+          this.interactiveAnalysis.word_analysis.forEach(wordObj => {
+             this.interactiveAsaiGuesses.push(new Array(wordObj.asai_groups.length).fill(''));
+             this.interactiveAsaiResults.push(new Array(wordObj.asai_groups.length).fill(null));
+          });
+          
+          // Initialize 1D arrays for per-word Seer guessing
+          this.hasCheckedInteractiveSeer = false;
+          this.interactiveSeerGuesses = new Array(this.interactiveAnalysis.word_analysis.length).fill('');
+          this.interactiveSeerResults = new Array(this.interactiveAnalysis.word_analysis.length).fill(null);
+          
+          this.step = 'analyze_word';
+        }
+      } else {
+        // Wrong split
+        const cleanCorrectSplit = correctSplitRaw.replace(/\/+/g, '/');
+        this.showFeedback(`தவறு! சரியான பிரிப்பு: ${cleanCorrectSplit}`, 'error');
+      }
+    }
+  }
+
+  getAsaiExplanation(asaiText: string): string {
+    const letters = this.tamilNLP.splitTamilLetters(asaiText);
+    const mathirais = letters.map(l => this.tamilNLP.getMathirai(l));
+    
+    // Check for trailing Mei letters that might have been grouped
+    // Ner Asai
+    if (mathirais.length >= 1 && mathirais[0] === 1) {
+       if (mathirais.length === 1) return 'தனிக்குறில்';
+       if (mathirais.every((m, i) => i === 0 ? m === 1 : m === 0)) return 'தனிக்குறில் ஒற்று';
+    }
+    if (mathirais.length >= 1 && mathirais[0] === 2) {
+       if (mathirais.length === 1) return 'தனிநெடில்';
+       if (mathirais.every((m, i) => i === 0 ? m === 2 : m === 0)) return 'தனிநெடில் ஒற்று';
+    }
+    
+    // Nirai Asai
+    if (mathirais.length >= 2 && mathirais[0] === 1 && mathirais[1] === 1) {
+       if (mathirais.length === 2) return 'இருகுறில்';
+       if (mathirais.every((m, i) => i < 2 ? m === 1 : m === 0)) return 'இருகுறில் ஒற்று';
+    }
+    if (mathirais.length >= 2 && mathirais[0] === 1 && mathirais[1] === 2) {
+       if (mathirais.length === 2) return 'குறில் நெடில்';
+       if (mathirais.every((m, i) => i === 0 ? m === 1 : (i === 1 ? m === 2 : m === 0))) return 'குறில் நெடில் ஒற்று';
+    }
+    
+    return 'விளக்கம் இல்லை';
+  }
+
+
+
+  getAllCorrectAsaiGroups() {
+    if (!this.interactiveAnalysis) return [];
+    return this.interactiveAnalysis.word_analysis.flatMap(w => w.asai_groups);
+  }
+
+  selectInteractiveAsaiByWord(wordIndex: number, asaiIndex: number, guess: 'நேர்' | 'நிரை') {
+    this.interactiveAsaiGuesses[wordIndex][asaiIndex] = guess;
+  }
+
+  checkAllAsais() {
+    if (!this.interactiveAnalysis) return;
+    let allValid = true;
+    let anyEmpty = false;
+
+    this.interactiveAnalysis.word_analysis.forEach((wordObj, wIndex) => {
+       wordObj.asai_groups.forEach((asai, aIndex) => {
+          const guess = this.interactiveAsaiGuesses[wIndex][aIndex];
+          if (!guess) {
+             anyEmpty = true;
+             this.interactiveAsaiResults[wIndex][aIndex] = null;
+          } else {
+             const isCorrect = asai.type.includes(guess);
+             this.interactiveAsaiResults[wIndex][aIndex] = isCorrect;
+             if (!isCorrect) allValid = false;
+          }
+       });
+    });
+
+    if (anyEmpty) {
+       this.showFeedback('தயவுசெய்து அனைத்து அசைகளுக்கும் விடையளிக்கவும்!', 'error');
+       return;
+    }
+
+    this.hasCheckedInteractiveAsai = true;
+    this.allCorrect = allValid;
+
+    if (allValid) {
+       if (this.practiceType === 'alahidu') {
+         this.showFeedback('அசை சரியாக பிரிக்கப்பட்டுள்ளது! அடுத்து சீர் கண்டுபிடிப்போம்.', 'success');
+         setTimeout(() => {
+           this.step = 'identify_seer';
+           this.interactiveCurrentWordIndex = 0;
+           this.interactiveSeerValidationResults = [];
+           this.cdr.detectChanges();
+         }, 2000);
+       } else {
+         this.showFeedback('அற்புதம்! முழுமையாக முடித்துவிட்டீர்கள். 🌟', 'success');
+         setTimeout(() => {
+           this.step = 'result';
+           this.practiceCompleted.emit();
+           this.cdr.detectChanges();
+         }, 2500);
+       }
+    } else {
+       this.showFeedback('சில தவறுகள் உள்ளன. மீண்டும் முயற்சிக்கவும்!', 'error');
+    }
+  }
+
+  retryInteractiveAsai() {
+    this.hasCheckedInteractiveAsai = false;
+    this.feedbackMessage = null;
+    this.allCorrect = false;
+    // reset incorrect ones maybe? Or let them just fix it
+  }
+
+  // --- ALAHIDU INTERACTIVE METHODS ---
+
+  selectInteractiveSeerByWord(wordIndex: number, seerGuess: string) {
+    this.interactiveSeerGuesses[wordIndex] = seerGuess;
+  }
+
+  checkAllSeers() {
+    if (!this.interactiveAnalysis) return;
+    let allValid = true;
+    let anyEmpty = false;
+
+    this.interactiveAnalysis.word_analysis.forEach((wordObj, wIndex) => {
+       const guess = this.interactiveSeerGuesses[wIndex];
+       if (!guess) {
+          anyEmpty = true;
+          this.interactiveSeerResults[wIndex] = null;
+       } else {
+          const isCorrect = guess === wordObj.seer_pattern;
+          this.interactiveSeerResults[wIndex] = isCorrect;
+          if (!isCorrect) allValid = false;
+       }
+    });
+
+    if (anyEmpty) {
+       this.showFeedback('தயவுசெய்து அனைத்து வார்த்தைகளுக்கும் சீர் கண்டுபிடிக்கவும்!', 'error');
+       return;
+    }
+
+    this.hasCheckedInteractiveSeer = true;
+    this.allCorrect = allValid;
+
+    if (allValid) {
+       if (this.interactiveAnalysis.thalai_analysis.length > 0) {
+          this.showFeedback('அற்புதம்! சீர்கள் சரியாக உள்ளன. அடுத்து தளை கண்டுபிடிப்போம்.', 'success');
+          setTimeout(() => {
+            this.step = 'identify_thalai';
+            this.interactiveCurrentThalaiIndex = 0;
+            this.interactiveThalaiValidationResults = [];
+            this.cdr.detectChanges();
+          }, 2000);
+       } else {
+          this.showFeedback('அற்புதம்! முழுமையாக முடித்துவிட்டீர்கள். 🌟', 'success');
+          setTimeout(() => {
+            this.step = 'result';
+            this.practiceCompleted.emit();
+            this.cdr.detectChanges();
+          }, 2500);
+       }
+    } else {
+       this.showFeedback('சில தவறுகள் உள்ளன. மீண்டும் முயற்சிக்கவும்!', 'error');
+    }
+  }
+
+  retryInteractiveSeer() {
+    this.hasCheckedInteractiveSeer = false;
+    this.feedbackMessage = null;
+    this.allCorrect = false;
+  }
+
+  selectInteractiveThalai(thalaiGuess: string) {
+    if (!this.interactiveAnalysis) return;
+    const thalais = this.interactiveAnalysis.thalai_analysis;
+    if (this.interactiveCurrentThalaiIndex >= thalais.length) return;
+
+    const currentThalai = thalais[this.interactiveCurrentThalaiIndex];
+    const isCorrect = currentThalai.thalai_type === thalaiGuess;
+
+    this.interactiveThalaiValidationResults.push({
+      firstWord: currentThalai.first_word,
+      secondWord: currentThalai.second_word,
+      expectedThalai: currentThalai.thalai_type,
+      userGuess: thalaiGuess,
+      isCorrect: isCorrect
+    });
+
+    if (isCorrect) {
+      this.showFeedback('சரியான தளை!', 'success');
+    } else {
+      this.showFeedback(`தவறு! சரியான தளை: ${currentThalai.thalai_type}`, 'error');
+    }
+
+    this.interactiveCurrentThalaiIndex++;
+
+    if (this.interactiveCurrentThalaiIndex >= thalais.length) {
+      const allThalaiCorrect = this.interactiveThalaiValidationResults.every(r => r.isCorrect);
+      this.allCorrect = allThalaiCorrect;
+      if (allThalaiCorrect) {
+         this.showFeedback('அற்புதம்! முழுமையாக அலகிட்டு முடித்துவிட்டீர்கள். 🌟', 'success');
+         setTimeout(() => {
+           this.step = 'result';
+           this.practiceCompleted.emit();
+           this.cdr.detectChanges();
+         }, 2500);
+      } else {
+         this.showFeedback('சில தவறுகள் உள்ளன. மீண்டும் தளைகளை முயற்சிக்கவும்.', 'error');
+      }
+    }
+  }
+
+  retryInteractiveThalai() {
+    this.interactiveCurrentThalaiIndex = 0;
+    this.interactiveThalaiValidationResults = [];
+    this.feedbackMessage = null;
+  }
+
+  interactiveCharAnalysis: { char: string, type: string, mathirai: number }[] = [];
+
+  startAnalysis() {
+    this.step = 'analyze_word';
+    this.interactiveAnalysis = this.tamilNLP.analyzeSeiyulLine(this.interactiveWord);
+    
+    if (this.practiceType === 'eluthu') {
+       this.allCorrect = true;
+       // Compute character breakdown for Eluthu
+       const letters = this.tamilNLP.splitTamilLetters(this.interactiveWord.replace(/\s+/g, ''));
+       this.interactiveCharAnalysis = letters.map(l => {
+         const m = this.tamilNLP.getMathirai(l);
+         let t = 'மெய் / ஆய்தம்';
+         if (m === 1) t = 'குறில்';
+         if (m === 2) t = 'நெடில்';
+         return { char: l, type: t, mathirai: m };
+       });
+    }
+  }
+
+  selectPracticeArea(areaId: string) {
+    this.activeTab = areaId;
+    this.step = 'dashboard_input';
+    this.userInput = ''; // clear input for fresh start, or we could keep it. Let's clear for clean UX.
+    this.analysisResult = null;
+    
+    // Auto-enter fullscreen mode as requested by user
+    if (!document.fullscreenElement && !this.isGameMode) {
+      document.documentElement.requestFullscreen().then(() => {
+        this.isFullscreen = true;
+      }).catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    }
+  }
+
+  goBackToDashboardMenu() {
+    this.step = 'dashboard_menu';
+    this.analysisResult = null;
   }
 
   selectTab(tabId: string) {
     this.activeTab = tabId;
+  }
+
+  startPracticeFromDashboard() {
+    if (!this.userInput.trim()) {
+      this.showFeedback('தயவுசெய்து ஒரு வார்த்தையை உள்ளிடவும்.', 'error');
+      return;
+    }
+    
+    // Convert active dashboard tab to practice type
+    this.practiceType = this.activeTab;
+    this.interactiveWord = this.userInput;
+    this.playMode = 'practice';
+    
+    this.submitUserWord();
   }
 
   analyzeText() {
@@ -155,152 +517,7 @@ export class PracticeEngineComponent implements OnInit {
     this.analysisResult = this.tamilNLP.analyzeSeiyulLine(this.userInput);
   }
 
-  // ---- Game Mode Methods (from previous step) ---- //
 
-  checkSyllableSplit() {
-    if (!this.userSplitInput) {
-      this.showFeedback('Please enter your split using forward slash (/).', 'error');
-      return;
-    }
-
-    const userSplits = this.userSplitInput.split('/').map(s => s.trim()).filter(s => s.length > 0);
-    const originalWord = userSplits.join('');
-    
-    if (originalWord !== this.userInput && originalWord !== this.userInput.replace(/\s+/g, '')) {
-       this.showFeedback(`Ensure you are splitting the word: ${this.userInput}`, 'error');
-    }
-
-    const systemSplits = this.tamilNLP.splitTamilWordIntoSyllables(originalWord);
-    
-    if (JSON.stringify(userSplits) === JSON.stringify(systemSplits)) {
-      this.showFeedback('Awesome! You split the word perfectly.', 'success');
-      this.syllables = userSplits;
-      
-      setTimeout(() => {
-        this.step = 'classify';
-        this.feedbackMessage = null;
-      }, 1500);
-    } else {
-      this.showFeedback('Not quite right. Look closely at the Mathirai rules!', 'error');
-    }
-  }
-
-  submitClassification() {
-    let allClassified = true;
-    for (let i = 0; i < this.syllables.length; i++) {
-      if (!this.userClassifications[i]) {
-        allClassified = false;
-        break;
-      }
-    }
-
-    if (!allClassified) {
-      this.showFeedback('Please classify all syllables!', 'error');
-      return;
-    }
-
-    this.validationResults = [];
-    this.allCorrect = true;
-
-    for (let i = 0; i < this.syllables.length; i++) {
-      const syllable = this.syllables[i];
-      const userClass = this.userClassifications[i]; 
-      
-      const correctClassTamil = this.tamilNLP.classifySyllable(syllable);
-      const correctClassEng = correctClassTamil === 'நேர்' ? 'ner' : 'nirai';
-
-      const isCorrect = userClass === correctClassEng;
-      if (!isCorrect) this.allCorrect = false;
-
-      this.validationResults.push({
-        syllable,
-        userClassification: userClass,
-        correctClassification: correctClassTamil,
-        isCorrect
-      });
-    }
-
-    this.step = 'result';
-  }
-
-  selectEluthuAnswer(type: string) {
-    this.eluthuClassifications[0] = type;
-    this.submitEluthuClassification();
-  }
-
-  selectAsaiAnswer(type: string) {
-    const analysis = this.tamilNLP.identifyAsai(this.userInput);
-    const correctAsaiType = analysis.length > 0 ? analysis[0].type : 'நேர்'; // Fallback
-    const isCorrect = (type === correctAsaiType);
-
-    this.allCorrect = isCorrect;
-    this.validationResults = [{
-      syllable: this.userInput,
-      userClassification: type,
-      correctClassification: correctAsaiType,
-      isCorrect: isCorrect
-    }];
-    
-    this.step = 'result';
-  }
-
-  submitEluthuClassification() {
-    let allClassified = true;
-    for (let i = 0; i < this.eluthuLetters.length; i++) {
-      if (!this.eluthuClassifications[i]) {
-        allClassified = false;
-        break;
-      }
-    }
-
-    if (!allClassified) {
-      this.showFeedback('Please classify all letters!', 'error');
-      return;
-    }
-
-    this.validationResults = [];
-    this.allCorrect = true;
-
-    for (let i = 0; i < this.eluthuLetters.length; i++) {
-      const letter = this.eluthuLetters[i];
-      const userClass = this.eluthuClassifications[i]; 
-      
-      const mathirai = this.tamilNLP.getMathirai(letter);
-      let correctClassEng = 'mei';
-      let correctClassTamil = 'மெய் / ஆய்தம்';
-      if (mathirai === 1) { correctClassEng = 'kuril'; correctClassTamil = 'குறில்'; }
-      if (mathirai === 2) { correctClassEng = 'nedil'; correctClassTamil = 'நெடில்'; }
-
-      const isCorrect = userClass === correctClassEng;
-      if (!isCorrect) this.allCorrect = false;
-
-      this.validationResults.push({
-        syllable: letter, 
-        userClassification: userClass === 'kuril' ? 'குறில்' : (userClass === 'nedil' ? 'நெடில்' : 'மெய் / ஆய்தம்'),
-        correctClassification: correctClassTamil,
-        isCorrect
-      });
-    }
-
-    this.step = 'result';
-  }
-
-  retry() {
-    if (this.practiceType === 'eluthu') {
-       this.step = 'classify_eluthu';
-       this.userInput = this.getRandomTamilLetter();
-       this.eluthuLetters = [this.userInput];
-       this.eluthuClassifications = {};
-    } else if (this.practiceType === 'asai') {
-       this.step = 'classify_asai';
-       this.userInput = this.getRandomAsaiWord();
-    } else {
-       this.step = 'sandbox';
-       this.userInput = '';
-       this.analysisResult = null;
-    }
-    this.feedbackMessage = null;
-  }
 
   continueToActivity() {
     this.practiceCompleted.emit();

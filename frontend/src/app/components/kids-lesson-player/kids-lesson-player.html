@@ -62,13 +62,25 @@
       <i class="bi bi-heartbreak-fill text-danger mb-4"
         style="font-size: 6rem; filter: drop-shadow(0 4px 0 #c62828);"></i>
       <h2 class="fw-bold text-dark mb-3">Out of Hearts!</h2>
-      <p class="fs-5 text-secondary mb-5">You made too many mistakes. Don't worry, refill your hearts and try again!
-      </p>
+      <p class="fs-5 text-secondary mb-4">You made too many mistakes. Take a deep breath! Hearts will refill in:</p>
+      
+      <div class="mb-5 d-flex justify-content-center align-items-center">
+        <div class="timer-circle bg-white rounded-circle shadow-lg border border-4 border-warning d-flex align-items-center justify-content-center"
+             style="width: 120px; height: 120px; font-size: 3rem; font-weight: 900; color: #dc2626; font-family: 'Fredoka One', cursive;"
+             [class.animate-pulse]="heartRefillTimer() <= 10">
+          {{ heartRefillTimer() }}
+        </div>
+      </div>
 
       <button
-        class="btn btn-warning btn-lg rounded-pill w-100 py-3 fw-bold text-dark shadow-sm border border-2 border-white hover-lift mb-3"
+        class="btn btn-warning btn-lg rounded-pill w-100 py-3 fw-bold text-dark shadow-sm border border-2 border-white mb-3 hover-lift"
+        [disabled]="heartRefillTimer() > 0"
         (click)="retryActivity()">
-        <i class="bi bi-suit-heart-fill text-danger me-2"></i> Refill Hearts
+        @if(heartRefillTimer() > 0) {
+           <i class="bi bi-hourglass-split text-danger me-2"></i> Waiting...
+        } @else {
+           <i class="bi bi-suit-heart-fill text-danger me-2 animate-bounce"></i> Continue!
+        }
       </button>
       <button class="btn btn-outline-secondary rounded-pill w-100 py-3 fw-bold hover-lift" (click)="goToMap()">
         Quit to Map
@@ -78,15 +90,8 @@
     <!-- DYNAMIC CARDS -->
     <div class="w-100 h-100 d-flex flex-column animate-pop-in">
       @if (currentStep(); as step) {
-      @if (step.type !== 'reading') {
-      <div class="position-relative w-100 d-flex justify-content-center align-items-center mb-2">
-        <h3 class="fw-bold text-white text-center m-0"
-          style="font-size: 1.5rem; text-shadow: 0px 4px 10px rgba(0,0,0,0.5); letter-spacing: 1px;">
-          ✨ {{ step.title }}
-        </h3>
-      </div>
-      }
       
+
       @if (step.type === 'video') {
       <!-- Premium Video Player -->
       <div
@@ -220,10 +225,11 @@
       }
 
       @if (step.type === 'practice') {
-      <div class="w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-center mx-auto"
-        style="max-width: 1200px; width: 95%;">
+      <div class="w-100 flex-grow-1 d-flex flex-column justify-content-start pt-2 mx-auto overflow-hidden"
+        style="max-width: 100%; width: 100%; min-height: 0;">
         <!-- We pass the title or topic as practiceType and word as practiceContent -->
         <app-practice-engine 
+          #practiceEngine
           [practiceType]="step.data?.topic || 'asai'" 
           [practiceContent]="step.data?.word || 'தமிழ்'"
           (practiceCompleted)="onPracticeCompleted()" 
@@ -337,8 +343,8 @@
         <!-- Continue Action -->
         <button
           class="btn btn-danger btn-lg rounded-pill px-4 py-2 fw-bold fs-4 text-white shadow-sm hover-lift border-bottom border-4"
-          style="border-color: #dc2626 !important; min-width: 180px;" (click)="retryActivity()">
-          GOT IT <i class="bi bi-arrow-repeat"></i>
+          style="border-color: #dc2626 !important; min-width: 180px;" (click)="continueFromFeedback()">
+          GOT IT <i class="bi bi-arrow-right"></i>
         </button>
       </div>
     </div>

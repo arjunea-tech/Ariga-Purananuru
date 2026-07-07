@@ -38,3 +38,6 @@
     transform: translateY(0);
   }
 }
+
+:host { display: block; height: 100%; width: 100%; }
+

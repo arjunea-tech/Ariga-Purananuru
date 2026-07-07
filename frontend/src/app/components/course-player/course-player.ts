@@ -101,6 +101,8 @@ export class CoursePlayer implements OnInit, OnDestroy {
   showCorrectSplash = signal<boolean>(false);
   showIncorrectSplash = signal<boolean>(false);
   activityFeedbackState = signal<'correct' | 'incorrect' | null>(null);
+  heartRefillTimer = signal<number>(0);
+  private timerInterval: any;
 
   constructor() {}
 
@@ -310,6 +312,16 @@ export class CoursePlayer implements OnInit, OnDestroy {
   startLesson(chapterId: number) {
     this.activeChapterId.set(chapterId);
     this.currentView.set('content'); // Using 'content' view for the new Full-Screen Lesson Player
+    
+    // Auto-enter fullscreen mode when a lesson is started
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => {
+        this.isFullscreen.set(true);
+      }).catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    }
+
     this.lessonSequence.set([]);
     this.currentStepIndex.set(0);
     this.isVideoCompleted.set(false);
@@ -570,6 +582,15 @@ export class CoursePlayer implements OnInit, OnDestroy {
     this.activeContentId.set(id);
     this.fullContent.set(null); // Reset while loading
 
+    // Auto-enter fullscreen mode when a lesson is started
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().then(() => {
+        this.isFullscreen.set(true);
+      }).catch(err => {
+        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+      });
+    }
+
     const url = `${environment.apiUrl}/contents/${id}`;
     this.http.get<Content>(url).subscribe({
       next: (content) => {
@@ -636,6 +657,15 @@ export class CoursePlayer implements OnInit, OnDestroy {
         }, 50);
         if (this.hearts() === 0) {
           this.showGameOver.set(true);
+          this.heartRefillTimer.set(30);
+          this.timerInterval = setInterval(() => {
+            const currentTimer = this.heartRefillTimer();
+            if (currentTimer > 0) {
+              this.heartRefillTimer.set(currentTimer - 1);
+            } else {
+              clearInterval(this.timerInterval);
+            }
+          }, 1000);
         }
       }
     }
@@ -648,6 +678,15 @@ export class CoursePlayer implements OnInit, OnDestroy {
     if (state === 'incorrect' && this.hearts() > 0) {
       const currentStep = this.currentStep();
       if (currentStep) {
+        // Only inject remediation warning once
+        const hasRemediation = this.lessonSequence().some(s => s.title === 'Remediation Review');
+        if (!hasRemediation) {
+           this.lessonSequence.update(seq => [...seq, {
+               type: 'reading',
+               title: 'மீண்டும் முயற்சி செய்வோம்!',
+               data: { isJson: false, text: 'சில கேள்விகளுக்குத் தவறாகப் பதில் அளித்துவிட்டீர்கள்! கவலை வேண்டாம், மீண்டும் ஒருமுறை முயற்சி செய்வோம்! உங்களால் முடியும்! ✨' }
+           }]);
+        }
         this.lessonSequence.update(seq => [...seq, currentStep]);
       }
     }
@@ -658,6 +697,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
   }
 
   retryActivity() {
+    if (this.heartRefillTimer() > 0) return; // Prevent early click
     this.hearts.set(5);
     this.showGameOver.set(false);
     this.activityFeedbackState.set(null);
@@ -701,7 +741,11 @@ export class CoursePlayer implements OnInit, OnDestroy {
   }
 
 
-  ngOnDestroy() {}
+  ngOnDestroy() {
+      if (this.timerInterval) {
+          clearInterval(this.timerInterval);
+      }
+  }
 
   finishLesson() {
     this.audioService.playSuccess();

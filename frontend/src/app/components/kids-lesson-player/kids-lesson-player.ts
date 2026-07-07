@@ -1,4 +1,4 @@
-import { Component, input, Output, EventEmitter, OnInit, OnDestroy, signal, effect, computed, inject } from '@angular/core';
+import { Component, input, Output, EventEmitter, OnInit, OnDestroy, signal, effect, computed, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivityRenderer } from '../activity-engine/activity-renderer/activity-renderer';
 import { PracticeEngineComponent } from '../practice-engine/practice-engine.component';
@@ -28,6 +28,9 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
   xp = input<number>(0);
   coins = input<number>(0);
   activityFeedbackState = input<'correct' | 'incorrect' | null>(null);
+  heartRefillTimer = input<number>(0);
+
+  @ViewChild('practiceEngine') practiceEngine?: PracticeEngineComponent;
 
   @Output() quit = new EventEmitter<void>();
   @Output() retry = new EventEmitter<void>();
@@ -200,7 +203,7 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
 
   onPracticeCompleted() {
     this.practiceCompleted.emit();
-    this.nextLessonStep(); // Automatically proceed to the next step (Activity)
+    // Allow user to manually click NEXT to proceed
   }
 
   continueFromFeedback() {
@@ -214,6 +217,12 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
   }
 
   prevLessonStep() {
+    // If inside Practice Engine and not on the first screen, just go back within the engine
+    if (this.currentStep()?.type === 'practice' && this.practiceEngine && this.practiceEngine.step !== 'select_mode') {
+      this.practiceEngine.step = 'select_mode';
+      return;
+    }
+
     this.prevStep.emit();
     this.currentContentPage.set(0);
     this.stopSpeech();

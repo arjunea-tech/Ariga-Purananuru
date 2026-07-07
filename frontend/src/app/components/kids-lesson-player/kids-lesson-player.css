@@ -81,3 +81,6 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+:host { display: block; height: 100%; width: 100%; }
+
