@@ -734,16 +734,47 @@ export class CoursePlayer implements OnInit, OnDestroy {
     if (state === 'incorrect' && this.hearts() > 0) {
       const currentStep = this.currentStep();
       if (currentStep) {
-        // Only inject remediation warning once
-        const hasRemediation = this.lessonSequence().some(s => s.title === 'மீண்டும் முயற்சி செய்வோம்!');
-        if (!hasRemediation) {
-           this.lessonSequence.update(seq => [...seq, {
-               type: 'remediation',
-               title: 'மீண்டும் முயற்சி செய்வோம்!',
-               data: { isJson: false, text: 'சில கேள்விகளுக்குத் தவறாகப் பதில் அளித்துவிட்டீர்கள்! கவலை வேண்டாம், மீண்டும் ஒருமுறை முயற்சி செய்வோம்! உங்களால் முடியும்! ✨' }
-           }]);
-        }
-        this.lessonSequence.update(seq => [...seq, currentStep]);
+        // Clone the step and data to ensure Angular detects the reference change and resets state
+        const clonedStep = {
+          ...currentStep,
+          data: currentStep.data ? {
+            ...currentStep.data,
+            data: currentStep.data.data ? { ...currentStep.data.data } : undefined
+          } : undefined
+        };
+
+        const remediationStep: LessonStep = {
+          type: 'remediation',
+          title: 'மீண்டும் முயற்சி செய்வோம்!',
+          data: { 
+            isJson: false, 
+            text: 'சில கேள்விகளுக்குத் தவறாகப் பதில் அளித்துவிட்டீர்கள்! கவலை வேண்டாம், மீண்டும் ஒருமுறை முயற்சி செய்வோம்! உங்களால் முடியும்! ✨' 
+          }
+        };
+
+        this.lessonSequence.update(seq => {
+          const newSeq = [...seq];
+          const firstAssessmentIdx = newSeq.findIndex(s => s.type === 'assessment');
+
+          if (firstAssessmentIdx !== -1) {
+            // Check if remediation warning is already injected before this assessment
+            const hasRemediation = newSeq.slice(0, firstAssessmentIdx).some(s => s.title === 'மீண்டும் முயற்சி செய்வோம்!');
+            if (!hasRemediation) {
+              newSeq.splice(firstAssessmentIdx, 0, remediationStep, clonedStep);
+            } else {
+              newSeq.splice(firstAssessmentIdx, 0, clonedStep);
+            }
+          } else {
+            // No assessment, append to end
+            const hasRemediation = newSeq.some(s => s.title === 'மீண்டும் முயற்சி செய்வோம்!');
+            if (!hasRemediation) {
+              newSeq.push(remediationStep, clonedStep);
+            } else {
+              newSeq.push(clonedStep);
+            }
+          }
+          return newSeq;
+        });
       }
     }
 

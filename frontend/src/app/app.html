@@ -38,9 +38,9 @@
 
   <!-- Sidebar Navigation -->
   <aside class="sidebar bg-dark text-light d-flex flex-column shadow" [class.show]="isSidebarOpen()"
-    style="width: 280px; z-index: 1050; background-color: var(--sidebar-bg) !important;">
+    style="width: 280px; z-index: 1200; background-color: var(--sidebar-bg) !important;">
 
-    <div class="p-4 border-bottom border-secondary border-opacity-25 d-none d-lg-block">
+    <div class="p-4 border-bottom border-secondary border-opacity-25 d-flex align-items-center justify-content-between flex-shrink-0">
       <div class="d-flex align-items-center gap-3">
         @if (tenantBranding()?.logo_url) {
           <img [src]="tenantBranding()?.logo_url" class="rounded-circle flex-shrink-0" style="width: 32px; height: 32px; object-fit: contain; background: white; padding: 2px;">
@@ -53,7 +53,7 @@
           </svg>
         }
         <div class="d-flex flex-column">
-          <span class="h6 mb-0 fw-bold text-truncate" style="max-width: 160px;">
+          <span class="h6 mb-0 fw-bold text-truncate" style="max-width: 130px;">
             {{ tenantBranding()?.tenant_name || authService.getUser()?.name }}
           </span>
           <small class="text-secondary"
@@ -62,10 +62,14 @@
           </small>
         </div>
       </div>
+      <!-- Close button on mobile -->
+      <button class="btn btn-link text-light p-0 border-0 shadow-none d-lg-none" (click)="closeSidebar()">
+        <i class="bi bi-x-lg fs-4"></i>
+      </button>
     </div>
 
     <!-- Language Switcher -->
-    <div class="px-3 py-2 mx-3 mt-3 mb-2 rounded-3"
+    <div class="px-3 py-2 mx-3 mt-3 mb-2 rounded-3 flex-shrink-0"
       style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
       <label class="small text-light fw-bold mb-1 d-block"
         style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em;">Language</label>
@@ -79,7 +83,7 @@
       </div>
     </div>
 
-    <hr class="my-2 mx-3 border-light opacity-25">
+    <hr class="my-2 mx-3 border-light opacity-25 flex-shrink-0">
 
     <!-- Main Navigation Menu -->
     <nav class="flex-grow-1 overflow-y-auto custom-scrollbar p-3 d-flex flex-column gap-2">
@@ -204,17 +208,17 @@
       </a>
       }
 
-      <!-- 🚪 Logout Button (Always placed at the bottom) -->
-      <hr class="mt-auto mb-2 border-light opacity-25">
-      <div class="px-3 pb-3">
-        <button (click)="logout(); $event.stopPropagation()"
-          class="btn btn-logout-custom btn-sm w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2 fw-semibold">
-          <i class="bi bi-box-arrow-right fs-5"></i>
-          <span>{{ 'LOGOUT' | translate }}</span>
-        </button>
-      </div>
-
     </nav>
+
+    <!-- 🚪 Pinned Logout Button Section (Outside nav scroll container) -->
+    <div class="p-3 border-top border-secondary border-opacity-25 bg-dark flex-shrink-0"
+      style="background-color: rgba(0, 0, 0, 0.2) !important;">
+      <button (click)="logout(); $event.stopPropagation()"
+        class="btn btn-logout-custom btn-sm w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2 fw-semibold">
+        <i class="bi bi-box-arrow-right fs-5"></i>
+        <span>{{ 'LOGOUT' | translate }}</span>
+      </button>
+    </div>
   </aside>
 
   <!-- Main Workspace Content Area -->
