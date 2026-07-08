@@ -1,6 +1,7 @@
 /* ── LESSON PLAYER BACKGROUND ── */
 .lesson-bg-pattern {
-  background-color: #f0fdf4; /* Soft mint/green-ish background */
+  background-color: #f0fdf4;
+  /* Soft mint/green-ish background */
   background-image: radial-gradient(#dcfce7 20%, transparent 20%), radial-gradient(#dcfce7 20%, transparent 20%);
   background-size: 60px 60px;
   background-position: 0 0, 30px 30px;
@@ -12,20 +13,23 @@
 }
 
 .premium-card {
-  background: #FFF9C4 !important; /* Parchment yellow */
+  background: #FFF9C4 !important;
+  /* Parchment yellow */
   border: 6px solid #FBC02D !important;
   border-radius: 24px !important;
-  box-shadow: 0 10px 0 rgba(251, 192, 45, 0.5), 0 25px 50px rgba(0,0,0,0.5) !important;
+  box-shadow: 0 10px 0 rgba(251, 192, 45, 0.5), 0 25px 50px rgba(0, 0, 0, 0.5) !important;
   color: #5D4037 !important;
 }
 
 .premium-card::-webkit-scrollbar {
   width: 12px;
 }
+
 .premium-card::-webkit-scrollbar-track {
   background: rgba(251, 192, 45, 0.2);
   border-radius: 10px;
 }
+
 .premium-card::-webkit-scrollbar-thumb {
   background: #FBC02D;
   border-radius: 10px;
@@ -43,9 +47,11 @@
 .hover-lift {
   transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
+
 .hover-lift:hover {
   transform: translateY(-5px) scale(1.02);
 }
+
 .hover-lift:active {
   transform: translateY(2px) scale(0.98);
 }
@@ -56,8 +62,15 @@
 }
 
 @keyframes popIn {
-  from { opacity: 0; transform: scale(0); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .animate-bounce-in {
@@ -65,22 +78,100 @@
 }
 
 @keyframes bounceIn {
-  from { opacity: 0; transform: scale(0.5) translateY(100px); }
-  to { opacity: 1; transform: scale(1) translateY(0); }
+  from {
+    opacity: 0;
+    transform: scale(0.5) translateY(100px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
+
 .hide-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-:host { display: block; height: 100%; width: 100%; }
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
 
+.glow-btn {
+  animation: glowPulse 2s infinite;
+}
+
+@keyframes glowPulse {
+  0% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    border-color: rgba(255, 255, 255, 1);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.6);
+    border-color: #3b82f6;
+  }
+
+  100% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    border-color: rgba(255, 255, 255, 1);
+  }
+}
+
+/* Responsive Overrides */
+@media (max-width: 768px) {
+  .lesson-player main {
+    padding-top: 70px !important;
+  }
+  
+  .reading-content {
+    font-size: 1.15rem !important;
+  }
+  
+  .premium-card {
+    border-width: 4px !important;
+    border-radius: 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .lesson-player main {
+    padding-top: 60px !important;
+  }
+  
+  .reading-content {
+    font-size: 1rem !important;
+  }
+  
+  .progress-bar {
+    height: 12px !important;
+  }
+  
+  .lesson-player header {
+    height: 60px !important;
+  }
+  
+  .lesson-player header button {
+    width: 35px !important;
+    height: 35px !important;
+    top: 10px !important;
+    left: 10px !important;
+  }
+}

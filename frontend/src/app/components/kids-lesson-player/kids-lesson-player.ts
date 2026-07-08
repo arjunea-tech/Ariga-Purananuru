@@ -7,7 +7,7 @@ import confetti from 'canvas-confetti';
 import { gsap } from 'gsap';
 
 export interface LessonStep {
-  type: 'video' | 'pdf' | 'reading' | 'practice' | 'activity' | 'assessment';
+  type: 'video' | 'pdf' | 'reading' | 'practice' | 'activity' | 'assessment' | 'remediation';
   title: string;
   data: any;
 }
@@ -61,7 +61,7 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
 
   rawReadingHtml = computed(() => {
     const step = this.currentStep();
-    if (step && step.type === 'reading') {
+    if (step && (step.type === 'reading' || step.type === 'remediation')) {
       if (step.data.isJson) {
         const pageData = step.data.blocks[this.currentContentPage()];
         if (!pageData) return '';

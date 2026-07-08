@@ -22,6 +22,7 @@
     opacity: 0;
     transform: scale(0.9);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -33,11 +34,34 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-:host { display: block; height: 100%; width: 100%; }
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
 
+/* Custom lighter placeholder for textareas */
+textarea::placeholder {
+  color: #adb5bd !important;
+  opacity: 1 !important;
+  font-weight: 400;
+}
+
+/* Responsive Overrides */
+@media (max-width: 576px) {
+  .option-card {
+    padding: 10px 15px !important;
+    font-size: 1rem !important;
+  }
+  
+  .practice-title {
+    font-size: 1.5rem !important;
+  }
+}

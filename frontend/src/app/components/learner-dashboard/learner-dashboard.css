@@ -657,3 +657,51 @@
   transform: translateY(-2px);
   box-shadow: 0 6px 0 #2e7d32, 0 6px 12px rgba(0,0,0,0.25) !important;
 }
+
+/* Responsive Overrides */
+@media (max-width: 768px) {
+  .css-pine-tree {
+    display: none !important;
+  }
+  .css-flower {
+    display: none !important;
+  }
+  .hill-bg-3 {
+    height: 35vh;
+  }
+  .hill-bg-2 {
+    height: 25vh;
+  }
+  .hill-bg-1 {
+    height: 15vh;
+  }
+  
+  /* Hud stats responsiveness */
+  .game-hud {
+    justify-content: center !important;
+    position: relative !important;
+    padding: 10px !important;
+  }
+  .hud-stats {
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+  
+  .dashboard-container {
+    padding-top: 20px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .hud-stats .stat-badge {
+    min-width: 60px;
+    font-size: 0.75rem !important;
+  }
+  .hud-stats button {
+    font-size: 0.75rem !important;
+  }
+  .display-6 {
+    font-size: 1.75rem !important;
+  }
+}

@@ -1,5 +1,4 @@
-<div class="w-100 d-flex flex-column align-items-center justify-content-center"
-  [ngClass]="{'p-2 p-md-4': !isGameMode}">
+<div class="w-100 d-flex flex-column align-items-center justify-content-center" [ngClass]="{'p-2 p-md-4': !isGameMode}">
 
   <div
     [ngClass]="isGameMode ? 'w-100 px-2 px-md-4' : 'card premium-card border-0 shadow-lg rounded-5 overflow-hidden w-100 position-relative animate-pop-in'"
@@ -10,7 +9,7 @@
     <!-- Header (Only for standalone mode) -->
     <div *ngIf="!isGameMode" class="bg-primary text-white p-4 text-center position-relative"
       style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%) !important;">
-      
+
       <!-- Fullscreen Toggle Button -->
       <button class="btn btn-light position-absolute top-0 end-0 m-3 rounded-circle shadow-sm hover-lift"
         style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; opacity: 0.9;"
@@ -73,7 +72,8 @@
             (click)="selectPracticeArea('thalai')">
             <div class="mb-2"><i class="bi bi-link-45deg fs-2 text-danger"></i></div>
             <h5 class="fw-bold mb-1">தளை பயிற்சி</h5>
-            <p class="text-secondary mb-0" style="font-size: 0.85rem;">நின்ற சீரும் வரும் சீரும் இணையும் தளைகளைப் பயிற்சி
+            <p class="text-secondary mb-0" style="font-size: 0.85rem;">நின்ற சீரும் வரும் சீரும் இணையும் தளைகளைப்
+              பயிற்சி
               செய்.</p>
           </div>
         </div>
@@ -116,7 +116,7 @@
             <i class="bi bi-pencil-square text-primary me-2"></i> Type or paste your Tamil text (Seiyul) here:
           </label>
           <textarea class="form-control bg-light border-2 rounded-4 p-3 fs-5 shadow-sm" rows="3" [(ngModel)]="userInput"
-            placeholder="e.g. அகழ்வாரைத் தாங்கும் நிலம்போல..." (input)="analyzeText()"></textarea>
+            placeholder="Type here..." (input)="analyzeText()"></textarea>
         </div>
 
         <!-- Dashboard Actions -->
@@ -257,10 +257,9 @@
           class="w-100 mb-3 text-center d-flex flex-column flex-md-row align-items-center justify-content-center gap-3 position-relative z-1"
           style="max-width: 900px;">
           <textarea class="form-control bg-white border-3 rounded-4 px-3 py-2 shadow-sm fw-bold text-dark flex-grow-1"
-            style="border-color: #a78bfa !important; outline: none; font-size: 1.3rem; font-family: 'Nunito', sans-serif; box-shadow: inset 0 2px 6px rgba(167, 139, 250, 0.15) !important; resize: none;"
-            rows="2" [(ngModel)]="interactiveWord"
-            [placeholder]="playMode === 'explain' || practiceType === 'eluthu' ? 'எ.கா: வார்த்தையை' : 'எ.கா: வார்த்/தை/யை'"
-            (keyup.enter)="submitUserWord()"></textarea>
+            style="border-color: #a78bfa !important; outline: none; font-size: clamp(1rem, 3vw, 1.3rem); font-family: 'Nunito', sans-serif; box-shadow: inset 0 2px 6px rgba(167, 139, 250, 0.15) !important; resize: none;"
+            rows="2" [(ngModel)]="interactiveWord" placeholder="Type here..."
+            (keydown.enter)="$event.preventDefault(); submitUserWord()"></textarea>
 
           <button
             class="btn rounded-pill px-4 py-3 fw-bold shadow-lg hover-lift text-nowrap d-flex align-items-center justify-content-center"
@@ -272,6 +271,15 @@
               [ngClass]="playMode === 'explain' || practiceType === 'eluthu' ? 'bi-scissors' : 'bi-check-circle-fill'"></i>
             {{ playMode === 'explain' || practiceType === 'eluthu' ? 'பகுப்பாய்வு செய்' : 'சரிபார்' }}
           </button>
+        </div>
+        <!-- Inline Feedback Message -->
+        <div *ngIf="feedbackMessage" class="mt-3 text-center animate-slide-up">
+          <div class="d-inline-flex align-items-center gap-2 px-4 py-2 rounded-pill fw-bold text-white shadow-sm"
+            [ngClass]="feedbackType === 'success' ? 'bg-success' : 'bg-danger'">
+            <i class="bi"
+              [ngClass]="feedbackType === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'"></i>
+            {{ feedbackMessage }}
+          </div>
         </div>
       </div>
 
@@ -452,11 +460,16 @@
 
           <!-- Submit or Retry Buttons -->
           <div class="d-flex flex-column align-items-center w-100 mt-2">
-            <button *ngIf="!hasCheckedInteractiveAsai || (hasCheckedInteractiveAsai && !allCorrect)"
+            <button *ngIf="!hasCheckedInteractiveAsai"
               class="btn rounded-pill px-5 py-3 fw-bold shadow-lg hover-lift text-white"
               style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); font-size: 1.3rem;"
               (click)="checkAllAsais()">
               <i class="bi bi-check2-all me-2"></i> சரிபார்
+            </button>
+            <button *ngIf="hasCheckedInteractiveAsai && !allCorrect"
+              class="btn btn-warning rounded-pill px-5 py-3 fw-bold shadow-lg hover-lift text-dark"
+              style="font-size: 1.3rem;" (click)="retryInteractiveAsai()">
+              <i class="bi bi-arrow-counterclockwise me-2"></i> மீண்டும் முயற்சி செய்
             </button>
           </div>
         </div>
@@ -489,78 +502,12 @@
                 </div>
 
                 <!-- Seer Choices -->
-                <div class="d-flex flex-wrap justify-content-center gap-1 w-100">
-                  <ng-container *ngIf="wordObj.asai_groups.length === 2">
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.9rem;"
-                      [ngClass]="interactiveSeerGuesses[wIndex] === 'தேமா' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(wIndex, 'தேமா')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">தேமா</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.9rem;"
-                      [ngClass]="interactiveSeerGuesses[wIndex] === 'புளிமா' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(wIndex, 'புளிமா')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">புளிமா</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.9rem;"
-                      [ngClass]="interactiveSeerGuesses[wIndex] === 'கருவிளம்' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(wIndex, 'கருவிளம்')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">கருவிளம்</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.9rem;"
-                      [ngClass]="interactiveSeerGuesses[wIndex] === 'கூவிளம்' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(wIndex, 'கூவிளம்')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">கூவிளம்</button>
-                  </ng-container>
-                  <ng-container *ngIf="wordObj.asai_groups.length === 3">
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.85rem;"
-                      [ngClass]="interactiveSeerGuesses[wIndex] === 'தேமாங்காய்' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(wIndex, 'தேமாங்காய்')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">தேமாங்காய்</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.85rem;"
-                      [ngClass]="interactiveSeerGuesses[wIndex] === 'புளிமாங்காய்' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(wIndex, 'புளிமாங்காய்')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">புளிமாங்காய்</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.85rem;"
-                      [ngClass]="interactiveSeerGuesses[wIndex] === 'கருவிளங்காய்' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(wIndex, 'கருவிளங்காய்')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">கருவிளங்காய்</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.85rem;"
-                      [ngClass]="interactiveSeerGuesses[wIndex] === 'கூவிளங்காய்' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(wIndex, 'கூவிளங்காய்')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">கூவிளங்காய்</button>
-                    <!-- Kani seers (optional, rarely used in Kural but supported) -->
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.85rem;"
-                      [ngClass]="interactiveSeerGuesses[wIndex] === 'தேமாங்கனி' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(wIndex, 'தேமாங்கனி')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">தேமாங்கனி</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.85rem;"
-                      [ngClass]="interactiveSeerGuesses[wIndex] === 'புளிமாங்கனி' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(wIndex, 'புளிமாங்கனி')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">புளிமாங்கனி</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.85rem;"
-                      [ngClass]="interactiveSeerGuesses[wIndex] === 'கருவிளங்கனி' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(wIndex, 'கருவிளங்கனி')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">கருவிளங்கனி</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.85rem;"
-                      [ngClass]="interactiveSeerGuesses[wIndex] === 'கூவிளங்கனி' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(wIndex, 'கூவிளங்கனி')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">கூவிளங்கனி</button>
-                  </ng-container>
-                  <ng-container *ngIf="wordObj.asai_groups.length === 1">
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.9rem;"
-                      [ngClass]="interactiveSeerGuesses[wIndex] === 'நாள்' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(wIndex, 'நாள்')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">நாள்</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.9rem;"
-                      [ngClass]="interactiveSeerGuesses[wIndex] === 'மலர்' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(wIndex, 'மலர்')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">மலர்</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.9rem;"
-                      [ngClass]="interactiveSeerGuesses[wIndex] === 'காசு' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(wIndex, 'காசு')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">காசு</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.9rem;"
-                      [ngClass]="interactiveSeerGuesses[wIndex] === 'பிறப்பு' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(wIndex, 'பிறப்பு')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">பிறப்பு</button>
-                  </ng-container>
+                <div class="d-flex flex-wrap justify-content-center gap-2 w-100 mt-2">
+                  <button *ngFor="let option of interactiveSeerOptions[wIndex]"
+                    class="btn px-3 py-2 fw-bold border-0 shadow-sm rounded-3" style="font-size: 0.95rem;"
+                    [ngClass]="interactiveSeerGuesses[wIndex] === option ? 'bg-warning text-dark border border-2 border-warning' : 'bg-light text-dark hover-lift'"
+                    (click)="selectInteractiveSeerByWord(wIndex, option)"
+                    [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[wIndex]">{{ option }}</button>
                 </div>
 
                 <!-- Feedback text within the card -->
@@ -596,78 +543,12 @@
                 </div>
 
                 <!-- Seer Choices -->
-                <div class="d-flex flex-wrap justify-content-center gap-1 w-100">
-                  <ng-container *ngIf="wordObj.asai_groups.length === 2">
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.9rem;"
-                      [ngClass]="interactiveSeerGuesses[i + 4] === 'தேமா' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(i + 4, 'தேமா')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">தேமா</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.9rem;"
-                      [ngClass]="interactiveSeerGuesses[i + 4] === 'புளிமா' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(i + 4, 'புளிமா')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">புளிமா</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.9rem;"
-                      [ngClass]="interactiveSeerGuesses[i + 4] === 'கருவிளம்' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(i + 4, 'கருவிளம்')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">கருவிளம்</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.9rem;"
-                      [ngClass]="interactiveSeerGuesses[i + 4] === 'கூவிளம்' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(i + 4, 'கூவிளம்')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">கூவிளம்</button>
-                  </ng-container>
-                  <ng-container *ngIf="wordObj.asai_groups.length === 3">
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.85rem;"
-                      [ngClass]="interactiveSeerGuesses[i + 4] === 'தேமாங்காய்' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(i + 4, 'தேமாங்காய்')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">தேமாங்காய்</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.85rem;"
-                      [ngClass]="interactiveSeerGuesses[i + 4] === 'புளிமாங்காய்' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(i + 4, 'புளிமாங்காய்')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">புளிமாங்காய்</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.85rem;"
-                      [ngClass]="interactiveSeerGuesses[i + 4] === 'கருவிளங்காய்' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(i + 4, 'கருவிளங்காய்')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">கருவிளங்காய்</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.85rem;"
-                      [ngClass]="interactiveSeerGuesses[i + 4] === 'கூவிளங்காய்' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(i + 4, 'கூவிளங்காய்')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">கூவிளங்காய்</button>
-                    <!-- Kani seers (optional, rarely used in Kural but supported) -->
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.85rem;"
-                      [ngClass]="interactiveSeerGuesses[i + 4] === 'தேமாங்கனி' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(i + 4, 'தேமாங்கனி')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">தேமாங்கனி</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.85rem;"
-                      [ngClass]="interactiveSeerGuesses[i + 4] === 'புளிமாங்கனி' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(i + 4, 'புளிமாங்கனி')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">புளிமாங்கனி</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.85rem;"
-                      [ngClass]="interactiveSeerGuesses[i + 4] === 'கருவிளங்கனி' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(i + 4, 'கருவிளங்கனி')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">கருவிளங்கனி</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.85rem;"
-                      [ngClass]="interactiveSeerGuesses[i + 4] === 'கூவிளங்கனி' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(i + 4, 'கூவிளங்கனி')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">கூவிளங்கனி</button>
-                  </ng-container>
-                  <ng-container *ngIf="wordObj.asai_groups.length === 1">
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.9rem;"
-                      [ngClass]="interactiveSeerGuesses[i + 4] === 'நாள்' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(i + 4, 'நாள்')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">நாள்</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.9rem;"
-                      [ngClass]="interactiveSeerGuesses[i + 4] === 'மலர்' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(i + 4, 'மலர்')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">மலர்</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.9rem;"
-                      [ngClass]="interactiveSeerGuesses[i + 4] === 'காசு' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(i + 4, 'காசு')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">காசு</button>
-                    <button class="btn px-2 py-1 fw-bold border-0" style="font-size: 0.9rem;"
-                      [ngClass]="interactiveSeerGuesses[i + 4] === 'பிறப்பு' ? 'bg-warning text-dark' : 'bg-light text-dark'"
-                      (click)="selectInteractiveSeerByWord(i + 4, 'பிறப்பு')"
-                      [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">பிறப்பு</button>
-                  </ng-container>
+                <div class="d-flex flex-wrap justify-content-center gap-2 w-100 mt-2">
+                  <button *ngFor="let option of interactiveSeerOptions[i + 4]"
+                    class="btn px-3 py-2 fw-bold border-0 shadow-sm rounded-3" style="font-size: 0.95rem;"
+                    [ngClass]="interactiveSeerGuesses[i + 4] === option ? 'bg-warning text-dark border border-2 border-warning' : 'bg-light text-dark hover-lift'"
+                    (click)="selectInteractiveSeerByWord(i + 4, option)"
+                    [disabled]="hasCheckedInteractiveSeer && interactiveSeerResults[i + 4]">{{ option }}</button>
                 </div>
 
                 <!-- Feedback text within the card -->
@@ -791,11 +672,16 @@
 
         <!-- Submit Buttons -->
         <div class="d-flex flex-column align-items-center w-100 mt-2">
-          <button *ngIf="!hasCheckedInteractiveSeer || (hasCheckedInteractiveSeer && !allCorrect)"
+          <button *ngIf="!hasCheckedInteractiveSeer"
             class="btn rounded-pill px-5 py-3 fw-bold shadow-lg hover-lift text-white"
             style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); font-size: 1.3rem;"
             (click)="checkAllSeers()">
             <i class="bi bi-check2-all me-2"></i> சரிபார்
+          </button>
+          <button *ngIf="hasCheckedInteractiveSeer && !allCorrect"
+            class="btn btn-warning rounded-pill px-5 py-3 fw-bold shadow-lg hover-lift text-dark"
+            style="font-size: 1.3rem;" (click)="retryInteractiveSeer()">
+            <i class="bi bi-arrow-counterclockwise me-2"></i> மீண்டும் முயற்சி செய்
           </button>
         </div>
       </div>
@@ -811,54 +697,65 @@
             interactiveAnalysis.thalai_analysis.length }}</p>
         </div>
 
-        <div class="d-flex justify-content-center align-items-center gap-3 mb-4 flex-wrap">
-          <div class="card shadow-sm border-2 rounded-4 p-3 text-center"
-            style="border-color: #3b82f6 !important; min-width: 150px;">
+        <div class="d-flex flex-column flex-md-row justify-content-center align-items-center gap-3 mb-4">
+          <div class="card shadow-sm border-2 rounded-4 p-3 text-center w-100 w-md-auto"
+            style="border-color: #3b82f6 !important; min-width: 150px; max-width: 250px;">
             <p class="text-secondary mb-1">நின்ற சீர்</p>
-            <h4 class="fw-bold text-dark">{{
+            <h4 class="fw-bold text-dark text-break">{{
               interactiveAnalysis.thalai_analysis[interactiveCurrentThalaiIndex].first_word }}</h4>
             <span
-              class="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-2 py-1 mt-1 fs-6">
+              class="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-2 py-1 mt-1 fs-6 text-wrap">
               {{ interactiveAnalysis.thalai_analysis[interactiveCurrentThalaiIndex].first_seer_type }}
             </span>
           </div>
 
-          <i class="bi bi-link-45deg fs-2 text-warning fw-bold"></i>
+          <i class="bi bi-link-45deg fs-2 text-warning fw-bold d-none d-md-block"></i>
+          <i class="bi bi-arrow-down fs-2 text-warning fw-bold d-md-none"></i>
 
-          <div class="card shadow-sm border-2 rounded-4 p-3 text-center"
-            style="border-color: #10b981 !important; min-width: 150px;">
+          <div class="card shadow-sm border-2 rounded-4 p-3 text-center w-100 w-md-auto"
+            style="border-color: #10b981 !important; min-width: 150px; max-width: 250px;">
             <p class="text-secondary mb-1">வரும் சீர்</p>
-            <h4 class="fw-bold text-dark">{{
+            <h4 class="fw-bold text-dark text-break">{{
               interactiveAnalysis.thalai_analysis[interactiveCurrentThalaiIndex].second_word }}</h4>
             <span
-              class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-2 py-1 mt-1 fs-6">
+              class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-2 py-1 mt-1 fs-6 text-wrap">
               {{ interactiveAnalysis.thalai_analysis[interactiveCurrentThalaiIndex].second_word_first_asai }}
             </span>
           </div>
         </div>
 
-        <div class="d-flex flex-wrap justify-content-center gap-3 w-100 mb-4" style="max-width: 800px;">
-          <button class="btn rounded-pill px-4 py-3 fw-bold shadow-sm text-dark"
-            style="background: #f8fafc; border: 2px solid #cbd5e1; font-size: 1.2rem;"
+        <div class="d-flex flex-wrap justify-content-center gap-2 w-100 mb-4" style="max-width: 800px;">
+          <button class="btn rounded-pill px-3 py-2 fw-bold shadow-sm text-dark flex-grow-1 flex-md-grow-0"
+            style="background: #f8fafc; border: 2px solid #cbd5e1; font-size: clamp(0.9rem, 3vw, 1.2rem);"
             (click)="selectInteractiveThalai('நேர் ஒன்றாசிரியத்தளை')">நேர் ஒன்றாசிரியத்தளை</button>
-          <button class="btn rounded-pill px-4 py-3 fw-bold shadow-sm text-dark"
-            style="background: #f8fafc; border: 2px solid #cbd5e1; font-size: 1.2rem;"
+          <button class="btn rounded-pill px-3 py-2 fw-bold shadow-sm text-dark flex-grow-1 flex-md-grow-0"
+            style="background: #f8fafc; border: 2px solid #cbd5e1; font-size: clamp(0.9rem, 3vw, 1.2rem);"
             (click)="selectInteractiveThalai('நிரை ஒன்றாசிரியத்தளை')">நிரை ஒன்றாசிரியத்தளை</button>
-          <button class="btn rounded-pill px-4 py-3 fw-bold shadow-sm text-dark"
-            style="background: #f8fafc; border: 2px solid #cbd5e1; font-size: 1.2rem;"
+          <button class="btn rounded-pill px-3 py-2 fw-bold shadow-sm text-dark flex-grow-1 flex-md-grow-0"
+            style="background: #f8fafc; border: 2px solid #cbd5e1; font-size: clamp(0.9rem, 3vw, 1.2rem);"
             (click)="selectInteractiveThalai('இயற்சீர் வெண்டளை')">இயற்சீர் வெண்டளை</button>
-          <button class="btn rounded-pill px-4 py-3 fw-bold shadow-sm text-dark"
-            style="background: #f8fafc; border: 2px solid #cbd5e1; font-size: 1.2rem;"
+          <button class="btn rounded-pill px-3 py-2 fw-bold shadow-sm text-dark flex-grow-1 flex-md-grow-0"
+            style="background: #f8fafc; border: 2px solid #cbd5e1; font-size: clamp(0.9rem, 3vw, 1.2rem);"
             (click)="selectInteractiveThalai('வெண்சீர் வெண்டளை')">வெண்சீர் வெண்டளை</button>
-          <button class="btn rounded-pill px-4 py-3 fw-bold shadow-sm text-dark"
-            style="background: #f8fafc; border: 2px solid #cbd5e1; font-size: 1.2rem;"
+          <button class="btn rounded-pill px-3 py-2 fw-bold shadow-sm text-dark flex-grow-1 flex-md-grow-0"
+            style="background: #f8fafc; border: 2px solid #cbd5e1; font-size: clamp(0.9rem, 3vw, 1.2rem);"
             (click)="selectInteractiveThalai('கலித்தளை')">கலித்தளை</button>
-          <button class="btn rounded-pill px-3 py-2 fw-bold shadow-sm text-dark"
-            style="background: #f8fafc; border: 2px solid #cbd5e1; font-size: 1.1rem;"
+          <button class="btn rounded-pill px-3 py-2 fw-bold shadow-sm text-dark flex-grow-1 flex-md-grow-0"
+            style="background: #f8fafc; border: 2px solid #cbd5e1; font-size: clamp(0.9rem, 3vw, 1.1rem);"
             (click)="selectInteractiveThalai('ஒன்றிய வஞ்சித்தளை')">ஒன்றிய வஞ்சித்தளை</button>
-          <button class="btn rounded-pill px-3 py-2 fw-bold shadow-sm text-dark"
-            style="background: #f8fafc; border: 2px solid #cbd5e1; font-size: 1.1rem;"
+          <button class="btn rounded-pill px-3 py-2 fw-bold shadow-sm text-dark flex-grow-1 flex-md-grow-0"
+            style="background: #f8fafc; border: 2px solid #cbd5e1; font-size: clamp(0.9rem, 3vw, 1.1rem);"
             (click)="selectInteractiveThalai('ஒன்றாத வஞ்சித்தளை')">ஒன்றாத வஞ்சித்தளை</button>
+        </div>
+
+        <!-- Inline Feedback Message -->
+        <div *ngIf="feedbackMessage" class="mt-2 text-center animate-slide-up">
+          <div class="d-inline-flex align-items-center gap-2 px-4 py-2 rounded-pill fw-bold text-white shadow-sm"
+            [ngClass]="feedbackType === 'success' ? 'bg-success' : 'bg-danger'">
+            <i class="bi"
+              [ngClass]="feedbackType === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-circle-fill'"></i>
+            {{ feedbackMessage }}
+          </div>
         </div>
 
         <!-- Retry Button if wrong -->
@@ -1043,8 +940,7 @@
             style="max-width: 900px;">
             <textarea class="form-control bg-white border-3 rounded-4 px-3 py-2 shadow-sm fw-bold text-dark flex-grow-1"
               style="border-color: #a78bfa !important; outline: none; font-size: 1.1rem; font-family: 'Nunito', sans-serif; box-shadow: inset 0 2px 6px rgba(167, 139, 250, 0.15) !important; resize: none;"
-              rows="2" [(ngModel)]="userInput" [placeholder]="sandboxPlaceholder"
-              (keyup.enter)="analyzeText()"></textarea>
+              rows="2" [(ngModel)]="userInput" placeholder="Type here..." (keyup.enter)="analyzeText()"></textarea>
 
             <button
               class="btn rounded-pill px-4 py-2 fw-bold shadow-lg hover-lift text-nowrap d-flex align-items-center justify-content-center"
@@ -1146,17 +1042,7 @@
         </div>
       </div>
 
-      <!-- Floating Feedback Alert -->
-      <div *ngIf="feedbackMessage"
-        class="position-absolute bottom-0 start-50 translate-middle-x mb-4 z-3 animate-slide-up" style="width: 80%;">
-        <div
-          class="alert rounded-pill shadow d-flex align-items-center gap-3 px-4 py-3 border-0 fw-bold fs-5 text-white"
-          [ngClass]="feedbackType === 'success' ? 'bg-success' : 'bg-danger'">
-          <i class="bi"
-            [ngClass]="feedbackType === 'success' ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill'"></i>
-          {{ feedbackMessage }}
-        </div>
-      </div>
+
 
     </div>
   </div>

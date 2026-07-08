@@ -77,3 +77,14 @@
 .sidebar nav::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+/* Mobile Header Spacing Overrides */
+@media (max-width: 991.98px) {
+  .mobile-header {
+    height: 60px;
+    box-sizing: border-box;
+  }
+  .main-content > div {
+    margin-top: 60px !important;
+  }
+}

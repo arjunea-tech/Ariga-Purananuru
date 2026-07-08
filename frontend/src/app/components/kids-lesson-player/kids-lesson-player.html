@@ -10,8 +10,8 @@
     </button>
 
     <!-- Progress Bar (Floating Top Center) -->
-    <div class="position-absolute pe-auto"
-      style="top: 30px; left: 50%; transform: translateX(-50%); width: 40%; min-width: 200px; max-width: 400px;">
+    <div class="position-absolute pe-auto w-75 w-md-50"
+      style="top: 30px; left: 50%; transform: translateX(-50%); max-width: 400px;">
       <div class="progress rounded-pill bg-light border border-2 border-secondary overflow-hidden"
         style="height: 18px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
         <div class="progress-bar bg-success rounded-pill transition-all"
@@ -58,9 +58,9 @@
     </div>
     } @else if (showGameOver()) {
     <!-- OUT OF HEARTS SCREEN -->
-    <div class="text-center animate-pop-in w-100 max-w-md mx-auto pb-5">
-      <i class="bi bi-heartbreak-fill text-danger mb-4"
-        style="font-size: 6rem; filter: drop-shadow(0 4px 0 #c62828);"></i>
+    <div class="text-center animate-pop-in w-100 mx-auto pb-5 px-3" style="max-width: 500px;">
+      <i class="bi bi-heartbreak-fill text-danger mb-4 display-1 display-md-1"
+        style="filter: drop-shadow(0 4px 0 #c62828);"></i>
       <h2 class="fw-bold text-dark mb-3">Out of Hearts!</h2>
       <p class="fs-5 text-secondary mb-4">You made too many mistakes. Take a deep breath! Hearts will refill in:</p>
       
@@ -144,21 +144,21 @@
       @if (step.type === 'reading') {
       <!-- Reading Content (Card Box) -->
       <div
-        class="w-100 d-flex flex-column align-items-center justify-content-between mx-auto bg-white bg-opacity-75 shadow-lg position-relative"
-        style="max-width: 1200px; height: 75vh; padding: 2rem 3rem; border-radius: 40px; border: 6px solid rgba(255, 255, 255, 0.8); backdrop-filter: blur(5px);">
+        class="w-100 d-flex flex-column align-items-center justify-content-between mx-auto bg-white bg-opacity-75 shadow-lg position-relative p-3 p-md-5"
+        style="max-width: 1200px; min-height: 75vh; height: auto; border-radius: 40px; border: 6px solid rgba(255, 255, 255, 0.8); backdrop-filter: blur(5px);">
 
         <!-- Read Aloud Button (Top Right Corner) -->
-        <button
+        <button *ngIf="false"
           class="btn btn-warning rounded-circle shadow-lg position-absolute d-flex align-items-center justify-content-center hover-lift"
           style="top: -20px; right: -15px; width: 65px; height: 65px; border: 5px solid white; z-index: 15;"
           (click)="speakText(rawReadingHtml())">
           <i class="bi bi-volume-up-fill fs-2 text-dark"></i>
         </button>
 
-        <!-- Lesson Title (Top Left Corner) -->
-        <div class="position-absolute" style="top: -20px; left: -15px; z-index: 15;">
-          <h3 class="fw-bold text-dark text-center m-0 px-4 py-2 bg-white rounded-pill shadow-sm"
-            style="font-family: 'Fredoka One', cursive; border: 4px solid #fcd34d; font-size: 1.4rem;">
+        <!-- Lesson Title (Top Center) -->
+        <div class="position-absolute start-50 translate-middle-x" style="top: -20px; z-index: 15; width: max-content; max-width: 90%;">
+          <h3 class="fw-bold text-dark text-center m-0 px-3 px-md-4 py-2 bg-white rounded-pill shadow-sm text-truncate"
+            style="font-family: 'Fredoka One', cursive; border: 4px solid #fcd34d; font-size: clamp(1rem, 4vw, 1.4rem);">
             ✨ {{ currentStepIndex() + 1 }}. {{ step.title }}
           </h3>
         </div>
@@ -177,12 +177,10 @@
           <div
             class="flex-grow-1 position-relative p-3 w-100 h-100 d-flex flex-column align-items-center justify-content-center overflow-hidden">
             <!-- Huge Floating Typewriter Content Area -->
-            <div class="reading-content w-100 text-center px-4 py-3 h-100 d-flex flex-column hide-scrollbar"
-              style="overflow-y: auto; justify-content: flex-start; font-size: 1.3rem; line-height: 1.7; color: #1e293b; font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; text-shadow: 0px 4px 15px rgba(255,255,255,0.8); font-weight: 600; letter-spacing: 0.5px;">
-              <div class="mt-auto mb-auto">
-                <span [innerHTML]="typedContent()"></span>
-                <span class="blinking-cursor"
-                  style="border-right: 5px solid #fcd34d; animation: blink 1s step-end infinite;">&nbsp;</span>
+            <div class="reading-content w-100 text-center px-2 px-md-4 py-3 h-100 d-flex flex-column hide-scrollbar"
+              style="overflow-y: auto; justify-content: flex-start; font-size: clamp(1.1rem, 3vw, 1.4rem); line-height: 1.7; color: #1e293b; font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; text-shadow: 0px 4px 15px rgba(255,255,255,0.8); font-weight: 600; letter-spacing: 0.5px;">
+              <div class="mt-auto mb-auto w-100">
+                <div [innerHTML]="rawReadingHtml()" class="text-center"></div>
               </div>
             </div>
           </div>
@@ -191,7 +189,7 @@
         <!-- Navigation Controls -->
         <div class="d-flex justify-content-between align-items-center w-100 mt-2 px-2 px-md-4">
           <button
-            class="btn btn-light rounded-circle shadow-sm hover-lift d-flex align-items-center justify-content-center"
+            class="btn btn-light rounded-circle shadow-sm hover-lift d-flex align-items-center justify-content-center glow-btn"
             style="width: 50px; height: 50px; border: 3px solid #cbd5e1;" (click)="prevContentPage()"
             [disabled]="currentContentPage() === 0">
             <i class="bi bi-chevron-left fs-4 text-secondary fw-bold"></i>
@@ -207,12 +205,39 @@
             }
           </div>
           <button
-            class="btn btn-primary rounded-circle shadow-sm hover-lift d-flex align-items-center justify-content-center text-white"
+            class="btn btn-primary rounded-circle shadow-sm hover-lift d-flex align-items-center justify-content-center text-white glow-btn"
             style="width: 50px; height: 50px; border: 3px solid white;" (click)="nextContentPage()"
             [disabled]="(step.data.isJson && currentContentPage() === step.data.blocks.length - 1) || !step.data.isJson">
             <i class="bi bi-chevron-right fs-4 fw-bold"></i>
           </button>
         </div>
+      </div>
+      }
+
+      @if (step.type === 'remediation') {
+      <div
+        class="w-100 d-flex flex-column align-items-center justify-content-center mx-auto bg-white bg-opacity-90 shadow-lg position-relative animate-pop-in mt-auto mb-auto p-3 p-md-5"
+        style="max-width: 800px; border-radius: 40px; border: 8px solid #fecdd3; backdrop-filter: blur(10px); box-shadow: 0 15px 35px rgba(225, 29, 72, 0.2) !important;">
+        
+        <div class="position-absolute" style="top: -40px;">
+          <i class="bi bi-stars text-warning animate-bounce d-block" style="font-size: clamp(3rem, 10vw, 6rem); filter: drop-shadow(0 5px 15px rgba(251,191,36,0.4));"></i>
+        </div>
+        
+        <h2 class="fw-bold text-danger text-center mb-4 mt-4" style="font-size: clamp(2rem, 6vw, 3rem); font-family: 'Fredoka One', cursive;">
+          {{ step.title }}
+        </h2>
+        
+        <p class="text-dark text-center fw-bold lh-lg mb-5 px-2 px-md-4" style="font-size: clamp(1.2rem, 4vw, 1.75rem); font-family: 'Nunito', sans-serif;">
+          {{ step.data.text }}
+        </p>
+
+        <button class="btn btn-danger btn-lg rounded-pill px-4 px-md-5 py-2 py-md-3 shadow-lg fw-bold d-flex align-items-center justify-content-center gap-2 hover-lift text-white w-100 w-md-auto text-nowrap"
+          style="font-size: clamp(1.2rem, 4vw, 1.6rem); border-bottom: 6px solid #9f1239; transition: transform 0.2s;"
+          (click)="nextStep.emit()"
+          onmousedown="this.style.transform='translateY(4px)'; this.style.borderBottomWidth='2px';"
+          onmouseup="this.style.transform='translateY(0)'; this.style.borderBottomWidth='6px';">
+          மீண்டும் செல்வோம்! <i class="bi bi-rocket-takeoff-fill"></i>
+        </button>
       </div>
       }
 
@@ -281,12 +306,12 @@
     <!-- Floating Feedback Banner -->
     @if (activityFeedbackState() === 'correct') {
     <div class="position-absolute start-50 translate-middle-x animate-bounce-in pe-auto"
-      style="bottom: 30px; width: 90%; max-width: 800px; z-index: 1050;">
-      <div class="rounded-pill p-3 px-5 d-flex justify-content-between align-items-center position-relative shadow-lg"
+      style="bottom: 30px; width: 95%; max-width: 800px; z-index: 1050;">
+      <div class="rounded-5 rounded-md-pill p-3 px-md-5 d-flex flex-column flex-md-row justify-content-between align-items-center position-relative shadow-lg gap-3 gap-md-0"
         style="background: #d7ffb8; border: 4px solid #bbf7d0; box-shadow: 0 20px 40px rgba(74, 222, 128, 0.3) !important;">
 
         <!-- Mascot Reaction -->
-        <div class="position-absolute" style="bottom: -10px; left: -20px;">
+        <div class="position-absolute d-none d-md-block" style="bottom: -10px; left: -20px;">
           <img src="/assets/images/mascot.png" alt="Happy Mascot" class="mascot-happy"
             style="width: 130px; filter: drop-shadow(0 10px 15px rgba(34, 197, 94, 0.5)); transform-origin: bottom center;">
           <i class="bi bi-stars text-warning position-absolute mascot-stars"
@@ -294,56 +319,56 @@
         </div>
 
         <!-- Message -->
-        <div class="d-flex align-items-center gap-4" style="margin-left: 130px;">
-          <div class="bg-white text-success rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+        <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start gap-2 gap-md-4 ms-md-5 ps-md-5">
+          <div class="bg-white text-success rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0"
             style="width: 60px; height: 60px;">
             <i class="bi bi-check-lg" style="font-size: 2.5rem; -webkit-text-stroke: 3px;"></i>
           </div>
           <div>
-            <h2 class="text-success fw-bold mb-0" style="font-size: 2rem; font-family: 'Nunito', sans-serif;">
+            <h2 class="text-success fw-bold mb-0" style="font-size: clamp(1.5rem, 5vw, 2rem); font-family: 'Nunito', sans-serif;">
               Awesome!</h2>
-            <p class="text-success text-opacity-75 mb-0 fw-bold fs-5">You got it right. <span
+            <p class="text-success text-opacity-75 mb-0 fw-bold fs-6 fs-md-5">You got it right. <span
                 class="text-warning text-shadow">+10 XP</span></p>
           </div>
         </div>
 
         <!-- Continue Action -->
         <button
-          class="btn btn-success btn-lg rounded-pill px-4 py-2 fw-bold fs-4 text-white shadow-sm hover-lift border-bottom border-4"
-          style="border-color: #16a34a !important; min-width: 180px;" (click)="continueFromFeedback()">
+          class="btn btn-success btn-lg rounded-pill px-4 py-2 fw-bold text-white shadow-sm hover-lift border-bottom border-4 w-100 w-md-auto mt-2 mt-md-0"
+          style="border-color: #16a34a !important; font-size: clamp(1.1rem, 4vw, 1.5rem);" (click)="continueFromFeedback()">
           CONTINUE <i class="bi bi-arrow-right"></i>
         </button>
       </div>
     </div>
     } @else if (activityFeedbackState() === 'incorrect') {
     <div class="position-absolute start-50 translate-middle-x animate-bounce-in pe-auto"
-      style="bottom: 30px; width: 90%; max-width: 800px; z-index: 1050;">
-      <div class="rounded-pill p-3 px-5 d-flex justify-content-between align-items-center position-relative shadow-lg"
+      style="bottom: 30px; width: 95%; max-width: 800px; z-index: 1050;">
+      <div class="rounded-5 rounded-md-pill p-3 px-md-5 d-flex flex-column flex-md-row justify-content-between align-items-center position-relative shadow-lg gap-3 gap-md-0"
         style="background: #fee2e2; border: 4px solid #fecaca; box-shadow: 0 20px 40px rgba(248, 113, 113, 0.3) !important;">
 
         <!-- Mascot Reaction -->
-        <div class="position-absolute" style="bottom: -10px; left: -20px;">
+        <div class="position-absolute d-none d-md-block" style="bottom: -10px; left: -20px;">
           <img src="/assets/images/mascot.png" alt="Sad Mascot" class="mascot-sad"
             style="width: 120px; filter: grayscale(70%) sepia(30%) hue-rotate(-50deg) drop-shadow(0 10px 15px rgba(239, 68, 68, 0.3)); transform-origin: bottom center;">
         </div>
 
         <!-- Message -->
-        <div class="d-flex align-items-center gap-4" style="margin-left: 120px;">
-          <div class="bg-white text-danger rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+        <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start gap-2 gap-md-4 ms-md-5 ps-md-4">
+          <div class="bg-white text-danger rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0"
             style="width: 60px; height: 60px;">
             <i class="bi bi-x-lg" style="font-size: 2.5rem; -webkit-text-stroke: 3px;"></i>
           </div>
           <div>
-            <h2 class="text-danger fw-bold mb-0" style="font-size: 2rem; font-family: 'Nunito', sans-serif;">Not quite
+            <h2 class="text-danger fw-bold mb-0" style="font-size: clamp(1.5rem, 5vw, 2rem); font-family: 'Nunito', sans-serif;">Not quite
               right</h2>
-            <p class="text-danger text-opacity-75 mb-0 fw-bold fs-5">Let's try that again!</p>
+            <p class="text-danger text-opacity-75 mb-0 fw-bold fs-6 fs-md-5">Let's try that again!</p>
           </div>
         </div>
 
         <!-- Continue Action -->
         <button
-          class="btn btn-danger btn-lg rounded-pill px-4 py-2 fw-bold fs-4 text-white shadow-sm hover-lift border-bottom border-4"
-          style="border-color: #dc2626 !important; min-width: 180px;" (click)="continueFromFeedback()">
+          class="btn btn-danger btn-lg rounded-pill px-4 py-2 fw-bold text-white shadow-sm hover-lift border-bottom border-4 w-100 w-md-auto mt-2 mt-md-0"
+          style="border-color: #dc2626 !important; font-size: clamp(1.1rem, 4vw, 1.5rem);" (click)="continueFromFeedback()">
           GOT IT <i class="bi bi-arrow-right"></i>
         </button>
       </div>
@@ -354,24 +379,24 @@
       <!-- Left Side: PREV -->
       @if (currentStepIndex() > 0 && !lessonFinished()) {
       <button
-        class="btn btn-light rounded-pill px-4 py-2 fw-bold fs-5 text-secondary shadow-lg hover-lift border border-4 border-light transition-all position-absolute pe-auto"
-        style="bottom: 20px; left: 20px; min-width: 140px;" (click)="prevLessonStep()">
-        <i class="bi bi-chevron-left me-2"></i> PREV
+        class="btn btn-light rounded-pill px-3 px-md-4 py-2 fw-bold text-secondary shadow-lg hover-lift border border-4 border-light transition-all position-absolute pe-auto"
+        style="bottom: 20px; left: 10px; min-width: 100px; font-size: clamp(1rem, 3vw, 1.25rem);" (click)="prevLessonStep()">
+        <i class="bi bi-chevron-left me-1 me-md-2"></i> PREV
       </button>
       }
 
       <!-- Right Side: NEXT / FINISH -->
       @if (lessonFinished()) {
       <button
-        class="btn btn-success rounded-pill px-4 py-2 fw-bold fs-5 text-white shadow-lg hover-lift border-bottom border-4 position-absolute pe-auto"
-        style="bottom: 20px; right: 20px; min-width: 140px;" (click)="finishLesson()">
-        FINISH <i class="bi bi-check2-circle ms-2"></i>
+        class="btn btn-success rounded-pill px-3 px-md-4 py-2 fw-bold text-white shadow-lg hover-lift border-bottom border-4 position-absolute pe-auto"
+        style="bottom: 20px; right: 10px; min-width: 100px; font-size: clamp(1rem, 3vw, 1.25rem);" (click)="finishLesson()">
+        FINISH <i class="bi bi-check2-circle ms-1 ms-md-2"></i>
       </button>
       } @else if (currentStep()?.type !== 'activity') {
       <button
-        class="btn rounded-pill px-4 py-2 fw-bold fs-5 shadow-lg hover-lift transition-all text-white border-bottom border-4 position-absolute pe-auto"
-        style="bottom: 20px; right: 20px; min-width: 140px; background: #6366f1; border-color: #4f46e5;" (click)="nextLessonStep()">
-        NEXT <i class="bi bi-chevron-right ms-2"></i>
+        class="btn rounded-pill px-3 px-md-4 py-2 fw-bold shadow-lg hover-lift transition-all text-white border-bottom border-4 position-absolute pe-auto"
+        style="bottom: 20px; right: 10px; min-width: 100px; background: #6366f1; border-color: #4f46e5; font-size: clamp(1rem, 3vw, 1.25rem);" (click)="nextLessonStep()">
+        NEXT <i class="bi bi-chevron-right ms-1 ms-md-2"></i>
       </button>
       }
     </div>

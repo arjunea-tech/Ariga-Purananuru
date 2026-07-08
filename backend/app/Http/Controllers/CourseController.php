@@ -84,7 +84,7 @@ class CourseController extends Controller
             'levels.chapters.contents' => function ($query) {
                 $query->select('contents.id', 'contents.name', 'contents.title', 'contents.sort_order', 'contents.is_active')
                     ->where('contents.is_active', true)
-                    ->orderBy('content_chapters.sort_order');
+                    ->orderBy('contents.sort_order');
             },
             'levels.chapters.assessments' => function ($query) {
                 $query->where('assessments.is_active', true);
