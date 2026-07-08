@@ -6,7 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { forkJoin } from 'rxjs';
 
 export interface LessonStep {
-  type: 'video' | 'pdf' | 'reading' | 'activity' | 'assessment' | 'practice';
+  type: 'video' | 'pdf' | 'reading' | 'activity' | 'assessment' | 'practice' | 'remediation';
   title: string;
   data: any;
 }
@@ -417,14 +417,49 @@ export class CoursePlayer implements OnInit, OnDestroy {
           }
 
           if (readingBlocks.length > 0) {
-            let groupedBlocks = [];
-            let currentGroup = [];
+            let processedReadingBlocks: any[] = [];
             for (let i = 0; i < readingBlocks.length; i++) {
               let b = readingBlocks[i];
-              currentGroup.push(b);
-              if (currentGroup.length >= 3 && b.type !== 'header') {
-                groupedBlocks.push(currentGroup);
-                currentGroup = [];
+              if ((b.type === 'paragraph' || b.type === 'text') && b.data && b.data.text && b.data.text.length > 400 && b.data.text.includes('<')) {
+                 const rawHtml = b.data.text;
+                 const parts = rawHtml.split(/(?=<h4|<h3|<p>|<ul|<ol)/gi);
+                 let currentPageHtml = '';
+                 for (let part of parts) {
+                    if (currentPageHtml.length + part.length > 500 && currentPageHtml.length > 0) {
+                       processedReadingBlocks.push({ type: 'paragraph', data: { text: currentPageHtml } });
+                       currentPageHtml = part;
+                    } else {
+                       currentPageHtml += part;
+                    }
+                 }
+                 if (currentPageHtml.length > 0) {
+                    processedReadingBlocks.push({ type: 'paragraph', data: { text: currentPageHtml } });
+                 }
+              } else {
+                 processedReadingBlocks.push(b);
+              }
+            }
+
+            let groupedBlocks = [];
+            let currentGroup = [];
+            let currentGroupLength = 0;
+
+            for (let i = 0; i < processedReadingBlocks.length; i++) {
+              let b = processedReadingBlocks[i];
+              let bLength = (b.data && typeof b.data.text === 'string') ? b.data.text.length : 100;
+              
+              if (currentGroupLength > 0 && currentGroupLength + bLength > 600) {
+                 groupedBlocks.push(currentGroup);
+                 currentGroup = [b];
+                 currentGroupLength = bLength;
+              } else {
+                 currentGroup.push(b);
+                 currentGroupLength += bLength;
+                 if (currentGroup.length >= 3 && b.type !== 'header') {
+                   groupedBlocks.push(currentGroup);
+                   currentGroup = [];
+                   currentGroupLength = 0;
+                 }
               }
             }
             if (currentGroup.length > 0) {
@@ -515,10 +550,31 @@ export class CoursePlayer implements OnInit, OnDestroy {
             });
           }
         } else {
+          const rawHtml = content.text_content || '';
+          let pages = [];
+          
+          if (rawHtml.length > 400) {
+             const parts = rawHtml.split(/(?=<h4|<h3|<p>|<ul|<ol)/gi);
+             let currentPage = '';
+             for (let part of parts) {
+                if (currentPage.length + part.length > 500 && currentPage.length > 0) {
+                   pages.push([{ type: 'paragraph', data: { text: currentPage } }]);
+                   currentPage = part;
+                } else {
+                   currentPage += part;
+                }
+             }
+             if (currentPage.length > 0) {
+                pages.push([{ type: 'paragraph', data: { text: currentPage } }]);
+             }
+          } else {
+             pages = [[{ type: 'paragraph', data: { text: rawHtml } }]];
+          }
+
           steps.push({
             type: 'reading',
             title: content.title || content.name,
-            data: { isJson: false, text: content.text_content }
+            data: { isJson: true, blocks: pages }
           });
         }
       }
@@ -557,7 +613,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
       return;
     }
 
-    if (step.type === 'pdf') {
+    if (step.type === 'pdf' || step.type === 'remediation') {
       this.isStepCompleted.set(true);
     } else if (step.type === 'reading') {
       if (step.data.isJson && step.data.blocks && step.data.blocks.length > 0) {
@@ -678,16 +734,47 @@ export class CoursePlayer implements OnInit, OnDestroy {
     if (state === 'incorrect' && this.hearts() > 0) {
       const currentStep = this.currentStep();
       if (currentStep) {
-        // Only inject remediation warning once
-        const hasRemediation = this.lessonSequence().some(s => s.title === 'Remediation Review');
-        if (!hasRemediation) {
-           this.lessonSequence.update(seq => [...seq, {
-               type: 'reading',
-               title: 'மீண்டும் முயற்சி செய்வோம்!',
-               data: { isJson: false, text: 'சில கேள்விகளுக்குத் தவறாகப் பதில் அளித்துவிட்டீர்கள்! கவலை வேண்டாம், மீண்டும் ஒருமுறை முயற்சி செய்வோம்! உங்களால் முடியும்! ✨' }
-           }]);
-        }
-        this.lessonSequence.update(seq => [...seq, currentStep]);
+        // Clone the step and data to ensure Angular detects the reference change and resets state
+        const clonedStep = {
+          ...currentStep,
+          data: currentStep.data ? {
+            ...currentStep.data,
+            data: currentStep.data.data ? { ...currentStep.data.data } : undefined
+          } : undefined
+        };
+
+        const remediationStep: LessonStep = {
+          type: 'remediation',
+          title: 'மீண்டும் முயற்சி செய்வோம்!',
+          data: { 
+            isJson: false, 
+            text: 'சில கேள்விகளுக்குத் தவறாகப் பதில் அளித்துவிட்டீர்கள்! கவலை வேண்டாம், மீண்டும் ஒருமுறை முயற்சி செய்வோம்! உங்களால் முடியும்! ✨' 
+          }
+        };
+
+        this.lessonSequence.update(seq => {
+          const newSeq = [...seq];
+          const firstAssessmentIdx = newSeq.findIndex(s => s.type === 'assessment');
+
+          if (firstAssessmentIdx !== -1) {
+            // Check if remediation warning is already injected before this assessment
+            const hasRemediation = newSeq.slice(0, firstAssessmentIdx).some(s => s.title === 'மீண்டும் முயற்சி செய்வோம்!');
+            if (!hasRemediation) {
+              newSeq.splice(firstAssessmentIdx, 0, remediationStep, clonedStep);
+            } else {
+              newSeq.splice(firstAssessmentIdx, 0, clonedStep);
+            }
+          } else {
+            // No assessment, append to end
+            const hasRemediation = newSeq.some(s => s.title === 'மீண்டும் முயற்சி செய்வோம்!');
+            if (!hasRemediation) {
+              newSeq.push(remediationStep, clonedStep);
+            } else {
+              newSeq.push(clonedStep);
+            }
+          }
+          return newSeq;
+        });
       }
     }
 

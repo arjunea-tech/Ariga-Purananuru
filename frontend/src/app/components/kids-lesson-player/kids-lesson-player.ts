@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { ActivityRenderer } from '../activity-engine/activity-renderer/activity-renderer';
 import { PracticeEngineComponent } from '../practice-engine/practice-engine.component';
 import { AudioService } from '../../services/audio.service';
+import { AuthService } from '../../services/auth';
 import confetti from 'canvas-confetti';
 import { gsap } from 'gsap';
 
 export interface LessonStep {
-  type: 'video' | 'pdf' | 'reading' | 'practice' | 'activity' | 'assessment';
+  type: 'video' | 'pdf' | 'reading' | 'practice' | 'activity' | 'assessment' | 'remediation';
   title: string;
   data: any;
 }
@@ -43,6 +44,7 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
   @Output() continueFeedback = new EventEmitter<void>();
 
   private audioService = inject(AudioService);
+  private authService = inject(AuthService);
 
   currentContentPage = signal<number>(0);
   typedContent = signal<string>('');
@@ -61,7 +63,7 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
 
   rawReadingHtml = computed(() => {
     const step = this.currentStep();
-    if (step && step.type === 'reading') {
+    if (step && (step.type === 'reading' || step.type === 'remediation')) {
       if (step.data.isJson) {
         const pageData = step.data.blocks[this.currentContentPage()];
         if (!pageData) return '';
@@ -242,6 +244,18 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
         });
       }
     }
+  }
+
+  logout() {
+    this.authService.logout().subscribe({
+      complete: () => {
+        window.location.href = '/login';
+      },
+      error: () => {
+        this.authService.clearSession();
+        window.location.href = '/login';
+      }
+    });
   }
 
 

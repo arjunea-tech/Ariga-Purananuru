@@ -11,9 +11,9 @@ import { TamilNLPService, SeiyulAnalysis } from '../../services/tamil-nlp.servic
   styleUrls: ['./practice-engine.component.css']
 })
 export class PracticeEngineComponent implements OnInit {
-  @Input() practiceType: string = 'alahidu'; 
-  @Input() practiceContent: string = ''; 
-  
+  @Input() practiceType: string = 'alahidu';
+  @Input() practiceContent: string = '';
+
   @Output() practiceCompleted = new EventEmitter<void>();
 
   tabs = [
@@ -26,14 +26,14 @@ export class PracticeEngineComponent implements OnInit {
 
   activeTab: string = 'alahidu';
   userInput: string = 'அகழ்வாரைத் தாங்கும் நிலம்போலத் தம்மை\nஇகழ்வார்ப் பொறுத்தல் தலை';
-  
+
   analysisResult: SeiyulAnalysis | null = null;
-  
+
   // Game Mode variables (for when used inside a course player)
   isGameMode: boolean = false;
   isFullscreen: boolean = false;
   step: 'dashboard_menu' | 'dashboard_input' | 'select_mode' | 'input_word' | 'split_word' | 'analyze_word' | 'auto_explain' | 'sandbox' | 'result' | 'identify_seer' | 'identify_thalai' = 'select_mode';
-  
+
   // Interactive flow variables
   playMode: 'explain' | 'practice' = 'explain';
   interactiveWord: string = '';
@@ -41,8 +41,8 @@ export class PracticeEngineComponent implements OnInit {
   interactiveSplitInput: string = '';
   interactiveParts: string[] = [];
   interactiveCurrentPartIndex: number = 0;
-  interactiveValidationResults: {part: string, type: string, isCorrect: boolean, userGuess?: string, explanation?: string}[] = [];
-  
+  interactiveValidationResults: { part: string, type: string, isCorrect: boolean, userGuess?: string, explanation?: string }[] = [];
+
   feedbackMessage: string | null = null;
   feedbackType: 'success' | 'error' = 'success';
   allCorrect: boolean = false;
@@ -60,6 +60,7 @@ export class PracticeEngineComponent implements OnInit {
   hasCheckedInteractiveSeer = false;
   interactiveSeerGuesses: string[] = []; // [wordIndex]
   interactiveSeerResults: (boolean | null)[] = [];
+  interactiveSeerOptions: string[][] = []; // Dynamic options for Seer choices
 
   sandboxTitle: string = 'வார்த்தையை உள்ளிடுக';
   sandboxDesc: string = 'கீழே வார்த்தையை தட்டச்சு செய்து, பிரித்து காண்க பட்டனை அழுத்துக!';
@@ -80,7 +81,7 @@ export class PracticeEngineComponent implements OnInit {
   constructor(
     private tamilNLP: TamilNLPService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   getRandomTamilLetter(): string {
     const types = ['uyir_kuril', 'uyir_nedil', 'mei', 'uyirmei_kuril', 'uyirmei_nedil'];
@@ -89,7 +90,7 @@ export class PracticeEngineComponent implements OnInit {
     if (selectedType === 'uyir_kuril') return this.uyirKuril[Math.floor(Math.random() * this.uyirKuril.length)];
     if (selectedType === 'uyir_nedil') return this.uyirNedil[Math.floor(Math.random() * this.uyirNedil.length)];
     if (selectedType === 'mei') return this.mei[Math.floor(Math.random() * this.mei.length)];
-    
+
     const base = this.uyirmeiBase[Math.floor(Math.random() * this.uyirmeiBase.length)];
     if (selectedType === 'uyirmei_kuril') {
       const mod = this.kurilModifiers[Math.floor(Math.random() * this.kurilModifiers.length)];
@@ -109,25 +110,25 @@ export class PracticeEngineComponent implements OnInit {
     if (this.practiceContent) {
       this.isGameMode = true;
       this.activeTab = this.practiceType;
-      
+
       // Sandbox fallback for thalai/alahidu (which don't have interactive toy modes yet)
       if (this.practiceType === 'thalai') {
-         this.step = 'sandbox';
-         this.analysisResult = null;
-         
-         if (this.practiceType === 'thalai') {
-            this.sandboxTitle = 'தளை பயிற்சி';
-            this.sandboxDesc = 'கீழே ஒரு பாடலின் வரியை உள்ளிட்டு, தளைகளை அறியலாம்.';
-            this.sandboxPlaceholder = 'உதாரணம்: அகர முதல எழுத்தெல்லாம்';
-            this.userInput = this.practiceContent || ''; 
-         }
-         
-         if (this.userInput) {
-             this.analyzeText();
-         }
+        this.step = 'sandbox';
+        this.analysisResult = null;
+
+        if (this.practiceType === 'thalai') {
+          this.sandboxTitle = 'தளை பயிற்சி';
+          this.sandboxDesc = 'கீழே ஒரு பாடலின் வரியை உள்ளிட்டு, தளைகளை அறியலாம்.';
+          this.sandboxPlaceholder = 'உதாரணம்: அகர முதல எழுத்தெல்லாம்';
+          this.userInput = this.practiceContent || '';
+        }
+
+        if (this.userInput) {
+          this.analyzeText();
+        }
       } else {
-         // Eluthu, Asai, Seer, Alahidu will use the new Interactive Flow
-         this.step = 'select_mode';
+        // Eluthu, Asai, Seer, Alahidu will use the new Interactive Flow
+        this.step = 'select_mode';
       }
     } else {
       // Standalone Dashboard mode
@@ -165,9 +166,9 @@ export class PracticeEngineComponent implements OnInit {
 
   goBackToInput() {
     if (!this.isGameMode) {
-       this.step = 'dashboard_input';
+      this.step = 'dashboard_input';
     } else {
-       this.step = 'select_mode';
+      this.step = 'select_mode';
     }
     this.interactiveWord = '';
     this.interactiveAnalysis = null;
@@ -180,6 +181,7 @@ export class PracticeEngineComponent implements OnInit {
     this.hasCheckedInteractiveSeer = false;
     this.interactiveSeerGuesses = [];
     this.interactiveSeerResults = [];
+    this.interactiveSeerOptions = [];
     this.interactiveCurrentThalaiIndex = 0;
     this.interactiveThalaiValidationResults = [];
     this.feedbackMessage = null;
@@ -203,43 +205,47 @@ export class PracticeEngineComponent implements OnInit {
       this.step = 'auto_explain';
     } else {
       // PRACTICE MODE (User inputs split directly)
-      const userSplitAttempt = this.interactiveWord;
+      const userSplitAttempt = this.interactiveWord.trim();
       const baseWord = userSplitAttempt.replace(/\//g, '').trim();
-      
+
       this.interactiveAnalysis = this.tamilNLP.analyzeSeiyulLine(baseWord);
       if (!this.interactiveAnalysis || !this.interactiveAnalysis.word_analysis.length) return;
-      
+
       const correctSplitRaw = this.interactiveAnalysis.word_analysis.map(w => w.asai_text).join(' / ');
-      
+
       const normalizedUser = userSplitAttempt.replace(/\s+/g, '/').replace(/\/+/g, '/');
       const normalizedCorrect = correctSplitRaw.replace(/\s+/g, '/').replace(/\/+/g, '/');
 
       if (normalizedUser === normalizedCorrect) {
+        this.feedbackMessage = null;
         if (this.practiceType === 'seer') {
-          // Immediately show the result for Seer mode
-          this.step = 'result';
-          this.allCorrect = true;
-          this.practiceCompleted.emit();
+          // Move to Seer identification
+          this.hasCheckedInteractiveSeer = false;
+          this.interactiveSeerGuesses = new Array(this.interactiveAnalysis.word_analysis.length).fill('');
+          this.interactiveSeerResults = new Array(this.interactiveAnalysis.word_analysis.length).fill(null);
+          this.interactiveSeerOptions = this.interactiveAnalysis.word_analysis.map(w => this.generateSeerOptions(w.seer_pattern, w.asai_groups.length));
+          this.step = 'identify_seer';
         } else {
           // Asai Mode -> Move to Asai identification
           this.interactiveParts = normalizedCorrect.split('/');
           this.interactiveCurrentPartIndex = 0;
           this.interactiveValidationResults = [];
           this.hasCheckedInteractiveAsai = false;
-          
+
           // Initialize the 2D arrays for per-word Asai guessing
           this.interactiveAsaiGuesses = [];
           this.interactiveAsaiResults = [];
           this.interactiveAnalysis.word_analysis.forEach(wordObj => {
-             this.interactiveAsaiGuesses.push(new Array(wordObj.asai_groups.length).fill(''));
-             this.interactiveAsaiResults.push(new Array(wordObj.asai_groups.length).fill(null));
+            this.interactiveAsaiGuesses.push(new Array(wordObj.asai_groups.length).fill(''));
+            this.interactiveAsaiResults.push(new Array(wordObj.asai_groups.length).fill(null));
           });
-          
+
           // Initialize 1D arrays for per-word Seer guessing
           this.hasCheckedInteractiveSeer = false;
           this.interactiveSeerGuesses = new Array(this.interactiveAnalysis.word_analysis.length).fill('');
           this.interactiveSeerResults = new Array(this.interactiveAnalysis.word_analysis.length).fill(null);
-          
+          this.interactiveSeerOptions = this.interactiveAnalysis.word_analysis.map(w => this.generateSeerOptions(w.seer_pattern, w.asai_groups.length));
+
           this.step = 'analyze_word';
         }
       } else {
@@ -253,28 +259,28 @@ export class PracticeEngineComponent implements OnInit {
   getAsaiExplanation(asaiText: string): string {
     const letters = this.tamilNLP.splitTamilLetters(asaiText);
     const mathirais = letters.map(l => this.tamilNLP.getMathirai(l));
-    
+
     // Check for trailing Mei letters that might have been grouped
     // Ner Asai
     if (mathirais.length >= 1 && mathirais[0] === 1) {
-       if (mathirais.length === 1) return 'தனிக்குறில்';
-       if (mathirais.every((m, i) => i === 0 ? m === 1 : m === 0)) return 'தனிக்குறில் ஒற்று';
+      if (mathirais.length === 1) return 'தனிக்குறில்';
+      if (mathirais.every((m, i) => i === 0 ? m === 1 : m === 0)) return 'தனிக்குறில் ஒற்று';
     }
     if (mathirais.length >= 1 && mathirais[0] === 2) {
-       if (mathirais.length === 1) return 'தனிநெடில்';
-       if (mathirais.every((m, i) => i === 0 ? m === 2 : m === 0)) return 'தனிநெடில் ஒற்று';
+      if (mathirais.length === 1) return 'தனிநெடில்';
+      if (mathirais.every((m, i) => i === 0 ? m === 2 : m === 0)) return 'தனிநெடில் ஒற்று';
     }
-    
+
     // Nirai Asai
     if (mathirais.length >= 2 && mathirais[0] === 1 && mathirais[1] === 1) {
-       if (mathirais.length === 2) return 'இருகுறில்';
-       if (mathirais.every((m, i) => i < 2 ? m === 1 : m === 0)) return 'இருகுறில் ஒற்று';
+      if (mathirais.length === 2) return 'இருகுறில்';
+      if (mathirais.every((m, i) => i < 2 ? m === 1 : m === 0)) return 'இருகுறில் ஒற்று';
     }
     if (mathirais.length >= 2 && mathirais[0] === 1 && mathirais[1] === 2) {
-       if (mathirais.length === 2) return 'குறில் நெடில்';
-       if (mathirais.every((m, i) => i === 0 ? m === 1 : (i === 1 ? m === 2 : m === 0))) return 'குறில் நெடில் ஒற்று';
+      if (mathirais.length === 2) return 'குறில் நெடில்';
+      if (mathirais.every((m, i) => i === 0 ? m === 1 : (i === 1 ? m === 2 : m === 0))) return 'குறில் நெடில் ஒற்று';
     }
-    
+
     return 'விளக்கம் இல்லை';
   }
 
@@ -295,46 +301,49 @@ export class PracticeEngineComponent implements OnInit {
     let anyEmpty = false;
 
     this.interactiveAnalysis.word_analysis.forEach((wordObj, wIndex) => {
-       wordObj.asai_groups.forEach((asai, aIndex) => {
-          const guess = this.interactiveAsaiGuesses[wIndex][aIndex];
-          if (!guess) {
-             anyEmpty = true;
-             this.interactiveAsaiResults[wIndex][aIndex] = null;
-          } else {
-             const isCorrect = asai.type.includes(guess);
-             this.interactiveAsaiResults[wIndex][aIndex] = isCorrect;
-             if (!isCorrect) allValid = false;
-          }
-       });
+      wordObj.asai_groups.forEach((asai, aIndex) => {
+        const guess = this.interactiveAsaiGuesses[wIndex][aIndex];
+        if (!guess) {
+          anyEmpty = true;
+          this.interactiveAsaiResults[wIndex][aIndex] = null;
+        } else {
+          const isCorrect = asai.type.includes(guess);
+          this.interactiveAsaiResults[wIndex][aIndex] = isCorrect;
+          if (!isCorrect) allValid = false;
+        }
+      });
     });
 
     if (anyEmpty) {
-       this.showFeedback('தயவுசெய்து அனைத்து அசைகளுக்கும் விடையளிக்கவும்!', 'error');
-       return;
+      this.showFeedback('தயவுசெய்து அனைத்து அசைகளுக்கும் விடையளிக்கவும்!', 'error');
+      return;
     }
 
     this.hasCheckedInteractiveAsai = true;
     this.allCorrect = allValid;
 
     if (allValid) {
-       if (this.practiceType === 'alahidu') {
-         this.showFeedback('அசை சரியாக பிரிக்கப்பட்டுள்ளது! அடுத்து சீர் கண்டுபிடிப்போம்.', 'success');
-         setTimeout(() => {
-           this.step = 'identify_seer';
-           this.interactiveCurrentWordIndex = 0;
-           this.interactiveSeerValidationResults = [];
-           this.cdr.detectChanges();
-         }, 2000);
-       } else {
-         this.showFeedback('அற்புதம்! முழுமையாக முடித்துவிட்டீர்கள். 🌟', 'success');
-         setTimeout(() => {
-           this.step = 'result';
-           this.practiceCompleted.emit();
-           this.cdr.detectChanges();
-         }, 2500);
-       }
+      this.feedbackMessage = null;
+      if (this.practiceType === 'alahidu' || this.practiceType === 'seer') {
+        this.showFeedback(this.practiceType === 'alahidu' ? 'அசை சரியாக பிரிக்கப்பட்டுள்ளது! அடுத்து சீர் கண்டுபிடிப்போம்.' : 'அசை சரி! இப்போது இது என்ன சீர் என்று கண்டுபிடி.', 'success');
+        setTimeout(() => {
+          this.feedbackMessage = null;
+          this.step = 'identify_seer';
+          this.interactiveCurrentWordIndex = 0;
+          this.interactiveSeerValidationResults = [];
+          this.interactiveSeerOptions = this.interactiveAnalysis!.word_analysis.map(w => this.generateSeerOptions(w.seer_pattern, w.asai_groups.length));
+          this.cdr.detectChanges();
+        }, 2000);
+      } else {
+        this.showFeedback('அற்புதம்! முழுமையாக முடித்துவிட்டீர்கள். 🌟', 'success');
+        setTimeout(() => {
+          this.step = 'result';
+          this.practiceCompleted.emit();
+          this.cdr.detectChanges();
+        }, 2500);
+      }
     } else {
-       this.showFeedback('சில தவறுகள் உள்ளன. மீண்டும் முயற்சிக்கவும்!', 'error');
+      this.showFeedback('சில தவறுகள் உள்ளன. மீண்டும் முயற்சிக்கவும்!', 'error');
     }
   }
 
@@ -347,6 +356,41 @@ export class PracticeEngineComponent implements OnInit {
 
   // --- ALAHIDU INTERACTIVE METHODS ---
 
+  generateSeerOptions(correctSeer: string, asaiCount: number): string[] {
+    let options: string[] = [];
+    if (asaiCount === 1) {
+      options = ['நாள்', 'மலர்', 'காசு', 'பிறப்பு'];
+    } else if (asaiCount === 2) {
+      options = ['தேமா', 'புளிமா', 'கருவிளம்', 'கூவிளம்'];
+    } else if (asaiCount === 3) {
+      if (correctSeer.includes('கனி')) {
+        options = ['தேமாங்கனி', 'புளிமாங்கனி', 'கருவிளங்கனி', 'கூவிளங்கனி'];
+      } else {
+        options = ['தேமாங்காய்', 'புளிமாங்காய்', 'கருவிளங்காய்', 'கூவிளங்காய்'];
+      }
+    } else if (asaiCount === 4) {
+      if (correctSeer.includes('தண்பூ')) {
+        options = ['தேமாந்தண்பூ', 'புளிமாந்தண்பூ', 'கருவிளந்தண்பூ', 'கூவிளந்தண்பூ'];
+      } else if (correctSeer.includes('தண்ணிழல்')) {
+        options = ['தேமாந்தண்ணிழல்', 'புளிமாந்தண்ணிழல்', 'கருவிளந்தண்ணிழல்', 'கூவிளந்தண்ணிழல்'];
+      } else if (correctSeer.includes('நறும்பூ')) {
+        options = ['தேமாநறும்பூ', 'புளிமாநறும்பூ', 'கருவிளநறும்பூ', 'கூவிளநறும்பூ'];
+      } else {
+        options = ['தேமாநறுநிழல்', 'புளிமாநறுநிழல்', 'கருவிளநறுநிழல்', 'கூவிளநறுநிழல்'];
+      }
+    }
+
+    // Fallback if empty or unknown (just in case)
+    if (options.length === 0) options = [correctSeer];
+
+    // Shuffle options using Fisher-Yates
+    for (let i = options.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [options[i], options[j]] = [options[j], options[i]];
+    }
+    return options;
+  }
+
   selectInteractiveSeerByWord(wordIndex: number, seerGuess: string) {
     this.interactiveSeerGuesses[wordIndex] = seerGuess;
   }
@@ -357,44 +401,44 @@ export class PracticeEngineComponent implements OnInit {
     let anyEmpty = false;
 
     this.interactiveAnalysis.word_analysis.forEach((wordObj, wIndex) => {
-       const guess = this.interactiveSeerGuesses[wIndex];
-       if (!guess) {
-          anyEmpty = true;
-          this.interactiveSeerResults[wIndex] = null;
-       } else {
-          const isCorrect = guess === wordObj.seer_pattern;
-          this.interactiveSeerResults[wIndex] = isCorrect;
-          if (!isCorrect) allValid = false;
-       }
+      const guess = this.interactiveSeerGuesses[wIndex];
+      if (!guess) {
+        anyEmpty = true;
+        this.interactiveSeerResults[wIndex] = null;
+      } else {
+        const isCorrect = guess === wordObj.seer_pattern;
+        this.interactiveSeerResults[wIndex] = isCorrect;
+        if (!isCorrect) allValid = false;
+      }
     });
 
     if (anyEmpty) {
-       this.showFeedback('தயவுசெய்து அனைத்து வார்த்தைகளுக்கும் சீர் கண்டுபிடிக்கவும்!', 'error');
-       return;
+      this.showFeedback('தயவுசெய்து அனைத்து வார்த்தைகளுக்கும் சீர் கண்டுபிடிக்கவும்!', 'error');
+      return;
     }
 
     this.hasCheckedInteractiveSeer = true;
     this.allCorrect = allValid;
 
     if (allValid) {
-       if (this.interactiveAnalysis.thalai_analysis.length > 0) {
-          this.showFeedback('அற்புதம்! சீர்கள் சரியாக உள்ளன. அடுத்து தளை கண்டுபிடிப்போம்.', 'success');
-          setTimeout(() => {
-            this.step = 'identify_thalai';
-            this.interactiveCurrentThalaiIndex = 0;
-            this.interactiveThalaiValidationResults = [];
-            this.cdr.detectChanges();
-          }, 2000);
-       } else {
-          this.showFeedback('அற்புதம்! முழுமையாக முடித்துவிட்டீர்கள். 🌟', 'success');
-          setTimeout(() => {
-            this.step = 'result';
-            this.practiceCompleted.emit();
-            this.cdr.detectChanges();
-          }, 2500);
-       }
+      if (this.interactiveAnalysis.thalai_analysis.length > 0) {
+        this.showFeedback('அற்புதம்! சீர்கள் சரியாக உள்ளன. அடுத்து தளை கண்டுபிடிப்போம்.', 'success');
+        setTimeout(() => {
+          this.step = 'identify_thalai';
+          this.interactiveCurrentThalaiIndex = 0;
+          this.interactiveThalaiValidationResults = [];
+          this.cdr.detectChanges();
+        }, 2000);
+      } else {
+        this.showFeedback('அற்புதம்! முழுமையாக முடித்துவிட்டீர்கள். 🌟', 'success');
+        setTimeout(() => {
+          this.step = 'result';
+          this.practiceCompleted.emit();
+          this.cdr.detectChanges();
+        }, 2500);
+      }
     } else {
-       this.showFeedback('சில தவறுகள் உள்ளன. மீண்டும் முயற்சிக்கவும்!', 'error');
+      this.showFeedback('சில தவறுகள் உள்ளன. மீண்டும் முயற்சிக்கவும்!', 'error');
     }
   }
 
@@ -432,14 +476,14 @@ export class PracticeEngineComponent implements OnInit {
       const allThalaiCorrect = this.interactiveThalaiValidationResults.every(r => r.isCorrect);
       this.allCorrect = allThalaiCorrect;
       if (allThalaiCorrect) {
-         this.showFeedback('அற்புதம்! முழுமையாக அலகிட்டு முடித்துவிட்டீர்கள். 🌟', 'success');
-         setTimeout(() => {
-           this.step = 'result';
-           this.practiceCompleted.emit();
-           this.cdr.detectChanges();
-         }, 2500);
+        this.showFeedback('அற்புதம்! முழுமையாக அலகிட்டு முடித்துவிட்டீர்கள். 🌟', 'success');
+        setTimeout(() => {
+          this.step = 'result';
+          this.practiceCompleted.emit();
+          this.cdr.detectChanges();
+        }, 2500);
       } else {
-         this.showFeedback('சில தவறுகள் உள்ளன. மீண்டும் தளைகளை முயற்சிக்கவும்.', 'error');
+        this.showFeedback('சில தவறுகள் உள்ளன. மீண்டும் தளைகளை முயற்சிக்கவும்.', 'error');
       }
     }
   }
@@ -448,6 +492,7 @@ export class PracticeEngineComponent implements OnInit {
     this.interactiveCurrentThalaiIndex = 0;
     this.interactiveThalaiValidationResults = [];
     this.feedbackMessage = null;
+    this.allCorrect = false;
   }
 
   interactiveCharAnalysis: { char: string, type: string, mathirai: number }[] = [];
@@ -455,18 +500,18 @@ export class PracticeEngineComponent implements OnInit {
   startAnalysis() {
     this.step = 'analyze_word';
     this.interactiveAnalysis = this.tamilNLP.analyzeSeiyulLine(this.interactiveWord);
-    
+
     if (this.practiceType === 'eluthu') {
-       this.allCorrect = true;
-       // Compute character breakdown for Eluthu
-       const letters = this.tamilNLP.splitTamilLetters(this.interactiveWord.replace(/\s+/g, ''));
-       this.interactiveCharAnalysis = letters.map(l => {
-         const m = this.tamilNLP.getMathirai(l);
-         let t = 'மெய் / ஆய்தம்';
-         if (m === 1) t = 'குறில்';
-         if (m === 2) t = 'நெடில்';
-         return { char: l, type: t, mathirai: m };
-       });
+      this.allCorrect = true;
+      // Compute character breakdown for Eluthu
+      const letters = this.tamilNLP.splitTamilLetters(this.interactiveWord.replace(/\s+/g, ''));
+      this.interactiveCharAnalysis = letters.map(l => {
+        const m = this.tamilNLP.getMathirai(l);
+        let t = 'மெய் / ஆய்தம்';
+        if (m === 1) t = 'குறில்';
+        if (m === 2) t = 'நெடில்';
+        return { char: l, type: t, mathirai: m };
+      });
     }
   }
 
@@ -475,7 +520,7 @@ export class PracticeEngineComponent implements OnInit {
     this.step = 'dashboard_input';
     this.userInput = ''; // clear input for fresh start, or we could keep it. Let's clear for clean UX.
     this.analysisResult = null;
-    
+
     // Auto-enter fullscreen mode as requested by user
     if (!document.fullscreenElement && !this.isGameMode) {
       document.documentElement.requestFullscreen().then(() => {
@@ -500,12 +545,12 @@ export class PracticeEngineComponent implements OnInit {
       this.showFeedback('தயவுசெய்து ஒரு வார்த்தையை உள்ளிடவும்.', 'error');
       return;
     }
-    
+
     // Convert active dashboard tab to practice type
     this.practiceType = this.activeTab;
     this.interactiveWord = this.userInput;
     this.playMode = 'practice';
-    
+
     this.submitUserWord();
   }
 

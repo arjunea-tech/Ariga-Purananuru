@@ -796,3 +796,73 @@
 .min-h-300 {
   min-height: 300px;
 }
+
+/* Responsive HUD and Header Overrides */
+@media (max-width: 768px) {
+  /* Convert floating header into relative flexbox row */
+  header.position-absolute:not(.d-none) {
+    height: auto !important;
+    position: relative !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: 12px 15px !important;
+    z-index: 1050 !important;
+    background: transparent !important;
+  }
+  
+  /* Reset child positions to flow within flex container */
+  header.position-absolute:not(.d-none) .position-absolute {
+    position: static !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+  }
+
+  /* Compact the map and levels container padding */
+  .map-container {
+    padding-top: 20px !important;
+  }
+
+  .game-world-container {
+    overflow-y: auto !important;
+  }
+}
+
+@media (max-width: 576px) {
+  header.position-absolute:not(.d-none) {
+    padding: 10px 10px !important;
+    gap: 8px !important;
+  }
+
+  header.position-absolute:not(.d-none) .stat-badge {
+    min-width: unset !important;
+    font-size: 0.75rem !important;
+    padding: 2px 8px !important;
+  }
+  
+  header.position-absolute:not(.d-none) button, 
+  header.position-absolute:not(.d-none) a.btn {
+    padding: 4px 8px !important;
+    height: 32px !important;
+    width: auto !important;
+    min-width: 32px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 0.75rem !important;
+  }
+  
+  header.position-absolute:not(.d-none) button.rounded-circle, 
+  header.position-absolute:not(.d-none) a.btn.rounded-circle {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 0.75rem !important;
+  }
+
+  header.position-absolute:not(.d-none) .bi {
+    font-size: 0.85rem !important;
+  }
+}
