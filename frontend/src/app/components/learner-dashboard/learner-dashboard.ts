@@ -19,7 +19,7 @@ interface Course {
 @Component({
   selector: 'app-learner-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, LottieComponent],
+  imports: [CommonModule, RouterModule],
   templateUrl: './learner-dashboard.html',
   styleUrls: ['./learner-dashboard.css']
 })
@@ -51,10 +51,32 @@ export class LearnerDashboard implements OnInit {
     autoplay: false,
     loop: false
   };
+  xpPoints = signal<number>(0);
+  streakDays = signal<number>(0);
+  hearts = signal<number>(5);
+  gems = signal<number>(0);
+  badges = signal<any[]>([]);
   showAchievementModal = signal(false);
 
   ngOnInit() {
     this.fetchCourses();
+    this.fetchStudentStats();
+  }
+
+  fetchStudentStats() {
+    const token = this.authService.getToken();
+    const headers = { 'Authorization': `Bearer ${token || ''}` };
+    this.http.get<any>(`${environment.apiUrl}/student/dashboard`, { headers }).subscribe({
+      next: (res) => {
+        this.xpPoints.set(res.xp_points || 0);
+        this.streakDays.set(res.streak_days || 0);
+        this.badges.set(res.badges || []);
+        this.gems.set(Math.floor((res.xp_points || 0) / 15) + 5);
+      },
+      error: (err) => {
+        console.error('Failed to load student stats', err);
+      }
+    });
   }
 
   fetchCourses() {

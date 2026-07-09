@@ -58,6 +58,7 @@ export class TamilNLPService {
   }
 
   getMathirai(letter: string): number {
+    if (letter === 'ஃ') return 0; // ஆய்தம் → 1/2 மாத்திரை
     if (this.MEI_LETTERS.includes(letter) || letter.includes('்')) {
       return 0;
     } else if (this.NEDIL_LETTERS.includes(letter)) {
@@ -224,11 +225,27 @@ export class TamilNLPService {
     const word_analysis: WordAnalysis[] = [];
     const seer_names: string[] = [];
 
-    for (const word of words) {
-      const asai_groups = this.identifyAsai(word);
-      const asai_types = asai_groups.map(a => a.type);
-      const asai_text = asai_groups.map(a => a.text).join('/');
-      const seer_pattern = this.validateSeerPattern(asai_types);
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i];
+      let asai_groups = this.identifyAsai(word);
+      let asai_types = asai_groups.map(a => a.type);
+      let asai_text = asai_groups.map(a => a.text).join('/');
+      let seer_pattern = this.validateSeerPattern(asai_types);
+
+      // Special handling for the last word of a Thirukkural (7 words)
+      if (words.length === 7 && i === 6) {
+        if (asai_types.length === 1) {
+          if (asai_types[0] === 'நேர்') seer_pattern = 'நாள்';
+          if (asai_types[0] === 'நிரை') seer_pattern = 'மலர்';
+        } else if (asai_types.length >= 2) {
+          if (asai_types[0] === 'நேர்') seer_pattern = 'காசு';
+          if (asai_types[0] === 'நிரை') seer_pattern = 'பிறப்பு';
+        }
+        
+        asai_groups = [{ text: word, type: seer_pattern }];
+        asai_types = [seer_pattern];
+        asai_text = word;
+      }
 
       word_analysis.push({
         word,

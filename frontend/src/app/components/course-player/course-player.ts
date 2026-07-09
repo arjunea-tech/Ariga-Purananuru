@@ -125,10 +125,21 @@ export class CoursePlayer implements OnInit, OnDestroy {
   });
 
   selectedChapter = computed(() => {
-    const level = this.selectedLevel();
     const chapId = this.activeChapterId();
-    if (!level || !chapId) return null;
-    return level.chapters.find(c => c.id === chapId) || null;
+    const structure = this.courseStructure();
+    if (!chapId || !structure) return null;
+    // First try with the active level for performance
+    const level = this.selectedLevel();
+    if (level) {
+      const found = level.chapters.find(c => c.id === chapId);
+      if (found) return found;
+    }
+    // Fallback: search all levels (handles case when only chapterId is in URL)
+    for (const l of structure.levels) {
+      const found = l.chapters.find(c => c.id === chapId);
+      if (found) return found;
+    }
+    return null;
   });
 
   activeContent = computed(() => {
@@ -188,6 +199,30 @@ export class CoursePlayer implements OnInit, OnDestroy {
         this.courseId.set(qid);
         this.loadStructure();
       }
+
+      const rawView = params['view'];
+      const view: 'levels' | 'map' | 'content' | 'activity' =
+        (rawView === 'map' || rawView === 'content' || rawView === 'activity') ? rawView : 'levels';
+      const levelId = params['levelId'] ? +params['levelId'] : null;
+      const chapterId = params['chapterId'] ? +params['chapterId'] : null;
+
+      if (levelId && levelId !== this.activeLevelId()) {
+        this.activeLevelId.set(levelId);
+      }
+
+      if (view !== this.currentView()) {
+        this.currentView.set(view);
+      }
+
+      if (chapterId && chapterId !== this.activeChapterId()) {
+        this.activeChapterId.set(chapterId);
+        if (this.courseStructure()) {
+          this.loadLessonSequence(chapterId);
+        }
+        // else: initializeStructure() will call loadLessonSequence on its own
+      } else if (!chapterId && this.activeChapterId()) {
+        this.activeChapterId.set(null);
+      }
     });
   }
 
@@ -218,6 +253,13 @@ export class CoursePlayer implements OnInit, OnDestroy {
     });
     this.courseStructure.set(structure);
     this.loadLocalProgress();
+
+    // Check if there is a pending chapterId in the query parameters to load
+    const params = this.route.snapshot.queryParams;
+    const chapterId = params['chapterId'] ? +params['chapterId'] : null;
+    if (chapterId) {
+      this.loadLessonSequence(chapterId);
+    }
   }
 
   loadLocalProgress(): void {
@@ -297,8 +339,11 @@ export class CoursePlayer implements OnInit, OnDestroy {
       this.triggerMascotWarning('🔒 Level is locked! Complete all chapters of the previous level to unlock.');
       return;
     }
-    this.activeLevelId.set(id);
-    this.currentView.set('map');
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { view: 'map', levelId: id },
+      queryParamsHandling: 'merge'
+    });
   }
 
   selectChapterNode(id: number) {
@@ -310,9 +355,6 @@ export class CoursePlayer implements OnInit, OnDestroy {
   }
 
   startLesson(chapterId: number) {
-    this.activeChapterId.set(chapterId);
-    this.currentView.set('content'); // Using 'content' view for the new Full-Screen Lesson Player
-    
     // Auto-enter fullscreen mode when a lesson is started
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().then(() => {
@@ -322,6 +364,14 @@ export class CoursePlayer implements OnInit, OnDestroy {
       });
     }
 
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { view: 'content', chapterId },
+      queryParamsHandling: 'merge'
+    });
+  }
+
+  loadLessonSequence(chapterId: number) {
     this.lessonSequence.set([]);
     this.currentStepIndex.set(0);
     this.isVideoCompleted.set(false);
@@ -329,6 +379,17 @@ export class CoursePlayer implements OnInit, OnDestroy {
     this.showGameOver.set(false);
     this.lessonFinished.set(false);
     this.activityFeedbackState.set(null);
+
+    // Auto-resolve activeLevelId if not set (e.g. navigating directly via URL)
+    const structure = this.courseStructure();
+    if (structure && !this.activeLevelId()) {
+      for (const l of structure.levels) {
+        if (l.chapters.some(c => c.id === chapterId)) {
+          this.activeLevelId.set(l.id);
+          break;
+        }
+      }
+    }
 
     const chapter = this.selectedChapter();
     if (!chapter) return;
@@ -420,9 +481,12 @@ export class CoursePlayer implements OnInit, OnDestroy {
             let processedReadingBlocks: any[] = [];
             for (let i = 0; i < readingBlocks.length; i++) {
               let b = readingBlocks[i];
-              if ((b.type === 'paragraph' || b.type === 'text') && b.data && b.data.text && b.data.text.length > 400 && b.data.text.includes('<')) {
+              if ((b.type === 'paragraph' || b.type === 'text') && b.data && b.data.text && b.data.text.length > 400) {
                  const rawHtml = b.data.text;
-                 const parts = rawHtml.split(/(?=<h4|<h3|<p>|<ul|<ol)/gi);
+                 let parts = rawHtml.split(/(?<=[\.\?\!]\s+)|(?=<h[1-6]|<p|<ul|<ol|<li|<div|<br|\n)/gi);
+                 if (parts.length === 1 && parts[0].length > 500) {
+                    parts = rawHtml.split(/(?<=\s+)/g);
+                 }
                  let currentPageHtml = '';
                  for (let part of parts) {
                     if (currentPageHtml.length + part.length > 500 && currentPageHtml.length > 0) {
@@ -554,7 +618,10 @@ export class CoursePlayer implements OnInit, OnDestroy {
           let pages = [];
           
           if (rawHtml.length > 400) {
-             const parts = rawHtml.split(/(?=<h4|<h3|<p>|<ul|<ol)/gi);
+             let parts = rawHtml.split(/(?<=[\.\?\!]\s+)|(?=<h[1-6]|<p|<ul|<ol|<li|<div|<br|\n)/gi);
+             if (parts.length === 1 && parts[0].length > 500) {
+                parts = rawHtml.split(/(?<=\s+)/g);
+             }
              let currentPage = '';
              for (let part of parts) {
                 if (currentPage.length + part.length > 500 && currentPage.length > 0) {
@@ -631,7 +698,11 @@ export class CoursePlayer implements OnInit, OnDestroy {
   }
 
   goToLevels() {
-    this.currentView.set('levels');
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { view: 'levels', levelId: null, chapterId: null },
+      queryParamsHandling: 'merge'
+    });
   }
 
   selectTopic(id: number): void {
@@ -658,7 +729,11 @@ export class CoursePlayer implements OnInit, OnDestroy {
   }
 
   goToMap(): void {
-    this.currentView.set('map');
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { view: 'map', chapterId: null },
+      queryParamsHandling: 'merge'
+    });
   }
 
   goToActivity(): void {

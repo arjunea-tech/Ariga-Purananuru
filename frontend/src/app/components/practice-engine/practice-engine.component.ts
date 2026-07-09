@@ -1,12 +1,13 @@
 import { Component, EventEmitter, Input, Output, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { TamilNLPService, SeiyulAnalysis } from '../../services/tamil-nlp.service';
 
 @Component({
   selector: 'app-practice-engine',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './practice-engine.component.html',
   styleUrls: ['./practice-engine.component.css']
 })
@@ -30,7 +31,7 @@ export class PracticeEngineComponent implements OnInit {
   analysisResult: SeiyulAnalysis | null = null;
 
   // Game Mode variables (for when used inside a course player)
-  isGameMode: boolean = false;
+  @Input() isGameMode: boolean = false;
   isFullscreen: boolean = false;
   step: 'dashboard_menu' | 'dashboard_input' | 'select_mode' | 'input_word' | 'split_word' | 'analyze_word' | 'auto_explain' | 'sandbox' | 'result' | 'identify_seer' | 'identify_thalai' = 'select_mode';
 
@@ -291,7 +292,7 @@ export class PracticeEngineComponent implements OnInit {
     return this.interactiveAnalysis.word_analysis.flatMap(w => w.asai_groups);
   }
 
-  selectInteractiveAsaiByWord(wordIndex: number, asaiIndex: number, guess: 'நேர்' | 'நிரை') {
+  selectInteractiveAsaiByWord(wordIndex: number, asaiIndex: number, guess: string) {
     this.interactiveAsaiGuesses[wordIndex][asaiIndex] = guess;
   }
 
@@ -507,10 +508,23 @@ export class PracticeEngineComponent implements OnInit {
       const letters = this.tamilNLP.splitTamilLetters(this.interactiveWord.replace(/\s+/g, ''));
       this.interactiveCharAnalysis = letters.map(l => {
         const m = this.tamilNLP.getMathirai(l);
-        let t = 'மெய் / ஆய்தம்';
-        if (m === 1) t = 'குறில்';
-        if (m === 2) t = 'நெடில்';
-        return { char: l, type: t, mathirai: m };
+        let t: string;
+        let displayM: number;
+        if (l === 'ஃ') {
+          t = 'ஆய்தம்';
+          displayM = 0.5;
+        } else if (m === 1) {
+          t = 'குறில்';
+          displayM = 1;
+        } else if (m === 2) {
+          t = 'நெடில்';
+          displayM = 2;
+        } else {
+          // மெய் letters (க், ச், etc.) → 0 mathirai → shown as 1/2
+          t = 'மெய்';
+          displayM = 0.5;
+        }
+        return { char: l, type: t, mathirai: displayM };
       });
     }
   }

@@ -1,51 +1,46 @@
 <div class="login-container">
   <div class="login-glass-card">
-    
+
     <!-- Branding Header -->
     <div class="login-header">
       <div class="logo-badge">
-        அ
+        த
       </div>
-      <h1>அறிக புறநானூறு</h1>
-      <p>Language Learning Portal</p>
+      <h1>தமிழ் யாப்பு</h1>
+      <!-- <p>Language Learning Portal</p> -->
     </div>
 
     <!-- Unified Login Form -->
     <div class="form-container">
       <!-- Alert Messages -->
       @if (errorMessage) {
-        <div class="alert alert-danger">
-          <span class="alert-icon">⚠️</span>
-          <span class="alert-text">{{ errorMessage }}</span>
-        </div>
+      <div class="alert alert-danger">
+        <span class="alert-icon">⚠️</span>
+        <span class="alert-text">{{ errorMessage }}</span>
+      </div>
       }
 
       @if (successMessage) {
-        <div class="alert alert-success">
-          <span class="alert-icon">✓</span>
-          <span class="alert-text">{{ successMessage }}</span>
-        </div>
+      <div class="alert alert-success">
+        <span class="alert-icon">✓</span>
+        <span class="alert-text">{{ successMessage }}</span>
+      </div>
       }
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-        
+
         <!-- Username / Email -->
         <div class="form-group">
           <label for="login">Username</label>
           <div class="input-wrapper">
             <span class="input-icon">👤</span>
-            <input
-              id="login"
-              type="text"
-              formControlName="login"
-              placeholder="Enter your username"
-              [class.invalid]="loginForm.get('login')?.touched && loginForm.get('login')?.invalid"
-            />
+            <input id="login" type="text" formControlName="login" placeholder="Enter your username"
+              [class.invalid]="loginForm.get('login')?.touched && loginForm.get('login')?.invalid" />
           </div>
           @if (loginForm.get('login')?.hasError('serverError')) {
-            <small class="error-msg">{{ loginForm.get('login')?.errors?.['serverError'] }}</small>
+          <small class="error-msg">{{ loginForm.get('login')?.errors?.['serverError'] }}</small>
           } @else if (loginForm.get('login')?.touched && loginForm.get('login')?.invalid) {
-            <small class="error-msg">Username or Email is required (min 3 chars).</small>
+          <small class="error-msg">Username or Email is required (min 3 chars).</small>
           }
         </div>
 
@@ -54,43 +49,40 @@
           <label for="password">Password</label>
           <div class="input-wrapper" style="position: relative;">
             <span class="input-icon">🔑</span>
-            <input
-              id="password"
-              [type]="showPassword ? 'text' : 'password'"
-              formControlName="password"
+            <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password"
               placeholder="••••••••"
               [class.invalid]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
-              style="padding-right: 40px;"
-            />
-            <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()" tabindex="-1" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #6c757d;">
+              style="padding-right: 40px;" />
+            <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()" tabindex="-1"
+              style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #6c757d;">
               @if (showPassword) {
-                <span title="Hide password">👁️‍🗨️</span>
+              <span title="Hide password">👁️‍🗨️</span>
               } @else {
-                <span title="Show password">👁️</span>
+              <span title="Show password">👁️</span>
               }
             </button>
           </div>
           @if (loginForm.get('password')?.hasError('serverError')) {
-            <small class="error-msg">{{ loginForm.get('password')?.errors?.['serverError'] }}</small>
+          <small class="error-msg">{{ loginForm.get('password')?.errors?.['serverError'] }}</small>
           } @else if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
-            <small class="error-msg">Password is required (min 4 chars).</small>
+          <small class="error-msg">Password is required (min 4 chars).</small>
           }
         </div>
 
         <!-- Submit Button -->
         <button type="submit" [disabled]="loading || loginForm.invalid" class="btn-submit">
           @if (loading) {
-            <span class="spinner"></span> Logging in...
+          <span class="spinner"></span> Logging in...
           } @else {
-            Sign In
+          Sign In
           }
         </button>
 
       </form>
     </div>
-    
+
     <div class="login-footer">
-      <p>© 2026 Ariga Purananuru. All rights reserved.</p>
+      <p>© 2026 தமிழ் யாப்பு. All rights reserved.</p>
     </div>
 
   </div>

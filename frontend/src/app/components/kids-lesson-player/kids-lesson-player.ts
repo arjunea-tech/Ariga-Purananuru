@@ -69,15 +69,15 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
         if (!pageData) return '';
 
         const renderBlock = (block: any) => {
-          if (block.type === 'paragraph' || block.type === 'text') return `<div class="opacity-75 mb-4" style="text-align: left;">${block.data.text}</div>`;
-          else if (block.type === 'header') return `<h3 class="fw-bold text-primary mb-3" style="font-size: 1.7rem;">${block.data.text}</h3>`;
+          if (block.type === 'paragraph' || block.type === 'text') return `<div class="opacity-75 mb-4 text-start text-sm-center">${block.data.text}</div>`;
+          else if (block.type === 'header') return `<h3 class="fw-bold text-primary mb-3 text-center" style="font-size: clamp(1.3rem, 4vw, 1.7rem);">${block.data.text}</h3>`;
           else if (block.type === 'list') {
-            return `<ul class="mb-4 ps-4 opacity-75 text-start d-inline-block">` + block.data.items.map((i: any) => `<li class="mb-2">${typeof i === 'string' ? i : (i.content || '')}</li>`).join('') + `</ul>`;
+            return `<div class="w-100 text-center"><ul class="mb-4 ps-4 opacity-75 text-start d-inline-block">` + block.data.items.map((i: any) => `<li class="mb-2">${typeof i === 'string' ? i : (i.content || '')}</li>`).join('') + `</ul></div>`;
           }
           else if (block.type === 'image') {
             const url = block.data.file?.url || block.data.url || '';
             const caption = block.data.caption || '';
-            return `<div class="text-center mb-4"><img src="${url}" alt="${caption}" class="img-fluid rounded shadow-sm" style="max-height: 350px; object-fit: contain;">${caption ? `<div class="text-muted small mt-2">${caption}</div>` : ''}</div>`;
+            return `<div class="text-center mb-4"><img src="${url}" alt="${caption}" class="img-fluid rounded shadow-sm" style="max-height: clamp(150px, 28vh, 300px); object-fit: contain;">${caption ? `<div class="text-muted small mt-2">${caption}</div>` : ''}</div>`;
           }
           else if (block.type === 'table') {
             const withHeadings = block.data.withHeadings;
@@ -85,10 +85,10 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
             let html = `<div class="table-responsive w-100 mb-4"><table class="table table-bordered shadow-sm" style="border-radius: 12px; overflow: hidden; background: white;">`;
             rows.forEach((row: string[], index: number) => {
               if (index === 0 && withHeadings) {
-                html += `<thead style="background: #fef08a;"><tr>` + row.map(cell => `<th class="p-2 text-dark fs-5 fw-bold border-bottom-0">${cell}</th>`).join('') + `</tr></thead><tbody>`;
+                html += `<thead style="background: #fef08a;"><tr>` + row.map(cell => `<th class="p-2 text-dark fs-6 fw-bold border-bottom-0">${cell}</th>`).join('') + `</tr></thead><tbody>`;
               } else {
                 if (index === 0 && !withHeadings) html += `<tbody>`;
-                html += `<tr>` + row.map(cell => `<td class="p-2 fs-6 opacity-75">${cell}</td>`).join('') + `</tr>`;
+                html += `<tr>` + row.map(cell => `<td class="p-2 small opacity-75">${cell}</td>`).join('') + `</tr>`;
               }
             });
             if (rows.length > 0) html += `</tbody>`;
@@ -104,7 +104,7 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
           return renderBlock(pageData);
         }
       } else {
-        return `<div class="fw-bold opacity-75" style="font-size: 1.8rem; line-height: 1.6; font-family: 'Nunito', 'Comic Sans MS', sans-serif;">${step.data.text}</div>`;
+        return `<div class="fw-bold opacity-75 text-start text-sm-center" style="font-size: clamp(1.1rem, 3.2vw, 1.8rem); line-height: 1.6; font-family: 'Nunito', 'Comic Sans MS', sans-serif;">${step.data.text}</div>`;
       }
     }
     return '';

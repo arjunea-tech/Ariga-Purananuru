@@ -38,9 +38,9 @@
         <div class="col-md-4">
           <label class="form-label small fw-bold text-secondary">Levels</label>
           <div class="dropdown position-relative">
-            <div class="form-select border-light bg-light shadow-none cursor-pointer d-flex justify-content-between align-items-center h-auto py-2 px-3" 
+            <div class="form-select-custom border border-light bg-light rounded shadow-none cursor-pointer d-flex justify-content-between align-items-center h-auto py-2 px-3" 
                  (click)="toggleDropdown($event)" [class.show]="isDropdownOpen()">
-              <span class="text-truncate">{{ getSelectedLevelsLabel() }}</span>
+              <span class="text-truncate pe-3">{{ getSelectedLevelsLabel() }}</span>
             </div>
             
             @if (isDropdownOpen()) {
