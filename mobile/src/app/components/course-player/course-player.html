@@ -1,0 +1,113 @@
+<div class="w-100 position-relative overflow-hidden bg-light" style="height: 100vh;">
+
+  <!-- Mascot Progression Warning Bubble -->
+  @if (showMascotWarning()) {
+  <div
+    class="mascot-warning-toast position-fixed top-0 start-50 translate-middle-x mt-5 p-3 rounded-4 shadow-lg border border-3 border-danger d-flex align-items-center gap-3 animate-pop-in z-5"
+    style="background: #FFF9C4; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.3) !important;">
+    <div style="font-size: 2.2rem;">🦉</div>
+    <div>
+      <p class="mb-0 fw-bold text-dark fs-6" style="line-height: 1.3;">{{ mascotWarning() }}</p>
+    </div>
+  </div>
+  }
+
+
+
+  <!-- DASHBOARDS (Navigation View) -->
+  @if (currentView() === 'levels' || currentView() === 'map') {
+  @if (theme() === 'kids') {
+  <app-kids-dashboard [structure]="courseStructure()" [currentView]="currentView()" [activeLevelId]="activeLevelId()"
+    [activeChapterId]="activeChapterId()" [completedLevels]="completedLevelIds()"
+    [completedChapters]="completedChapterIds()" (selectLevel)="selectLevel($event)"
+    (selectChapterNode)="selectChapterNode($event)"></app-kids-dashboard>
+  } @else {
+  <app-student-dashboard></app-student-dashboard>
+  }
+  }
+
+  <!-- LESSON PLAYER OVERLAY -->
+  @if (currentView() === 'content') {
+  @if (theme() === 'kids') {
+  <app-kids-lesson-player
+    [lessonSequence]="lessonSequence()"
+    [currentStepIndex]="currentStepIndex()"
+    [lessonFinished]="lessonFinished()"
+    [showGameOver]="showGameOver()"
+    [hearts]="hearts()"
+    [xp]="xp()"
+    [coins]="coins()"
+    [activityFeedbackState]="activityFeedbackState()"
+    [heartRefillTimer]="heartRefillTimer()"
+    (quit)="goToMap()"
+    (retry)="retryActivity()"
+    (finish)="finishLesson()"
+    (stepCompleted)="handleStepCompleted($event)"
+    (nextStep)="nextLessonStep()"
+    (prevStep)="prevLessonStep()"
+    (activityAnswered)="onActivityAnswered($event)"
+    (continueFeedback)="continueFromFeedback()">
+  </app-kids-lesson-player>
+  } @else {
+    <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center bg-dark text-white">
+      <h2>Student Player Placeholder</h2>
+      <button class="btn btn-light mt-3" (click)="goToMap()">Quit</button>
+    </div>
+  }
+  }
+
+  <!-- Top HUD (Floating widgets for Dashboard) -->
+  <header class="position-absolute top-0 start-0 w-100 h-100 pe-none" style="z-index: 1050;"
+    [class.d-none]="currentView() === 'content'">
+    <!-- Left Navigation Actions (Floating Top Left) -->
+    <div class="position-absolute pe-auto" style="top: 20px; left: 20px;">
+      <button
+        class="btn btn-warning rounded-pill px-3 py-2 shadow-lg border border-2 border-white text-dark fw-bold d-flex align-items-center gap-2 hover-lift"
+        (click)="goBack()">
+        <i class="bi bi-arrow-left-circle-fill text-dark"></i>
+        <span class="d-none d-sm-inline">Back</span>
+      </button>
+    </div>
+
+    <!-- Stats & Actions (Floating Top Right) -->
+    <div class="position-absolute d-flex gap-2 pe-auto" style="top: 20px; right: 20px;">
+      @if (currentView() === 'activity') {
+      <div
+        class="stat-badge d-flex align-items-center bg-white rounded-pill px-2 py-1 shadow-sm border border-2 border-danger"
+        style="font-size: 0.85rem;">
+        @for (h of [1,2,3,4,5]; track h) {
+        <i class="bi" [ngClass]="hearts() >= h ? 'bi-heart-fill text-danger' : 'bi-heart text-secondary'"
+          style="font-size: 0.9rem; margin: 0 1px;"></i>
+        }
+      </div>
+      }
+      <div
+        class="stat-badge d-flex align-items-center bg-white rounded-pill px-2 py-1 shadow-sm border border-2 border-warning"
+        style="font-size: 0.85rem;">
+        <i class="bi bi-star-fill text-warning me-1"></i>
+        <span class="fw-bold text-dark">{{ xp() }}</span>
+      </div>
+      <div
+        class="stat-badge d-flex align-items-center bg-white rounded-pill px-2 py-1 shadow-sm border border-2 border-primary"
+        style="font-size: 0.85rem;">
+        <i class="bi bi-gem text-primary me-1"></i>
+        <span class="fw-bold text-dark">{{ coins() }}</span>
+      </div>
+      <button class="btn btn-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+        style="width: 32px; height: 32px; border: 2px solid white; padding: 0;" (click)="toggleFullscreen()" title="Fullscreen">
+        <i class="bi" [ngClass]="isFullscreen() ? 'bi-fullscreen-exit' : 'bi-arrows-fullscreen'"
+          style="font-size: 0.9rem;"></i>
+      </button>
+      <a routerLink="/learn"
+        class="btn btn-danger rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+        style="width: 32px; height: 32px; border: 2px solid white; padding: 0;" title="Exit Course">
+        <i class="bi bi-x-lg" style="font-size: 0.9rem;"></i>
+      </a>
+      <button class="btn btn-danger rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+        style="width: 32px; height: 32px; border: 2px solid white; padding: 0; margin-left: 5px;" (click)="logout()" title="Logout">
+        <i class="bi bi-box-arrow-right" style="font-size: 0.9rem;"></i>
+      </button>
+    </div>
+  </header>
+
+</div>

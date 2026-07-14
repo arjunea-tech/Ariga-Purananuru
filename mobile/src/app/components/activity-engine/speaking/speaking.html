@@ -1,0 +1,126 @@
+<div class="mb-4 glass-card speaking-container">
+  <div class="mb-3 d-flex align-items-center justify-content-between">
+    @if (activity?.targetText) {
+      <button type="button" 
+              class="btn btn-outline-danger btn-sm rounded-pill d-flex align-items-center gap-2 px-3 py-1-5"
+              [disabled]="isPlaying()"
+              (click)="playSample()">
+        <i class="bi" [class.bi-volume-up-fill]="!isPlaying()" [class.bi-soundwave]="isPlaying()"></i>
+        <span>{{ isPlaying() ? 'Listening...' : 'Model Speech' }}</span>
+      </button>
+    }
+  </div>
+
+  <!-- Instruction Question -->
+  <h5 class="text-dark fw-bold mb-3" [innerHTML]="activity?.question || 'Listen and repeat the sentence:'"></h5>
+
+  <!-- Image Support (Picture Description / Live Demo) -->
+  @if (activity?.imageUrl) {
+    <div class="my-3 text-center">
+      <img [src]="activity?.imageUrl" class="img-fluid rounded-4 shadow-sm border border-light" style="max-height: 250px; object-fit: contain;" alt="Speech Prompt Image" />
+    </div>
+  }
+
+  <!-- Target Text Card -->
+  @if (activity?.targetText) {
+    <div class="card bg-light border-0 rounded-4 p-4 mb-4 text-center">
+      <p class="m-0 text-secondary fw-semibold text-uppercase tracking-wider" style="font-size: 0.75rem; letter-spacing: 0.08em;">Sentence to Speak</p>
+      <h3 class="fw-bold text-dark mt-2 mb-0" style="line-height: 1.3;">"{{ activity?.targetText }}"</h3>
+    </div>
+  }
+
+  <!-- Voice Recording Control Section -->
+  <div class="d-flex flex-column align-items-center justify-content-center my-4 py-2">
+    <!-- Pulsing Mic Button -->
+    <button type="button"
+            class="mic-btn rounded-circle d-flex align-items-center justify-content-center position-relative shadow border-0"
+            [class.recording]="isRecording()"
+            [disabled]="hasSubmitted()"
+            (click)="toggleRecording()">
+      <i class="bi bi-mic-fill fs-2 text-white"></i>
+      
+      <!-- Pulsing Rings when recording -->
+      @if (isRecording()) {
+        <span class="pulse-ring ring-1"></span>
+        <span class="pulse-ring ring-2"></span>
+        <span class="pulse-ring ring-3"></span>
+      }
+    </button>
+    
+    <span class="mt-3 text-secondary fw-medium" style="font-size: 0.9rem;">
+      @if (isRecording()) {
+        <span class="text-danger animate-pulse"><i class="bi bi-record-circle-fill me-1"></i> Recording... Speak now!</span>
+      } @else if (transcript()) {
+        Tap to Re-record
+      } @else {
+        Tap Microphone to Start
+      }
+    </span>
+  </div>
+
+  <!-- Real-time transcription feedback -->
+  @if (transcript()) {
+    <div class="animate-fade-in card bg-white border rounded-4 p-3 mb-4">
+      <div class="d-flex align-items-center gap-2 mb-2 text-secondary fw-bold" style="font-size: 0.8rem;">
+        <i class="bi bi-chat-right-text-fill text-primary"></i>
+        <span>Transcribed Speech:</span>
+      </div>
+      <p class="m-0 text-dark fw-medium" style="font-size: 1.05rem;">"{{ transcript() }}"</p>
+    </div>
+  }
+
+  <!-- Accuracy grading panel -->
+  @if (matchScore() !== null) {
+    <div class="animate-fade-in card bg-opacity-10 border-0 rounded-4 p-4 mb-4 text-center" 
+         [class.bg-success]="matchScore()! >= 70" 
+         [class.bg-warning]="matchScore()! >= 40 && matchScore()! < 70" 
+         [class.bg-danger]="matchScore()! < 40">
+      
+      <h5 class="fw-bold mb-2" 
+          [class.text-success]="matchScore()! >= 70"
+          [class.text-warning]="matchScore()! >= 40 && matchScore()! < 70"
+          [class.text-danger]="matchScore()! < 40">
+        @if (matchScore()! >= 70) {
+          Great Job! Excellent Pronunciation
+        } @else if (matchScore()! >= 40) {
+          Nice try! Speak clearly and try again
+        } @else {
+          Needs improvement
+        }
+      </h5>
+
+      <!-- Score Circular/Bar Progress -->
+      <div class="d-flex align-items-center justify-content-center gap-3">
+        <div class="progress flex-grow-1 bg-white bg-opacity-50" style="height: 10px; border-radius: 5px;">
+          <div class="progress-bar rounded-pill" 
+               [class.bg-success]="matchScore()! >= 70"
+               [class.bg-warning]="matchScore()! >= 40 && matchScore()! < 70"
+               [class.bg-danger]="matchScore()! < 40"
+               [style.width.%]="matchScore()"></div>
+        </div>
+        <span class="fw-bold" style="font-size: 1.1rem;">{{ matchScore() }}% Match</span>
+      </div>
+    </div>
+  }
+
+  <!-- Submit Buttons -->
+  @if (transcript() && !hasSubmitted()) {
+    <button type="button" 
+            class="btn btn-danger w-100 rounded-pill py-3 fw-bold text-white shadow-sm border-0" 
+            style="background: linear-gradient(135deg, #ef4444, #b91c1c); transition: all 0.2s;"
+            (click)="submitAnswer()">
+      Submit Answer
+    </button>
+  }
+
+  <!-- Explanation box -->
+  @if (showFeedback && hasSubmitted() && activity?.explanation) {
+    <div class="animate-fade-in mt-4 rounded-3 p-4 bg-warning bg-opacity-10 border-start border-4 border-warning">
+      <div class="d-flex align-items-center gap-2 fw-bold text-warning mb-2" style="font-size: 0.9rem;">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>Explanation / Tips</span>
+      </div>
+      <p class="m-0" style="color: #451a03; font-size: 0.925rem; line-height: 1.5;">{{ activity?.explanation }}</p>
+    </div>
+  }
+</div>

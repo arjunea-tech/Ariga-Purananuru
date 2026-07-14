@@ -413,21 +413,21 @@ export class CoursePlayer implements OnInit, OnDestroy {
     const steps: LessonStep[] = [];
 
     contents.forEach(content => {
-      if (content.id === 1) {
-        steps.push({
-          type: 'video',
-          title: 'Homophones Lesson',
-          data: 'assets/Homophones video .mp4'
-        });
-      }
+      // if (content.id === 1) {
+      //   steps.push({
+      //     type: 'video',
+      //     title: 'Homophones Lesson',
+      //     data: 'assets/Homophones video .mp4'
+      //   });
+      // }
 
-      if (content.external_url && content.external_url.length > 0) {
-        steps.push({
-          type: 'video',
-          title: content.title || content.name,
-          data: content.external_url[0] // Assume first URL is the video link
-        });
-      }
+      // if (content.external_url && content.external_url.length > 0) {
+      //   steps.push({
+      //     type: 'video',
+      //     title: content.title || content.name,
+      //     data: content.external_url[0] // Assume first URL is the video link
+      //   });
+      // }
 
       if (content.attachments && content.attachments.length > 0) {
         steps.push({
@@ -457,15 +457,15 @@ export class CoursePlayer implements OnInit, OnDestroy {
           const activityBlocks = blocks.filter((b: any) => b.type === 'activity');
           const assessmentBlocks = blocks.filter((b: any) => b.type === 'assessment');
 
-          if (videoBlocks.length > 0) {
-            videoBlocks.forEach((block: any, idx: number) => {
-              steps.push({
-                type: 'video',
-                title: (content.title || content.name) + (videoBlocks.length > 1 ? ` - Video ${idx + 1}` : ' - Video'),
-                data: block.data.url || block.data.embed
-              });
-            });
-          }
+          // if (videoBlocks.length > 0) {
+          //   videoBlocks.forEach((block: any, idx: number) => {
+          //     steps.push({
+          //       type: 'video',
+          //       title: (content.title || content.name) + (videoBlocks.length > 1 ? ` - Video ${idx + 1}` : ' - Video'),
+          //       data: block.data.url || block.data.embed
+          //     });
+          //   });
+          // }
 
           if (pdfBlocks.length > 0) {
             pdfBlocks.forEach((block: any, idx: number) => {

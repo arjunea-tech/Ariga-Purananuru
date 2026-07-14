@@ -1,0 +1,7 @@
+/* Level component styles using Bootstrap utilities */
+.hover-bg-primary:hover { background-color: var(--bs-primary) !important; }
+.hover-bg-danger:hover { background-color: var(--bs-danger) !important; }
+.hover-text-white:hover { color: #fff !important; }
+.transition-all { transition: all 0.2s ease-in-out; }
+.hover-scale:hover { transform: translateY(-2px); filter: brightness(1.1); }
+.tracking-wider { letter-spacing: 0.1em; }

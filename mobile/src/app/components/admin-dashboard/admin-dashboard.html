@@ -1,0 +1,201 @@
+<div class="container-fluid py-4">
+  <!-- Header Section -->
+  <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+    <div>
+      <h2 class="fw-bold mb-1 d-flex align-items-center gap-2">
+        <i class="bi bi-speedometer2 text-primary"></i>
+        Academy Dashboard
+      </h2>
+      <p class="text-secondary mb-0">Overview of your school's key performance indicators and statistics.</p>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm rounded-3">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ error() }}
+      <button type="button" class="btn-close" (click)="error.set(null)"></button>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="mt-2 text-secondary">Loading dashboard statistics...</p>
+    </div>
+  } @else if (stats(); as s) {
+    <!-- KPI Cards -->
+    <div class="row g-4 mb-5">
+      <!-- Total Students -->
+      <div class="col-sm-6 col-xl">
+        <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden kpi-card">
+          <div class="card-body p-4 position-relative">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h6 class="text-secondary fw-semibold mb-1 text-uppercase tracking-wide">Total Students</h6>
+                <h2 class="fw-bold text-dark mb-0">{{ s.total_students }}</h2>
+              </div>
+              <div class="icon-box bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center">
+                <i class="bi bi-mortarboard-fill fs-4"></i>
+              </div>
+            </div>
+            <p class="text-muted small mb-0"><i class="bi bi-arrow-up-right text-success me-1"></i>Active learners in your academy</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Courses -->
+      <div class="col-sm-6 col-xl">
+        <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden kpi-card">
+          <div class="card-body p-4 position-relative">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h6 class="text-secondary fw-semibold mb-1 text-uppercase tracking-wide">Active Courses</h6>
+                <h2 class="fw-bold text-dark mb-0">{{ s.active_courses }}</h2>
+              </div>
+              <div class="icon-box bg-info-subtle text-info rounded-circle d-flex align-items-center justify-content-center">
+                <i class="bi bi-journal-richtext fs-4"></i>
+              </div>
+            </div>
+            <p class="text-muted small mb-0"><i class="bi bi-collection me-1"></i>Available in your curriculum</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overall Completion Rate -->
+      <div class="col-sm-6 col-xl">
+        <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden kpi-card">
+          <div class="card-body p-4 position-relative">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h6 class="text-secondary fw-semibold mb-1 text-uppercase tracking-wide">Avg Completion</h6>
+                <h2 class="fw-bold text-success mb-0">{{ s.overall_completion_rate }}%</h2>
+              </div>
+              <div class="icon-box bg-success-subtle text-success rounded-circle d-flex align-items-center justify-content-center">
+                <i class="bi bi-graph-up-arrow fs-4"></i>
+              </div>
+            </div>
+            <div class="progress mt-3" style="height: 6px;">
+              <div class="progress-bar bg-success" role="progressbar" [style.width]="s.overall_completion_rate + '%'"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Total Staff -->
+      @if (authService.hasRole(['super_admin', 'admin'])) {
+        <div class="col-sm-6 col-xl">
+          <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden kpi-card">
+            <div class="card-body p-4 position-relative">
+              <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                  <h6 class="text-secondary fw-semibold mb-1 text-uppercase tracking-wide">Total Staff</h6>
+                  <h2 class="fw-bold text-dark mb-0">{{ s.total_staff }}</h2>
+                </div>
+                <div class="icon-box bg-warning-subtle text-warning rounded-circle d-flex align-items-center justify-content-center">
+                  <i class="bi bi-person-badge-fill fs-4"></i>
+                </div>
+              </div>
+              <p class="text-muted small mb-0"><i class="bi bi-building me-1"></i>Staff Members & Teachers</p>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Quick Actions / Secondary Row -->
+    <div class="row g-4 mb-4">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+            <h5 class="fw-bold"><i class="bi bi-lightning-charge text-warning me-2"></i>Quick Actions</h5>
+          </div>
+          <div class="card-body p-4">
+            <div class="d-flex flex-wrap gap-3">
+              <a href="/student-progress" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold shadow-sm">
+                <i class="bi bi-graph-up me-2"></i>View Detailed Progress
+              </a>
+              <a href="/users" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-semibold">
+                <i class="bi bi-people me-2"></i>Manage Users
+              </a>
+              <a href="/courses" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-semibold">
+                <i class="bi bi-journal-bookmark me-2"></i>Manage Courses
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Institution Branding Settings (Visible for super_admin and admin only) -->
+    @if (authService.hasRole(['super_admin', 'admin'])) {
+      <div class="row g-4 mt-2">
+        <div class="col-12 col-lg-6">
+          <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+              <h5 class="fw-bold"><i class="bi bi-palette text-primary me-2"></i>Institution Branding Settings</h5>
+            </div>
+            <div class="card-body p-4">
+              <form [formGroup]="brandingForm" (ngSubmit)="saveBranding()">
+                <!-- Tenant Selector (Visible for super_admin only) -->
+                @if (authService.getUserRole() === 'super_admin' && tenantsList().length > 0) {
+                  <div class="mb-4">
+                    <label for="tenantSelect" class="form-label fw-semibold text-secondary small">Select Institution / Tenant</label>
+                    <select id="tenantSelect" [value]="tenant()?.id" (change)="onTenantChange($event)" class="form-select form-select-sm">
+                      @for (t of tenantsList(); track t.id) {
+                        <option [value]="t.id">{{ t.tenant_name }} ({{ t.tenant_code }})</option>
+                      }
+                    </select>
+                  </div>
+                }
+
+                <!-- Logo upload -->
+                <div class="mb-4">
+                  <label class="form-label fw-semibold text-secondary small">School Logo</label>
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="border rounded-3 p-1 bg-light d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                      @if (logoPreviewUrl()) {
+                        <img [src]="logoPreviewUrl()" class="img-fluid rounded-3 object-fit-contain" style="max-height: 100%;">
+                      } @else {
+                        <i class="bi bi-image text-muted fs-2"></i>
+                      }
+                    </div>
+                    <div>
+                      <input type="file" (change)="onLogoSelected($event)" accept="image/*" class="form-control form-control-sm">
+                      <small class="text-muted d-block mt-1">Recommended square format (PNG/JPEG).</small>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Primary & Secondary Colors -->
+                <div class="row g-3 mb-4">
+                  <div class="col-6">
+                    <label for="primary_color" class="form-label fw-semibold text-secondary small">Primary Color</label>
+                    <div class="d-flex align-items-center gap-2">
+                      <input type="color" id="primary_color" formControlName="primary_color" class="form-control form-control-color border-0 p-0" style="width: 44px; height: 38px; cursor: pointer;">
+                      <input type="text" formControlName="primary_color" class="form-control form-control-sm" style="font-size: 13px;">
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <label for="secondary_color" class="form-label fw-semibold text-secondary small">Secondary Color</label>
+                    <div class="d-flex align-items-center gap-2">
+                      <input type="color" id="secondary_color" formControlName="secondary_color" class="form-control form-control-color border-0 p-0" style="width: 44px; height: 38px; cursor: pointer;">
+                      <input type="text" formControlName="secondary_color" class="form-control form-control-sm" style="font-size: 13px;">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Save Button -->
+                <button type="submit" [disabled]="savingBranding()" class="btn btn-primary px-4 rounded-pill fw-semibold shadow-sm">
+                  @if (savingBranding()) {
+                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                  }
+                  <span>Save Branding</span>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

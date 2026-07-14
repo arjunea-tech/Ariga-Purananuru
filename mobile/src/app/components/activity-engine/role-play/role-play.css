@@ -1,0 +1,45 @@
+.roleplay-container {
+  overflow: hidden;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 0.95rem;
+  line-height: 38px;
+  text-align: center;
+}
+
+.bubble-content {
+  max-width: 100%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.bg-success-subtle {
+  background-color: #d1fae5;
+  border: 1px dashed #10b981;
+}
+
+.max-w-75 {
+  max-width: 75%;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+}
+
+.recording {
+  animation: pulsesize 1.5s infinite alternate;
+}
+
+@keyframes pulsesize {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+  }
+  100% {
+    transform: scale(1.05);
+    box-shadow: 0 8px 12px rgba(220, 38, 38, 0.4);
+  }
+}

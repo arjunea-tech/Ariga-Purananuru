@@ -19,9 +19,15 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => explode(',', env('ALLOWED_ORIGINS', 'http://localhost:4200,https://ariga-purananuru-frontend.vercel.app')),
+    'allowed_origins' => [
+        'http://localhost',
+        'https://localhost',
+        'capacitor://localhost',
+        'http://localhost:4200',
+        'http://localhost:8100',
+    ],
 
-    'allowed_origins_patterns' => ['#^http://localhost:\d+$#'],
+    'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 

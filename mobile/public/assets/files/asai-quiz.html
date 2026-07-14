@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>தமிழ் அசை அறிதல் - Tamil Asai Classifier</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans Tamil', Arial, sans-serif;
+            background-color: #f8f9fa;
+            padding-bottom: 50px;
+        }
+        .container {
+            max-width: 800px;
+        }
+        .card {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            border-radius: 10px;
+        }
+        .syllable-card {
+            border-left: 4px solid #007bff;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        .ner {
+            background-color: #d1e7dd;
+            border-left-color: #198754;
+        }
+        .nirai {
+            background-color: #cfe2ff;
+            border-left-color: #0d6efd;
+        }
+        .uncertain {
+            background-color: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        .result-container {
+            margin-top: 30px;
+        }
+        h1, h2, h3 {
+            color: #333;
+        }
+        .tab-content {
+            padding: 20px;
+            background: white;
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+        }
+        .nav-tabs {
+            border-bottom: none;
+        }
+        .btn-primary {
+            background-color: #6f42c1;
+            border-color: #6f42c1;
+        }
+        .btn-primary:hover {
+            background-color: #5a32a3;
+            border-color: #5a32a3;
+        }
+        .mathirai-info {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .quiz-progress {
+            height: 10px;
+        }
+        .tamil-input {
+            font-size: 1.2rem;
+        }
+        #splitInstructions {
+            background-color: #fff3cd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        .example-word {
+            background-color: #e9ecef;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+        #feedbackMessage {
+            margin-top: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-4">
+        <h1 class="text-center mb-4">தமிழ் அசை அறிதல்</h1>
+        <h2 class="text-center mb-5">Tamil Syllable Classifier</h2>
+
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="practice-tab" data-bs-toggle="tab" data-bs-target="#practice" type="button" role="tab" aria-controls="practice" aria-selected="true">Practice Mode</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="quiz-tab" data-bs-toggle="tab" data-bs-target="#quiz" type="button" role="tab" aria-controls="quiz" aria-selected="false">Quiz Mode</button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="myTabContent">
+            <!-- Practice Mode Tab -->
+            <div class="tab-pane fade show active" id="practice" role="tabpanel" aria-labelledby="practice-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>அசை வகையை கண்டறிதல் - Syllable Classification</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="splitInstructions" class="mb-3">
+                            <p><strong>Instructions:</strong> Type a Tamil word and use the forward slash (/) character to separate syllables as you think they should be divided.</p>
+                            <p>Example: <span class="example-word">அழ/கு</span> or <span class="example-word">கா/தல்</span> or <span class="example-word">தமிழ்</span></p>
+                        </div>
+
+                        <form id="splitWordForm">
+                            <div class="mb-3">
+                                <label for="tamilWordWithSplits" class="form-label">Tamil Word with Syllable Splits (using /)</label>
+                                <input type="text" class="form-control tamil-input" id="tamilWordWithSplits" placeholder="e.g. அழ/கு">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Analyze Syllables</button>
+                        </form>
+
+                        <!-- New feedback message alert -->
+                        <div id="feedbackMessage" class="alert mt-3"></div>
+
+                        <div id="splitResults" class="result-container d-none">
+                            <h4>Analysis Results</h4>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5>Original Word: <span id="originalWord"></span></h5>
+                                    <div id="syllableResults"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h3>தானியங்கி அசை அறிதல் - Automatic Identification</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="autoIdentifyForm">
+                            <div class="mb-3">
+                                <label for="tamilWord" class="form-label">Tamil Word</label>
+                                <input type="text" class="form-control tamil-input" id="tamilWord" placeholder="e.g. அழகு">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Identify Asai</button>
+                        </form>
+
+                        <div id="autoResults" class="result-container d-none">
+                            <h4>Analysis Results</h4>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h5>Automatic Syllable Identification:</h5>
+                                    <div id="autoSyllableResults"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Mode Tab -->
+            <div class="tab-pane fade" id="quiz" role="tabpanel" aria-labelledby="quiz-tab">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h3>அசை அறிதல் வினாடி வினா - Asai Quiz</h3>
+                        <button id="startQuizBtn" class="btn btn-primary">Start Quiz</button>
+                    </div>
+                    <div class="card-body">
+                        <div id="quizProgress" class="d-none">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Question: <span id="currentQuestion">0</span>/<span id="totalQuestions">0</span></span>
+                                <span>Score: <span id="currentScore">0</span></span>
+                            </div>
+                            <div class="progress mb-4 quiz-progress">
+                                <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+            
+                        <div id="quizContainer" class="d-none">
+                            <div class="card mb-4">
+                                <div class="card-body">
+                                    <h4 id="quizWord" class="mb-3"></h4>
+                                    <p class="text-muted">Meaning: <span id="quizMeaning"></span></p>
+                                    
+                                    <form id="quizForm" class="mt-4">
+                                        <!-- Split section -->
+                                        <div id="splitSection" class="mb-4">
+                                            <div id="splitInstructionsQuiz" class="alert alert-info mb-3">
+                                                <p><strong>Instructions:</strong> First, separate the word into syllables using forward slash (/) character.</p>
+                                                <p>Example: <span class="example-word">அழ/கு</span> or <span class="example-word">கா/தல்</span></p>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="userSplitInput" class="form-label">Split the word into syllables using /</label>
+                                                <input type="text" class="form-control tamil-input" id="userSplitInput" placeholder="e.g. அழ/கு">
+                                            </div>
+                                            <button type="button" id="checkSplitBtn" class="btn btn-primary">Check Syllable Split</button>
+                                        </div>
+                                        
+                                        <!-- Classification section -->
+                                        <div id="classifySection" class="mt-4 d-none">
+                                            <h5 class="mb-3">Now classify each syllable as நேர் (ner) or நிரை (nirai):</h5>
+                                            <div id="syllableClassificationArea"></div>
+                                            <button type="button" id="submitClassificationBtn" class="btn btn-primary mt-3">Submit Classification</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+            
+                        <div id="quizFeedback" class="d-none">
+                            <div class="alert" id="feedbackAlert">
+                                <span id="feedbackText"></span>
+                            </div>
+                            <button id="nextQuestionBtn" class="btn btn-primary d-none">Next Question</button>
+                        </div>
+            
+                        <div id="quizResults" class="d-none">
+                            <div class="card">
+                                <div class="card-body text-center">
+                                    <h4>Quiz Results</h4>
+                                    <p class="fs-1 mb-3">Score: <span id="finalScore">0</span>/<span id="finalTotal">0</span></p>
+                                    <p class="fs-3"><span id="percentageScore">0</span>%</p>
+                                    <p id="resultMessage" class="fs-4"></p>
+                                    <button id="restartQuizBtn" class="btn btn-primary mt-3">Restart Quiz</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    <!-- JavaScript for functionality -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form submissions
+            document.getElementById('splitWordForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const word = document.getElementById('tamilWordWithSplits').value.trim();
+                if (word) {
+                    analyzeSplitWord(word);
+                }
+            });
+
+            document.getElementById('autoIdentifyForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const word = document.getElementById('tamilWord').value.trim();
+                if (word) {
+                    identifyAsai(word);
+                }
+            });
+
+            // Quiz functionality
+            document.getElementById('startQuizBtn').addEventListener('click', startQuiz);
+            document.getElementById('quizForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitQuizAnswer();
+            });
+            document.getElementById('nextQuestionBtn').addEventListener('click', showNextQuestion);
+            document.getElementById('re').addEventListener('click', startQuiz);
+        });
+        
+        function getMathirai(letter) {
+            const mei = ['க்', 'ங்', 'ச்', 'ஞ்', 'ட்', 'ண்', 'த்', 'ந்', 'ப்', 'ம்',
+                        'ய்', 'ர்', 'ல்', 'வ்', 'ழ்', 'ள்', 'ற்', 'ன்'];
+
+            const nedilLetters = ['ஆ', 'ஈ', 'ஊ', 'ஏ', 'ஐ', 'ஓ', 'ஔ'];
+            const nedilCombinations = ['ா', 'ீ', 'ூ', 'ே', 'ை', 'ோ', 'ௌ'];
+
+            if (mei.includes(letter)) {
+                return 0;
+            } else if (nedilLetters.includes(letter)) {
+                return 2;
+            } else {
+                for (let combo of nedilCombinations) {
+                    if (letter.includes(combo)) {
+                        return 2;
+                    }
+                }
+                return 1;
+            }
+        }
+        
+        function splitTamilLetters(str) {
+            const letters = [];
+            const regex = /([க-ஹஃஶஶஂஃ][ா-ௌ]?்?)|([அ-ஔஃ])|([ா-்])/g;
+            let match;
+
+            while ((match = regex.exec(str)) !== null) {
+                letters.push(match[0]);
+            }
+
+            return letters;
+        }
+
+        // Function to show feedback message in UI
+        function showFeedbackMessage(message, isSuccess) {
+            const feedbackEl = document.getElementById('feedbackMessage');
+            feedbackEl.style.display = 'block';
+            feedbackEl.className = isSuccess ? 'alert alert-success' : 'alert alert-danger';
+            feedbackEl.textContent = message;
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                feedbackEl.style.display = 'none';
+            }, 5000);
+        }
+
+      // Function to split Tamil word into syllables
+function splitTamilWordIntoSyllables(word) {
+    const letters = splitTamilLetters(word);
+    const mathiraiValues = letters.map(getMathirai);
+    const syllables = [];
+
+    let i = 0;
+    while (i < letters.length) {
+        const curr = mathiraiValues[i];
+
+        if (curr === 2) {
+            if (i + 1 < letters.length && mathiraiValues[i + 1] === 0) {
+                syllables.push(letters[i] + letters[i + 1]);
+                i += 2;
+            } else {
+                syllables.push(letters[i]);
+                i += 1;
+            }
+        } else if (curr === 1) {
+            if (i + 2 < letters.length) {
+                const next1 = mathiraiValues[i + 1];
+                const next2 = mathiraiValues[i + 2];
+
+                // Removed the 3-character rule for 1 + 2 + (1 or 2) = Nirai
+                
+                if ((next1 === 1 || next1 === 2) && next2 === 0) {
+                    syllables.push(letters[i] + letters[i + 1] + letters[i + 2]);
+                    i += 3;
+                    continue;
+                }
+            }
+
+            if (i + 1 < letters.length) {
+                const next = mathiraiValues[i + 1];
+
+                if (next === 0) {
+                    syllables.push(letters[i] + letters[i + 1]);
+                    i += 2;
+                } else if (next === 1 || next === 2) {
+                    syllables.push(letters[i] + letters[i + 1]);
+                    i += 2;
+                } else {
+                    syllables.push(letters[i]);
+                    i += 1;
+                }
+            } else {
+                syllables.push(letters[i]);
+                i += 1;
+            }
+        } else if (curr === 0) {
+            if (i + 1 < letters.length) {
+                syllables.push(letters[i] + letters[i + 1]);
+                i += 2;
+            } else {
+                syllables.push(letters[i]);
+                i += 1;
+            }
+        } else {
+            syllables.push(letters[i]);
+            i += 1;
+        }
+    }
+    return syllables;
+}
+
+ function analyzeSplitWord(word) {
+    const userSyllables = word.split('/').map(s => s.trim()).filter(s => s.length > 0);
+    const originalWord = userSyllables.join('');
+    const systemSyllables = splitTamilWordIntoSyllables(originalWord);
+    const isMatch = JSON.stringify(userSyllables) === JSON.stringify(systemSyllables);
+    
+    if (!isMatch) {
+        showFeedbackMessage('The syllable segmentation does not match the expected pattern. Please review your input.', false);
+        
+        // Show detailed comparison
+        let detailMessage = `User Syllables: ${userSyllables.join('/')} | System Syllables: ${systemSyllables.join('/')}`;
+        console.log(detailMessage);  // Log for debugging
+    }
+    else { 
+        showFeedbackMessage('The syllable segmentation matches the expected pattern!', true);
+        
+        // Create a form for syllable classification
+        createSyllableClassificationForm1(userSyllables);
+    }
+}
+ // Function to create syllable classification form
+function createSyllableClassificationForm1(syllables) {
+    const resultsDiv = document.getElementById('splitResults');
+    const syllableResultsDiv = document.getElementById('syllableResults');
+    document.getElementById('originalWord').textContent = syllables.join('');
+    
+    syllableResultsDiv.innerHTML = '';
+    
+    // Create heading
+    const heading = document.createElement('h5');
+    heading.textContent = 'Classify each syllable as நேர் (ner) or நிரை (nirai):';
+    heading.className = 'mb-3';
+    syllableResultsDiv.appendChild(heading);
+    
+    // Create form for classifications
+    const classificationForm = document.createElement('form');
+    classificationForm.id = 'syllableClassificationForm';
+    
+    syllables.forEach((syllable, index) => {
+        const syllableCard = document.createElement('div');
+        syllableCard.className = 'card syllable-card mb-3';
+        
+        syllableCard.innerHTML = `
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <h5>${syllable}</h5>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="classification_${index}" id="ner_${index}" value="ner">
+                            <label class="form-check-label" for="ner_${index}">நேர் (ner)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="classification_${index}" id="nirai_${index}" value="nirai">
+                            <label class="form-check-label" for="nirai_${index}">நிரை (nirai)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        classificationForm.appendChild(syllableCard);
+    });
+    
+    // Add submit button
+    const submitButton = document.createElement('button');
+    submitButton.type = 'submit';
+    submitButton.className = 'btn btn-primary';
+    submitButton.textContent = 'Submit Classifications';
+    classificationForm.appendChild(submitButton);
+    
+    // Create validation results area
+    const validationResultsDiv = document.createElement('div');
+    validationResultsDiv.id = 'validationResults';
+    validationResultsDiv.className = 'mt-3 d-none';
+    syllableResultsDiv.appendChild(validationResultsDiv);
+    
+    // Add event listener for form submission
+    classificationForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Check if all syllables are classified
+        let allClassified = true;
+        syllables.forEach((_, index) => {
+            if (!document.querySelector(`input[name="classification_${index}"]:checked`)) {
+                allClassified = false;
+            }
+        });
+        
+        if (!allClassified) {
+            showFeedbackMessage('Please classify all syllables before submitting.', false);
+            return;
+        }
+        
+        // Get user classifications
+        const userClassifications = [];
+        syllables.forEach((syllable, index) => {
+            const selectedOption = document.querySelector(`input[name="classification_${index}"]:checked`);
+            userClassifications.push({
+                syllable: syllable,
+                classification: selectedOption.value === 'ner' ? 'நேர்' : 'நிரை',
+                translation: selectedOption.value
+            });
+        });
+        
+        // Validate against correct classifications
+        validateClassifications(syllables.join(''), userClassifications);
+    });
+    
+    syllableResultsDiv.appendChild(classificationForm);
+    resultsDiv.classList.remove('d-none');
+}
+
+// Function to validate user classifications
+function validateClassifications(word, userClassifications) {
+    // We'll use the existing backend endpoint to get correct classifications
+    fetch('/classify', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tamil_char: word })
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Convert backend data to same format as user classifications
+        const correctClassifications = data.map(item => {
+            return {
+                syllable: item[0],
+                classification: item[1],
+                translation: item[1] === "நேர்" ? "ner" : "nirai"
+            };
+        });
+        
+        // Compare and mark correct/incorrect
+        const results = [];
+        let allCorrect = true;
+        
+        userClassifications.forEach((userClass, index) => {
+            if (index < correctClassifications.length) {
+                const isCorrect = userClass.translation === correctClassifications[index].translation;
+                if (!isCorrect) allCorrect = false;
+                
+                results.push({
+                    syllable: userClass.syllable,
+                    userClassification: userClass.classification,
+                    correctClassification: correctClassifications[index].classification,
+                    isCorrect: isCorrect
+                });
+            }
+        });
+        
+        // Display validation results
+        displayValidationResults(results, allCorrect);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showFeedbackMessage('An error occurred while validating your classifications.', false);
+    });
+}
+
+// Enhanced function to display validation results
+function displayValidationResults(results, allCorrect) {
+    const validationResultsDiv = document.getElementById('validationResults');
+    validationResultsDiv.innerHTML = '';
+    validationResultsDiv.classList.remove('d-none');
+    
+    // Create summary alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = allCorrect ? 'alert alert-success' : 'alert alert-warning';
+    alertDiv.innerHTML = allCorrect ? 
+        '<strong>Great job!</strong> All classifications are correct.' : 
+        '<strong>Almost there!</strong> Some classifications need review.';
+    validationResultsDiv.appendChild(alertDiv);
+    
+    // Show results with detailed explanations
+    const resultsDiv = document.createElement('div');
+    resultsDiv.className = 'mt-4';
+    
+    results.forEach(result => {
+        const resultCard = document.createElement('div');
+        resultCard.className = `card mb-3 ${result.isCorrect ? 'ner' : 'nirai'}`;
+        
+        let explanation = '';
+        if (result.isCorrect) {
+            explanation = `<p>Correct! "${result.syllable}" is ${result.correctClassification} (${result.correctClassification === 'நேர்' ? 'ner' : 'nirai'}).</p>`;
+        } else {
+            explanation = `<p>Incorrect. "${result.syllable}" is actually ${result.correctClassification} (${result.correctClassification === 'நேர்' ? 'ner' : 'nirai'}).`;
+            
+            // Add more detailed explanation based on the classification rule
+            /* const letters = splitTamilLetters(result.syllable);
+            const mathiraiValues = letters.map(getMathirai);
+            const totalMathirai = mathiraiValues.reduce((sum, value) => sum + value, 0);
+            
+            if (result.correctClassification === 'நேர்') {
+                explanation += ` It has a total mathirai value of ${totalMathirai}, which makes it நேர் (ner).`;
+            } else {
+                explanation += ` It has a total mathirai value of ${totalMathirai}, which makes it நிரை (nirai).`;
+            } */
+            
+            explanation += '</p>';
+        }
+        
+        resultCard.innerHTML = `
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5>${result.syllable}</h5>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>
+                                <span class="badge ${result.isCorrect ? 'bg-success' : 'bg-danger'} me-2">
+                                    ${result.isCorrect ? 'Correct' : 'Incorrect'}
+                                </span>
+                                <strong>Your answer:</strong> ${result.userClassification}
+                            </div>
+                            <div>
+                                <strong>Correct answer:</strong> ${result.correctClassification}
+                            </div>
+                        </div>
+                        ${explanation}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        resultsDiv.appendChild(resultCard);
+    });
+    
+    validationResultsDiv.appendChild(resultsDiv);
+    
+    // Show correct classifications in detail
+    const correctClassificationsDiv = document.createElement('div');
+    correctClassificationsDiv.className = 'mt-4';
+    
+    /* const explanationHeading = document.createElement('h5');
+    explanationHeading.textContent = 'How Tamil Syllable Classification Works:';
+    explanationHeading.className = 'mb-3';
+    correctClassificationsDiv.appendChild(explanationHeading);
+    
+    const explanationText = document.createElement('div');
+    explanationText.className = 'card p-3 mb-4';
+    explanationText.innerHTML = `
+        <p><strong>நேர் (Ner):</strong> A syllable is classified as நேர் (ner) if it has a total mathirai value of 1, or if it consists of a kuril (1 mathirai) letter followed by a mei (1/2 mathirai) letter.</p>
+        <p><strong>நிரை (Nirai):</strong> A syllable is classified as நிரை (nirai) if it has a total mathirai value of 2 or more (except for specific patterns).</p>
+    `;
+    correctClassificationsDiv.appendChild(explanationText); */
+    
+    validationResultsDiv.appendChild(correctClassificationsDiv);
+    
+    // Add a button to try again
+    const tryAgainButton = document.createElement('button');
+    tryAgainButton.className = 'btn btn-secondary mt-3';
+    tryAgainButton.textContent = 'Classify Another Word';
+    tryAgainButton.addEventListener('click', function() {
+        document.getElementById('tamilWordWithSplits').value = '';
+        document.getElementById('splitResults').classList.add('d-none');
+    });
+    validationResultsDiv.appendChild(tryAgainButton);
+}
+
+    // Function to display results for split analysis
+        function displaySplitResults(data) {
+            const resultsDiv = document.getElementById('splitResults');
+            const syllableResultsDiv = document.getElementById('syllableResults');
+            document.getElementById('originalWord').textContent = data.word;
+            
+            syllableResultsDiv.innerHTML = '';
+            
+            data.detailed_classifications.forEach(item => {
+                const syllableCard = document.createElement('div');
+                syllableCard.className = `card syllable-card ${item.translation}`;
+                
+                syllableCard.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h5>${item.syllable}</h5>
+                        </div>
+                        <div class="col-md-8">
+                            <p><strong>Classification:</strong> ${item.classification} (${item.translation})</p>
+                        </div>
+                    </div>
+                `;
+                
+                syllableResultsDiv.appendChild(syllableCard);
+            });
+            
+            resultsDiv.classList.remove('d-none');
+        }
+
+        // Function to identify asai patterns automatically
+        function identifyAsai(word) {
+            fetch('/classify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ tamil_char: word })
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayAutoResults(data, word);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showFeedbackMessage('An error occurred while analyzing the word.', false);
+            });
+        }
+
+        // Function to display results for automatic analysis
+        function displayAutoResults(data, originalWord) {
+            const resultsDiv = document.getElementById('autoResults');
+            const syllableResultsDiv = document.getElementById('autoSyllableResults');
+            
+            syllableResultsDiv.innerHTML = '';
+            
+            if (data.length === 0) {
+                syllableResultsDiv.innerHTML = '<p>No asai patterns detected.</p>';
+            } else {
+                data.forEach(item => {
+                    const syllable = item[0];
+                    const classification = item[1];
+                    const translatedClass = classification === "நேர்" ? "ner" : "nirai";
+                    
+                    const syllableCard = document.createElement('div');
+                    syllableCard.className = `card syllable-card ${translatedClass}`;
+                    
+                    syllableCard.innerHTML = `
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h5>${syllable}</h5>
+                            </div>
+                            <div class="col-md-8">
+                                <p><strong>Classification:</strong> ${classification} (${translatedClass})</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    syllableResultsDiv.appendChild(syllableCard);
+                });
+            }
+            
+            resultsDiv.classList.remove('d-none');
+        }
+
+// For Practice Tab
+// Function to analyze split word and create classification form
+function analyzeSplitWord(word) {
+    const userSyllables = word.split('/').map(s => s.trim()).filter(s => s.length > 0);
+    const originalWord = userSyllables.join('');
+    const systemSyllables = splitTamilWordIntoSyllables(originalWord);
+    const isMatch = JSON.stringify(userSyllables) === JSON.stringify(systemSyllables);
+    
+    if (!isMatch) {
+        showFeedbackMessage('The syllable segmentation does not match the expected pattern. Please review your input.', false);
+        
+        // Show detailed comparison
+        let detailMessage = `User Syllables: ${userSyllables.join('/')} | System Syllables: ${systemSyllables.join('/')}`;
+        console.log(detailMessage);  // Log for debugging
+    }
+    else { 
+        showFeedbackMessage('The syllable segmentation matches the expected pattern!', true);
+        
+        // Create a form for syllable classification
+        createSyllableClassificationForm1(userSyllables);
+    }
+}
+
+// Function to create syllable classification form
+function createSyllableClassificationForm2(syllables) {
+    const resultsDiv = document.getElementById('splitResults');
+    const syllableResultsDiv = document.getElementById('syllableResults');
+    document.getElementById('originalWord').textContent = syllables.join('');
+    
+    syllableResultsDiv.innerHTML = '';
+    
+    // Create heading
+    const heading = document.createElement('h5');
+    heading.textContent = 'Classify each syllable as நேர் (ner) or நிரை (nirai):';
+    heading.className = 'mb-3';
+    syllableResultsDiv.appendChild(heading);
+    
+    // First, show the syllables with their details
+    const syllablesDetailsDiv = document.createElement('div');
+    syllablesDetailsDiv.className = 'mb-4';
+    
+    syllables.forEach(syllable => {
+        // Analyze each syllable
+        const letters = splitTamilLetters(syllable);
+        const mathiraiValues = letters.map(getMathirai);
+        const totalMathirai = mathiraiValues.reduce((sum, value) => sum + value, 0);
+        const classification = classifySyllable(syllable);
+        const translatedClass = classification === "நேர்" ? "ner" : "nirai";
+        
+        const syllableCard = document.createElement('div');
+        syllableCard.className = `card syllable-card mb-3 ${translatedClass}`;
+        
+        syllableCard.innerHTML = `
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5>${syllable}</h5>
+                    </div>
+                    <div class="col-md-8">
+                        <p><strong>Classification:</strong> ${classification} (${translatedClass})</p>
+                        <p class="mathirai-info">Total Mathirai: ${totalMathirai}</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        syllablesDetailsDiv.appendChild(syllableCard);
+    });
+    
+    syllableResultsDiv.appendChild(syllablesDetailsDiv);
+    
+    // Add a heading for the interactive classification part
+    const interactiveHeading = document.createElement('h5');
+    interactiveHeading.textContent = 'Now try to classify them yourself:';
+    interactiveHeading.className = 'mb-3 mt-4';
+    syllableResultsDiv.appendChild(interactiveHeading);
+    
+    // Create form for interactive classifications
+    const classificationForm = document.createElement('form');
+    classificationForm.id = 'syllableClassificationForm';
+    
+    syllables.forEach((syllable, index) => {
+        const syllableCard = document.createElement('div');
+        syllableCard.className = 'card syllable-card mb-3';
+        
+        syllableCard.innerHTML = `
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <h5>${syllable}</h5>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="classification_${index}" id="ner_${index}" value="ner">
+                            <label class="form-check-label" for="ner_${index}">நேர் (ner)</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="classification_${index}" id="nirai_${index}" value="nirai">
+                            <label class="form-check-label" for="nirai_${index}">நிரை (nirai)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        classificationForm.appendChild(syllableCard);
+    });
+    
+    // Add submit button
+    const submitButton = document.createElement('button');
+    submitButton.type = 'submit';
+    submitButton.className = 'btn btn-primary';
+    submitButton.textContent = 'Check My Classifications';
+    classificationForm.appendChild(submitButton);
+    
+    // Create validation results area
+    const validationResultsDiv = document.createElement('div');
+    validationResultsDiv.id = 'validationResults';
+    validationResultsDiv.className = 'mt-3 d-none';
+    syllableResultsDiv.appendChild(validationResultsDiv);
+    
+    // Add event listener for form submission
+    classificationForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Check if all syllables are classified
+        let allClassified = true;
+        syllables.forEach((_, index) => {
+            if (!document.querySelector(`input[name="classification_${index}"]:checked`)) {
+                allClassified = false;
+            }
+        });
+        
+        if (!allClassified) {
+            showFeedbackMessage('Please classify all syllables before submitting.', false);
+            return;
+        }
+        
+        // Get user classifications
+        const userClassifications = [];
+        syllables.forEach((syllable, index) => {
+            const selectedOption = document.querySelector(`input[name="classification_${index}"]:checked`);
+            userClassifications.push({
+                syllable: syllable,
+                classification: selectedOption.value === 'ner' ? 'நேர்' : 'நிரை',
+                translation: selectedOption.value
+            });
+        });
+        
+        // Get correct classifications
+        const correctClassifications = syllables.map(syllable => {
+            const classification = classifySyllable(syllable);
+            return {
+                syllable: syllable,
+                classification: classification,
+                translation: classification === 'நேர்' ? 'ner' : 'nirai'
+            };
+        });
+        
+        // Compare and mark correct/incorrect
+        const results = [];
+        let allCorrect = true;
+        
+        userClassifications.forEach((userClass, index) => {
+            const isCorrect = userClass.translation === correctClassifications[index].translation;
+            if (!isCorrect) allCorrect = false;
+            
+            results.push({
+                syllable: userClass.syllable,
+                userClassification: userClass.classification,
+                correctClassification: correctClassifications[index].classification,
+                isCorrect: isCorrect
+            });
+        });
+        
+        // Display validation results
+        displayValidationResults(results, allCorrect);
+    });
+    
+    syllableResultsDiv.appendChild(classificationForm);
+    resultsDiv.classList.remove('d-none');
+}
+
+/**
+ * FIX FOR TAMIL SYLLABLE CLASSIFIER QUIZ
+ * 
+ * This file contains the corrected code for the Tamil Syllable Classifier application.
+ * The main issue is that there are two implementations of the classifySyllable() function,
+ * with the simplified one being used in the quiz mode, leading to incorrect feedback.
+ */
+
+// STEP 1: Remove the duplicate simplified classifySyllable function (around line 1046)
+// and ensure the more detailed implementation is used everywhere
+
+/**
+ * Function to properly classify a Tamil syllable as நேர் (ner) or நிரை (nirai)
+ * This is the correct implementation that should be used throughout the application
+ */
+ function classifySyllable(syllable) {
+    const letters = splitTamilLetters(syllable);
+    const mathiraiValues = letters.map(getMathirai);
+    
+    // Rule 1: Single letter with 2 mathirai forms Ner (நேர்) asai
+    if (letters.length === 1 && mathiraiValues[0] === 2) {
+        return "நேர்"; // Single letter with 2 mathirai is Ner
+    }
+    
+    // Rule 1 extended: Single letter with 1 mathirai is also Ner
+    if (letters.length === 1 && mathiraiValues[0] === 1) {
+        return "நேர்"; // Single letter with 1 mathirai is Ner
+    }
+    
+    // Rule 2: A 2-mathirai letter followed by a 0-mathirai letter = single Ner
+    if (letters.length === 2 && mathiraiValues[0] === 2 && mathiraiValues[1] === 0) {
+        return "நேர்"; // 2 + 0 = Ner
+    }
+    
+    // Rule 2 extended: A 2-mathirai letter followed by two 0-mathirai letters = Ner
+    if (letters.length === 3 && mathiraiValues[0] === 2 && mathiraiValues[1] === 0 && mathiraiValues[2] === 0) {
+        return "நேர்"; // 2 + 0 + 0 = Ner
+    }
+    
+    // Rule 3: A 1-mathirai + 0-mathirai = Ner
+    if (letters.length === 2 && mathiraiValues[0] === 1 && mathiraiValues[1] === 0) {
+        return "நேர்"; // 1 + 0 = Ner
+    }
+    
+    // Rule 4: 1 + 1 or 1 + 2 = Nirai
+    if (letters.length === 2 && mathiraiValues[0] === 1 && (mathiraiValues[1] === 1 || mathiraiValues[1] === 2)) {
+        return "நிரை"; // 1 + 1 or 1 + 2 = Nirai
+    }
+    
+    // Rule 5: 1 + (1 or 2) + 0 = Nirai (3-char rule)
+    if (letters.length === 3 && mathiraiValues[0] === 1 && 
+        (mathiraiValues[1] === 1 || mathiraiValues[1] === 2) && mathiraiValues[2] === 0) {
+        return "நிரை"; // 1 + (1 or 2) + 0 = Nirai
+    }
+    
+    // Any other combination default to Nirai
+    return "நிரை";
+}
+
+function checkSyllableSplit() {
+    const userSplitInput = document.getElementById('userSplitInput');
+    if (!userSplitInput) return;
+    
+    const userSplitText = userSplitInput.value.trim();
+    if (!userSplitText) {
+        showFeedback('Please enter the word with syllable splits using / character.', false);
+        return;
+    }
+    
+    const userSyllables = userSplitText.split('/').map(s => s.trim()).filter(s => s.length > 0);
+    if (userSyllables.length === 0) {
+        showFeedback('Please use / to split the word into syllables.', false);
+        return;
+    }
+    
+    const currentWord = selectedQuizWords[currentQuestionIndex].word;
+    
+    // Get correct syllables using our algorithm
+    const correctSyllables = splitTamilWordIntoSyllables(currentWord);
+    
+    // Compare user's syllables with correct syllables
+    const isCorrect = arraysEqual(userSyllables, correctSyllables);
+    
+    if (isCorrect) {
+        // Save current syllables for classification step
+        currentSyllables = [...correctSyllables];
+        
+        // THIS IS THE FIXED PART - Get correct classifications using the classifySyllable function
+        currentClassifications = correctSyllables.map(syllable => ({
+            syllable: syllable,
+            classification: classifySyllable(syllable) // This uses the correct implementation
+        }));
+        
+        // Show success message
+        showFeedback('Correct syllable split! Now classify each syllable.', true);
+        
+        // Show classification section
+        const splitSection = document.getElementById('splitSection');
+        const classifySection = document.getElementById('classifySection');
+        
+        if (splitSection) splitSection.classList.add('d-none');
+        if (classifySection) classifySection.classList.remove('d-none');
+        
+        // Create classification form in the quiz syllable area
+        const syllableArea = document.getElementById('syllableClassificationArea');
+        if (syllableArea) {
+            syllableArea.innerHTML = '';
+            
+            // Create the classification form dynamically
+            currentSyllables.forEach((syllable, index) => {
+                const syllableDiv = document.createElement('div');
+                syllableDiv.className = 'card syllable-card mb-3 p-3';
+                
+                syllableDiv.innerHTML = `
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <h5>${syllable}</h5>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="classification_${index}" id="ner_${index}" value="நேர்">
+                                <label class="form-check-label" for="ner_${index}">நேர் (ner)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="classification_${index}" id="nirai_${index}" value="நிரை">
+                                <label class="form-check-label" for="nirai_${index}">நிரை (nirai)</label>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                syllableArea.appendChild(syllableDiv);
+            });
+        }
+    } else {
+        // Show error message with the correct split
+        let feedback = 'Incorrect syllable split.';
+        feedback += ` The correct split would be: ${correctSyllables.join('/')}`;
+        showFeedback(feedback, false);
+    }
+}
+
+// STEP 4: Add a debug function to help understand syllable classification (optional)
+
+/**
+ * Debug function to log how a syllable is classified
+ * This can be called from the browser console for troubleshooting
+ */
+function debugClassification(syllable) {
+    const letters = splitTamilLetters(syllable);
+    const mathiraiValues = letters.map(getMathirai);
+    const totalMathirai = mathiraiValues.reduce((sum, value) => sum + value, 0);
+    
+    console.log(`Syllable: ${syllable}`);
+    console.log(`Letters: ${letters.join(', ')}`);
+    console.log(`Mathirai values: ${mathiraiValues.join(', ')}`);
+    console.log(`Total mathirai: ${totalMathirai}`);
+    console.log(`Classification: ${classifySyllable(syllable)}`);
+    
+    // Show which rule applies
+    if (letters.length === 1 && mathiraiValues[0] === 2) {
+        console.log("Rule applied: Single letter with 2 mathirai is நேர் (ner)");
+    } else if (letters.length === 1 && mathiraiValues[0] === 1) {
+        console.log("Rule applied: Single letter with 1 mathirai is நேர் (ner)");
+    } else if (letters.length === 2 && mathiraiValues[0] === 2 && mathiraiValues[1] === 0) {
+        console.log("Rule applied: 2-mathirai letter + 0-mathirai letter is நேர் (ner)");
+    } else if (letters.length === 2 && mathiraiValues[0] === 1 && mathiraiValues[1] === 0) {
+        console.log("Rule applied: 1-mathirai letter + 0-mathirai letter is நேர் (ner)");
+    } else if (letters.length === 2 && mathiraiValues[0] === 1 && (mathiraiValues[1] === 1 || mathiraiValues[1] === 2)) {
+        console.log("Rule applied: 1-mathirai letter + (1 or 2)-mathirai letter is நிரை (nirai)");
+    } else if (letters.length === 3 && mathiraiValues[0] === 1 && 
+               (mathiraiValues[1] === 1 || mathiraiValues[1] === 2) && mathiraiValues[2] === 0) {
+        console.log("Rule applied: 1 + (1 or 2) + 0 mathirai pattern is நிரை (nirai)");
+    } else {
+        console.log(`Rule applied: Default classification for this pattern is நிரை (nirai)`);
+    }
+    
+    return classifySyllable(syllable);
+}
+document.getElementById('submitClassificationBtn').addEventListener('click', checkSyllableClassification);
+
+/**
+ * Fix for the Submit Classification Button in Quiz Mode
+ * 
+ * The main issue is that while there's an event listener attached to the submitClassificationBtn,
+ * the checkSyllableClassification function is not properly defined in the code.
+ */
+
+// Add this function to your script to handle the submit classification button click
+function checkSyllableClassification() {
+    // Get user's classifications
+    const userClassifications = [];
+    let allSelected = true;
+    
+    for (let i = 0; i < currentSyllables.length; i++) {
+        const ner = document.getElementById(`ner_${i}`);
+        const nirai = document.getElementById(`nirai_${i}`);
+        
+        if (!ner || !nirai || (!ner.checked && !nirai.checked)) {
+            allSelected = false;
+            break;
+        }
+        
+        userClassifications.push({
+            syllable: currentSyllables[i],
+            classification: ner.checked ? 'நேர்' : 'நிரை'
+        });
+    }
+    
+    if (!allSelected) {
+        showFeedback('Please classify all syllables before submitting.', false);
+        return;
+    }
+    
+    // Compare with correct classifications
+    let allCorrect = true;
+    let incorrectSyllables = [];
+    
+    for (let i = 0; i < currentClassifications.length; i++) {
+        const isCorrect = userClassifications[i].classification === currentClassifications[i].classification;
+        if (!isCorrect) {
+            allCorrect = false;
+            incorrectSyllables.push({
+                syllable: currentSyllables[i],
+                userClassification: userClassifications[i].classification,
+                correctClassification: currentClassifications[i].classification
+            });
+        }
+    }
+    
+    // Display results with detailed feedback
+    let feedback = '';
+    if (allCorrect) {
+        score++;
+        feedback = 'Excellent! All classifications are correct.';
+    } else {
+        feedback = 'Some classifications are incorrect.';
+        
+        // For each syllable, show correct classification
+        currentClassifications.forEach((item, index) => {
+            const userClass = userClassifications[index].classification;
+            const isCorrect = userClass === item.classification;
+            const nerTranslation = 'ner';
+            const niraiTranslation = 'nirai';
+            
+            const userTranslation = userClass === 'நேர்' ? nerTranslation : niraiTranslation;
+            const correctTranslation = item.classification === 'நேர்' ? nerTranslation : niraiTranslation;
+             
+            if (!isCorrect) {
+                feedback += `, Correct: ${item.classification} (${correctTranslation})`;
+            }
+        });
+    }
+    
+    showFeedback(feedback, allCorrect);
+    
+    // Check if quiz is completed
+    if (currentQuestionIndex >= totalQuestions - 1) {
+        // Show final results after a short delay
+        setTimeout(showQuizResults, 2000);
+    } else {
+        document.getElementById('nextQuestionBtn').classList.remove('d-none');
+    }
+}
+
+// Quiz related functions
+// Sample quiz data (in a real application, this would come from a server)
+const quizWords = [
+    { word: 'அழகு', meaning: 'Beauty' },
+    { word: 'கவிதை', meaning: 'Poetry' },
+    { word: 'தமிழ்', meaning: 'Tamil language' },
+    { word: 'கல்வி', meaning: 'Education' },
+    { word: 'நிலவு', meaning: 'Moon' },
+    { word: 'மழை', meaning: 'Rain' },
+    { word: 'தென்றல்', meaning: 'Breeze' },
+    { word: 'புத்தகம்', meaning: 'Book' },
+    { word: 'வானம்', meaning: 'Sky' },
+    { word: 'பறவை', meaning: 'Bird' }
+];
+
+// Quiz state variables
+let currentQuestionIndex = 0;
+let score = 0;
+let totalQuestions = 5;
+let currentSyllables = [];
+let currentClassifications = [];
+let selectedQuizWords = [];
+
+// Initialize Quiz functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Other event listeners...
+    
+    // Quiz functionality
+    document.getElementById('startQuizBtn').addEventListener('click', startQuiz);
+    document.getElementById('restartQuizBtn').addEventListener('click', startQuiz);
+    document.getElementById('nextQuestionBtn').addEventListener('click', showNextQuestion);
+    document.getElementById('checkSplitBtn').addEventListener('click', checkSyllableSplit);
+    document.getElementById('submitClassificationBtn').addEventListener('click', checkSyllableClassification);
+});
+
+/**
+ * Start a new quiz
+ */
+function startQuiz() {
+    // Shuffle and select the first 5 words for the quiz
+    selectedQuizWords = [...quizWords].sort(() => Math.random() - 0.5).slice(0, totalQuestions);
+    
+    // Reset quiz state
+    currentQuestionIndex = 0;
+    score = 0;
+    
+    // Update UI
+    document.getElementById('quizProgress').classList.remove('d-none');
+    document.getElementById('quizContainer').classList.remove('d-none');
+    document.getElementById('quizFeedback').classList.add('d-none');
+    document.getElementById('quizResults').classList.add('d-none');
+    
+    // Show split section, hide classify section
+    const splitSection = document.getElementById('splitSection');
+    const classifySection = document.getElementById('classifySection');
+    
+    if (splitSection) splitSection.classList.remove('d-none');
+    if (classifySection) classifySection.classList.add('d-none');
+    
+    // Reset form input
+    const userSplitInput = document.getElementById('userSplitInput');
+    if (userSplitInput) userSplitInput.value = '';
+    
+    // Update progress display
+    updateQuizProgress();
+    
+    // Display the first question
+    displayCurrentQuestion();
+}
+
+/**
+ * Update the quiz progress indicators
+ */
+function updateQuizProgress() {
+    document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+    document.getElementById('totalQuestions').textContent = totalQuestions;
+    document.getElementById('currentScore').textContent = score;
+    
+    const progressPercentage = ((currentQuestionIndex + 1) / totalQuestions) * 100;
+    const progressBar = document.getElementById('progressBar');
+    progressBar.style.width = `${progressPercentage}%`;
+    progressBar.setAttribute('aria-valuenow', progressPercentage);
+}
+
+/**
+ * Display the current question
+ */
+function displayCurrentQuestion() {
+    if (currentQuestionIndex >= selectedQuizWords.length) {
+        console.error('Index out of bounds');
+        return;
+    }
+    
+    const currentWord = selectedQuizWords[currentQuestionIndex];
+    document.getElementById('quizWord').textContent = currentWord.word;
+    document.getElementById('quizMeaning').textContent = currentWord.meaning || '';
+
+    // Also populate the input field with the word (without slashes)
+    const userSplitInput = document.getElementById('userSplitInput');
+    if (userSplitInput) {
+        userSplitInput.value = currentWord.word;
+    }
+}
+
+/**
+ * Show feedback to the user
+ */
+function showFeedback(message, isSuccess) {
+    const feedbackDiv = document.getElementById('quizFeedback');
+    const feedbackAlert = document.getElementById('feedbackAlert');
+    const feedbackText = document.getElementById('feedbackText');
+    
+    if (!feedbackDiv || !feedbackAlert || !feedbackText) return;
+    
+    feedbackDiv.classList.remove('d-none');
+    
+    if (isSuccess) {
+        feedbackAlert.className = 'alert alert-success';
+    } else {
+        feedbackAlert.className = 'alert alert-danger';
+    }
+    
+    feedbackText.textContent = message;
+}
+
+/**
+ * Fix for the Tamil Syllable Classifier Quiz
+ * 
+ * The issue is that the Quiz mode is not correctly validating user answers.
+ * This script contains only the parts that need to be fixed, to be inserted 
+ * into the original HTML file.
+ */
+
+// The main issue is in the checkSyllableSplit function where currentClassifications
+// is populated. The function should be replaced with this version:
+
+function checkSyllableSplit() {
+    const userSplitInput = document.getElementById('userSplitInput');
+    if (!userSplitInput) return;
+    
+    const userSplitText = userSplitInput.value.trim();
+    if (!userSplitText) {
+        showFeedback('Please enter the word with syllable splits using / character.', false);
+        return;
+    }
+    
+    const userSyllables = userSplitText.split('/').map(s => s.trim()).filter(s => s.length > 0);
+    if (userSyllables.length === 0) {
+        showFeedback('Please use / to split the word into syllables.', false);
+        return;
+    }
+    
+    const currentWord = selectedQuizWords[currentQuestionIndex].word;
+    
+    // Get correct syllables using our algorithm
+    const correctSyllables = splitTamilWordIntoSyllables(currentWord);
+    
+    // Compare user's syllables with correct syllables
+    const isCorrect = arraysEqual(userSyllables, correctSyllables);
+    
+    if (isCorrect) {
+        // Save current syllables for classification step
+        currentSyllables = [...correctSyllables];
+        
+        // THIS IS THE FIXED PART - Get correct classifications using the classifySyllable function
+        currentClassifications = correctSyllables.map(syllable => ({
+            syllable: syllable,
+            classification: classifySyllable(syllable) // This uses the correct implementation
+        }));
+        
+        // Show success message
+        showFeedback('Correct syllable split! Now classify each syllable.', true);
+        
+        // Show classification section
+        const splitSection = document.getElementById('splitSection');
+        const classifySection = document.getElementById('classifySection');
+        
+        if (splitSection) splitSection.classList.add('d-none');
+        if (classifySection) classifySection.classList.remove('d-none');
+        
+        // Create classification form in the quiz syllable area
+        const syllableArea = document.getElementById('syllableClassificationArea');
+        if (syllableArea) {
+            syllableArea.innerHTML = '';
+            
+            // Create the classification form dynamically
+            currentSyllables.forEach((syllable, index) => {
+                const syllableDiv = document.createElement('div');
+                syllableDiv.className = 'card syllable-card mb-3 p-3';
+                
+                syllableDiv.innerHTML = `
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <h5>${syllable}</h5>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="classification_${index}" id="ner_${index}" value="நேர்">
+                                <label class="form-check-label" for="ner_${index}">நேர் (ner)</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="classification_${index}" id="nirai_${index}" value="நிரை">
+                                <label class="form-check-label" for="nirai_${index}">நிரை (nirai)</label>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                syllableArea.appendChild(syllableDiv);
+            });
+        }
+    } else {
+        // Show error message with the correct split
+        let feedback = 'Incorrect syllable split.';
+        feedback += ` The correct split would be: ${correctSyllables.join('/')}`;
+        showFeedback(feedback, false);
+    }
+}
+
+// The second part of the fix is to modify the showNextQuestion function
+// to correctly update the current word for the new question:
+
+function showNextQuestion() {
+    currentQuestionIndex++;
+    updateQuizProgress();
+    
+    // Reset UI for next question
+    document.getElementById('quizFeedback').classList.add('d-none');
+    document.getElementById('nextQuestionBtn').classList.add('d-none');
+    
+    const splitSection = document.getElementById('splitSection');
+    const classifySection = document.getElementById('classifySection');
+    
+    if (splitSection) splitSection.classList.remove('d-none');
+    if (classifySection) classifySection.classList.add('d-none');
+    
+    // Display the current question before resetting the input field
+    displayCurrentQuestion();
+    
+    const userSplitInput = document.getElementById('userSplitInput');
+    if (userSplitInput) {
+        // We can optionally pre-populate with the current word to make it easier for the user
+        const currentWord = selectedQuizWords[currentQuestionIndex].word;
+        userSplitInput.value = currentWord;
+    }
+}
+
+// Define a proper classifySyllable function if not already defined elsewhere
+// This ensures we have the correct implementation being used
+
+function classifySyllable(syllable) {
+    const letters = splitTamilLetters(syllable);
+    const mathiraiValues = letters.map(getMathirai);
+    
+    // Rule 1: Single letter with 2 mathirai forms Ner (நேர்) asai
+    if (letters.length === 1 && mathiraiValues[0] === 2) {
+        return "நேர்"; // Single letter with 2 mathirai is Ner
+    }
+    
+    // Rule 1 extended: Single letter with 1 mathirai is also Ner
+    if (letters.length === 1 && mathiraiValues[0] === 1) {
+        return "நேர்"; // Single letter with 1 mathirai is Ner
+    }
+    
+    // Rule 2: A 2-mathirai letter followed by a 0-mathirai letter = single Ner
+    if (letters.length === 2 && mathiraiValues[0] === 2 && mathiraiValues[1] === 0) {
+        return "நேர்"; // 2 + 0 = Ner
+    }
+    
+    // Rule 2 extended: A 2-mathirai letter followed by two 0-mathirai letters = Ner
+    if (letters.length === 3 && mathiraiValues[0] === 2 && mathiraiValues[1] === 0 && mathiraiValues[2] === 0) {
+        return "நேர்"; // 2 + 0 + 0 = Ner
+    }
+    
+    // Rule 3: A 1-mathirai + 0-mathirai = Ner
+    if (letters.length === 2 && mathiraiValues[0] === 1 && mathiraiValues[1] === 0) {
+        return "நேர்"; // 1 + 0 = Ner
+    }
+    
+    // Rule 4: 1 + 1 or 1 + 2 = Nirai
+    if (letters.length === 2 && mathiraiValues[0] === 1 && (mathiraiValues[1] === 1 || mathiraiValues[1] === 2)) {
+        return "நிரை"; // 1 + 1 or 1 + 2 = Nirai
+    }
+    
+    // Rule 5: 1 + (1 or 2) + 0 = Nirai (3-char rule)
+    if (letters.length === 3 && mathiraiValues[0] === 1 && 
+        (mathiraiValues[1] === 1 || mathiraiValues[1] === 2) && mathiraiValues[2] === 0) {
+        return "நிரை"; // 1 + (1 or 2) + 0 = Nirai
+    }
+    
+    // Any other combination default to Nirai
+    return "நிரை";
+}
+
+/**
+ * Show the final quiz results
+ */
+function showQuizResults() {
+    document.getElementById('quizContainer').classList.add('d-none');
+    document.getElementById('quizFeedback').classList.add('d-none');
+    document.getElementById('quizResults').classList.remove('d-none');
+    
+    const percentageScore = Math.round((score / totalQuestions) * 100);
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('finalTotal').textContent = totalQuestions;
+    document.getElementById('percentageScore').textContent = percentageScore;
+    
+    // Generate result message based on score
+    let resultMessage = '';
+    if (percentageScore >= 90) {
+        resultMessage = 'Outstanding! You\'re a Tamil syllable expert!';
+    } else if (percentageScore >= 70) {
+        resultMessage = 'Great job! You have a solid understanding of Tamil syllables.';
+    } else if (percentageScore >= 50) {
+        resultMessage = 'Good effort! Keep practicing to improve your skills.';
+    } else {
+        resultMessage = 'Keep practicing! Learning Tamil syllables takes time.';
+    }
+    
+    document.getElementById('resultMessage').textContent = resultMessage;
+}
+
+/**
+ * Helper function to check if two arrays are equal
+ */
+function arraysEqual(arr1, arr2) {
+    if (arr1.length !== arr2.length) return false;
+    for (let i = 0; i < arr1.length; i++) {
+        if (arr1[i] !== arr2[i]) return false;
+    }
+    return true;
+}
+
+    </script>
+</body>
+</html>

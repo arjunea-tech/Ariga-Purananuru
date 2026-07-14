@@ -1,0 +1,255 @@
+<ion-app>
+@if (!authService.isLoggedIn()) {
+  <!-- Standalone Login view layout -->
+  <ion-router-outlet></ion-router-outlet>
+} @else if (authService.getUserRole() === 'student') {
+  <!-- Clean layout for students -->
+  <div style="position: absolute; top:0; left:0; right:0; bottom:0; width: 100%; height: 100%; display: flex; flex-direction: column;">
+    <ion-router-outlet style="flex: 1; display: block; height: 100%; width: 100%;"></ion-router-outlet>
+  </div>
+} @else {
+<!-- Fully authenticated user dashboard workspace -->
+<div class="container-fluid p-0 d-flex min-vh-100 position-relative">
+
+  <!-- Mobile Header (Visible only on small screens) -->
+  <header
+    class="mobile-header d-lg-none w-100 bg-dark text-light p-3 d-flex justify-content-between align-items-center position-fixed top-0 start-0 shadow-sm"
+    style="z-index: 1100; background-color: var(--sidebar-bg) !important;">
+    <div class="d-flex align-items-center gap-2">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--bs-primary)" stroke-width="2.5"
+        stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+        <path d="M2 17l10 5 10-5"></path>
+        <path d="M2 12l10 5 10-5"></path>
+      </svg>
+      <span class="h6 mb-0 fw-bold">{{ authService.getUser()?.name }}</span>
+    </div>
+    <button class="btn btn-link text-light p-0 border-0 shadow-none" (click)="toggleSidebar()">
+      <i class="bi bi-list fs-2"></i>
+    </button>
+  </header>
+
+  <!-- Sidebar Overlay (Visible only on mobile when sidebar is open) -->
+  @if (isSidebarOpen()) {
+  <div class="sidebar-overlay d-lg-none" (click)="closeSidebar()"></div>
+  }
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar bg-dark text-light d-flex flex-column shadow" [class.show]="isSidebarOpen()"
+    style="width: 280px; z-index: 1200; background-color: var(--sidebar-bg) !important;">
+
+    <div class="p-4 border-bottom border-secondary border-opacity-25 d-flex align-items-center justify-content-between flex-shrink-0">
+      <div class="d-flex align-items-center gap-3">
+        @if (tenantBranding()?.logo_url) {
+          <img [src]="tenantBranding()?.logo_url" class="rounded-circle flex-shrink-0" style="width: 32px; height: 32px; object-fit: contain; background: white; padding: 2px;">
+        } @else {
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--bs-primary)" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
+          </svg>
+        }
+        <div class="d-flex flex-column">
+          <span class="h6 mb-0 fw-bold text-truncate" style="max-width: 130px;">
+            {{ tenantBranding()?.tenant_name || authService.getUser()?.name }}
+          </span>
+          <small class="text-secondary"
+            style="font-size: 0.7rem; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px;">
+            {{ tenantBranding() ? authService.getUser()?.name : authService.getUserRole()?.replace('_', ' ') }}
+          </small>
+        </div>
+      </div>
+      <!-- Close button on mobile -->
+      <button class="btn btn-link text-light p-0 border-0 shadow-none d-lg-none" (click)="closeSidebar()">
+        <i class="bi bi-x-lg fs-4"></i>
+      </button>
+    </div>
+
+    <!-- Language Switcher -->
+    <div class="px-3 py-2 mx-3 mt-3 mb-2 rounded-3 flex-shrink-0"
+      style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);">
+      <label class="small text-light fw-bold mb-1 d-block"
+        style="font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em;">Language</label>
+      <div class="d-flex align-items-center gap-2">
+        <i class="bi bi-translate text-primary"></i>
+        <select (change)="switchLanguage($event)" [value]="currentLang()"
+          class="form-select form-select-sm bg-dark text-light border-secondary border-opacity-50 shadow-none cursor-pointer py-1">
+          <option value="en" class="bg-dark text-light">English (EN)</option>
+          <option value="ta" class="bg-dark text-light">Tamil (தமிழ்)</option>
+        </select>
+      </div>
+    </div>
+
+    <hr class="my-2 mx-3 border-light opacity-25 flex-shrink-0">
+
+    <!-- Main Navigation Menu -->
+    <nav class="flex-grow-1 overflow-y-auto custom-scrollbar p-3 d-flex flex-column gap-2">
+
+      <!-- 🎓 Learning Workspace Link (Visible to students) -->
+      @if (authService.hasRole(['super_admin','student'])) {
+      <a routerLink="/learn" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-play-circle"></i>
+        <span>{{ 'SIDEBAR.LEARNING_PORTAL' | translate }}</span>
+      </a>
+      }
+
+      <!-- 📢 Global Announcements -->
+      <a routerLink="/announcements" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-megaphone"></i>
+        <span>{{ 'SIDEBAR.ANNOUNCEMENTS' | translate }}</span>
+      </a>
+
+      <!-- 🏫 Academy Manager Menu Items (Super Admin, Admin, Staff) -->
+      @if (authService.hasRole(['super_admin', 'admin', 'staff'])) {
+      <div class="mt-3 mb-1 px-3 small text-uppercase fw-bold text-light opacity-75"
+        style="font-size: 0.65rem; letter-spacing: 0.05em;">
+        {{ 'SIDEBAR.ACADEMY_MANAGER' | translate }}
+      </div>
+
+      <a routerLink="/admin-dashboard" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-speedometer2"></i>
+        <span>{{ 'SIDEBAR.DASHBOARD' | translate }}</span>
+      </a>
+      <a routerLink="/users" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-people"></i>
+        <span>{{ 'SIDEBAR.USERS' | translate }}</span>
+      </a>
+      <a routerLink="/student-progress" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-graph-up"></i>
+        <span>{{ 'SIDEBAR.STUDENT_PROGRESS' | translate }}</span>
+      </a>
+      }
+
+      <!-- 📚 Content Manager Menu Items (Super Admin Only) -->
+      @if (authService.hasRole(['super_admin'])) {
+      <div class="mt-3 mb-1 px-3 small text-uppercase fw-bold text-light opacity-75"
+        style="font-size: 0.65rem; letter-spacing: 0.05em;">
+        Content Manager
+      </div>
+      <a routerLink="/courses" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-journal-bookmark"></i>
+        <span>{{ 'SIDEBAR.COURSES' | translate }}</span>
+      </a>
+      <a routerLink="/levels" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-layers"></i>
+        <span>{{ 'SIDEBAR.LEVELS' | translate }}</span>
+      </a>
+      <a routerLink="/course-package-levels" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-diagram-3"></i>
+        <span>{{ 'SIDEBAR.MAPPING' | translate }}</span>
+      </a>
+      <a routerLink="/chapters" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-journal-text"></i>
+        <span>{{ 'SIDEBAR.CHAPTERS' | translate }}</span>
+      </a>
+      <a routerLink="/contents" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-file-earmark-text"></i>
+        <span>{{ 'SIDEBAR.CONTENTS' | translate }}</span>
+      </a>
+      <a routerLink="/assessments" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-check2-square"></i>
+        <span>{{ 'SIDEBAR.ASSESSMENTS' | translate }}</span>
+      </a>
+      <a routerLink="/learning-modes" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-book"></i>
+        <span>{{ 'SIDEBAR.LEARNING_MODE' | translate }}</span>
+      </a>
+      <a routerLink="/activity-builder" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-puzzle"></i>
+        <span>Activity Builder</span>
+      </a>
+      }
+
+      <!-- 🏢 Admin Section Menu Items (Filtered by roles) -->
+      @if (authService.hasRole(['super_admin'])) {
+      <div class="mt-3 mb-1 px-3 small text-uppercase fw-bold text-light opacity-75"
+        style="font-size: 0.65rem; letter-spacing: 0.05em;">
+        {{ 'SIDEBAR.ADMIN_SECTION' | translate }}
+      </div>
+
+      <a routerLink="/tenants" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-people"></i>
+        <span>{{ 'SIDEBAR.TENANTS' | translate }}</span>
+      </a>
+
+      <a routerLink="/properties" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-building"></i>
+        <span>{{ 'SIDEBAR.PROPERTIES' | translate }}</span>
+      </a>
+
+      <a routerLink="/packages" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-box-seam"></i>
+        <span>{{ 'SIDEBAR.PACKAGES' | translate }}</span>
+      </a>
+
+      <a routerLink="/admin-upload" routerLinkActive="active" (click)="closeSidebar()"
+        class="nav-link d-flex align-items-center gap-3 py-2 px-3 rounded-3 text-light transition-all w-100">
+        <i class="bi bi-cloud-arrow-up"></i>
+        <span>{{ 'SIDEBAR.ADMIN_UPLOAD' | translate }}</span>
+      </a>
+      }
+
+    </nav>
+
+    <!-- 🚪 Pinned Logout Button Section (Outside nav scroll container) -->
+    <div class="p-3 border-top border-secondary border-opacity-25 bg-dark flex-shrink-0"
+      style="background-color: rgba(0, 0, 0, 0.2) !important;">
+      <button (click)="logout(); $event.stopPropagation()"
+        class="btn btn-logout-custom btn-sm w-100 rounded-3 py-2 d-flex align-items-center justify-content-center gap-2 fw-semibold">
+        <i class="bi bi-box-arrow-right fs-5"></i>
+        <span>{{ 'LOGOUT' | translate }}</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Workspace Content Area -->
+  <main class="main-content flex-grow-1 bg-light min-vh-100">
+    <div class="p-3 p-md-4 p-lg-5 mt-5 mt-lg-0">
+      <router-outlet></router-outlet>
+    </div>
+  </main>
+
+</div>
+}
+
+<!-- Global Loader -->
+@if (loaderService.isLoading()) {
+<div class="global-loader position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
+     style="background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(5px); z-index: 1060;">
+  <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+    <span class="visually-hidden">Loading...</span>
+  </div>
+</div>
+}
+
+<!-- Toast Notifications Container -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+  @for (toast of notificationService.toasts(); track toast.id) {
+  <div class="toast-custom toast-{{ toast.type }}" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="toast-message-content">
+      {{ toast.message }}
+    </div>
+    <button type="button" class="toast-close-btn" (click)="notificationService.remove(toast.id)" aria-label="Close">
+      <i class="bi bi-x"></i>
+    </button>
+  </div>
+  }
+</div>
+</ion-app>

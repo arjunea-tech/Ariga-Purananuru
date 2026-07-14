@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>அழகுத் தமிழ் யாப்பு</title>
+    <link href="https://fonts.googleapis.com/css2?family=Catamaran:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* Tamil Prosody Analyzer - Main Stylesheet */
+        :root {
+            --primary-color: #4a148c;
+            --primary-light: #7c43bd;
+            --primary-dark: #12005e;
+            --accent-color: #ff9800;
+            --text-light: #f5f5f5;
+            --text-dark: #212121;
+            --background-light: #f9f7ff;
+            --background-medium: #e8e3f7;
+            --error-color: #d32f2f;
+            --success-color: #388e3c;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Catamaran', sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background-color: var(--background-light);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header Styles */
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header h2 {
+            font-size: 1.2rem;
+            font-weight: normal;
+            opacity: 0.8;
+        }
+
+        /* Input Section */
+        .input-section {
+            background-color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .input-section h3 {
+            margin-bottom: 0.5rem;
+            color: var(--primary-dark);
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            color: #666;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #analyze-button {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        #analyze-button:hover {
+            background-color: var(--primary-light);
+        }
+
+        #clear-button {
+            background-color: #e0e0e0;
+            color: var(--text-dark);
+        }
+
+        #clear-button:hover {
+            background-color: #d0d0d0;
+        }
+
+        .example-container {
+            text-align: center;
+        }
+
+        #load-example {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        #load-example:hover {
+            background-color: #ffb74d;
+        }
+
+        /* Loading Indicator */
+        .loading-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(74, 20, 140, 0.3);
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Results Section */
+        .results-section {
+            background-color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            margin-bottom: 2rem;
+        }
+
+        .results-section h3 {
+            margin-bottom: 1.5rem;
+            color: var(--primary-dark);
+            text-align: center;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--background-medium);
+        }
+
+        .tab-button {
+            padding: 0.75rem 1.5rem;
+            background-color: transparent;
+            color: var(--text-dark);
+            border-bottom: 3px solid transparent;
+            border-radius: 0;
+        }
+
+        .tab-button:hover {
+            background-color: var(--background-light);
+            transform: none;
+        }
+
+        .tab-button.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Analysis Tables */
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .analysis-table th,
+        .analysis-table td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .analysis-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        .analysis-table tbody tr:nth-child(even) {
+            background-color: var(--background-light);
+        }
+
+        .analysis-table tbody tr:hover {
+            background-color: var(--background-medium);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            header h1 {
+                font-size: 1.8rem;
+            }
+            
+            header h2 {
+                font-size: 1rem;
+            }
+            
+            .button-container {
+                flex-direction: column;
+            }
+            
+            .tab-button {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .analysis-table {
+                font-size: 0.9rem;
+            }
+            
+            .analysis-table th,
+            .analysis-table td {
+                padding: 0.5rem;
+            }
+        }
+
+        /* Asai and Thalai Highlights */
+        .ner {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .nirai {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>அழகுத் தமிழ் யாப்பு</h1>
+            <h2>Tamil Prosody Analyzer - அலகிட்டு வாய்பாடு</h2>
+        </header>
+        
+        <main>
+            <div class="input-section">
+                <h3>தமிழ் பாடலைப் பகுப்பாய்வு செய்ய உள்ளிடவும்:</h3>
+                <p class="subtitle">Enter Tamil poetry for analysis:</p>
+                
+                <textarea id="tamil-input" placeholder="உதாரணம்: அகழ்வாரைத் தாங்கும் நிலம்போலத் தம்மை
+இகழ்வார்ப் பொறுத்தல் தலை."></textarea>
+                
+                <div class="button-container">
+                    <button id="analyze-button">பகுப்பாய்வு செய் (Analyze)</button>
+                    <button id="clear-button">அழி (Clear)</button>
+                </div>
+                
+                <div class="example-container">
+                    <button id="load-example">உதாரணம் காட்டு (Load Example)</button>
+                </div>
+            </div>
+            
+            <div id="loading" class="loading-indicator hidden">
+                <div class="spinner"></div>
+                <p>பகுப்பாய்வு செய்கிறது... (Analyzing...)</p>
+            </div>
+            
+            <div id="results-container" class="results-section hidden">
+                <h3>பகுப்பாய்வு முடிவுகள் (Analysis Results)</h3>
+                
+                <div class="tabs">
+                    <button class="tab-button active" data-tab="asai-tab">அசை பகுப்பாய்வு (Asai Analysis)</button>
+                    <button class="tab-button" data-tab="thalai-tab">தளை பகுப்பாய்வு (Thalai Analysis)</button>
+                </div>
+                
+                <div id="asai-tab" class="tab-content active">
+                    <div class="asai-table-container">
+                        <table id="asai-table" class="analysis-table">
+                            <thead>
+                                <tr>
+                                    <th>எண்</th>
+                                    <th>சொல்</th>
+                                    <th>அசைகள்</th>
+                                    <th>அசை வகை</th>
+                                    <th>சீர் வகை</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div id="thalai-tab" class="tab-content">
+                    <div class="thalai-table-container">
+                        <table id="thalai-table" class="analysis-table">
+                            <thead>
+                                <tr>
+                                    <th>எண்</th>
+                                    <th>முதல் சொல்</th>
+                                    <th>இரண்டாம் சொல்</th>
+                                    <th>முதல் சீர்</th>
+                                    <th>இரண்டாம் சொல் முதல் அசை</th>
+                                    <th>தளை வகை</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>© 2025 அழகுத் தமிழ் யாப்பு </p>
+        </footer>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const tamilInput = document.getElementById('tamil-input');
+            const analyzeButton = document.getElementById('analyze-button');
+            const clearButton = document.getElementById('clear-button');
+            const loadExampleButton = document.getElementById('load-example');
+            const resultsContainer = document.getElementById('results-container');
+            const loadingIndicator = document.getElementById('loading');
+            const asaiTable = document.getElementById('asai-table').querySelector('tbody');
+            const thalaiTable = document.getElementById('thalai-table').querySelector('tbody');
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            // Example Tamil poetry
+            const exampleText = 'அகழ்வாரைத் தாங்கும் நிலம்போலத் தம்மை\nஇகழ்வார்ப் பொறுத்தல் தலை.';
+            
+            // Event Listeners
+            analyzeButton.addEventListener('click', analyzeTamilText);
+            clearButton.addEventListener('click', clearAll);
+            loadExampleButton.addEventListener('click', loadExample);
+            
+            // Tab switching functionality
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all tabs
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to current tab
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Functions
+            function analyzeTamilText() {
+                const text = tamilInput.value.trim();
+                
+                if (!text) {
+                    alert('பாடலை உள்ளிடவும் (Please enter Tamil poetry)');
+                    return;
+                }
+                
+                // Show loading indicator
+                loadingIndicator.classList.remove('hidden');
+                resultsContainer.classList.add('hidden');
+                
+                // Clear previous results
+                asaiTable.innerHTML = '';
+                thalaiTable.innerHTML = '';
+                
+                // Send data to server for analysis
+                fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ text: text }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide loading indicator
+                    loadingIndicator.classList.add('hidden');
+                    
+                    if (data.error) {
+                        alert(data.error);
+                        return;
+                    }
+                    
+                    // Process and display results
+                    displayResults(data.results);
+                    resultsContainer.classList.remove('hidden');
+                })
+                .catch(error => {
+                    loadingIndicator.classList.add('hidden');
+                    alert('Error: ' + error.message);
+                });
+            }
+            
+            function displayResults(results) {
+                results.forEach((lineResult, lineIndex) => {
+                    // Process asai analysis
+                    lineResult.word_analysis.forEach((word, wordIndex) => {
+                        const row = document.createElement('tr');
+                        
+                        // Word number
+                        const numCell = document.createElement('td');
+                        numCell.textContent = wordIndex + 1;
+                        row.appendChild(numCell);
+                        
+                        // Word
+                        const wordCell = document.createElement('td');
+                        wordCell.textContent = word.word;
+                        row.appendChild(wordCell);
+                        
+                        // Asai text
+                        const asaiTextCell = document.createElement('td');
+                        asaiTextCell.textContent = word.asai_text;
+                        row.appendChild(asaiTextCell);
+                        
+                        // Asai types
+                        const asaiTypesCell = document.createElement('td');
+                        
+                        // Highlight asai types
+                        const asaiHTML = word.asai_type_text
+                            .replace(/நேர்/g, '<span class="ner">நேர்</span>')
+                            .replace(/நிரை/g, '<span class="nirai">நிரை</span>');
+                            
+                        asaiTypesCell.innerHTML = asaiHTML;
+                        row.appendChild(asaiTypesCell);
+                        
+                        // Seer pattern
+                        const seerCell = document.createElement('td');
+                        seerCell.textContent = word.seer_pattern;
+                        row.appendChild(seerCell);
+                        
+                        asaiTable.appendChild(row);
+                    });
+                    
+                    // Process thalai analysis
+                    lineResult.thalai_analysis.forEach((thalai, thalaiIndex) => {
+                        const row = document.createElement('tr');
+                        
+                        // Thalai number
+                        const numCell = document.createElement('td');
+                        numCell.textContent = thalaiIndex + 1;
+                        row.appendChild(numCell);
+                        
+                        // First word
+                        const firstWordCell = document.createElement('td');
+                        firstWordCell.textContent = thalai.first_word;
+                        row.appendChild(firstWordCell);
+                        
+                        // Second word
+                        const secondWordCell = document.createElement('td');
+                        secondWordCell.textContent = thalai.second_word;
+                        row.appendChild(secondWordCell);
+                        
+                        // First seer
+                        const firstSeerCell = document.createElement('td');
+                        firstSeerCell.textContent = thalai.first_seer;
+                        row.appendChild(firstSeerCell);
+                        
+                        // Second word first asai
+                        const secondAsaiCell = document.createElement('td');
+                        
+                        // Highlight asai type
+                        if (thalai.second_word_first_asai === 'நேர்') {
+                            secondAsaiCell.innerHTML = '<span class="ner">நேர்</span>';
+                        } else {
+                            secondAsaiCell.innerHTML = '<span class="nirai">நிரை</span>';
+                        }
+                        
+                        row.appendChild(secondAsaiCell);
+                        
+                        // Thalai type
+                        const thalaiTypeCell = document.createElement('td');
+                        thalaiTypeCell.textContent = thalai.thalai_type;
+                        row.appendChild(thalaiTypeCell);
+                        
+                        thalaiTable.appendChild(row);
+                    });
+                });
+            }
+            
+            function clearAll() {
+                tamilInput.value = '';
+                asaiTable.innerHTML = '';
+                thalaiTable.innerHTML = '';
+                resultsContainer.classList.add('hidden');
+            }
+            
+            function loadExample() {
+                tamilInput.value = exampleText;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,281 @@
+<div class="container-fluid p-4 bg-light min-vh-100">
+  <!-- LIST VIEW -->
+  @if (!isFormVisible()) {
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0 text-dark">
+      <i class="bi bi-grid-1x2 text-primary me-2"></i>Activity Builder
+    </h2>
+    <button class="btn btn-primary d-flex align-items-center gap-2 px-4 py-2 shadow-sm rounded-3"
+      (click)="showCreateForm()">
+      <i class="bi bi-plus-lg"></i>
+      <span>Create New Activity</span>
+    </button>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="bg-light text-secondary small text-uppercase fw-bold">
+          <tr>
+            <th class="px-4 py-3">ID</th>
+            <th class="py-3">Activity Title</th>
+            <th class="py-3">Type</th>
+            <th class="px-4 py-3 text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="border-top-0">
+          @for (activity of savedActivities(); track activity.id) {
+          <tr>
+            <td class="px-4 py-3 text-muted">#{{ activity.id }}</td>
+            <td class="py-3">
+              <div class="fw-bold text-dark">{{ activity.title }}</div>
+            </td>
+            <td class="py-3">
+              <span class="badge bg-secondary opacity-75 px-3 py-2 rounded-pill">{{ activity.type | uppercase }}</span>
+            </td>
+            <td class="px-4 py-3 text-end">
+              <div class="d-flex justify-content-end gap-2">
+                <button
+                  class="btn btn-light btn-sm rounded-3 p-2 shadow-none border-0 text-primary bg-primary bg-opacity-10 hover-bg-primary hover-text-white transition-all"
+                  (click)="editActivity(activity)" title="Edit">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+                <button
+                  class="btn btn-light btn-sm rounded-3 p-2 shadow-none border-0 text-danger bg-danger bg-opacity-10 hover-bg-danger hover-text-white transition-all"
+                  (click)="deleteActivity(activity.id!)" title="Delete">
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="4" class="text-center py-5 text-secondary fs-5 opacity-50">
+              <i class="bi bi-grid-1x2 fs-1 d-block mb-2"></i>
+              No activities found. Create one to get started.
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
+
+  <!-- FORM VIEW -->
+  @if (isFormVisible()) {
+  <div class="card border-0 shadow-sm rounded-4 mb-4">
+    <div class="card-header bg-white border-bottom border-light p-4 d-flex justify-content-between align-items-center">
+      <h4 class="mb-0 fw-bold text-dark">
+        {{ activityId() ? 'Edit Activity' : 'Create Activity' }}
+      </h4>
+      <div class="d-flex gap-2">
+        <button class="btn btn-primary d-flex align-items-center gap-2 fw-bold shadow-sm" 
+                (click)="saveActivity()" [disabled]="isSaving()">
+          @if (isSaving()) {
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Saving...
+          } @else {
+            <i class="bi bi-cloud-arrow-up"></i>
+            Save Activity
+          }
+        </button>
+        <button class="btn btn-light shadow-none" (click)="cancelForm()">Cancel</button>
+      </div>
+    </div>
+
+    <div class="card-body p-4 p-lg-5">
+      <!-- Top Section: Metadata -->
+      <div class="row g-4 mb-5">
+        <div class="col-md-8">
+          <label class="form-label fw-bold text-secondary small">Activity Title</label>
+          <input type="text" class="form-control border-secondary form-control-lg" 
+                 placeholder="e.g. Tamil Nouns MCQ" [(ngModel)]="activityTitle">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold text-secondary small">Activity Type</label>
+          <select class="form-select border-secondary form-select-lg" [(ngModel)]="activityType">
+            <option value="mcq">Multiple Choice Question (MCQ)</option>
+            <option value="fill_blanks">Fill in the Blanks</option>
+            <option value="flashcard">3D Vocabulary Flashcard</option>
+            <option value="match">Match It</option>
+            <option value="crossword">Dynamic Crossword Puzzle</option>
+            <option value="word_arrange">Word Arrangement</option>
+            <option value="speaking">Speaking (Voice Record)</option>
+            <option value="role_play">Role Play Conversation Dialogue</option>
+            <option value="sequencing">Sequencing (Event Ordering)</option>
+            <option value="parts_of_speech">Parts of Speech Tagger</option>
+            <option value="mind_map">Mind Mapping Diagram</option>
+            <option value="writing">Paragraph / Story Writing</option>
+            <hr>
+            <option value="custom">Custom Canvas Builder</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Content Area -->
+      <div class="content-area mt-4">
+        <h5 class="fw-bold text-dark mb-4">Configuration</h5>
+
+        <!-- Standard Engine Renderers -->
+        @if (activityType() !== 'custom') {
+          <div class="standard-engine-wrapper border rounded-4 bg-white p-4 shadow-sm" style="min-height: 450px;">
+            <div #standardFormContainer></div>
+          </div>
+        }
+
+        <!-- Custom Canvas Builder -->
+        @if (activityType() === 'custom') {
+          <div class="custom-builder-wrapper">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="toolbar">
+                <button class="btn btn-outline-primary fw-bold me-2" (click)="addContainer()">
+                  <i class="bi bi-box me-1"></i> Add Container
+                </button>
+                <div class="btn-group shadow-sm">
+                  <button class="btn btn-outline-secondary" (click)="addBlock('text')" [disabled]="!selectedContainerId()">
+                    <i class="bi bi-fonts"></i> Text
+                  </button>
+                  <button class="btn btn-outline-secondary" (click)="addBlock('audio')" [disabled]="!selectedContainerId()">
+                    <i class="bi bi-mic"></i> Audio
+                  </button>
+                  <button class="btn btn-outline-secondary" (click)="addBlock('image')" [disabled]="!selectedContainerId()">
+                    <i class="bi bi-image"></i> Image
+                  </button>
+                  <button class="btn btn-outline-secondary" (click)="addBlock('video')" [disabled]="!selectedContainerId()">
+                    <i class="bi bi-play-btn"></i> Video
+                  </button>
+                  <button class="btn btn-outline-secondary" (click)="addBlock('link')" [disabled]="!selectedContainerId()">
+                    <i class="bi bi-link-45deg"></i> Link
+                  </button>
+                </div>
+              </div>
+              
+              <!-- Preview Toggle -->
+              <div class="form-check form-switch fs-5 mb-0">
+                <input class="form-check-input cursor-pointer shadow-none" type="checkbox" role="switch" id="previewSwitch"
+                  [checked]="isPreviewMode()" (change)="togglePreview()">
+                <label class="form-check-label ms-2 fs-6 fw-bold" [class.text-primary]="isPreviewMode()"
+                  for="previewSwitch">Preview</label>
+              </div>
+            </div>
+
+            <div class="card shadow-sm border-0 border-top bg-light">
+              <div class="card-body p-4 canvas-area">
+
+                @if (nodes().length === 0) {
+                <div class="text-center text-muted p-5 border border-2 border-dashed rounded-3">
+                  <i class="bi bi-plus-circle fs-1 mb-2 d-block text-primary opacity-50"></i>
+                  Add a Container to get started
+                </div>
+                }
+
+                <!-- BUILDER MODE -->
+                @if (!isPreviewMode()) {
+                @for (container of nodes(); track container.id) {
+                <div class="activity-container mb-4 position-relative"
+                  [class.active-container]="selectedContainerId() === container.id" (click)="selectContainer(container.id)">
+
+                  <div class="container-badge d-flex justify-content-between align-items-center">
+                    <span class="badge bg-primary rounded-pill px-3 py-2">
+                      <i class="bi bi-box me-1"></i> Container
+                    </span>
+                    <button class="btn btn-sm btn-outline-danger border-0" (click)="removeContainer(container.id, $event)">
+                      <i class="bi bi-trash"></i>
+                    </button>
+                  </div>
+
+                  <div class="container-content p-3 mt-3">
+                    @if (container.contents.length === 0) {
+                    <div class="text-center text-muted small p-3 opacity-50">Empty Container</div>
+                    }
+
+                    @for (block of container.contents; track block.id) {
+                    <div
+                      class="activity-block d-flex align-items-start gap-3 mb-2 p-3 bg-white border rounded shadow-sm position-relative">
+
+                      <div class="block-icon bg-light text-primary rounded p-2 d-flex align-items-center justify-content-center">
+                        @if (block.type === 'text') { <i class="bi bi-fonts fs-5"></i> }
+                        @if (block.type === 'audio') { <i class="bi bi-mic fs-5"></i> }
+                        @if (block.type === 'image') { <i class="bi bi-image fs-5"></i> }
+                        @if (block.type === 'video') { <i class="bi bi-play-btn fs-5"></i> }
+                        @if (block.type === 'link') { <i class="bi bi-link-45deg fs-5"></i> }
+                      </div>
+
+                      <div class="flex-grow-1">
+                        <div class="d-flex justify-content-between mb-1">
+                          <span class="text-uppercase fw-bold text-muted small" style="font-size: 0.7rem;">{{ block.type }}</span>
+                        </div>
+
+                        @if (block.type === 'text') {
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="block.content"
+                          placeholder="Enter text content...">
+                        } @else {
+                        <input type="text" class="form-control form-control-sm" [(ngModel)]="block.url"
+                          placeholder="Enter media URL (e.g., assets/audio.wav)">
+                        }
+                      </div>
+
+                      <button class="btn btn-sm text-danger border-0 p-1"
+                        (click)="removeBlock(container.id, block.id, $event)">
+                        <i class="bi bi-x-circle"></i>
+                      </button>
+                    </div>
+                    }
+                  </div>
+                </div>
+                }
+                }
+
+                <!-- USER PREVIEW MODE -->
+                @if (isPreviewMode()) {
+                <div class="user-preview-wrapper p-4 rounded-4 bg-white shadow-sm border">
+                  @for (container of nodes(); track container.id) {
+                  <div class="preview-container mb-4">
+                    @for (block of container.contents; track block.id) {
+
+                    @if (block.type === 'text') {
+                    <div class="preview-text">
+                      <span class="fs-5">{{ block.content || '...' }}</span>
+                    </div>
+                    }
+
+                    @if (block.type === 'audio') {
+                    <div class="preview-audio d-inline-flex align-items-center rounded-pill bg-light border px-2 py-1 mx-1 shadow-sm">
+                      <button class="btn btn-primary rounded-circle p-1 d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px;">
+                        <i class="bi bi-play-fill fs-6"></i>
+                      </button>
+                    </div>
+                    }
+
+                    @if (block.type === 'image') {
+                    <div class="preview-image mx-2 d-inline-block">
+                      <div class="bg-light border rounded d-flex flex-column align-items-center justify-content-center p-2 text-muted" style="min-height: 80px; min-width: 100px;">
+                        <i class="bi bi-image fs-3 mb-1 opacity-50"></i>
+                      </div>
+                    </div>
+                    }
+
+                    @if (block.type === 'video') {
+                    <div class="preview-video mx-2 d-inline-block w-100 mt-2">
+                      <div class="bg-dark border rounded d-flex flex-column align-items-center justify-content-center p-4 text-light position-relative">
+                        <i class="bi bi-play-circle fs-2 mb-2 opacity-75"></i>
+                      </div>
+                    </div>
+                    }
+
+                    }
+                  </div>
+                  }
+                </div>
+                }
+
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+  }
+</div>

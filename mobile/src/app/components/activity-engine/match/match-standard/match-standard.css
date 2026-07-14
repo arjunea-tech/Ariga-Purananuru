@@ -1,0 +1,90 @@
+/* ==========================================================================
+   STANDARD BOARD THEME STYLING
+   ========================================================================== */
+.standard-board {
+  background: #f8fafc;
+  border-radius: 1.5rem;
+}
+
+.standard-card {
+  background: white;
+  border: 1.5px solid #e2e8f0;
+  cursor: pointer;
+  min-height: 3.5rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+}
+.standard-card.draggable {
+  cursor: grab;
+}
+.standard-card.draggable:active {
+  cursor: grabbing;
+}
+.standard-card:hover:not(.matched) {
+  transform: translateY(-2px);
+  border-color: #3b82f6;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+.standard-card.selected {
+  border-color: #3b82f6 !important;
+  background: rgba(59, 130, 246, 0.05) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+.standard-card.matched {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.standard-match-image {
+  max-width: 100%;
+  max-height: 80px;
+  object-fit: contain;
+  border-radius: 0.375rem;
+}
+
+/* Speaker Mini Button */
+.btn-speaker-mini {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 0.2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s ease;
+}
+.btn-speaker-mini:hover {
+  transform: scale(1.25);
+}
+
+/* Lock pair colors styling (distinct premium pastel colors) */
+.color-pair-0 { background-color: rgba(59, 130, 246, 0.12) !important; border: 1.5px solid #3b82f6 !important; }
+.color-pair-1 { background-color: rgba(16, 185, 129, 0.12) !important; border: 1.5px solid #10b981 !important; }
+.color-pair-2 { background-color: rgba(245, 158, 11, 0.12) !important; border: 1.5px solid #f59e0b !important; }
+.color-pair-3 { background-color: rgba(236, 72, 153, 0.12) !important; border: 1.5px solid #ec4899 !important; }
+.color-pair-4 { background-color: rgba(139, 92, 246, 0.12) !important; border: 1.5px solid #8b5cf6 !important; }
+.color-pair-5 { background-color: rgba(20, 184, 166, 0.12) !important; border: 1.5px solid #14b8a6 !important; }
+
+/* Shakes & Animations */
+@keyframes horizontal-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(3px); }
+}
+.incorrect-shake {
+  animation: horizontal-shake 0.4s ease-in-out;
+  border-color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #ef4444 !important;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

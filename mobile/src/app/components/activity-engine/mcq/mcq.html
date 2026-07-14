@@ -1,0 +1,63 @@
+    <div class="w-100 d-flex flex-column align-items-center justify-content-center pb-4 pt-2 max-w-md mx-auto" style="max-width: 600px;">
+      <div class="mb-4 text-center">
+        <div class="d-flex align-items-center justify-content-center mb-3 flex-wrap gap-2">
+          @if (activity?.audioUrl) {
+            <button type="button" 
+                    class="btn btn-primary d-flex align-items-center gap-2 rounded-pill px-4 py-2 border-0 shadow-sm text-white font-semibold"
+                    style="transition: all 0.3s ease; background: linear-gradient(135deg, #6366f1, #3b82f6); font-size: 0.85rem;"
+                    [class.opacity-75]="isPlaying()"
+                    (click)="playAudio()">
+              @if (isPlaying()) {
+                <span class="spinner-grow spinner-grow-sm text-white" role="status" aria-hidden="true" style="width: 0.8rem; height: 0.8rem;"></span>
+                <span>Playing...</span>
+              } @else {
+                <i class="bi bi-volume-up-fill text-white fs-6"></i>
+                <span>Listen Audio</span>
+              }
+            </button>
+          }
+        </div>
+        <h3 class="fw-bold text-dark m-0 mt-2 fs-3" style="line-height: 1.5; text-shadow: 0px 4px 10px rgba(255,255,255,0.8), 0px 8px 30px rgba(255,255,255,0.9);" [innerHTML]="activity?.question"></h3>
+      </div>
+
+      <div class="d-flex flex-column gap-3 w-100">
+        @for (option of activity?.options; track option.id; let idx = $index) {
+          <button 
+            type="button"
+            class="option-row w-100 d-flex align-items-center text-start border bg-white bg-opacity-75 rounded-4 p-3 position-relative"
+            [class.selected]="selectedOptionId() === option.id"
+            [class.correct]="showFeedback && hasSubmitted() && option.isCorrect"
+            [class.incorrect]="showFeedback && hasSubmitted() && selectedOptionId() === option.id && !option.isCorrect"
+            [class.shake]="showFeedback && hasSubmitted() && selectedOptionId() === option.id && !option.isCorrect"
+            [class.bounce]="showFeedback && hasSubmitted() && option.isCorrect && selectedOptionId() === option.id"
+            [disabled]="showFeedback && hasSubmitted()"
+            (click)="selectOption(option)">
+            
+            <div class="bubble d-flex align-items-center justify-content-center rounded-circle fw-bold text-secondary flex-shrink-0 bg-light me-4" style="width: 2.2rem; height: 2.2rem; transition: all 0.2s ease;">
+              {{ getLetter(idx) }}
+            </div>
+            
+            <span class="flex-grow-1 fw-medium text-secondary" style="font-size: 1rem;">{{ option.text }}</span>
+
+            <div class="d-flex align-items-center ms-3 fs-5" *ngIf="showFeedback && hasSubmitted()">
+              @if (option.isCorrect) {
+                <i class="bi bi-check-circle-fill text-success"></i>
+              } @else if (selectedOptionId() === option.id) {
+                <i class="bi bi-x-circle-fill text-danger"></i>
+              }
+            </div>
+          </button>
+        }
+      </div>
+
+      <!-- Expandable Explanation Block -->
+      @if (showFeedback && hasSubmitted() && activity?.explanation) {
+        <div class="animate-fade-in mt-4 rounded-3 p-4 bg-warning bg-opacity-10 border-start border-4 border-warning">
+          <div class="d-flex align-items-center gap-2 fw-bold text-warning mb-2" style="font-size: 0.9rem;">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Explanation</span>
+          </div>
+          <p class="m-0" style="color: #451a03; font-size: 0.925rem; line-height: 1.5;">{{ activity?.explanation }}</p>
+        </div>
+      }
+    </div>

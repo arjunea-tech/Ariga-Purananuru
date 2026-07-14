@@ -1,0 +1,239 @@
+.lesson-player {
+  overflow: hidden !important;
+}
+
+/* ── LESSON PLAYER BACKGROUND ── */
+.lesson-bg-pattern {
+  background-color: #f0fdf4;
+  /* Soft mint/green-ish background */
+  background-image: radial-gradient(#dcfce7 20%, transparent 20%), radial-gradient(#dcfce7 20%, transparent 20%);
+  background-size: 60px 60px;
+  background-position: 0 0, 30px 30px;
+}
+
+/* Overlay & Parchment Content Styles */
+.overlay-view {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.premium-card {
+  background: #FFF9C4 !important;
+  /* Parchment yellow */
+  border: 6px solid #FBC02D !important;
+  border-radius: 24px !important;
+  box-shadow: 0 10px 0 rgba(251, 192, 45, 0.5), 0 25px 50px rgba(0, 0, 0, 0.5) !important;
+  color: #5D4037 !important;
+}
+
+.premium-card::-webkit-scrollbar {
+  width: 12px;
+}
+
+.premium-card::-webkit-scrollbar-track {
+  background: rgba(251, 192, 45, 0.2);
+  border-radius: 10px;
+}
+
+.premium-card::-webkit-scrollbar-thumb {
+  background: #FBC02D;
+  border-radius: 10px;
+  border: 3px solid #FFF9C4;
+}
+
+.text-dark {
+  color: #3E2723 !important;
+}
+
+.text-secondary {
+  color: #5D4037 !important;
+}
+
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.hover-lift:hover {
+  transform: translateY(-5px) scale(1.02);
+}
+
+.hover-lift:active {
+  transform: translateY(2px) scale(0.98);
+}
+
+/* Animations */
+.animate-pop-in {
+  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-bounce-in {
+  animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes bounceIn {
+  from {
+    opacity: 0;
+    transform: scale(0.5) translateY(100px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+:host {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.glow-btn {
+  animation: glowPulse 2s infinite;
+}
+
+@keyframes glowPulse {
+  0% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    border-color: rgba(255, 255, 255, 1);
+  }
+
+  50% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.6);
+    border-color: #3b82f6;
+  }
+
+  100% {
+    box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+    border-color: rgba(255, 255, 255, 1);
+  }
+}
+
+/* Responsive Overrides */
+@media (max-width: 768px) {
+  .lesson-player main {
+    padding-top: 70px !important;
+  }
+  
+  .reading-content {
+    font-size: 1.15rem !important;
+  }
+  
+  .premium-card {
+    border-width: 4px !important;
+    border-radius: 16px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .lesson-player main {
+    padding-top: 60px !important;
+  }
+  
+  .reading-content {
+    font-size: 1rem !important;
+  }
+  
+  .progress-bar {
+    height: 12px !important;
+  }
+  
+  .lesson-player header {
+    height: 60px !important;
+  }
+  
+  .lesson-player header .btn {
+    width: 35px !important;
+    height: 35px !important;
+  }
+  
+  .lesson-player header .btn i {
+    font-size: 0.9rem !important;
+  }
+
+  .lesson-player header .gap-2 {
+    gap: 0.5rem !important;
+  }
+}
+
+/* ── READING CARD LAYOUT ── */
+.reading-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* ── BOTTOM NAV BUTTONS ── */
+.lesson-bottom-btn {
+  bottom: 16px !important;
+  font-size: 1rem !important;
+  min-width: 90px !important;
+  padding: 10px 20px !important;
+}
+
+/* ── LESSON DYNAMIC CARDS WRAPPER ── */
+.lesson-dynamic-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+@media (max-width: 576px) {
+  .lesson-player main {
+    padding-top: 60px !important;
+    padding-bottom: 70px !important;
+  }
+  
+  .lesson-dynamic-wrapper {
+    height: 100%;
+  }
+
+  .reading-card {
+    border-radius: 16px !important;
+    border-width: 3px !important;
+  }
+
+  .reading-content {
+    font-size: 1rem !important;
+    line-height: 1.7 !important;
+  }
+
+  .lesson-bottom-btn {
+    bottom: 12px !important;
+    min-width: 80px !important;
+    font-size: 0.95rem !important;
+    padding: 8px 16px !important;
+  }
+}

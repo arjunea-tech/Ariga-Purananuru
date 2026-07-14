@@ -113,12 +113,13 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
   constructor() {
     effect(() => {
       const html = this.rawReadingHtml();
-      if (html) {
-        this.speakText(html);
-      } else {
-        this.stopSpeech();
-        this.typedContent.set('');
-      }
+      // Disable auto-speech as requested by user
+      // if (html) {
+      //   this.speakText(html);
+      // } else {
+      //   this.stopSpeech();
+      //   this.typedContent.set('');
+      // }
     }, { allowSignalWrites: true });
 
     effect(() => {

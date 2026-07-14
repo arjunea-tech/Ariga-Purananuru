@@ -1,0 +1,146 @@
+<div class="container-fluid py-4">
+
+  <!-- List View -->
+  @if (!isFormVisible()) {
+  <div class="d-flex justify-content-end mb-4">
+    <button class="btn btn-primary d-flex align-items-center gap-2 px-4 py-2 shadow-sm rounded-3" (click)="showCreateForm()">
+      <i class="bi bi-plus-lg"></i>
+      <span>{{ 'TENANT.CREATE_BTN' | translate }}</span>
+    </button>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="bg-light text-secondary small text-uppercase fw-bold">
+          <tr>
+            <th class="px-4 py-3">{{ 'COMMON.CODE' | translate }}</th>
+            <th class="py-3">{{ 'COMMON.NAME' | translate }}</th>
+            <th class="py-3">{{ 'COMMON.CONTACT' | translate }}</th>
+            <th class="py-3">{{ 'COMMON.EMAIL' | translate }}</th>
+            <th class="py-3">{{ 'COMMON.STATUS' | translate }}</th>
+            <th class="px-4 py-3 text-end">{{ 'COMMON.ACTIONS' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody class="border-top-0">
+          @for (tenant of tenants(); track tenant.id) {
+          <tr>
+            <td class="px-4 py-3">
+              <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2 rounded-2">
+                {{ tenant.tenant_code }}
+              </span>
+            </td>
+            <td class="py-3 fw-medium text-dark">{{ tenant.tenant_name }}</td>
+            <td class="py-3 text-secondary">{{ tenant.contact_person || '-' }}</td>
+            <td class="py-3 text-secondary small">{{ tenant.email || '-' }}</td>
+            <td class="py-3">
+              <span class="badge rounded-pill px-3 py-2 fw-semibold" 
+                    [class.bg-success-subtle]="tenant.is_active" 
+                    [class.text-success]="tenant.is_active"
+                    [class.bg-danger-subtle]="!tenant.is_active"
+                    [class.text-danger]="!tenant.is_active">
+                {{ tenant.is_active ? ('COMMON.ACTIVE' | translate) : ('COMMON.INACTIVE' | translate) }}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-end">
+              <div class="d-flex justify-content-end gap-2">
+                <button class="btn btn-light btn-sm rounded-3 p-2 shadow-none border-0 text-primary bg-primary bg-opacity-10 hover-bg-primary hover-text-white transition-all" 
+                        (click)="editTenant(tenant)" 
+                        [title]="'COMMON.EDIT' | translate">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-light btn-sm rounded-3 p-2 shadow-none border-0 text-danger bg-danger bg-opacity-10 hover-bg-danger hover-text-white transition-all" 
+                        (click)="deleteTenant(tenant.id!)"
+                        [title]="'COMMON.DELETE' | translate">
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="6" class="text-center py-5 text-secondary fs-5 opacity-50">
+              <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+              {{ 'TENANT.EMPTY' | translate }}
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
+
+  <!-- Form Section -->
+  @if (isFormVisible()) {
+  <div class="card border-0 shadow rounded-4 animate-in slide-in-from-bottom-8 duration-500 overflow-hidden">
+    <div class="card-header bg-white border-bottom border-light p-4 d-flex justify-content-between align-items-center">
+      <h4 class="mb-0 fw-bold text-dark">
+        {{ isEditMode() ? ('TENANT.EDIT_TITLE' | translate) : ('TENANT.CREATE_TITLE' | translate) }}
+      </h4>
+      <button class="btn-close shadow-none" (click)="cancelForm()"></button>
+    </div>
+
+    <div class="card-body p-4 p-lg-5">
+      <form [formGroup]="tenantForm" (ngSubmit)="onSubmit()">
+        <div class="row g-4">
+          <!-- Tenant Code -->
+          <div class="col-md-6 position-relative">
+            <mcv-input-field [label]="'TENANT.CODE' | translate" formControlName="tenant_code" placeholder="e.g. TC001" [required]="true"></mcv-input-field>
+            <button type="button" (click)="generateCode()" 
+                    class="btn btn-link btn-sm position-absolute top-0 end-0 mt-1 me-3 text-decoration-none fw-bold"
+                    [title]="'COMMON.GENERATE' | translate">
+              <i class="bi bi-lightning-fill me-1"></i>
+              {{ 'COMMON.GENERATE' | translate }}
+            </button>
+          </div>
+
+          <!-- Tenant Name -->
+          <div class="col-md-6">
+            <mcv-input-field [label]="'TENANT.NAME' | translate" formControlName="tenant_name" placeholder="Full Company Name" [required]="true"></mcv-input-field>
+          </div>
+
+          <!-- Contact Person -->
+          <div class="col-md-6">
+            <mcv-input-field [label]="'TENANT.CONTACT_PERSON' | translate" formControlName="contact_person" placeholder="John Doe"></mcv-input-field>
+          </div>
+
+          <!-- Email -->
+          <div class="col-md-6">
+            <mcv-email-field [label]="'TENANT.EMAIL_ADDRESS' | translate" formControlName="email" placeholder="contact@example.com" [required]="true"></mcv-email-field>
+          </div>
+
+          <!-- Phone -->
+          <div class="col-md-6">
+            <mcv-phone-field #phoneField [label]="'TENANT.PHONE' | translate" formControlName="phone" placeholder="+1 234 567 890" [showCountryCode]="true" defaultCountryCode="+91"></mcv-phone-field>
+          </div>
+
+          <!-- Status -->
+          <div class="col-md-6 d-flex align-items-end">
+            <div class="mb-3 w-100 p-3 bg-light rounded-3 border border-light">
+              <mcv-toggle-field [label]="'COMMON.STATUS' | translate" formControlName="is_active" [onLabel]="'COMMON.ACTIVE' | translate" [offLabel]="'COMMON.INACTIVE' | translate"></mcv-toggle-field>
+            </div>
+          </div>
+
+          <!-- Address -->
+          <div class="col-12">
+            <mcv-text-area [label]="'TENANT.ADDRESS' | translate" formControlName="address" [rows]="3" placeholder="Full Postal Address"></mcv-text-area>
+          </div>
+        </div>
+
+        <div class="d-flex flex-column flex-sm-row gap-3 mt-5 pt-4 border-top border-light">
+          <button type="submit" class="btn btn-primary px-sm-5 py-2 fw-bold shadow-sm rounded-3 border-0 transition-all hover-scale w-100 w-sm-auto">
+            {{ isEditMode() ? ('COMMON.SAVE_CHANGES' | translate) : ('COMMON.SUBMIT' | translate) }}
+          </button>
+          <button type="button" class="btn btn-light px-sm-4 py-2 fw-semibold text-secondary rounded-3 w-100 w-sm-auto" (click)="resetForm()">
+            {{ 'COMMON.RESET' | translate }}
+          </button>
+          <button type="button" class="btn btn-outline-danger px-sm-4 py-2 fw-semibold rounded-3 ms-sm-auto w-100 w-sm-auto" (click)="cancelForm()">
+            {{ 'COMMON.CANCEL' | translate }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  }
+</div>

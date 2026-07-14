@@ -1,0 +1,38 @@
+.sequencing-container {
+  overflow: hidden;
+}
+
+.event-card {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.event-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.correct-highlight {
+  border-color: #a7f3d0 !important;
+  background-color: #f0fdf4 !important;
+}
+
+.incorrect-highlight {
+  border-color: #fca5a5 !important;
+  background-color: #fef2f2 !important;
+}
+
+.correct-highlight .step-badge {
+  background-color: #10b981 !important;
+  color: white !important;
+  border-color: #10b981 !important;
+}
+
+.incorrect-highlight .step-badge {
+  background-color: #ef4444 !important;
+  color: white !important;
+  border-color: #ef4444 !important;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+}

@@ -1,0 +1,90 @@
+    @if (normalizedActivity(); as data) {
+      <div class="activity-renderer-container">
+        @switch (data.type) {
+          @case ('mcq') {
+            <app-activity-mcq 
+              [activity]="data" 
+              [showFeedback]="showFeedback"
+              (answered)="onMCQAnswered($event)">
+            </app-activity-mcq>
+          }
+          @case ('fill_blanks') {
+            <app-activity-fill-blanks 
+              [activity]="data" 
+              [showFeedback]="showFeedback"
+              (answered)="onBlanksAnswered($event)">
+            </app-activity-fill-blanks>
+          }
+          @case ('flashcard') {
+            <app-activity-flashcard 
+              [activity]="data" 
+              [showFeedback]="showFeedback"
+              (answered)="onFlashcardAnswered($event)">
+            </app-activity-flashcard>
+          }
+          @case ('match') {
+            <app-activity-match 
+              [activity]="data" 
+              [showFeedback]="showFeedback"
+              (answered)="onMatchAnswered($event)">
+            </app-activity-match>
+          }
+          @case ('crossword') {
+            <app-activity-crossword
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onCrosswordAnswered($event)">
+            </app-activity-crossword>
+          }
+          @case ('word_arrange') {
+            <app-activity-word-arrange
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onWordArrangeAnswered($event)">
+            </app-activity-word-arrange>
+          }
+          @case ('speaking') {
+            <app-activity-speaking
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onSpeakingAnswered($event)">
+            </app-activity-speaking>
+          }
+          @case ('role_play') {
+            <app-activity-role-play
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onRolePlayAnswered($event)">
+            </app-activity-role-play>
+          }
+          @case ('sequencing') {
+            <app-activity-sequencing
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onSequencingAnswered($event)">
+            </app-activity-sequencing>
+          }
+          @case ('parts_of_speech') {
+            <app-activity-parts-of-speech
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onPartsOfSpeechAnswered($event)">
+            </app-activity-parts-of-speech>
+          }
+          @case ('mind_map') {
+            <app-activity-mind-map
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onMindMapAnswered($event)">
+            </app-activity-mind-map>
+          }
+          @case ('writing') {
+            <app-activity-writing
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onWritingAnswered($event)">
+            </app-activity-writing>
+          }
+        }
+      </div>
+    }

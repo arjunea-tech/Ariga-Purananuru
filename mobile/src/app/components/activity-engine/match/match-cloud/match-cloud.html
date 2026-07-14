@@ -1,0 +1,73 @@
+<!-- CLOUD THEME LAYOUT -->
+<div class="sky-board p-2 p-md-3 position-relative overflow-hidden mb-2 w-100">
+  <div class="row g-3 position-relative z-index-1 mt-0">
+    <!-- No Divider, organic floating layout -->
+
+    <!-- Left Column (Source Words inside Big Cloud) -->
+    <div class="col-12 col-md-6 d-flex flex-column align-items-center">
+      <div class="big-cloud-wrapper">
+        <div class="big-cloud-container">
+          @for (item of leftItems; track item.id; let idx = $index) {
+            @if (!isItemMatched(item.id)) {
+              <div
+                [id]="item.id"
+                class="word-bubble d-flex align-items-center gap-2"
+                [class.draggable]="allowDragDrop"
+                [class.selected]="selectedLeftId === item.id"
+                [class.incorrect-shake]="shakeLeftId === item.id"
+                [draggable]="allowDragDrop"
+                (dragstart)="onDragStart($event, item)"
+                (click)="selectLeft(item)">
+                
+                {{ item.text }}
+                
+                @if (enableAudio) {
+                  <button type="button" class="btn-speaker-mini" (click)="speak(item.text); $event.stopPropagation();">
+                    <i class="bi bi-volume-up-fill text-primary"></i>
+                  </button>
+                }
+              </div>
+            }
+          }
+          @if (isAllLeftMatched()) {
+            <div class="text-success small py-3 fw-bold animate-fade-in text-center w-100 d-flex align-items-center justify-content-center gap-2">
+              <i class="bi bi-cloud-check-fill fs-5"></i> All words matched!
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column (Target Words/Images inside Big Cloud) -->
+    <div class="col-12 col-md-6 d-flex flex-column align-items-center">
+      <div class="big-cloud-wrapper">
+        <div class="big-cloud-container">
+          @for (item of rightItems; track item.id) {
+            @if (!isItemMatched(item.id)) {
+              <div
+                [id]="item.id"
+                class="word-bubble"
+                [class.selected]="selectedRightId === item.id"
+                [class.incorrect-shake]="shakeRightId === item.id"
+                (dragover)="onDragOver($event)"
+                (drop)="onDrop($event, item)"
+                (click)="selectRight(item)">
+                
+                @if (item.rightImage) {
+                  <img [src]="item.rightImage" alt="Match Target" class="cloud-match-image" />
+                } @else {
+                  {{ item.text }}
+                }
+              </div>
+            }
+          }
+          @if (isAllRightMatched()) {
+            <div class="text-success small py-3 fw-bold animate-fade-in text-center w-100 d-flex align-items-center justify-content-center gap-2">
+              <i class="bi bi-cloud-check-fill fs-5"></i> All matched!
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
