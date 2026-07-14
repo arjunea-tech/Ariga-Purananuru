@@ -1,0 +1,117 @@
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+  border-radius: 1.25rem;
+  padding: 2rem;
+  transition: all 0.3s ease;
+}
+
+.crossword-grid {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  height: 100%;
+  max-width: 60vh;
+  max-height: 60vh;
+  aspect-ratio: 1 / 1;
+}
+
+.grid-cell {
+  aspect-ratio: 1 / 1;
+  transition: all 0.2s ease;
+}
+
+.grid-cell.active {
+  border-width: 2px !important;
+  border-color: #94a3b8 !important; /* Darker, thicker border for visibility */
+}
+.grid-cell.active:hover {
+  border-color: #94a3b8 !important;
+}
+.grid-cell.highlighted {
+  background: rgba(59, 130, 246, 0.08) !important;
+  border-color: #93c5fd !important;
+}
+.grid-cell.focused {
+  background: rgba(59, 130, 246, 0.15) !important;
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+/* Verification statuses */
+.grid-cell.correct {
+  background: rgba(16, 185, 129, 0.12) !important;
+  border-color: #10b981 !important;
+}
+.grid-cell.correct .cell-input {
+  color: #059669 !important; /* Strong Green text */
+}
+
+.grid-cell.incorrect {
+  background: rgba(239, 68, 68, 0.12) !important;
+  border-color: #ef4444 !important;
+  animation: cell-shake 0.3s ease;
+}
+.grid-cell.incorrect .cell-input {
+  color: #dc2626 !important; /* Strong Red text */
+}
+@keyframes cell-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  50% { transform: translateX(2px); }
+  75% { transform: translateX(-2px); }
+}
+
+.cell-input:disabled {
+  color: #047857 !important;
+  cursor: not-allowed;
+}
+
+.clue-btn:hover {
+  background: #f8fafc !important;
+  border-color: #cbd5e1;
+}
+.clue-btn.active {
+  background: rgba(59, 130, 246, 0.06) !important;
+  border: 1.5px solid #3b82f6 !important;
+}
+.clue-btn.active .clue-number {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+}
+.clue-btn.solved {
+  opacity: 0.75;
+}
+.clue-btn.solved .clue-text {
+  text-decoration: line-through;
+  color: #64748b;
+}
+
+.check-btn {
+  background: #10b981;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+.check-btn:hover {
+  background: #059669;
+  transform: translateY(-2px);
+}
+.reset-btn {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #cbd5e1 !important;
+}
+.reset-btn:hover {
+  background: #e2e8f0;
+  transform: translateY(-2px);
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

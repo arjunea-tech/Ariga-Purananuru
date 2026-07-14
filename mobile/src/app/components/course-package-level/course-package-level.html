@@ -1,0 +1,110 @@
+<div class="container-fluid py-4">
+
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="card-header bg-white border-bottom border-light p-4">
+      <h4 class="mb-0 fw-bold text-dark">
+        <i class="bi bi-diagram-3 me-2 text-primary"></i>
+        {{ selectedCourseName() ? (selectedCourseName() + ' - Mapping') : ('MAPPING.TITLE' | translate) }}
+      </h4>
+    </div>
+
+    <div class="card-body p-4 p-lg-5">
+      <div class="row g-4 mb-5">
+        <!-- Course Selection -->
+        @if (!selectedCourseName()) {
+        <div class="col-md-4">
+          <label class="form-label small fw-bold text-secondary">Course</label>
+          <select [(ngModel)]="selectedCourseId" (change)="onSelectionChange()" class="form-select border-light bg-light shadow-none cursor-pointer">
+            <option [ngValue]="null" disabled>Select Course</option>
+            @for (course of courses(); track course.id) {
+            <option [ngValue]="course.id">{{ course.name }}</option>
+            }
+          </select>
+        </div>
+        }
+
+        <!-- Package Selection -->
+        <div class="col-md-4">
+          <label class="form-label small fw-bold text-secondary">Package</label>
+          <select [(ngModel)]="selectedPackageId" (change)="onSelectionChange()" class="form-select border-light bg-light shadow-none cursor-pointer">
+            <option [ngValue]="null" disabled>Select Package</option>
+            @for (pkg of packages(); track pkg.id) {
+            <option [ngValue]="pkg.id">{{ pkg.name }} ({{ pkg.code }})</option>
+            }
+          </select>
+        </div>
+
+        <!-- Level Selection (Custom Multi-select) -->
+        <div class="col-md-4">
+          <label class="form-label small fw-bold text-secondary">Levels</label>
+          <div class="dropdown position-relative">
+            <div class="form-select-custom border border-light bg-light rounded shadow-none cursor-pointer d-flex justify-content-between align-items-center h-auto py-2 px-3" 
+                 (click)="toggleDropdown($event)" [class.show]="isDropdownOpen()">
+              <span class="text-truncate pe-3">{{ getSelectedLevelsLabel() }}</span>
+            </div>
+            
+            @if (isDropdownOpen()) {
+            <div class="dropdown-menu show w-100 border-light shadow-lg rounded-3 p-2 animate-in fade-in" 
+                 (click)="$event.stopPropagation()" style="max-height: 250px; overflow-y: auto;">
+              @for (level of availableLevels(); track level.id) {
+              <div class="dropdown-item px-2 py-1 rounded-2">
+                <div class="form-check m-0">
+                  <input class="form-check-input shadow-none cursor-pointer" type="checkbox" 
+                         [id]="'level-' + level.id"
+                         [checked]="isLevelSelected(level.id!)" 
+                         (change)="toggleLevelSelection(level.id!)">
+                  <label class="form-check-label ms-2 cursor-pointer w-100" [for]="'level-' + level.id">
+                    {{ level.name }}
+                  </label>
+                </div>
+              </div>
+              }
+              @if (availableLevels().length === 0) {
+              <div class="text-center p-3 text-secondary small italic">No more levels available</div>
+              }
+            </div>
+            }
+          </div>
+        </div>
+
+        <div class="col-12 text-end">
+          <button class="btn btn-primary px-4 py-2 fw-bold shadow-sm rounded-3" 
+                  [disabled]="selectedLevelIds().length === 0" (click)="mapSelectedLevels()">
+            Map Selected Levels
+          </button>
+        </div>
+      </div>
+
+      @if (selectedPackageId() && selectedCourseId()) {
+      <!-- Mapped Levels Section -->
+      <div class="p-4 bg-light rounded-4 border border-light">
+        <h6 class="fw-bold text-secondary text-uppercase mb-4 tracking-wider" style="font-size: 0.75rem;">Currently Mapped Levels</h6>
+        <div class="d-flex flex-wrap gap-2">
+          @for (level of mappedLevels(); track level.id) {
+          <div class="badge bg-white text-dark border shadow-sm px-3 py-2 rounded-3 d-flex align-items-center gap-2">
+            <span class="fw-medium text-primary">Level</span>
+            <span class="fw-bold">{{ level.name }}</span>
+            <button class="btn btn-link btn-sm p-0 ms-1 text-danger border-0 shadow-none" (click)="unmapLevel(level.id!)" title="Remove">
+              <i class="bi bi-x-circle-fill fs-6"></i>
+            </button>
+          </div>
+          }
+          @if (mappedLevels().length === 0) {
+          <div class="text-center py-4 w-100 text-secondary opacity-50 italic">
+            <i class="bi bi-link-45deg fs-2 d-block mb-1"></i>
+            No levels mapped to this package yet.
+          </div>
+          }
+        </div>
+      </div>
+      }
+
+      @if (!selectedPackageId() || !selectedCourseId()) {
+      <div class="text-center py-5 bg-light rounded-4 border border-dashed border-2">
+        <i class="bi bi-layers fs-1 text-secondary opacity-25 d-block mb-3"></i>
+        <p class="text-secondary fw-medium mb-0">Please select both a Course and a Package to start mapping levels.</p>
+      </div>
+      }
+    </div>
+  </div>
+</div>

@@ -1,0 +1,105 @@
+<div class="mb-4 glass-card pos-container">
+  <div class="mb-3 d-flex align-items-center justify-content-end">
+    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1" (click)="reset()">
+      <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+    </button>
+  </div>
+
+  <h5 class="text-dark fw-bold mb-4" [innerHTML]="activity?.question || 'Identify the parts of speech for the highlighted words:'"></h5>
+
+  <!-- Sentence Display as Word Chips -->
+  <div class="sentence-box border rounded-4 p-4 bg-white mb-4 d-flex flex-wrap gap-2 align-items-center" style="line-height: 2.5;">
+    @for (chip of wordChips(); track chip.index) {
+      @if (chip.correctTag) {
+        <!-- Clickable tagable word chip -->
+        <div class="word-chip d-flex flex-column align-items-center"
+             [class.active]="selectedWordIndex() === chip.index"
+             [class.correct-border]="showFeedback && hasSubmitted() && chip.selectedTag.toLowerCase() === chip.correctTag.toLowerCase()"
+             [class.incorrect-border]="showFeedback && hasSubmitted() && chip.selectedTag.toLowerCase() !== chip.correctTag.toLowerCase()"
+             (click)="selectWord(chip.index)"
+             style="cursor: pointer; padding: 0.2rem 0.6rem; border-radius: 8px;">
+          
+          <span class="word-text fw-bold text-dark fs-5">{{ chip.text }}</span>
+          
+          <!-- Assigned tag label -->
+          @if (chip.selectedTag) {
+            } @else {
+            <span class="text-muted text-xs font-semibold animate-pulse" style="font-size: 0.75rem; border-top: 1px dashed #cbd5e1; padding-top: 2px;">
+              <i class="bi bi-tag-fill me-1 text-primary"></i>Tag word
+            </span>
+          }
+        </div>
+      } @else {
+        <!-- Non-tagable standard word -->
+        <span class="fs-5 text-secondary px-1">{{ chip.text }}</span>
+      }
+    }
+  </div>
+
+  <!-- Tag Selector Palette -->
+  @if (selectedWordIndex() !== null) {
+    <div class="animate-fade-in card border-0 bg-light rounded-4 p-4 mb-4 text-center shadow-sm">
+      <div class="mb-3">
+        <span class="text-secondary fw-medium" style="font-size: 0.85rem;">Select Part of Speech for:</span>
+        <h4 class="fw-bold text-primary mt-1">"{{ wordChips()[selectedWordIndex()!].text }}"</h4>
+      </div>
+      <div class="d-flex flex-wrap justify-content-center gap-2">
+        @for (tag of availableTags; track tag) {
+          <button type="button" 
+                  class="btn btn-outline-primary btn-tag rounded-pill px-3 py-1-5 shadow-sm bg-white"
+                  style="font-size: 0.85rem; font-weight: 600;"
+                  (click)="assignTag(tag)">
+            {{ tag }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Error display: show correct answers comparison -->
+  @if (showFeedback && hasSubmitted() && !isCorrect()) {
+    <div class="animate-fade-in card border-0 bg-danger bg-opacity-5 rounded-4 p-4 mb-4">
+      <div class="d-flex align-items-center gap-2 text-danger fw-bold mb-3" style="font-size: 0.9rem;">
+        <i class="bi bi-x-circle-fill"></i>
+        <span>Tag Corrections:</span>
+      </div>
+      <div class="d-flex flex-column gap-2 text-secondary fw-semibold" style="font-size: 0.925rem;">
+        @for (chip of wordChips(); track chip.index) {
+          @if (chip.correctTag && chip.selectedTag.toLowerCase() !== chip.correctTag.toLowerCase()) {
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+              <span class="text-dark fw-bold">"{{ chip.text }}"</span>
+              <span class="text-muted">should be tagged as</span>
+              @if (chip.selectedTag) {
+                <span class="text-muted">(you selected )</span>
+              } @else {
+                <span class="text-muted">(left untagged)</span>
+              }
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Action Button -->
+  @if (!hasSubmitted()) {
+    <button type="button" 
+            class="btn btn-primary w-100 rounded-pill py-3 fw-bold text-white shadow-sm border-0" 
+            style="background: linear-gradient(135deg, #10b981, #059669); transition: all 0.2s;"
+            [disabled]="!isAnyTagged()"
+            (click)="checkAnswers()">
+      Submit Answer
+    </button>
+  }
+
+  <!-- Explanation box -->
+  @if (showFeedback && hasSubmitted() && activity?.explanation) {
+    <div class="animate-fade-in mt-4 rounded-3 p-4 bg-warning bg-opacity-10 border-start border-4 border-warning">
+      <div class="d-flex align-items-center gap-2 fw-bold text-warning mb-2" style="font-size: 0.9rem;">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>Explanation</span>
+      </div>
+      <p class="m-0" style="color: #451a03; font-size: 0.925rem; line-height: 1.5;">{{ activity?.explanation }}</p>
+    </div>
+  }
+</div>

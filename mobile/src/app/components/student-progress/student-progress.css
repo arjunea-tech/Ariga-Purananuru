@@ -1,0 +1,16 @@
+.avatar {
+    font-size: 1.25rem;
+  }
+  
+  .table > :not(caption) > * > * {
+    background-color: transparent;
+  }
+  
+  .modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  .progress {
+    background-color: #e9ecef;
+    border-radius: 0.5rem;
+  }

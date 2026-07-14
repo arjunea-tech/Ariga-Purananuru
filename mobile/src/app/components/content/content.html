@@ -1,0 +1,499 @@
+<div class="container-fluid py-4">
+
+  <!-- List View -->
+  @if (!isFormVisible()) {
+  <div class="d-flex justify-content-end mb-4">
+    <button class="btn btn-primary d-flex align-items-center gap-2 px-4 py-2 shadow-sm rounded-3"
+      (click)="showCreateForm()">
+      <i class="bi bi-plus-lg"></i>
+      <span>{{ 'CONTENT.CREATE_BTN' | translate }}</span>
+    </button>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="bg-light text-secondary small text-uppercase fw-bold">
+          <tr>
+            <th class="px-4 py-3">{{ 'COMMON.NAME' | translate }}</th>
+            <th class="py-3 text-center">{{ 'COMMON.SORT_ORDER' | translate }}</th>
+            <th class="py-3 text-center">{{ 'COMMON.STATUS' | translate }}</th>
+            <th class="px-4 py-3 text-end">{{ 'COMMON.ACTIONS' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody class="border-top-0">
+          @for (content of contents(); track content.id) {
+          <tr>
+            <td class="px-4 py-3">
+              <div class="fw-bold text-dark">{{ content.name }}</div>
+            </td>
+            <td class="py-3 text-center">
+              <span class="badge bg-light text-dark border px-2 py-1">{{ content.sort_order }}</span>
+            </td>
+            <td class="py-3 text-center">
+              <span class="badge rounded-pill px-3 py-2 fw-semibold" [class.bg-success-subtle]="content.is_active"
+                [class.text-success]="content.is_active" [class.bg-danger-subtle]="!content.is_active"
+                [class.text-danger]="!content.is_active">
+                {{ content.is_active ? ('COMMON.ACTIVE' | translate) : ('COMMON.INACTIVE' | translate) }}
+              </span>
+            </td>
+            <td class="px-4 py-3 text-end">
+              <div class="d-flex justify-content-end gap-2">
+                <button
+                  class="btn btn-light btn-sm rounded-3 p-2 shadow-none border-0 text-info bg-info bg-opacity-10 hover-bg-info hover-text-white transition-all"
+                  (click)="showPreview(content)" [title]="'COMMON.PREVIEW' | translate">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <button
+                  class="btn btn-light btn-sm rounded-3 p-2 shadow-none border-0 text-primary bg-primary bg-opacity-10 hover-bg-primary hover-text-white transition-all"
+                  (click)="editContent(content)" [title]="'COMMON.EDIT' | translate">
+                  <i class="bi bi-pencil-square"></i>
+                </button>
+                <button
+                  class="btn btn-light btn-sm rounded-3 p-2 shadow-none border-0 text-danger bg-danger bg-opacity-10 hover-bg-danger hover-text-white transition-all"
+                  (click)="deleteContent(content.id!)" [title]="'COMMON.DELETE' | translate">
+                  <i class="bi bi-trash3"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          } @empty {
+          <tr>
+            <td colspan="4" class="text-center py-5 text-secondary fs-5 opacity-50">
+              <i class="bi bi-file-earmark-text fs-1 d-block mb-2"></i>
+              {{ 'CONTENT.EMPTY' | translate }}
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+  }
+
+  <!-- Form View -->
+  @if (isFormVisible()) {
+  <div class="card border-0 shadow rounded-4 animate-in slide-in-from-bottom-8 duration-500">
+    <div class="card-header bg-white border-bottom border-light p-4 d-flex justify-content-between align-items-center">
+      <h4 class="mb-0 fw-bold text-dark">
+        {{ isEditMode() ? ('CONTENT.EDIT_TITLE' | translate) : ('CONTENT.CREATE_TITLE' | translate) }}
+      </h4>
+      <button class="btn-close shadow-none" (click)="cancelForm()"></button>
+    </div>
+
+    <div class="card-body p-4 p-lg-5">
+      <form [formGroup]="contentForm" (ngSubmit)="onSubmit()">
+        <div class="row g-4">
+            <div class="col-md-6 mb-4">
+              <mcv-input-field [label]="'CONTENT.NAME' | translate" formControlName="name" placeholder="Enter content name"
+                [required]="true">
+              </mcv-input-field>
+            </div>
+            <div class="col-md-6 mb-4">
+              <mcv-input-field [label]="'CONTENT.TITLE' | translate" formControlName="title" placeholder="Enter title for sidebar">
+              </mcv-input-field>
+            </div>
+
+
+          <div class="col-md-6">
+            <mcv-input-field [label]="'COMMON.SORT_ORDER' | translate" formControlName="sort_order" type="number"
+              placeholder="0"></mcv-input-field>
+          </div>
+
+          <div class="col-md-6 d-flex align-items-end justify-content-end">
+            <div class="mb-3 p-2 px-3 bg-light rounded-pill border border-light d-inline-flex align-items-center">
+              <mcv-toggle-field [label]="'COMMON.STATUS' | translate" formControlName="is_active"
+                [onLabel]="'COMMON.ACTIVE' | translate" [offLabel]="'COMMON.INACTIVE' | translate"></mcv-toggle-field>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label small text-secondary fw-semibold mb-2">{{ 'CONTENT.TEXT_CONTENT' | translate }}</label>
+            <div class="editorjs-wrapper border rounded-4 bg-white p-4 shadow-sm" style="min-height: 450px;">
+              <div id="editorjs"></div>
+            </div>
+          </div>
+
+          <!-- Attachments Section -->
+          <div class="col-12 mt-4">
+            <h6 class="fw-bold text-dark mb-3">{{ 'CONTENT.ATTACHMENTS' | translate }}</h6>
+            
+            <!-- Upload Area -->
+            <div class="mb-4">
+              <div class="position-relative d-flex flex-column align-items-center justify-content-center p-5 text-center bg-light rounded-4 transition-all shadow-sm" [class.opacity-50]="isUploading()" style="border: 2px dashed #dee2e6 !important; cursor: pointer;">
+                @if (isUploading()) {
+                  <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <h6 class="fw-bold text-dark mb-1">Uploading...</h6>
+                } @else {
+                  <div class="bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                    <i class="bi bi-cloud-arrow-up text-primary fs-3"></i>
+                  </div>
+                  <h6 class="fw-bold text-dark mb-1">Click to browse or drag & drop files</h6>
+                  <p class="text-secondary small mb-0">Only .docx, .xlsx, .pptx, .pdf, .txt; File Size less than 1 MB</p>
+                  <input type="file" class="position-absolute top-0 start-0 w-100 h-100 opacity-0 cursor-pointer" multiple (change)="onMultipleFileChange($event)" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt">
+                }
+              </div>
+            </div>
+
+            <!-- Attachments Table (From Diagram) -->
+            @if (attachmentsToSave().length > 0) {
+              <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light text-secondary small text-uppercase fw-bold">
+                      <tr>
+                        <th class="px-3 py-3" style="width: 60px;">No</th>
+                        <th class="py-3">Unique ID</th>
+                        <th class="py-3">Name (Alias Name)</th>
+                        <th class="px-3 py-3 text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody class="border-top-0">
+                      @for (item of attachmentsToSave(); track item.unique_id; let i = $index) {
+                        <tr>
+                          <td class="px-3 py-3 text-secondary">{{ i + 1 }}</td>
+                          <td class="py-3">
+                            <code class="text-primary small">{{ item.unique_id }}</code>
+                          </td>
+                          <td class="py-3">
+                            <input type="text" class="form-control form-control-sm border-0 bg-light rounded-3 px-3 fw-semibold shadow-none" 
+                                   [(ngModel)]="item.alias_name" [ngModelOptions]="{standalone: true}" 
+                                   placeholder="Enter display name">
+                          </td>
+                          <td class="px-3 py-3 text-center">
+                            <div class="d-flex justify-content-center gap-2">
+                              @if (item.url) {
+                                <button type="button" class="btn btn-light btn-sm rounded-circle p-2 shadow-none border-0 text-info bg-info bg-opacity-10 hover-bg-info hover-text-white transition-all" 
+                                        (click)="viewFile(item.url)" title="Preview">
+                                  <i class="bi bi-eye"></i>
+                                </button>
+                              }
+                              <button type="button" class="btn btn-light btn-sm rounded-circle p-2 shadow-none border-0 text-danger bg-danger bg-opacity-10 hover-bg-danger hover-text-white transition-all" 
+                                      (click)="removeAttachment(i)" title="Delete">
+                                <i class="bi bi-trash3"></i>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- External URLs Section -->
+          <div class="col-12 mt-4" formArrayName="urls">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+              <div>
+                <h6 class="fw-bold text-dark mb-1">External URLs</h6>
+                <p class="text-secondary small mb-0">
+                  <i class="bi bi-info-circle text-primary me-1"></i>
+                  Tip: Add a YouTube link or a local video path (e.g. <code>assets/videos/video_name.mp4</code>) here to show a video player at the top of the student lesson page.
+                </p>
+              </div>
+              <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm d-flex align-items-center gap-2 hover-scale" (click)="addUrlField()">
+                <i class="bi bi-plus-lg"></i> Add URL
+              </button>
+            </div>
+            
+            <div class="row g-3">
+              @for (urlCtrl of urlControls; track $index; let i = $index) {
+                <div class="col-md-6 col-lg-4">
+                  <div class="d-flex align-items-center p-2 bg-white border rounded-4 shadow-sm h-100 transition-all hover-scale" style="border-color: #f1f5f9 !important;">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-3 d-flex align-items-center justify-content-center me-3 ms-1 flex-shrink-0" style="width: 40px; height: 40px;">
+                      <i class="bi bi-link-45deg fs-5"></i>
+                    </div>
+                    <div class="flex-grow-1 pe-2">
+                      <input type="text" class="form-control border-0 bg-transparent shadow-none px-0 fw-semibold text-dark small" [formControlName]="i" placeholder="https://example.com/resource">
+                    </div>
+                    <div class="d-flex gap-1 flex-shrink-0 ms-auto pe-1">
+                      <button type="button" class="btn btn-sm btn-light text-danger hover-text-danger p-2 rounded-circle border-0 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;" (click)="removeUrlField(i)" title="Remove URL">
+                        <i class="bi bi-trash3"></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Content Mapping Section -->
+          <div class="col-12 mt-4">
+            <div class="card border-0 shadow-sm rounded-4" style="border-left: 4px solid #0d6efd !important;">
+              <div class="card-body p-4">
+                <h5 class="fw-bold text-dark mb-1">Content Mapping</h5>
+                <p class="text-secondary small mb-4">Map this content to one or more chapters</p>
+
+                <div class="mb-3">
+                  <label class="form-label fw-semibold small text-secondary">Chapters</label>
+                  <div class="dropdown" (click)="$event.stopPropagation()">
+                    <div class="form-control d-flex flex-wrap gap-2 align-items-center bg-white cursor-pointer"
+                      (click)="toggleChapterDropdown($event)" style="min-height: 45px;">
+
+                      @if (selectedChapterIds().length === 0) {
+                      <span class="text-muted">Select Chapters...</span>
+                      }
+
+                      @for (chapterId of selectedChapterIds(); track chapterId) {
+                      @let chapter = getChapterById(chapterId);
+                      <span
+                        class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 d-flex align-items-center gap-2 py-2 px-3 rounded-pill animate-in zoom-in-95 duration-200">
+                        {{ chapter?.name || 'Unknown' }}
+                        <i class="bi bi-x-lg cursor-pointer hover-scale"
+                          (click)="toggleChapterSelection(chapterId); $event.stopPropagation()"></i>
+                      </span>
+                      }
+
+                      <i class="bi bi-chevron-down ms-auto text-secondary small"></i>
+                    </div>
+
+                    <ul class="dropdown-menu w-100 shadow-lg border-0 mt-1 py-0 custom-scrollbar"
+                      [class.show]="isChapterDropdownOpen()"
+                      style="max-height: 240px; overflow-y: auto; z-index: 2000; position: absolute; top: 100%; left: 0; display: block; visibility: hidden;"
+                      [style.visibility]="isChapterDropdownOpen() ? 'visible' : 'hidden'">
+                      <li class="bg-light p-2 sticky-top border-bottom d-flex align-items-center gap-2">
+                        <i class="bi bi-search text-secondary ms-2 small"></i>
+                        <input type="text" class="form-control form-control-sm border-0 shadow-none bg-transparent"
+                          placeholder="Search chapters..." (input)="onChapterSearch($event)"
+                          (click)="$event.stopPropagation()">
+                      </li>
+                      <li class="border-bottom">
+                        <div
+                          class="dropdown-item d-flex align-items-center py-2 px-3 fw-bold text-primary bg-primary bg-opacity-10"
+                          (click)="toggleAllChapters()" style="cursor: pointer;">
+                          <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" [checked]="allChaptersSelected()"
+                              (change)="toggleAllChapters()" (click)="$event.stopPropagation()">
+                            <label class="form-check-label ms-2 small">Select All Chapters</label>
+                          </div>
+                        </div>
+                      </li>
+                      @for (chapter of filteredChapters(); track chapter.id) {
+                      <li>
+                        <div
+                          class="dropdown-item d-flex align-items-center py-2 px-3 border-bottom border-light border-opacity-50"
+                          (click)="toggleChapterSelection(chapter.id!)" style="cursor: pointer;">
+                          <div class="form-check mb-0">
+                            <input class="form-check-input" type="checkbox" [checked]="isChapterSelected(chapter.id!)"
+                              (change)="toggleChapterSelection(chapter.id!)" (click)="$event.stopPropagation()">
+                            <label class="form-check-label ms-2 text-dark d-flex flex-column">
+                              <span class="fw-bold small">{{ chapter.name }}</span>
+                              <span class="text-secondary smaller opacity-75" style="font-size: 0.7rem;">{{ chapter.code
+                                }}</span>
+                            </label>
+                          </div>
+                        </div>
+                      </li>
+                      } @empty {
+                      <li class="p-4 text-center text-muted">
+                        <i class="bi bi-search fs-2 d-block mb-2 opacity-25"></i>
+                        No chapters found.
+                      </li>
+                      }
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+
+        <div class="d-flex flex-column flex-sm-row gap-3 mt-5 pt-4 border-top border-light">
+          <button type="submit"
+            class="btn btn-primary px-sm-5 py-2 fw-bold shadow-sm rounded-3 border-0 transition-all hover-scale w-100 w-sm-auto">
+            {{ isEditMode() ? ('COMMON.SAVE_CHANGES' | translate) : ('COMMON.SUBMIT' | translate) }}
+          </button>
+          <button type="button" class="btn btn-light px-sm-4 py-2 fw-semibold text-secondary rounded-3 w-100 w-sm-auto"
+            (click)="resetForm()">
+            {{ 'COMMON.RESET' | translate }}
+          </button>
+          <button type="button" class="btn btn-outline-danger px-sm-4 py-2 fw-semibold rounded-3 ms-sm-auto w-100 w-sm-auto"
+            (click)="cancelForm()">
+            {{ 'COMMON.CANCEL' | translate }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+  }
+
+  <!-- Preview Modal -->
+  @if (previewContent(); as content) {
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5); z-index: 1060;">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+        <div class="modal-header bg-white border-bottom border-light px-4 py-3">
+          <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+            <i class="bi bi-eye text-primary"></i>
+            {{ content.name }}
+          </h5>
+          <button type="button" class="btn-close shadow-none" (click)="closePreview()"></button>
+        </div>
+        <div class="modal-body p-4 p-lg-5 bg-white">
+          @if (isPreviewJsonContent(content.text_content)) {
+            <div class="editorjs-blocks">
+              @for (block of getParsedPreviewBlocks(content.text_content); track $index) {
+                @if (block.type === 'paragraph') {
+                  <p class="mb-3 fs-5 text-dark" [innerHTML]="block.data.text"></p>
+                } @else if (block.type === 'header') {
+                  @if (block.data.level === 1) {
+                    <h1 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h1>
+                  } @else if (block.data.level === 2) {
+                    <h2 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h2>
+                  } @else {
+                    <h3 class="fw-bold text-dark mb-3" [innerHTML]="block.data.text"></h3>
+                  }
+                } @else if (block.type === 'list') {
+                  @if (block.data.style === 'ordered') {
+                    <ol class="mb-3 text-dark fs-5">
+                      @for (item of block.data.items; track $index) {
+                        <li>
+                          <span [innerHTML]="item && item.content !== undefined ? item.content : item"></span>
+                          @if (item && item.items && item.items.length > 0) {
+                            <ul>
+                              @for (sub of item.items; track sub) {
+                                <li>
+                                  <span [innerHTML]="sub && sub.content !== undefined ? sub.content : sub"></span>
+                                  @if (sub && sub.items && sub.items.length > 0) {
+                                    <ul>
+                                      @for (nested of sub.items; track nested) {
+                                        <li><span [innerHTML]="nested && nested.content !== undefined ? nested.content : nested"></span></li>
+                                      }
+                                    </ul>
+                                  }
+                                </li>
+                              }
+                            </ul>
+                          }
+                        </li>
+                      }
+                    </ol>
+                  } @else {
+                    <ul class="mb-3 text-dark fs-5">
+                      @for (item of block.data.items; track $index) {
+                        <li>
+                          <span [innerHTML]="item && item.content !== undefined ? item.content : item"></span>
+                          @if (item && item.items && item.items.length > 0) {
+                            <ul>
+                              @for (sub of item.items; track sub) {
+                                <li>
+                                  <span [innerHTML]="sub && sub.content !== undefined ? sub.content : sub"></span>
+                                  @if (sub && sub.items && sub.items.length > 0) {
+                                    <ul>
+                                      @for (nested of sub.items; track nested) {
+                                        <li><span [innerHTML]="nested && nested.content !== undefined ? nested.content : nested"></span></li>
+                                      }
+                                    </ul>
+                                  }
+                                </li>
+                              }
+                            </ul>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  }
+                } @else if (block.type === 'table') {
+                  <div class="table-responsive mb-3">
+                    <table class="table table-bordered align-middle text-dark">
+                      @if (block.data.withHeadings && block.data.content && block.data.content.length > 0) {
+                        <thead>
+                          <tr class="bg-light">
+                            @for (headerCell of block.data.content[0]; track $index) {
+                              <th [innerHTML]="headerCell"></th>
+                            }
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (row of block.data.content.slice(1); track $index) {
+                            <tr>
+                              @for (cell of row; track $index) {
+                                <td [innerHTML]="cell"></td>
+                              }
+                            </tr>
+                          }
+                        </tbody>
+                      } @else if (block.data.content) {
+                        <tbody>
+                          @for (row of block.data.content; track $index) {
+                            <tr>
+                              @for (cell of row; track $index) {
+                                <td [innerHTML]="cell"></td>
+                              }
+                            </tr>
+                          }
+                        </tbody>
+                      }
+                    </table>
+                  </div>
+                } @else if (block.type === 'activity') {
+                  <app-activity-renderer [activity]="block.data" [showFeedback]="true"></app-activity-renderer>
+                } @else {
+                  <div class="mb-3 text-dark" [innerHTML]="block.data.text || ''"></div>
+                }
+              }
+            </div>
+          } @else {
+            <div class="content-render mb-4" [innerHTML]="content.text_content | safeHtml"></div>
+          }
+          
+          <!-- Attachments Preview -->
+          @if (content.attachments && content.attachments.length > 0) {
+            <div class="mt-5 pt-4 border-top">
+              <h6 class="fw-bold text-dark mb-3">Attachments</h6>
+              <div class="row g-3">
+                @for (attachment of content.attachments; track attachment.unique_id) {
+                  <div class="col-md-4">
+                    <a [href]="attachment.url" target="_blank" class="text-decoration-none">
+                      <div class="d-flex align-items-center p-2 border rounded-3 bg-light hover-bg-white transition-all">
+                        @switch (attachment.file_extension) {
+                            @case ('pdf') { <i class="bi bi-file-pdf text-danger fs-4 me-2"></i> }
+                            @case ('doc') { <i class="bi bi-file-word text-primary fs-4 me-2"></i> }
+                            @case ('docx') { <i class="bi bi-file-word text-primary fs-4 me-2"></i> }
+                            @case ('xls') { <i class="bi bi-file-excel text-success fs-4 me-2"></i> }
+                            @case ('xlsx') { <i class="bi bi-file-excel text-success fs-4 me-2"></i> }
+                            @case ('ppt') { <i class="bi bi-file-ppt text-warning fs-4 me-2"></i> }
+                            @case ('pptx') { <i class="bi bi-file-ppt text-warning fs-4 me-2"></i> }
+                            @default { <i class="bi bi-file-earmark-text text-secondary fs-4 me-2"></i> }
+                        }
+                        <span class="text-dark small text-truncate">{{ attachment.alias_name || attachment.original_name }}</span>
+                      </div>
+                    </a>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- External URLs Preview -->
+          @if (content.urls && content.urls.length > 0) {
+            <div class="mt-4 p-3 bg-light rounded-4 border border-light">
+              <h6 class="fw-bold text-dark small mb-2">Reference URLs:</h6>
+              <div class="d-flex flex-column gap-2">
+                @for (url of content.urls; track url) {
+                  @if (url) {
+                    <a [href]="url" target="_blank" class="text-primary text-decoration-none small d-flex align-items-center gap-2 hover-underline">
+                      <i class="bi bi-link-45deg fs-5"></i>
+                      <span class="text-truncate">{{ url }}</span>
+                    </a>
+                  }
+                }
+              </div>
+            </div>
+          }
+        </div>
+        <div class="modal-footer bg-light border-0 px-4 py-3">
+          <button type="button" class="btn btn-secondary px-4 py-2 fw-semibold rounded-3" (click)="closePreview()">Close Preview</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+</div>

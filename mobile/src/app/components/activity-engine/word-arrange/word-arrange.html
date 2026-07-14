@@ -1,0 +1,100 @@
+    <div class="w-100 d-flex flex-column align-items-center justify-content-center pb-4 pt-2 max-w-lg mx-auto" style="max-width: 800px;">
+      <div class="header mb-4 position-relative d-flex justify-content-between align-items-center w-100">
+        <div style="width: 120px;" class="d-none d-sm-block"></div>
+        <h3 class="fw-bold text-dark m-0 flex-grow-1 text-center fs-3" style="text-shadow: 0px 4px 10px rgba(255,255,255,0.8), 0px 8px 30px rgba(255,255,255,0.9);">{{ activity?.question || 'Arrange the words to form a correct sentence:' }}</h3>
+        <div style="width: 120px;" class="d-flex justify-content-end">
+          <button 
+            type="button" 
+            class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 fw-bold d-flex align-items-center gap-1 shadow-sm"
+            [disabled]="hasSubmitted() && isCorrect()"
+            (click)="resetPuzzle()">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- Arrangement Slot / Workspace (Box-less) -->
+      <div class="sentence-workspace p-4 mb-5 d-flex flex-wrap gap-3 align-items-center justify-content-center w-100"
+           [class.correct]="hasSubmitted() && isCorrect()"
+           [class.incorrect]="hasSubmitted() && !isCorrect()"
+           style="min-height: 120px; transition: all 0.3s ease; border-bottom: 4px dashed rgba(255,255,255,0.4);">
+        
+        @if (arrangedWords().length === 0) {
+          <span class="text-white fw-bold fs-4 select-none" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">Tap words below to arrange them here...</span>
+        } @else {
+          @for (word of arrangedWords(); track word.id) {
+            <button 
+              type="button" 
+              class="word-pill arranged border rounded-pill px-3 py-2 fw-semibold shadow-sm animate-scale-in"
+              [disabled]="hasSubmitted()"
+              (click)="deselectWord(word)">
+              {{ word.text }}
+            </button>
+          }
+        }
+      </div>
+
+      <!-- Shuffled Word Options pool -->
+      <div class="d-flex flex-wrap gap-2 justify-content-center mb-4">
+        @for (word of shuffledWords(); track word.id) {
+          <button 
+            type="button" 
+            class="word-pill available border rounded-pill px-3 py-2 fw-semibold shadow-sm"
+            [class.used]="word.isUsed"
+            [disabled]="word.isUsed || hasSubmitted()"
+            (click)="selectWord(word)">
+            {{ word.text }}
+          </button>
+        }
+      </div>
+
+      <!-- Controls -->
+      <div class="d-flex gap-3 justify-content-center mt-3">
+        @if (showFeedback && !hasSubmitted()) {
+          <button 
+            type="button" 
+            class="btn-action check-btn border-0 py-3 px-5 rounded-pill fw-bold text-white d-inline-flex align-items-center gap-2 shadow"
+            [disabled]="!isAnyWordArranged()"
+            (click)="checkAnswers()">
+            <i class="bi bi-shield-check"></i> Check Answers
+          </button>
+        }
+      </div>
+
+      <!-- Success / Error Status Details -->
+      @if (hasSubmitted()) {
+        @if (isCorrect()) {
+          <div class="animate-fade-in mt-4 rounded-3 p-4 bg-success bg-opacity-10 border-start border-4 border-success">
+            <div class="d-flex align-items-center gap-2 fw-bold text-success mb-1" style="font-size: 0.95rem;">
+              <i class="bi bi-check-circle-fill"></i>
+              <span>Excellent! Correct Arrangement!</span>
+            </div>
+            <p class="m-0 text-success text-opacity-75" style="font-size: 0.9rem;">The words are in the perfect grammatical order.</p>
+          </div>
+        } @else {
+          <div class="animate-fade-in mt-4 rounded-3 p-4 bg-danger bg-opacity-10 border-start border-4 border-danger">
+            <div class="d-flex align-items-center gap-2 fw-bold text-danger mb-2" style="font-size: 0.95rem;">
+              <i class="bi bi-x-circle-fill"></i>
+              <span>Incorrect Order</span>
+            </div>
+            <div class="text-danger mb-1" style="font-size: 0.9rem;">
+              Correct sentence is: 
+              <strong class="bg-success bg-opacity-10 text-success px-2 py-1 rounded border border-success border-opacity-25 d-inline-block mt-1">
+                {{ originalWords().join(' ') }}
+              </strong>
+            </div>
+          </div>
+        }
+      }
+
+      <!-- Explanation Box -->
+      @if (showFeedback && hasSubmitted() && activity?.explanation) {
+        <div class="animate-fade-in mt-4 rounded-3 p-4 bg-warning bg-opacity-10 border-start border-4 border-warning">
+          <div class="d-flex align-items-center gap-2 fw-bold text-warning mb-2" style="font-size: 0.9rem;">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Explanation / Grammatical Hint</span>
+          </div>
+          <p class="m-0" style="color: #451a03; font-size: 0.925rem; line-height: 1.5;">{{ activity?.explanation }}</p>
+        </div>
+      }
+    </div>

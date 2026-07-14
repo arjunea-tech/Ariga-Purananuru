@@ -1,0 +1,72 @@
+<!-- STANDARD THEME LAYOUT -->
+<div class="standard-board p-4 rounded-4 bg-light border border-light-subtle mb-3">
+  <div class="row g-4">
+    <!-- Left Column -->
+    <div class="col-12 col-md-6 d-flex flex-column gap-3">
+      <span class="text-uppercase fw-bold text-secondary pb-2 border-bottom border-secondary border-opacity-10 text-center" style="font-size: 0.8rem; letter-spacing: 0.08em;">
+        Left Column
+      </span>
+      
+      @for (item of leftItems; track item.id) {
+        <div
+          [id]="item.id"
+          class="standard-card d-flex align-items-center justify-content-between p-3 rounded-3"
+          [class.draggable]="allowDragDrop && !isItemMatched(item.id)"
+          [class.selected]="selectedLeftId === item.id"
+          [class.matched]="isItemMatched(item.id)"
+          [class.incorrect-shake]="shakeLeftId === item.id"
+          [ngClass]="getMatchedColorClass(item.id)"
+          [draggable]="allowDragDrop && !isItemMatched(item.id)"
+          (dragstart)="onDragStart($event, item)"
+          (click)="selectLeft(item)">
+          
+          <div class="d-flex align-items-center gap-2">
+            @if (enableAudio && !isItemMatched(item.id)) {
+              <button type="button" class="btn-speaker-mini" (click)="speak(item.text); $event.stopPropagation();">
+                <i class="bi bi-volume-up-fill text-primary"></i>
+              </button>
+            }
+            <span class="fw-bold">{{ item.text }}</span>
+          </div>
+          
+          @if (isItemMatched(item.id)) {
+            <span class="badge-check"><i class="bi bi-check-circle-fill text-success fs-5"></i></span>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-12 col-md-6 d-flex flex-column gap-3">
+      <span class="text-uppercase fw-bold text-secondary pb-2 border-bottom border-secondary border-opacity-10 text-center" style="font-size: 0.8rem; letter-spacing: 0.08em;">
+        Right Column
+      </span>
+      
+      @for (item of rightItems; track item.id) {
+        <div
+          [id]="item.id"
+          class="standard-card d-flex align-items-center justify-content-between p-3 rounded-3"
+          [class.selected]="selectedRightId === item.id"
+          [class.matched]="isItemMatched(item.id)"
+          [class.incorrect-shake]="shakeRightId === item.id"
+          [ngClass]="getMatchedColorClass(item.id)"
+          (dragover)="onDragOver($event)"
+          (drop)="onDrop($event, item)"
+          (click)="selectRight(item)">
+          
+          <div class="d-flex align-items-center justify-content-center w-100">
+            @if (item.rightImage) {
+              <img [src]="item.rightImage" alt="Match Target" class="standard-match-image" />
+            } @else {
+              <span class="fw-bold">{{ item.text }}</span>
+            }
+          </div>
+          
+          @if (isItemMatched(item.id)) {
+            <span class="badge-check"><i class="bi bi-check-circle-fill text-success fs-5"></i></span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

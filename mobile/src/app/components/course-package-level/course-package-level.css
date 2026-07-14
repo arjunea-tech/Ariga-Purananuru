@@ -1,0 +1,50 @@
+/* Mapping component styles using Bootstrap utilities */
+.tracking-wider { letter-spacing: 0.1em; }
+.italic { font-style: italic; }
+.border-dashed { border-style: dashed !important; }
+
+/* Custom dropdown arrow for pseudo-select */
+.dropdown .form-select-custom {
+  position: relative;
+  width: 100%;
+}
+
+.dropdown .form-select-custom::after {
+  content: "";
+  width: 0.8em;
+  height: 0.8em;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-size: contain;
+  transition: transform 0.2s ease-in-out;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.dropdown.show .form-select-custom::after {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+@media (max-width: 576px) {
+  .dropdown .dropdown-menu {
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    box-shadow: none !important;
+    border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    margin-top: 8px !important;
+    max-height: 200px !important;
+  }
+}
+
+.animate-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
