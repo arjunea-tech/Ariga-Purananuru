@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'mobile',
   webDir: 'dist/language_app/browser',
   server: {
-    // androidScheme: 'https',
+    url: 'http://192.168.1.60:4200',
     cleartext: true
   }
 };

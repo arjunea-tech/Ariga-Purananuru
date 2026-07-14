@@ -17,6 +17,7 @@
 @import '@ionic/angular/css/text-transformation.css';
 @import '@ionic/angular/css/flex-utils.css';
 @import '@ionic/angular/css/display.css';
+
 :root {
   --bs-primary: #4f46e5;
   /* Modern Indigo primary */
@@ -222,7 +223,9 @@ body {
 
 /* Fix scrolling for standard Angular components inside Ionic Router Outlet */
 ion-router-outlet > * {
-  overflow-y: auto !important; width: 100vw !important; overflow-x: hidden !important;
+  overflow-y: auto !important; 
+  width: 100% !important; 
+  overflow-x: hidden !important;
   height: 100% !important;
   display: block !important;
   -webkit-overflow-scrolling: touch;

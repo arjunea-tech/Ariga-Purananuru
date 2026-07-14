@@ -1,6 +1,6 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from './services/auth';
 import { NotificationService } from './services/notification.service';
@@ -25,7 +25,7 @@ import {
   selector: 'app-root',
   standalone: true,
   imports: [
-    CommonModule, RouterLink, TranslateModule, 
+    CommonModule, RouterOutlet, RouterLink, RouterLinkActive, TranslateModule, 
     IonApp, IonRouterOutlet, IonMenu, IonHeader, IonToolbar, 
     IonContent, IonList, IonItem, IonIcon, 
     IonMenuToggle, IonButtons, IonButton, IonSplitPane, IonMenuButton, IonLabel, IonFooter
