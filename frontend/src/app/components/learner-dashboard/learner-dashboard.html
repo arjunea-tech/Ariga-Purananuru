@@ -17,21 +17,27 @@
 
       <div
         class="stat-badge d-flex align-items-center bg-white rounded-pill px-2 py-1 shadow-sm border border-2 border-warning"
-        style="font-size: 0.85rem;">
+        style="font-size: 0.85rem;" title="XP Points">
         <i class="bi bi-star-fill text-warning me-1"></i>
-        <span class="fw-bold text-dark">1250</span>
+        <span class="fw-bold text-dark">{{ xpPoints() }}</span>
       </div>
       <div
         class="stat-badge d-flex align-items-center bg-white rounded-pill px-2 py-1 shadow-sm border border-2 border-primary"
-        style="font-size: 0.85rem;">
+        style="font-size: 0.85rem;" title="Gems">
         <i class="bi bi-gem text-primary me-1"></i>
-        <span class="fw-bold text-dark">85</span>
+        <span class="fw-bold text-dark">{{ gems() }}</span>
+      </div>
+      <div
+        class="stat-badge d-flex align-items-center bg-white rounded-pill px-2 py-1 shadow-sm border border-2"
+        style="font-size: 0.85rem; border-color: #f97316 !important;" title="Study Streak">
+        <i class="bi bi-lightning-charge-fill text-warning me-1"></i>
+        <span class="fw-bold text-dark">{{ streakDays() }}d</span>
       </div>
       <div
         class="stat-badge d-flex align-items-center bg-white rounded-pill px-2 py-1 shadow-sm border border-2 border-danger"
-        style="font-size: 0.85rem;">
+        style="font-size: 0.85rem;" title="Hearts">
         <i class="bi bi-heart-fill text-danger me-1"></i>
-        <span class="fw-bold text-dark">5</span>
+        <span class="fw-bold text-dark">{{ hearts() }}</span>
       </div>
       <button class="btn btn-primary rounded-circle shadow-sm d-flex align-items-center justify-content-center ms-2"
         style="width: 32px; height: 32px; border: 2px solid white;" (click)="toggleFullscreen()" title="Fullscreen">
@@ -277,18 +283,76 @@
   <!-- Selective Lottie Achievement Modal -->
   @if (showAchievementModal()) {
   <div
-    class="achievement-modal-overlay position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center z-5"
-    style="background: rgba(0,0,0,0.65); backdrop-filter: blur(6px);">
-    <div class="achievement-card text-center p-5 animate-bounce-in"
-      style="background: #FFF9C4; border: 8px solid #FBC02D; border-radius: 28px; width: 90%; max-width: 450px; box-shadow: 0 20px 0 rgba(251, 192, 45, 0.4);">
-      <ng-lottie [options]="achievementLottieOptions" style="width: 180px; height: 180px; margin: 0 auto;"></ng-lottie>
-      <h2 class="fw-bold text-dark mb-3 mt-4" style="font-family: 'Fredoka', sans-serif;">Adventure Unlocked!</h2>
-      <p class="fs-5 text-secondary mb-4">You have achieved greatness in your forest journey! Keep it up!</p>
-      <button
-        class="btn btn-success btn-lg rounded-pill px-5 py-3 fw-bold border border-3 border-white shadow hover-lift"
+    class="achievement-modal-overlay position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+    style="background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(8px); z-index: 9999 !important;">
+    <div class="achievement-card text-center p-4 p-md-5 animate-bounce-in position-relative"
+      style="background: #FFF9C4; border: 8px solid #FBC02D; border-radius: 28px; width: 95%; max-width: 500px; box-shadow: 0 20px 0 rgba(251, 192, 45, 0.4); max-height: 85dvh; display: flex; flex-direction: column;">
+      
+      <!-- Close button on top-right of modal -->
+      <button class="btn btn-sm btn-light border border-2 border-dark rounded-circle position-absolute"
+        style="top: 15px; right: 15px; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; z-index: 10;"
         (click)="showAchievementModal.set(false)">
-        AWESOME!
+        <i class="bi bi-x-lg fw-bold text-dark"></i>
       </button>
+
+      <!-- Modal Header -->
+      <div class="mb-3 flex-shrink-0">
+        <h2 class="fw-bold text-dark mb-1" style="font-family: 'Fredoka', sans-serif; font-size: 1.75rem;">My Achievements</h2>
+        <p class="small text-secondary mb-0">Complete lessons and tests to unlock badges!</p>
+      </div>
+
+      <!-- Badges Grid/List with scrolling -->
+      <div class="flex-grow-1 overflow-y-auto pr-1 py-2" style="min-height: 0;">
+        <div class="d-flex flex-column gap-3">
+          
+          <div *ngFor="let badge of badges()" 
+               class="d-flex align-items-center p-3 rounded-4 border border-3 bg-white"
+               [ngStyle]="badge.unlocked ? {'border-color': '#4ade80'} : {'border-color': '#cbd5e1', 'opacity': '0.75'}">
+            
+            <!-- Badge Icon -->
+            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 shadow-sm"
+                 style="width: 55px; height: 55px; font-size: 2rem;"
+                 [ngStyle]="badge.unlocked ? {'background': '#d7ffb8'} : {'background': '#f1f5f9', 'filter': 'grayscale(100%)'}">
+              {{ badge.icon }}
+            </div>
+
+            <!-- Badge Text -->
+            <div class="text-start ms-3 flex-grow-1">
+              <h5 class="fw-bold mb-0 text-dark d-flex align-items-center gap-2" style="font-size: 1rem;">
+                {{ badge.title }}
+                <span *ngIf="badge.unlocked" class="badge bg-success rounded-pill fw-bold text-white px-2 py-0.5" style="font-size: 0.6rem;">
+                  Unlocked
+                </span>
+                <span *ngIf="!badge.unlocked" class="badge bg-secondary rounded-pill fw-bold text-white px-2 py-0.5" style="font-size: 0.6rem;">
+                  Locked
+                </span>
+              </h5>
+              <p class="mb-0 text-secondary small mt-1" style="line-height: 1.2; font-size: 0.8rem;">{{ badge.description }}</p>
+            </div>
+
+            <!-- XP Reward -->
+            <div class="text-end flex-shrink-0 ms-2">
+              <span class="badge rounded-pill fw-bold" 
+                    [ngClass]="badge.unlocked ? 'bg-warning text-dark' : 'bg-light text-muted border'"
+                    style="font-size: 0.75rem;">
+                +{{ badge.xp }} XP
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Close Action -->
+      <div class="mt-4 flex-shrink-0">
+        <button
+          class="btn btn-success btn-lg rounded-pill px-5 py-2.5 fw-bold border border-3 border-white shadow hover-lift w-100"
+          (click)="showAchievementModal.set(false)">
+          AWESOME!
+        </button>
+      </div>
+
     </div>
   </div>
   }

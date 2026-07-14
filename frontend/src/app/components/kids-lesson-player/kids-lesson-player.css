@@ -1,3 +1,7 @@
+.lesson-player {
+  overflow: hidden !important;
+}
+
 /* ── LESSON PLAYER BACKGROUND ── */
 .lesson-bg-pattern {
   background-color: #f0fdf4;

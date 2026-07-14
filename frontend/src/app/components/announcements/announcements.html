@@ -1,5 +1,5 @@
 <div class="container-fluid py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4 pb-3 border-bottom">
     <div>
       <h2 class="fw-bold mb-1 d-flex align-items-center gap-2">
         <i class="bi bi-megaphone text-primary"></i>
@@ -8,7 +8,7 @@
       <p class="text-secondary mb-0">Broadcast messages to staff and students in your academy.</p>
     </div>
     @if (authService.hasRole(['super_admin', 'admin'])) {
-      <button class="btn btn-primary shadow-sm rounded-3 fw-semibold px-4" (click)="showForm.set(!showForm())">
+      <button class="btn btn-primary shadow-sm rounded-3 fw-semibold px-4 text-nowrap" (click)="showForm.set(!showForm())">
         <i class="bi" [ngClass]="showForm() ? 'bi-x-lg' : 'bi-plus-lg'"></i> 
         {{ showForm() ? 'Cancel' : 'New Announcement' }}
       </button>

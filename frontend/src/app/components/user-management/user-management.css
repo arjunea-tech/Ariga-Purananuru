@@ -57,3 +57,10 @@ code {
 .animate-in {
   animation: slideInFromTop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+@media (max-width: 576px) {
+  .modal-dialog {
+    margin: 0.5rem !important;
+    max-width: calc(100% - 1rem) !important;
+  }
+}
