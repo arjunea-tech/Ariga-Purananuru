@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://192.168.1.60:8000/api',
-  baseUrl: 'http://192.168.1.60:8000'
+  apiUrl: 'https://web-production-077c6.up.railway.app/api',
+  baseUrl: 'https://web-production-077c6.up.railway.app'
 };
