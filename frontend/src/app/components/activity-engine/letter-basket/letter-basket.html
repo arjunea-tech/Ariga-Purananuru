@@ -1,0 +1,66 @@
+<div class="w-100 d-flex flex-column align-items-center justify-content-center pb-4 pt-2 mx-auto" style="max-width: 700px;">
+  <div class="mb-4 text-center">
+    <h3 class="fw-bold text-dark m-0 mt-2 fs-3" style="line-height: 1.5; text-shadow: 0px 4px 10px rgba(255,255,255,0.8), 0px 8px 30px rgba(255,255,255,0.9);" [innerHTML]="activity?.question"></h3>
+  </div>
+
+  <!-- Letter Cloud -->
+  <div class="cloud-container w-100 p-4 mb-4 d-flex justify-content-center align-items-center flex-wrap gap-3 position-relative">
+    <div class="cloud-bg"></div>
+    @if (cloudLetters().length > 0) {
+      @for (letter of cloudLetters(); track letter.id) {
+        <div 
+          class="letter-bubble d-flex align-items-center justify-content-center rounded-circle shadow-sm"
+          [class.selected]="selectedLetter()?.id === letter.id"
+          [class.shake]="shakeId() === letter.id"
+          draggable="true"
+          (dragstart)="onDragStart($event, letter)"
+          (click)="selectLetter(letter)">
+          {{ letter.text }}
+        </div>
+      }
+    } @else {
+      <div class="text-success fw-bold py-3 animate-bounce">
+        <i class="bi bi-star-fill me-2 animate-spin"></i> வாழ்த்துகள்! அனைத்தும் சரியாகப் பொருத்தப்பட்டது! (Well done!)
+      </div>
+    }
+  </div>
+
+  <!-- Baskets -->
+  <div class="baskets-grid w-100 gap-3">
+    @for (cat of categories; track cat) {
+      <div 
+        class="basket-card d-flex flex-column align-items-center p-3 rounded-4"
+        (dragover)="onDragOver($event)"
+        (drop)="onDrop($event, cat)"
+        (click)="selectBasket(cat)">
+        
+        <div class="basket-header w-100 text-center pb-2 mb-2 border-bottom fw-bold text-dark">
+          {{ cat }}
+        </div>
+
+        <div class="basket-dropzone w-100 d-flex flex-wrap gap-2 align-content-start justify-content-center">
+          @if (placedLetters()[cat].length === 0) {
+            <span class="empty-text text-muted my-auto" style="font-size: 0.75rem;">Drop here</span>
+          } @else {
+            @for (item of placedLetters()[cat]; track item.id) {
+              <span class="placed-badge badge bg-success text-white px-2 py-1 fs-6 rounded-pill animate-pop-in">
+                {{ item.text }}
+              </span>
+            }
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Expandable Explanation Block -->
+  @if (showFeedback && isComplete() && activity?.explanation) {
+    <div class="animate-fade-in mt-4 rounded-3 p-4 bg-warning bg-opacity-10 border-start border-4 border-warning w-100">
+      <div class="d-flex align-items-center gap-2 fw-bold text-warning mb-2" style="font-size: 0.9rem;">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>Explanation</span>
+      </div>
+      <p class="m-0" style="color: #451a03; font-size: 0.925rem; line-height: 1.5;">{{ activity?.explanation }}</p>
+    </div>
+  }
+</div>

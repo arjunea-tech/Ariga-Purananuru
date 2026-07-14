@@ -19,6 +19,9 @@ import { renderSequencingForm } from './activity-block/forms/sequencing';
 import { renderPartsOfSpeechForm } from './activity-block/forms/parts-of-speech';
 import { renderMindMapForm } from './activity-block/forms/mind-map';
 import { renderWritingForm } from './activity-block/forms/writing';
+import { renderOddOneOutForm } from './activity-block/forms/odd-one-out';
+import { renderWordHuntForm } from './activity-block/forms/word-hunt';
+import { renderLetterBasketForm } from './activity-block/forms/letter-basket';
 
 export class ActivityBlock {
   private data: any;
@@ -82,7 +85,11 @@ export class ActivityBlock {
       starterText: data?.starterText || '',
       modelAnswer: data?.modelAnswer || '',
       minWords: data?.minWords || 1,
-      maxWords: data?.maxWords || 1000
+      maxWords: data?.maxWords || 1000,
+      
+      // New activities properties
+      boxes: data?.boxes || [],
+      items: data?.items || []
     };
     this.api = api;
     this.readOnly = readOnly;
@@ -174,6 +181,21 @@ export class ActivityBlock {
         icon = 'bi-pencil-square';
         details = `Prompt: "${this.data.text || ''}"`;
         break;
+      case 'odd_one_out':
+        typeLabel = 'Odd One Out';
+        icon = 'bi-exclamation-triangle';
+        details = `Question: "${this.data.question || ''}" | Options: ${this.data.options?.length || 0}`;
+        break;
+      case 'word_hunt':
+        typeLabel = 'Hunt Words';
+        icon = 'bi-grid';
+        details = `Question: "${this.data.question || ''}" | Grid: ${this.data.gridSize}x${this.data.gridSize}`;
+        break;
+      case 'letter_basket':
+        typeLabel = 'Letter Basket';
+        icon = 'bi-bucket';
+        details = `Question: "${this.data.question || ''}" | Letters: ${this.data.items?.length || 0}`;
+        break;
     }
     return { typeLabel, icon, details };
   }
@@ -237,6 +259,9 @@ export class ActivityBlock {
             <option value="parts_of_speech" ${tempData.type === 'parts_of_speech' ? 'selected' : ''}>Parts of Speech Tagger</option>
             <option value="mind_map" ${tempData.type === 'mind_map' ? 'selected' : ''}>Mind Mapping Diagram</option>
             <option value="writing" ${tempData.type === 'writing' ? 'selected' : ''}>Paragraph / Story Writing</option>
+            <option value="odd_one_out" ${tempData.type === 'odd_one_out' ? 'selected' : ''}>Odd One Out</option>
+            <option value="word_hunt" ${tempData.type === 'word_hunt' ? 'selected' : ''}>Hunt Words</option>
+            <option value="letter_basket" ${tempData.type === 'letter_basket' ? 'selected' : ''}>Letter Basket</option>
           </select>
           <div class="modal-form-container"></div>
         </div>
@@ -282,6 +307,12 @@ export class ActivityBlock {
         renderMindMapForm(formContainer, tempData, this.renderExplanationInput);
       } else if (type === 'writing') {
         renderWritingForm(formContainer, tempData, this.renderExplanationInput);
+      } else if (type === 'odd_one_out') {
+        renderOddOneOutForm(formContainer, tempData, this.api, this.renderExplanationInput);
+      } else if (type === 'word_hunt') {
+        renderWordHuntForm(formContainer, tempData, this.renderExplanationInput);
+      } else if (type === 'letter_basket') {
+        renderLetterBasketForm(formContainer, tempData, this.renderExplanationInput);
       }
     };
 
@@ -313,6 +344,26 @@ export class ActivityBlock {
           { id: 'branch1', label: '', isPlaceholder: true, parentId: 'root' },
           { id: 'leaf1', label: '', isPlaceholder: true, parentId: 'branch1' }
         ];
+      }
+      if (tempData.type === 'odd_one_out' && (!tempData.options || tempData.options.length !== 4)) {
+        tempData.options = [
+          { text: '', isCorrect: true },
+          { text: '', isCorrect: false },
+          { text: '', isCorrect: false },
+          { text: '', isCorrect: false }
+        ];
+      }
+      if (tempData.type === 'word_hunt' && (!tempData.boxes || tempData.boxes.length === 0)) {
+        tempData.gridSize = 2;
+        tempData.boxes = [
+          { text: '', isCorrect: false },
+          { text: '', isCorrect: false },
+          { text: '', isCorrect: false },
+          { text: '', isCorrect: false }
+        ];
+      }
+      if (tempData.type === 'letter_basket' && !tempData.items) {
+        tempData.items = [];
       }
       renderForm();
     });
@@ -459,6 +510,26 @@ export class ActivityBlock {
       savedData.minWords = parseInt(this.data.minWords) || 1;
       savedData.maxWords = parseInt(this.data.maxWords) || 1000;
       savedData.modelAnswer = this.data.modelAnswer || '';
+    } else if (type === 'odd_one_out') {
+      savedData.question = this.data.question || '';
+      savedData.audioUrl = this.data.audioUrl || '';
+      savedData.options = (this.data.options || []).map((opt: any) => ({
+        text: opt.text || '',
+        isCorrect: !!opt.isCorrect
+      }));
+    } else if (type === 'word_hunt') {
+      savedData.question = this.data.question || '';
+      savedData.gridSize = parseInt(this.data.gridSize) || 2;
+      savedData.boxes = (this.data.boxes || []).map((b: any) => ({
+        text: b.text || '',
+        isCorrect: !!b.isCorrect
+      }));
+    } else if (type === 'letter_basket') {
+      savedData.question = this.data.question || '';
+      savedData.items = (this.data.items || []).map((item: any) => ({
+        text: item.text || '',
+        category: item.category || 'குறில்'
+      }));
     }
 
     return savedData;

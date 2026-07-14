@@ -122,6 +122,26 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
     }, { allowSignalWrites: true });
 
     effect(() => {
+      // Reset current content page whenever the current step index changes
+      this.currentStepIndex();
+      this.currentContentPage.set(0);
+    }, { allowSignalWrites: true });
+
+    effect(() => {
+      // Update step completion status reactively
+      const step = this.currentStep();
+      const page = this.currentContentPage();
+      if (step && step.type === 'reading') {
+        if (step.data.isJson && step.data.blocks) {
+          const isComplete = page >= step.data.blocks.length - 1;
+          this.stepCompleted.emit(isComplete);
+        } else {
+          this.stepCompleted.emit(true);
+        }
+      }
+    }, { allowSignalWrites: true });
+
+    effect(() => {
       const state = this.activityFeedbackState();
       if (state === 'correct') {
         setTimeout(() => {
@@ -165,6 +185,109 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
     clearTimeout(this.typingTimeout);
   }
 
+
+  private touchStartX = 0;
+  private touchEndX = 0;
+
+  onTouchStart(event: TouchEvent) {
+    this.touchStartX = event.changedTouches[0].clientX;
+  }
+
+  onTouchEnd(event: TouchEvent) {
+    this.touchEndX = event.changedTouches[0].clientX;
+    this.handleSwipeGesture();
+  }
+
+  private handleSwipeGesture() {
+    const swipeThreshold = 50;
+    const diff = this.touchStartX - this.touchEndX;
+    if (Math.abs(diff) > swipeThreshold) {
+      if (diff > 0) {
+        this.nextContentPage();
+      } else {
+        this.prevContentPage();
+      }
+    }
+  }
+
+  getStackTransform(idx: number): string {
+    const activeIdx = this.currentContentPage();
+    if (idx < activeIdx) {
+      return 'translate3d(-125%, -20px, 0) rotate(-12deg) scale(0.9)';
+    } else if (idx === activeIdx) {
+      return 'translate3d(0, 0, 0) scale(1)';
+    } else if (idx === activeIdx + 1) {
+      return 'translate3d(0, 15px, 0) scale(0.95)';
+    } else if (idx === activeIdx + 2) {
+      return 'translate3d(0, 30px, 0) scale(0.9)';
+    } else {
+      return 'translate3d(0, 35px, 0) scale(0.85)';
+    }
+  }
+
+  getStackZIndex(idx: number): number {
+    const activeIdx = this.currentContentPage();
+    if (idx < activeIdx) {
+      return 5;
+    }
+    return 100 - (idx - activeIdx);
+  }
+
+  getStackOpacity(idx: number): number {
+    const activeIdx = this.currentContentPage();
+    if (idx < activeIdx) {
+      return 0;
+    } else if (idx === activeIdx) {
+      return 1;
+    } else if (idx === activeIdx + 1) {
+      return 0.9;
+    } else if (idx === activeIdx + 2) {
+      return 0.6;
+    } else {
+      return 0;
+    }
+  }
+
+
+
+  renderPageHtml(pageData: any): string {
+    if (!pageData) return '';
+    const renderBlock = (block: any) => {
+      if (block.type === 'paragraph' || block.type === 'text') return `<div class="opacity-75 mb-4 text-start text-sm-center">${block.data.text}</div>`;
+      else if (block.type === 'header') return `<h3 class="fw-bold text-primary mb-3 text-center" style="font-size: clamp(1.3rem, 4vw, 1.7rem);">${block.data.text}</h3>`;
+      else if (block.type === 'list') {
+        return `<div class="w-100 text-center"><ul class="mb-4 ps-4 opacity-75 text-start d-inline-block">` + block.data.items.map((i: any) => `<li class="mb-2">${typeof i === 'string' ? i : (i.content || '')}</li>`).join('') + `</ul></div>`;
+      }
+      else if (block.type === 'image') {
+        const url = block.data.file?.url || block.data.url || '';
+        const caption = block.data.caption || '';
+        return `<div class="text-center mb-4"><img src="${url}" alt="${caption}" class="img-fluid rounded shadow-sm" style="max-height: clamp(150px, 28vh, 300px); object-fit: contain;">${caption ? `<div class="text-muted small mt-2">${caption}</div>` : ''}</div>`;
+      }
+      else if (block.type === 'table') {
+        const withHeadings = block.data.withHeadings;
+        const rows = block.data.content || [];
+        let html = `<div class="table-responsive w-100 mb-4"><table class="table table-bordered shadow-sm" style="border-radius: 12px; overflow: hidden; background: white;">`;
+        rows.forEach((row: string[], index: number) => {
+          if (index === 0 && withHeadings) {
+            html += `<thead style="background: #fef08a;"><tr>` + row.map(cell => `<th class="p-2 text-dark fs-6 fw-bold border-bottom-0">${cell}</th>`).join('') + `</tr></thead><tbody>`;
+          } else {
+            if (index === 0 && !withHeadings) html += `<tbody>`;
+            html += `<tr>` + row.map(cell => `<td class="p-2 small opacity-75">${cell}</td>`).join('') + `</tr>`;
+          }
+        });
+        if (rows.length > 0) html += `</tbody>`;
+        html += `</table></div>`;
+        return html;
+      }
+      return '';
+    };
+
+    if (Array.isArray(pageData)) {
+      return pageData.map((b: any) => renderBlock(b)).join('');
+    } else {
+      return renderBlock(pageData);
+    }
+  }
 
   goToMap() {
     this.quit.emit();

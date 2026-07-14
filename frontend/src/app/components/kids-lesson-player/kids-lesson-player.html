@@ -158,83 +158,123 @@
       }
 
       @if (step.type === 'reading') {
-      <!-- Reading Content (Card Box) -->
-      <div
-        class="w-100 d-flex flex-column align-items-center justify-content-between mx-auto bg-white bg-opacity-75 shadow-lg position-relative p-3 p-md-5"
-        style="max-width: 1200px; min-height: 75vh; height: auto; border-radius: 40px; border: 6px solid rgba(255, 255, 255, 0.8); backdrop-filter: blur(5px);">
-
-        <!-- Read Aloud Button (Top Right Corner) -->
-        <button *ngIf="false"
-          class="btn btn-warning rounded-circle shadow-lg position-absolute d-flex align-items-center justify-content-center hover-lift"
-          style="top: -20px; right: -15px; width: 65px; height: 65px; border: 5px solid white; z-index: 15;"
-          (click)="speakText(rawReadingHtml())">
-          <i class="bi bi-volume-up-fill fs-2 text-dark"></i>
+      <!-- 3D Card Stack deck container with touch gestures -->
+      <div class="position-relative w-100 d-flex align-items-center justify-content-center mx-auto" 
+           style="max-width: 1200px; min-height: 80vh;"
+           (touchstart)="onTouchStart($event)"
+           (touchend)="onTouchEnd($event)">
+           
+        <!-- Left Side Floating Chevron -->
+        <button *ngIf="currentContentPage() > 0"
+          type="button"
+          class="btn btn-light rounded-circle shadow-lg hover-lift d-flex align-items-center justify-content-center position-absolute start-0 slide-nav-btn glow-btn"
+          style="z-index: 150;"
+          (click)="prevContentPage()">
+          <i class="bi bi-chevron-left text-secondary fw-bold"></i>
         </button>
 
-        <!-- Lesson Title (Top Center - Desktop Only) -->
-        <div class="position-absolute start-50 translate-middle-x d-none d-md-block" style="top: -20px; z-index: 15; width: max-content; max-width: 90%;">
-          <h3 class="fw-bold text-dark text-center m-0 px-4 py-2 bg-white rounded-pill shadow-sm text-truncate"
-            style="font-family: 'Fredoka One', cursive; border: 4px solid #fcd34d; font-size: 1.4rem;">
-            ✨ {{ currentStepIndex() + 1 }}. {{ step.title }}
-          </h3>
-        </div>
-
-        <!-- Mobile Lesson Title (flows naturally at the top) -->
-        <div class="w-100 d-block d-md-none text-center mb-3 mt-2" style="z-index: 15;">
-          <h3 class="fw-bold text-dark text-center m-0 px-3 py-2 bg-white rounded-pill shadow-sm d-inline-block border border-2 border-warning"
-            style="font-family: 'Fredoka One', cursive; font-size: 1.1rem; max-width: 100%;">
-            ✨ {{ currentStepIndex() + 1 }}. {{ step.title }}
-          </h3>
-        </div>
-
-        <div
-          class="w-100 flex-grow-1 d-flex gap-4 align-items-center justify-content-center position-relative overflow-hidden"
-          style="min-height: 0;">
-          <!-- Mascot Presentation Pose -->
-          <div class="d-none d-lg-block position-relative animate-bounce align-self-end mb-4"
-            style="width: 180px; z-index: 5;">
-            <img src="/assets/images/mascot.png" alt="Mascot" class="w-100"
-              style="filter: drop-shadow(0 15px 25px rgba(0,0,0,0.2))">
-          </div>
-
-          <!-- Floating Text Area -->
-          <div
-            class="flex-grow-1 position-relative p-3 w-100 h-100 d-flex flex-column align-items-center justify-content-center overflow-hidden">
-            <!-- Huge Floating Typewriter Content Area -->
-            <div class="reading-content w-100 px-2 px-md-4 py-2 h-100 hide-scrollbar"
-              style="overflow-y: auto; font-size: clamp(1.05rem, 3.2vw, 1.35rem); line-height: 1.6; color: #1e293b; font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; text-shadow: 0px 2px 10px rgba(255,255,255,0.8); font-weight: 600; letter-spacing: 0.5px;">
-              <div class="w-100 py-2 d-flex flex-column align-items-center">
-                <div [innerHTML]="rawReadingHtml()" class="w-100"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Navigation Controls -->
-        <div class="d-flex justify-content-between align-items-center w-100 mt-2 px-2 px-md-4">
-          <button
-            class="btn btn-light rounded-circle shadow-sm hover-lift d-flex align-items-center justify-content-center glow-btn"
-            style="width: 50px; height: 50px; border: 3px solid #cbd5e1;" (click)="prevContentPage()"
-            [disabled]="currentContentPage() === 0">
-            <i class="bi bi-chevron-left fs-4 text-secondary fw-bold"></i>
-          </button>
-          <div class="d-flex gap-3 bg-white px-4 py-2 rounded-pill shadow-sm border border-2 border-light">
+        <!-- Card Stack Deck Container (Overflow visible so stacked cards can peek out at bottom) -->
+        <div class="card-stack-container w-100 position-relative d-flex align-items-center justify-content-center" 
+             style="min-height: 75vh; padding-bottom: 40px; overflow: visible;">
+            
             @if (step.data.isJson) {
-            @for (b of step.data.blocks; track $index) {
-            <div class="rounded-pill"
-              style="height: 12px; transition: all 0.3s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);"
-              [style.width]="$index === currentContentPage() ? '40px' : '12px'"
-              [ngClass]="$index === currentContentPage() ? 'bg-primary' : 'bg-secondary opacity-25'"></div>
+              @for (pageBlocks of step.data.blocks; track $index; let idx = $index) {
+                <!-- Individual Stacked Card -->
+                <div class="stack-card" 
+                     [style.transform]="getStackTransform(idx)"
+                     [style.z-index]="getStackZIndex(idx)"
+                     [style.opacity]="getStackOpacity(idx)"
+                     [style.pointer-events]="idx === currentContentPage() ? 'auto' : 'none'">
+                  
+                  <!-- White Reading Content Card -->
+                  <div
+                    class="w-100 h-100 d-flex flex-column align-items-center justify-content-between mx-auto bg-white bg-opacity-75 shadow-lg position-relative p-3 p-md-5"
+                    style="max-width: 900px; min-height: 68vh; height: auto; border-radius: 40px; border: 6px solid rgba(255, 255, 255, 0.8); backdrop-filter: blur(5px);">
+
+                    <!-- Lesson Title (Top Center - Desktop Only) -->
+                    <div class="position-absolute start-50 translate-middle-x d-none d-md-block" style="top: -20px; z-index: 15; width: max-content; max-width: 90%;">
+                      <h3 class="fw-bold text-dark text-center m-0 px-4 py-2 bg-white rounded-pill shadow-sm text-truncate"
+                        style="font-family: 'Fredoka One', cursive; border: 4px solid #fcd34d; font-size: 1.4rem;">
+                        ✨ {{ currentStepIndex() + 1 }}. {{ step.title }}
+                      </h3>
+                    </div>
+
+                    <!-- Mobile Lesson Title (flows naturally at the top) -->
+                    <div class="w-100 d-block d-md-none text-center mb-3 mt-2" style="z-index: 15;">
+                      <h3 class="fw-bold text-dark text-center m-0 px-3 py-2 bg-white rounded-pill shadow-sm d-inline-block border border-2 border-warning"
+                        style="font-family: 'Fredoka One', cursive; font-size: 1.1rem; max-width: 100%;">
+                        ✨ {{ currentStepIndex() + 1 }}. {{ step.title }}
+                      </h3>
+                    </div>
+
+                    <div
+                      class="w-100 flex-grow-1 d-flex gap-4 align-items-center justify-content-center position-relative overflow-hidden"
+                      style="min-height: 0;">
+                      <!-- Mascot Presentation Pose -->
+                      <div class="d-none d-lg-block position-relative animate-bounce align-self-end mb-4"
+                        style="width: 180px; z-index: 5;">
+                        <img src="/assets/images/mascot.png" alt="Mascot" class="w-100"
+                          style="filter: drop-shadow(0 15px 25px rgba(0,0,0,0.2))">
+                      </div>
+
+                      <!-- Text Area -->
+                      <div class="flex-grow-1 position-relative p-3 w-100 h-100 d-flex flex-column align-items-center justify-content-center overflow-hidden">
+                        <div class="reading-content w-100 px-2 px-md-4 py-2 h-100 hide-scrollbar"
+                          style="overflow-y: auto; font-size: clamp(1.05rem, 3.2vw, 1.35rem); line-height: 1.6; color: #1e293b; font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; text-shadow: 0px 2px 10px rgba(255,255,255,0.8); font-weight: 600; letter-spacing: 0.5px;">
+                          <div class="w-100 py-2 d-flex flex-column align-items-center">
+                            <div [innerHTML]="renderPageHtml(pageBlocks)" class="w-100"></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            } @else {
+              <!-- Fallback Stacked Card -->
+              <div class="stack-card" 
+                   [style.transform]="getStackTransform(0)"
+                   [style.z-index]="10"
+                   [style.opacity]="1"
+                   style="pointer-events: auto;">
+                <div
+                  class="w-100 h-100 d-flex flex-column align-items-center justify-content-between mx-auto bg-white bg-opacity-75 shadow-lg position-relative p-3 p-md-5"
+                  style="max-width: 900px; min-height: 68vh; height: auto; border-radius: 40px; border: 6px solid rgba(255, 255, 255, 0.8); backdrop-filter: blur(5px);">
+                  
+                  <div class="position-absolute start-50 translate-middle-x d-none d-md-block" style="top: -20px; z-index: 15; width: max-content; max-width: 90%;">
+                    <h3 class="fw-bold text-dark text-center m-0 px-4 py-2 bg-white rounded-pill shadow-sm text-truncate"
+                      style="font-family: 'Fredoka One', cursive; border: 4px solid #fcd34d; font-size: 1.4rem;">
+                      ✨ {{ currentStepIndex() + 1 }}. {{ step.title }}
+                    </h3>
+                  </div>
+
+                  <div class="w-100 flex-grow-1 d-flex gap-4 align-items-center justify-content-center position-relative overflow-hidden"
+                    style="min-height: 0;">
+                    <div class="flex-grow-1 position-relative p-3 w-100 h-100 d-flex flex-column align-items-center justify-content-center overflow-hidden">
+                      <div class="reading-content w-100 px-2 px-md-4 py-2 h-100 hide-scrollbar"
+                        style="overflow-y: auto; font-size: clamp(1.05rem, 3.2vw, 1.35rem); line-height: 1.6; color: #1e293b; font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif; text-shadow: 0px 2px 10px rgba(255,255,255,0.8); font-weight: 600; letter-spacing: 0.5px;">
+                        <div class="w-100 py-2 d-flex flex-column align-items-center">
+                          <div class="fw-bold opacity-75 text-start text-sm-center" style="font-size: clamp(1.1rem, 3.2vw, 1.8rem); line-height: 1.6; font-family: 'Nunito', sans-serif;">
+                            {{ step.data.text }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             }
-            }
-          </div>
-          <button
-            class="btn btn-primary rounded-circle shadow-sm hover-lift d-flex align-items-center justify-content-center text-white glow-btn"
-            style="width: 50px; height: 50px; border: 3px solid white;" (click)="nextContentPage()"
-            [disabled]="(step.data.isJson && currentContentPage() === step.data.blocks.length - 1) || !step.data.isJson">
-            <i class="bi bi-chevron-right fs-4 fw-bold"></i>
-          </button>
+
         </div>
+
+        <!-- Right Side Floating Chevron -->
+        <button *ngIf="step.data.isJson && currentContentPage() < step.data.blocks.length - 1"
+          type="button"
+          class="btn btn-primary rounded-circle shadow-lg hover-lift d-flex align-items-center justify-content-center position-absolute end-0 slide-nav-btn glow-btn text-white"
+          style="background: #6366f1; border-color: #4f46e5; z-index: 150;"
+          (click)="nextContentPage()">
+          <i class="bi bi-chevron-right fw-bold"></i>
+        </button>
       </div>
       }
 

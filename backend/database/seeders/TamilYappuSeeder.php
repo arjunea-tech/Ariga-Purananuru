@@ -76,6 +76,31 @@ class TamilYappuSeeder extends Seeder
             ],
             'ans' => 'குறில்',
           ],
+          3 => 
+          [
+            'type' => 'odd_one_out',
+            'q' => 'வேறுபட்டதைத் தேர்ந்தெடு (குறில் அல்லாத எழுத்து எது?):',
+            'opts' => 
+            [
+              0 => ['text' => 'அ', 'isCorrect' => false],
+              1 => ['text' => 'இ', 'isCorrect' => false],
+              2 => ['text' => 'உ', 'isCorrect' => false],
+              3 => ['text' => 'ஊ', 'isCorrect' => true],
+            ],
+          ],
+          4 => 
+          [
+            'type' => 'word_hunt',
+            'q' => 'குறில் எழுத்துக்களை மட்டும் தேர்ந்தெடுக்கவும் (Hunt Short Letters):',
+            'gridSize' => 3,
+            'boxes' => [],
+          ],
+          5 => 
+          [
+            'type' => 'letter_basket',
+            'q' => 'எழுத்துக்களை அவற்றிற்குரிய கூடைகளில் (குறில் / நெடில் / மெய் / ஒற்று) சரியாகப் போடவும்:',
+            'items' => [],
+          ],
         ],
         'practice_word' => 'கல்வி',
       ],
@@ -744,20 +769,42 @@ class TamilYappuSeeder extends Seeder
                 $activitiesData = $chapterData['activities'] ?? [];
                 
                 foreach ($activitiesData as $actIdx => $act) {
-                    $activity = Activity::create([
-                        'title' => $chapterData['title'] . ' ' . $actType . ' ' . ($actIdx + 1),
-                        'type' => 'mcq',
-                        'data_json' => [
+                    $type = $act['type'] ?? 'mcq';
+                    $dataJson = [];
+                    if ($type === 'mcq') {
+                        $dataJson = [
                             'question' => $act['q'],
                             'options' => $formatOptions($act['opts'], $act['ans'])
-                        ],
+                        ];
+                    } else if ($type === 'odd_one_out') {
+                        $dataJson = [
+                            'question' => $act['q'],
+                            'options' => $act['opts']
+                        ];
+                    } else if ($type === 'word_hunt') {
+                        $dataJson = [
+                            'question' => $act['q'],
+                            'gridSize' => $act['gridSize'] ?? 2,
+                            'boxes' => $act['boxes']
+                        ];
+                    } else if ($type === 'letter_basket') {
+                        $dataJson = [
+                            'question' => $act['q'],
+                            'items' => $act['items']
+                        ];
+                    }
+
+                    $activity = Activity::create([
+                        'title' => $chapterData['title'] . ' ' . $actType . ' ' . ($actIdx + 1),
+                        'type' => $type,
+                        'data_json' => $dataJson,
                     ]);
 
                     $contentBlocks[] = [
                         'type' => $actKey,
                         'data' => array_merge([
                             'id' => $activity->id,
-                            'type' => 'mcq',
+                            'type' => $type,
                         ], $activity->data_json)
                     ];
                 }

@@ -28,7 +28,7 @@ class ActivityController extends Controller
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'type' => 'required|string|in:custom,mcq,fill_blanks,match',
+            'type' => 'required|string|in:custom,mcq,fill_blanks,match,crossword,word_arrange,speaking,role_play,sequencing,parts_of_speech,mind_map,writing,odd_one_out,word_hunt,letter_basket',
             'data_json' => 'nullable|array',
         ]);
 
