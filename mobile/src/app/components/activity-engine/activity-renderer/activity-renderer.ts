@@ -12,9 +12,11 @@ import { SequencingComponent, SequencingData } from '../sequencing/sequencing';
 import { PartsOfSpeechComponent, PartsOfSpeechData } from '../parts-of-speech/parts-of-speech';
 import { MindMapComponent, MindMapData } from '../mind-map/mind-map';
 import { WritingComponent, WritingData } from '../writing/writing';
+import { OddOneOutComponent, OddOneOutData } from '../odd-one-out/odd-one-out';
+import { LetterBasketComponent, LetterBasketData } from '../letter-basket/letter-basket';
 
 export interface NormalizedActivity {
-  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing';
+  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'letter_basket';
   question?: string;
   text?: string;
   front?: string;
@@ -54,6 +56,7 @@ export interface NormalizedActivity {
   modelAnswer?: string;
   minWords?: number;
   maxWords?: number;
+  items?: any[];
 }
 
 @Component({
@@ -72,7 +75,9 @@ export interface NormalizedActivity {
     SequencingComponent,
     PartsOfSpeechComponent,
     MindMapComponent,
-    WritingComponent
+    WritingComponent,
+    OddOneOutComponent,
+    LetterBasketComponent
   ],
   templateUrl: './activity-renderer.html',
   styleUrls: ['./activity-renderer.css']
@@ -153,7 +158,7 @@ export class ActivityRenderer implements OnChanges {
     
     // 1. Determine type
     let typeInput = raw.type || raw.question_type || 'mcq';
-    let type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' = 'mcq';
+    let type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'letter_basket' = 'mcq';
 
     if (['multiple_choice', 'mcq', 'multiple-choice', 'multiplechoice'].includes(typeInput.toLowerCase())) {
       type = 'mcq';
@@ -179,6 +184,10 @@ export class ActivityRenderer implements OnChanges {
       type = 'mind_map';
     } else if (['writing', 'essay', 'paragraph_writing', 'story_writing'].includes(typeInput.toLowerCase())) {
       type = 'writing';
+    } else if (['odd_one_out', 'odd-one-out', 'oddoneout'].includes(typeInput.toLowerCase())) {
+      type = 'odd_one_out';
+    } else if (['letter_basket', 'letter-basket', 'letterbasket'].includes(typeInput.toLowerCase())) {
+      type = 'letter_basket';
     }
 
     // 2. Extract explanation & options
@@ -245,6 +254,18 @@ export class ActivityRenderer implements OnChanges {
       normalized.modelAnswer = raw.modelAnswer || additional.modelAnswer || '';
       normalized.minWords = raw.minWords || additional.minWords || 1;
       normalized.maxWords = raw.maxWords || additional.maxWords || 1000;
+    } else if (type === 'odd_one_out') {
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.audioUrl = raw.media_url || additional.audioUrl || '';
+      const rawOptions = raw.options || additional.options || [];
+      normalized.options = rawOptions.map((opt: any, idx: number) => ({
+        id: opt.id ?? idx,
+        text: opt.text ?? '',
+        isCorrect: !!opt.isCorrect
+      }));
+    } else if (type === 'letter_basket') {
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.items = raw.items || additional.items || [];
     }
 
     this.normalizedActivity.set(normalized);
@@ -343,6 +364,22 @@ export class ActivityRenderer implements OnChanges {
     this.answered.emit({
       questionId: this.activity?.id,
       type: 'writing',
+      ...event
+    });
+  }
+
+  onOddOneOutAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'odd_one_out',
+      ...event
+    });
+  }
+
+  onLetterBasketAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'letter_basket',
       ...event
     });
   }

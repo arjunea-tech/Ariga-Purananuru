@@ -85,6 +85,20 @@
               (answered)="onWritingAnswered($event)">
             </app-activity-writing>
           }
+          @case ('odd_one_out') {
+            <app-activity-odd-one-out
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onOddOneOutAnswered($event)">
+            </app-activity-odd-one-out>
+          }
+          @case ('letter_basket') {
+            <app-activity-letter-basket
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onLetterBasketAnswered($event)">
+            </app-activity-letter-basket>
+          }
         }
       </div>
     }
