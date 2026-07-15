@@ -44,7 +44,9 @@ export class ActivityBlock {
 
     this.data = {
       type,
-      question: data?.question || '',
+      question: data?.question || 
+                (type === 'word_hunt' ? "'கல்வி' என்ற சொல்லிலுள்ள குறில் எழுத்துக்களைக் கண்டறிக" : 
+                 (type === 'letter_basket' ? "எழுத்துக்களை சரியான கூடைகளில் இடுக" : '')),
       options: data?.options || [
         { text: '', isCorrect: true },
         { text: '', isCorrect: false }
@@ -88,8 +90,19 @@ export class ActivityBlock {
       maxWords: data?.maxWords || 1000,
       
       // New activities properties
-      boxes: data?.boxes || [],
-      items: data?.items || []
+      boxes: data?.boxes?.length ? data.boxes : (type === 'word_hunt' ? [
+        { text: 'க', isCorrect: true },
+        { text: 'ல்', isCorrect: false },
+        { text: 'வி', isCorrect: true }
+      ] : []),
+      items: data?.items?.length ? data.items : (type === 'letter_basket' ? [
+        { text: 'அ', category: 'குறில்' },
+        { text: 'ஆ', category: 'நெடில்' },
+        { text: 'க்', category: 'மெய்' },
+        { text: 'த்', category: 'ஒற்று' }
+      ] : []),
+      targetWord: data?.targetWord || (type === 'word_hunt' ? 'கல்வி' : ''),
+      letterCount: data?.letterCount || data?.items?.length || 10
     };
     this.api = api;
     this.readOnly = readOnly;
@@ -353,17 +366,34 @@ export class ActivityBlock {
           { text: '', isCorrect: false }
         ];
       }
-      if (tempData.type === 'word_hunt' && (!tempData.boxes || tempData.boxes.length === 0)) {
-        tempData.gridSize = 2;
-        tempData.boxes = [
-          { text: '', isCorrect: false },
-          { text: '', isCorrect: false },
-          { text: '', isCorrect: false },
-          { text: '', isCorrect: false }
-        ];
+      if (tempData.type === 'word_hunt') {
+        if (!tempData.question || tempData.question === '') {
+          tempData.question = "'கல்வி' என்ற சொல்லிலுள்ள குறில் எழுத்துக்களைக் கண்டறிக";
+        }
+        if (!tempData.targetWord) {
+          tempData.targetWord = 'கல்வி';
+        }
+        if (!tempData.boxes || tempData.boxes.length === 0 || tempData.boxes.every((b: any) => !b.text)) {
+          tempData.gridSize = 3;
+          tempData.boxes = [
+            { text: 'க', isCorrect: true },
+            { text: 'ல்', isCorrect: false },
+            { text: 'வி', isCorrect: true }
+          ];
+        }
       }
-      if (tempData.type === 'letter_basket' && !tempData.items) {
-        tempData.items = [];
+      if (tempData.type === 'letter_basket') {
+        if (!tempData.question || tempData.question === '') {
+          tempData.question = "எழுத்துக்களை சரியான கூடைகளில் இடுக";
+        }
+        if (!tempData.items || tempData.items.length === 0) {
+          tempData.items = [
+            { text: 'அ', category: 'குறில்' },
+            { text: 'ஆ', category: 'நெடில்' },
+            { text: 'க்', category: 'மெய்' },
+            { text: 'த்', category: 'ஒற்று' }
+          ];
+        }
       }
       renderForm();
     });
@@ -519,6 +549,7 @@ export class ActivityBlock {
       }));
     } else if (type === 'word_hunt') {
       savedData.question = this.data.question || '';
+      savedData.targetWord = this.data.targetWord || '';
       savedData.gridSize = parseInt(this.data.gridSize) || 2;
       savedData.boxes = (this.data.boxes || []).map((b: any) => ({
         text: b.text || '',
@@ -526,6 +557,7 @@ export class ActivityBlock {
       }));
     } else if (type === 'letter_basket') {
       savedData.question = this.data.question || '';
+      savedData.letterCount = parseInt(this.data.letterCount) || 10;
       savedData.items = (this.data.items || []).map((item: any) => ({
         text: item.text || '',
         category: item.category || 'குறில்'

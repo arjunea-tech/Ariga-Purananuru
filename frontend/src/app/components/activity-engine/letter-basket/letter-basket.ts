@@ -15,6 +15,8 @@ export interface LetterBasketData {
   explanation?: string;
 }
 
+const BOTH_BASKET_LETTERS = ['க்', 'ச்', 'ட்', 'த்', 'ப்', 'ற்', 'ன்', 'ல்', 'ம்', 'ர்'];
+
 const DYNAMIC_KURIL = [
   'அ', 'இ', 'உ', 'எ', 'ஒ', 
   'க', 'கி', 'கு', 'கெ', 'கொ', 
@@ -187,7 +189,11 @@ export class LetterBasketComponent implements OnChanges {
   placeItem(item: BasketItem, category: string): void {
     this.selectedLetter.set(null);
 
-    if (item.category === category) {
+    const isBothBasketLetter = item.text && BOTH_BASKET_LETTERS.includes(item.text);
+    const isCorrect = item.category === category || 
+      (isBothBasketLetter && (category === 'மெய்' || category === 'ஒற்று'));
+
+    if (isCorrect) {
       this.cloudLetters.update(letters => letters.filter(l => l.id !== item.id));
       this.placedLetters.update(placed => {
         const copy = { ...placed };

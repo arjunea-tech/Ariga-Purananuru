@@ -1,16 +1,49 @@
+const DYNAMIC_KURIL = ['அ', 'இ', 'உ', 'எ', 'ஒ', 'க', 'கி', 'கு', 'கெ', 'கொ', 'ச', 'சி', 'சு', 'செ', 'சொ', 'த', 'தி', 'து', 'தெ', 'தொ', 'ப', 'பி', 'பு', 'பெ', 'பொ', 'ம', 'மி', 'மு', 'மெ', 'மொ', 'ய', 'யி', 'யு', 'யெ', 'யொ', 'ர', 'ரி', 'ரு', 'ரெ', 'ரொ', 'ல', 'லி', 'லு', 'லெ', 'லொ', 'வ', 'வி', 'வு', 'வெ', 'வொ', 'ழ', 'ழி', 'ழு', 'ழெ', 'ழொ'];
+const DYNAMIC_NEDIL = ['ஆ', 'ஈ', 'ஊ', 'ஏ', 'ஐ', 'ஓ', 'ஔ', 'கா', 'கீ', 'கூ', 'கே', 'கை', 'கோ', 'கௌ', 'சா', 'சீ', 'சூ', 'சே', 'சை', 'சோ', 'சௌ', 'தா', 'தீ', 'தூ', 'தே', 'தை', 'தோ', 'தௌ', 'பா', 'பீ', 'பூ', 'பே', 'பை', 'போ', 'பௌ', 'மா', 'மீ', 'மூ', 'மே', 'மை', 'மோ', 'மௌ', 'யா', 'யீ', 'யூ', 'யே', 'யை', 'யோ', 'யௌ', 'ரா', 'ரீ', 'ரூ', 'ரே', 'ரை', 'ரோ', 'ரௌ', 'லா', 'லீ', 'லூ', 'லே', 'லை', 'லோ', 'லௌ', 'வா', 'வீ', 'வூ', 'வே', 'வை', 'வோ', 'வௌ', 'ழா', 'ழீ', 'ழூ', 'ழே', 'ழை', 'ழோ', 'ழௌ'];
+const DYNAMIC_MEI = ['க்', 'ங்', 'ச்', 'ஞ்', 'ட்', 'ண்', 'த்', 'ந்', 'ப்', 'ம்', 'ய்', 'ர்', 'ல்', 'வ்', 'ழ்', 'ள்', 'ற்', 'ன்'];
+const DYNAMIC_OTTRU = ['ஃ', 'க்', 'ங்', 'ச்', 'ஞ்', 'ட்', 'ண்', 'த்', 'ந்', 'ப்', 'ம்', 'ய்', 'ர்', 'ல்', 'வ்', 'ழ்', 'ள்', 'ற்', 'ன்'];
+const BOTH_BASKET_LETTERS = ['க்', 'ச்', 'ட்', 'த்', 'ப்', 'ற்', 'ன்', 'ல்', 'ம்', 'ர்'];
+
+function shuffleArray(array: any[]) {
+  const copy = [...array];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+function generateRandomLetters(count: number): Array<{ text: string, category: string }> {
+  let kCount = Math.floor(count / 4);
+  let nCount = Math.floor(count / 4);
+  let mCount = Math.floor(count / 4);
+  let oCount = count - (kCount + nCount + mCount);
+
+  const kurilSel = shuffleArray(DYNAMIC_KURIL).slice(0, kCount);
+  const nedilSel = shuffleArray(DYNAMIC_NEDIL).slice(0, nCount);
+  const meiSel = shuffleArray(DYNAMIC_MEI).slice(0, mCount);
+  const ottruSel = shuffleArray(DYNAMIC_OTTRU).slice(0, oCount);
+
+  const items: any[] = [];
+  kurilSel.forEach(text => items.push({ text, category: 'குறில்' }));
+  nedilSel.forEach(text => items.push({ text, category: 'நெடில்' }));
+  meiSel.forEach(text => items.push({ text, category: 'மெய்' }));
+  ottruSel.forEach(text => items.push({ text, category: 'ஒற்று' }));
+
+  return shuffleArray(items);
+}
+
 export function renderLetterBasketForm(
   parent: HTMLDivElement,
   data: any,
   renderExplanationInput: (parent: HTMLDivElement, data: any) => void
 ): void {
-  // Initialize default items if not present
-  if (!data.items) {
-    data.items = [
-      { text: 'அ', category: 'குறில்' },
-      { text: 'ஆ', category: 'நெடில்' },
-      { text: 'க்', category: 'மெய்' },
-      { text: 'த்', category: 'ஒற்று' }
-    ];
+  // Initialize defaults
+  if (!data.letterCount) {
+    data.letterCount = data.items?.length || 10;
+  }
+  if (!data.items || data.items.length === 0) {
+    data.items = generateRandomLetters(data.letterCount);
   }
 
   // 1. Question input
@@ -18,93 +51,122 @@ export function renderLetterBasketForm(
   qGroup.classList.add('activity-form-group');
   qGroup.innerHTML = `
     <label class="activity-editor-label">Question Text</label>
-    <input type="text" class="activity-input-text basket-question" value="${data.question || ''}" placeholder="E.g., எழுத்துக்களை சரியான கூடைகளில் இடுக (Put the letters in correct baskets)">
+    <input type="text" class="activity-input-text basket-question" value="${data.question || ''}" placeholder="E.g., எழுத்துக்களை சரியான கூடைகளில் இடுக">
   `;
   parent.appendChild(qGroup);
 
   const qInput = qGroup.querySelector('.basket-question') as HTMLInputElement;
-  qInput.addEventListener('input', (e: any) => { data.question = e.target.value; });
+  qInput.addEventListener('input', (e: any) => { 
+    data.question = e.target.value; 
+  });
 
-  // 2. Letters config list
-  const lettersGroup = document.createElement('div');
-  lettersGroup.classList.add('activity-form-group');
+  // 2. Select number of letters layout options
+  const selectGroup = document.createElement('div');
+  selectGroup.classList.add('activity-form-group');
+  selectGroup.innerHTML = `
+    <label class="activity-editor-label">Select Number of Letters to Generate (எழுத்துக்களின் எண்ணிக்கை)</label>
+    <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+      <div class="letter-count-box" data-count="10" style="flex: 1; border: 2.5px solid #cbd5e1; border-radius: 0.75rem; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.2s; font-weight: bold; background: white; color: #334155;">
+        10 Letters
+      </div>
+      <div class="letter-count-box" data-count="20" style="flex: 1; border: 2.5px solid #cbd5e1; border-radius: 0.75rem; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.2s; font-weight: bold; background: white; color: #334155;">
+        20 Letters
+      </div>
+      <div class="letter-count-box" data-count="30" style="flex: 1; border: 2.5px solid #cbd5e1; border-radius: 0.75rem; padding: 1rem; text-align: center; cursor: pointer; transition: all 0.2s; font-weight: bold; background: white; color: #334155;">
+        30 Letters
+      </div>
+    </div>
+  `;
+  parent.appendChild(selectGroup);
 
-  const lettersLabel = document.createElement('label');
-  lettersLabel.classList.add('activity-editor-label');
-  lettersLabel.textContent = 'Configure Cloud Letters & Target Baskets';
-  lettersGroup.appendChild(lettersLabel);
+  // 3. Letters preview container
+  const previewGroup = document.createElement('div');
+  previewGroup.classList.add('activity-form-group');
+  previewGroup.innerHTML = `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+      <label class="activity-editor-label" style="margin: 0;">Generated Letters Preview</label>
+      <button type="button" class="activity-btn activity-btn-primary basket-regenerate-btn" style="font-size: 0.75rem; padding: 0.25rem 0.75rem;">Regenerate</button>
+    </div>
+    <div class="basket-preview-container" style="display: flex; flex-wrap: wrap; gap: 0.5rem; border: 1.5px dashed #cbd5e1; border-radius: 0.75rem; padding: 1rem; min-height: 80px; background: #f8fafc;">
+    </div>
+  `;
+  parent.appendChild(previewGroup);
 
-  const rowsContainer = document.createElement('div');
-  rowsContainer.classList.add('basket-rows-container');
-  lettersGroup.appendChild(rowsContainer);
+  const previewContainer = previewGroup.querySelector('.basket-preview-container') as HTMLDivElement;
+  const regenerateBtn = previewGroup.querySelector('.basket-regenerate-btn') as HTMLButtonElement;
 
-  const renderLetterRows = () => {
-    rowsContainer.innerHTML = '';
-    data.items.forEach((item: any, idx: number) => {
-      const row = document.createElement('div');
-      row.classList.add('activity-row');
-      row.style.marginBottom = '0.5rem';
-      row.style.display = 'flex';
-      row.style.gap = '0.5rem';
-      row.style.alignItems = 'center';
+  const updatePreview = () => {
+    previewContainer.innerHTML = '';
+    
+    // Update count boxes active states
+    const countBoxes = selectGroup.querySelectorAll('.letter-count-box');
+    countBoxes.forEach((box: any) => {
+      const count = parseInt(box.getAttribute('data-count') || '10');
+      if (count === data.letterCount) {
+        box.style.borderColor = '#3b82f6';
+        box.style.background = '#eff6ff';
+        box.style.color = '#1d4ed8';
+        box.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.15)';
+      } else {
+        box.style.borderColor = '#cbd5e1';
+        box.style.background = 'white';
+        box.style.color = '#334155';
+        box.style.boxShadow = 'none';
+      }
+    });
 
-      const input = document.createElement('input');
-      input.type = 'text';
-      input.classList.add('activity-input-text');
-      input.style.width = '100px';
-      input.value = item.text || '';
-      input.placeholder = `Letter`;
-      input.addEventListener('input', (e: any) => {
-        item.text = e.target.value;
-      });
+    // Render badges
+    data.items.forEach((item: any) => {
+      const badge = document.createElement('div');
+      badge.style.background = '#ffffff';
+      badge.style.border = '1px solid #cbd5e1';
+      badge.style.borderRadius = '0.5rem';
+      badge.style.padding = '0.35rem 0.6rem';
+      badge.style.fontSize = '0.85rem';
+      badge.style.fontWeight = '600';
+      badge.style.display = 'inline-flex';
+      badge.style.alignItems = 'center';
+      badge.style.gap = '0.25rem';
+      
+      const badgeText = document.createElement('span');
+      badgeText.textContent = item.text || '?';
+      badgeText.style.fontSize = '1rem';
+      badgeText.style.fontWeight = 'bold';
+      badgeText.style.color = '#0f172a';
 
-      const select = document.createElement('select');
-      select.classList.add('activity-editor-select');
-      select.style.flexGrow = '1';
-      select.innerHTML = `
-        <option value="குறில்" ${item.category === 'குறில்' ? 'selected' : ''}>குறில் (Kuril - Short Vowel/CV)</option>
-        <option value="நெடில்" ${item.category === 'நெடில்' ? 'selected' : ''}>நெடில் (Nedil - Long Vowel/CV)</option>
-        <option value="மெய்" ${item.category === 'மெய்' ? 'selected' : ''}>மெய் (Mei - Consonant)</option>
-        <option value="ஒற்று" ${item.category === 'ஒற்று' ? 'selected' : ''}>ஒற்று (Ottru - Consonant Dot / Pulli)</option>
-      `;
-      select.addEventListener('change', (e: any) => {
-        item.category = e.target.value;
-      });
+      const isBothBasketLetter = item.text && BOTH_BASKET_LETTERS.includes(item.text);
+      const categoryText = isBothBasketLetter ? 'மெய் / ஒற்று' : item.category;
 
-      const deleteBtn = document.createElement('button');
-      deleteBtn.type = 'button';
-      deleteBtn.classList.add('activity-btn', 'activity-btn-danger');
-      deleteBtn.innerHTML = `&times;`;
-      deleteBtn.title = 'Remove Letter';
-      deleteBtn.addEventListener('click', () => {
-        if (data.items.length > 1) {
-          data.items.splice(idx, 1);
-          renderLetterRows();
-        }
-      });
+      const badgeCategory = document.createElement('span');
+      badgeCategory.textContent = `(${categoryText})`;
+      badgeCategory.style.fontSize = '0.7rem';
+      badgeCategory.style.color = '#64748b';
 
-      row.appendChild(input);
-      row.appendChild(select);
-      row.appendChild(deleteBtn);
-      rowsContainer.appendChild(row);
+      badge.appendChild(badgeText);
+      badge.appendChild(badgeCategory);
+      previewContainer.appendChild(badge);
     });
   };
 
-  renderLetterRows();
-
-  // Add Letter button
-  const addBtn = document.createElement('button');
-  addBtn.type = 'button';
-  addBtn.classList.add('activity-btn', 'activity-btn-primary', 'mt-2');
-  addBtn.innerHTML = `+ Add Letter`;
-  addBtn.addEventListener('click', () => {
-    data.items.push({ text: '', category: 'குறில்' });
-    renderLetterRows();
+  // Add click listener to count boxes
+  const countBoxes = selectGroup.querySelectorAll('.letter-count-box');
+  countBoxes.forEach((box: any) => {
+    box.addEventListener('click', () => {
+      const count = parseInt(box.getAttribute('data-count') || '10');
+      data.letterCount = count;
+      data.items = generateRandomLetters(count);
+      updatePreview();
+    });
   });
-  lettersGroup.appendChild(addBtn);
 
-  parent.appendChild(lettersGroup);
+  // Regenerate button
+  regenerateBtn.addEventListener('click', () => {
+    data.items = generateRandomLetters(data.letterCount);
+    updatePreview();
+  });
 
-  // 3. Explanation
+  updatePreview();
+
+  // 4. Explanation
   renderExplanationInput(parent, data);
 }
