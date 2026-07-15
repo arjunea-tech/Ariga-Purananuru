@@ -139,12 +139,25 @@
   }
 }
 
+/* Safe Area & Header updates */
+.lesson-player header {
+  height: calc(58px + env(safe-area-inset-top)) !important;
+  padding-top: env(safe-area-inset-top) !important;
+  padding-left: max(20px, env(safe-area-inset-left)) !important;
+  padding-right: max(20px, env(safe-area-inset-right)) !important;
+  box-sizing: border-box;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.lesson-player main {
+  padding-top: calc(58px + env(safe-area-inset-top) + 10px) !important;
+  padding-left: max(16px, env(safe-area-inset-left)) !important;
+  padding-right: max(16px, env(safe-area-inset-right)) !important;
+}
+
 /* Responsive Overrides */
 @media (max-width: 768px) {
-  .lesson-player main {
-    padding-top: 70px !important;
-  }
-  
   .reading-content {
     font-size: 1.15rem !important;
   }
@@ -156,20 +169,12 @@
 }
 
 @media (max-width: 480px) {
-  .lesson-player main {
-    padding-top: 60px !important;
-  }
-  
   .reading-content {
     font-size: 1rem !important;
   }
   
   .progress-bar {
     height: 12px !important;
-  }
-  
-  .lesson-player header {
-    height: 60px !important;
   }
   
   .lesson-player header .btn {
@@ -210,10 +215,30 @@
   flex-direction: column;
 }
 
+.reading-content ul,
+.reading-content ol {
+  padding-left: 2rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.reading-content li {
+  text-align: left !important;
+  margin-bottom: 0.5rem !important;
+}
+
 @media (max-width: 576px) {
+  .lesson-player header {
+    height: calc(58px + max(32px, env(safe-area-inset-top))) !important;
+    padding-top: max(32px, env(safe-area-inset-top)) !important;
+    padding-left: max(24px, env(safe-area-inset-left)) !important;
+    padding-right: max(24px, env(safe-area-inset-right)) !important;
+  }
+
   .lesson-player main {
-    padding-top: 60px !important;
-    padding-bottom: 70px !important;
+    padding-top: calc(58px + max(32px, env(safe-area-inset-top)) + 8px) !important;
+    padding-bottom: 75px !important;
+    padding-left: max(24px, env(safe-area-inset-left)) !important;
+    padding-right: max(24px, env(safe-area-inset-right)) !important;
   }
   
   .lesson-dynamic-wrapper {
@@ -223,6 +248,7 @@
   .reading-card {
     border-radius: 16px !important;
     border-width: 3px !important;
+    padding: 12px !important;
   }
 
   .reading-content {
@@ -230,10 +256,303 @@
     line-height: 1.7 !important;
   }
 
+  .reading-content p {
+    margin-bottom: 0.5rem !important;
+  }
+
+  .reading-content ol, .reading-content ul {
+    margin-bottom: 0.5rem !important;
+    padding-left: 1.25rem !important;
+  }
+
+  .reading-content li {
+    margin-bottom: 0.25rem !important;
+    text-align: left !important;
+  }
+
   .lesson-bottom-btn {
     bottom: 12px !important;
     min-width: 80px !important;
     font-size: 0.95rem !important;
     padding: 8px 16px !important;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   LESSON PLAYER THEME OVERRIDES (Forest, Desert, Space)
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* 🌵 1. DESERT THEME OVERRIDES 🌵 */
+.theme-desert.lesson-bg-pattern {
+  background-color: #fdf5e6 !important;
+  background-image: radial-gradient(#f4e3cf 20%, transparent 20%), radial-gradient(#f4e3cf 20%, transparent 20%) !important;
+}
+
+.theme-desert .premium-card,
+.theme-desert .parchment-board {
+  background: #fff8e1 !important;
+  border: 6px solid #f4a460 !important; /* Clay/Desert Orange border */
+  box-shadow: 0 10px 0 rgba(244, 164, 96, 0.5), 0 20px 40px rgba(0, 0, 0, 0.3) !important;
+  color: #5d4037 !important;
+}
+
+.theme-desert .text-dark {
+  color: #4e342e !important;
+}
+
+.theme-desert .text-secondary {
+  color: #6d4c41 !important;
+}
+
+.theme-desert th {
+  background: #ffe0b2 !important;
+  color: #e65100 !important;
+}
+
+/* 🌌 2. SPACE THEME OVERRIDES 🌌 */
+.theme-space.lesson-bg-pattern {
+  background-color: #0d0e15 !important;
+  background-image: radial-gradient(rgba(139, 92, 246, 0.15) 20%, transparent 20%), radial-gradient(rgba(139, 92, 246, 0.15) 20%, transparent 20%) !important;
+}
+
+.theme-space .premium-card,
+.theme-space .parchment-board {
+  background: rgba(22, 24, 43, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 4px solid #00e5ff !important; /* Glowing Neon Cyan border */
+  box-shadow: 0 0 30px rgba(0, 229, 255, 0.35), inset 0 0 15px rgba(0, 229, 255, 0.1) !important;
+  color: #e2e8f0 !important;
+}
+
+.theme-space .text-dark:not(.reading-card *):not(.option-row *):not(.bubble *):not(.rounded-pill *):not(.btn *):not(.h3 *),
+.theme-space .text-secondary:not(.reading-card *):not(.option-row *):not(.bubble *):not(.rounded-pill *):not(.btn *):not(.h3 *) {
+  color: #cbd5e1 !important;
+}
+
+.theme-space h3.text-primary,
+.theme-space .text-primary {
+  color: #38bdf8 !important;
+}
+
+.theme-space .table-responsive table {
+  background: #16182b !important;
+  color: #e2e8f0 !important;
+  border-color: #2a2e45 !important;
+}
+
+.theme-space th {
+  background: #1f223f !important;
+  color: #00e5ff !important;
+  border-bottom: 2px solid #2a2e45 !important;
+}
+
+.theme-space td {
+  color: #94a3b8 !important;
+}
+
+.theme-space .btn-light {
+  background: #1f223f !important;
+  color: #fff !important;
+  border-color: #2a2e45 !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   DEEP CHILD ACTIVITY ENCAPSULATION OVERRIDES
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* 🌌 Space Theme Child Activity Styles 🌌 */
+::ng-deep .theme-space .premium-card h1,
+::ng-deep .theme-space .premium-card h2,
+::ng-deep .theme-space .premium-card h3,
+::ng-deep .theme-space .premium-card h4,
+::ng-deep .theme-space .premium-card h5,
+::ng-deep .theme-space .premium-card p,
+::ng-deep .theme-space .premium-card label,
+::ng-deep .theme-space .premium-card .text-dark,
+::ng-deep .theme-space .premium-card .text-secondary {
+  color: #f8fafc !important;
+  text-shadow: none !important;
+}
+
+/* Keep choice option row labels and bubble letters dark/high contrast on their light backgrounds */
+::ng-deep .theme-space .premium-card .option-row,
+::ng-deep .theme-space .premium-card .option-row span,
+::ng-deep .theme-space .premium-card .option-row .bubble,
+::ng-deep .theme-space .premium-card .btn-light,
+::ng-deep .theme-space .premium-card .btn-light span,
+::ng-deep .theme-space .premium-card .draggable-item,
+::ng-deep .theme-space .premium-card .draggable-item *,
+::ng-deep .theme-space .premium-card .basket-item,
+::ng-deep .theme-space .premium-card .basket-item *,
+::ng-deep .theme-space .premium-card .match-card,
+::ng-deep .theme-space .premium-card .match-card *,
+::ng-deep .theme-space .premium-card .word-box,
+::ng-deep .theme-space .premium-card .word-box * {
+  color: #1e293b !important;
+  text-shadow: none !important;
+}
+
+/* 🌵 Desert Theme Child Activity Styles 🌵 */
+::ng-deep .theme-desert .premium-card h1,
+::ng-deep .theme-desert .premium-card h2,
+::ng-deep .theme-desert .premium-card h3,
+::ng-deep .theme-desert .premium-card h4,
+::ng-deep .theme-desert .premium-card h5,
+::ng-deep .theme-desert .premium-card p,
+::ng-deep .theme-desert .premium-card label,
+::ng-deep .theme-desert .premium-card .text-dark,
+::ng-deep .theme-desert .premium-card .text-secondary {
+  color: #4e342e !important;
+  text-shadow: none !important;
+}
+
+::ng-deep .theme-desert .premium-card .option-row,
+::ng-deep .theme-desert .premium-card .option-row span,
+::ng-deep .theme-desert .premium-card .option-row .bubble,
+::ng-deep .theme-desert .premium-card .btn-light,
+::ng-deep .theme-desert .premium-card .btn-light span,
+::ng-deep .theme-desert .premium-card .draggable-item,
+::ng-deep .theme-desert .premium-card .draggable-item *,
+::ng-deep .theme-desert .premium-card .basket-item,
+::ng-deep .theme-desert .premium-card .basket-item *,
+::ng-deep .theme-desert .premium-card .match-card,
+::ng-deep .theme-desert .premium-card .match-card *,
+::ng-deep .theme-desert .premium-card .word-box,
+::ng-deep .theme-desert .premium-card .word-box * {
+  color: #4e342e !important;
+  text-shadow: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   CORRECT / INCORRECT STATE SOLID OVERRIDES & PRACTICE ENGINE CARDS
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Force solid opaque backgrounds on MCQ correct/incorrect choices to avoid bleeding */
+::ng-deep body .premium-card .option-row.correct {
+  background: #d1fae5 !important;
+  border-color: #10b981 !important;
+}
+::ng-deep body .premium-card .option-row.correct span {
+  color: #065f46 !important;
+}
+
+::ng-deep body .premium-card .option-row.incorrect {
+  background: #fee2e2 !important;
+  border-color: #ef4444 !important;
+}
+::ng-deep body .premium-card .option-row.incorrect span {
+  color: #991b1b !important;
+}
+
+/* Keep inner cards (like sub-blocks inside Practice Engine) and button groups dark-labeled */
+::ng-deep .theme-space .premium-card .card,
+::ng-deep .theme-space .premium-card .card *,
+::ng-deep .theme-space .premium-card .btn-group,
+::ng-deep .theme-space .premium-card .btn-group * {
+  color: #1e293b !important;
+  text-shadow: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   MOBILE & SAFE AREA TOP HUD OPTIMIZATIONS
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Add top safe area padding and height to header to prevent cut-offs by notches */
+.lesson-player header {
+  padding-top: max(12px, env(safe-area-inset-top)) !important;
+  height: calc(64px + max(12px, env(safe-area-inset-top))) !important;
+  background: transparent !important;
+  backdrop-filter: none !important;
+}
+
+/* Adjust main container top padding to align with the taller header */
+.lesson-player main {
+  padding-top: calc(75px + max(12px, env(safe-area-inset-top))) !important;
+}
+
+/* 🌌 Space Theme Top HUD Buttons & Controls (Glow & High Contrast) 🌌 */
+.theme-space header button.btn-light {
+  background: rgba(0, 229, 255, 0.15) !important;
+  border-color: #00e5ff !important;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.4) !important;
+}
+
+.theme-space header button.btn-light i {
+  color: #00e5ff !important;
+}
+
+.theme-space header button.btn-light:hover {
+  background: rgba(0, 229, 255, 0.3) !important;
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.7) !important;
+}
+
+/* Make progress bar glow in Space theme */
+.theme-space header .progress {
+  background: rgba(22, 24, 43, 0.8) !important;
+  border-color: #00e5ff !important;
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.2) !important;
+}
+
+.theme-space header .progress-bar {
+  background: linear-gradient(90deg, #00e5ff, #00ff6c) !important;
+  box-shadow: 0 0 8px #00e5ff !important;
+}
+
+/* Make heart badge glow in Space theme */
+.theme-space header .d-flex.text-danger {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.4) !important;
+}
+
+.theme-space header .d-flex.text-danger span,
+.theme-space header .d-flex.text-danger i {
+  color: #ff8a8a !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   RESPONSIVE MASCOT STYLING
+   ────────────────────────────────────────────────────────────────────────── */
+.mascot-container {
+  width: 90px;
+}
+@media (min-width: 576px) {
+  .mascot-container {
+    width: 120px;
+  }
+}
+@media (min-width: 992px) {
+  .mascot-container {
+    width: 180px;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   RESPONSIVE FEEDBACK MASCOT STYLING
+   ────────────────────────────────────────────────────────────────────────── */
+.feedback-mascot-container {
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  bottom: calc(100% - 15px) !important;
+  z-index: 10;
+}
+.feedback-mascot-container .mascot-happy {
+  width: 115px !important;
+}
+.feedback-mascot-container .mascot-sad {
+  width: 105px !important;
+}
+
+@media (min-width: 768px) {
+  .feedback-mascot-container {
+    left: -20px !important;
+    transform: none !important;
+    bottom: -10px !important;
+  }
+  .feedback-mascot-container .mascot-happy {
+    width: 130px !important;
+  }
+  .feedback-mascot-container .mascot-sad {
+    width: 120px !important;
   }
 }

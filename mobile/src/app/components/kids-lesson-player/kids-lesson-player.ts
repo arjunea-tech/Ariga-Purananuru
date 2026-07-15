@@ -21,6 +21,7 @@ export interface LessonStep {
   styleUrls: ['./kids-lesson-player.css']
 })
 export class KidsLessonPlayer implements OnInit, OnDestroy {
+  levelThemeClass = input<string>('theme-forest');
   lessonSequence = input<LessonStep[]>([]);
   currentStepIndex = input<number>(0);
   lessonFinished = input<boolean>(false);

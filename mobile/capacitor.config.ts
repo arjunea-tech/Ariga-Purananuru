@@ -8,6 +8,11 @@ const config: CapacitorConfig = {
     androidScheme: 'https',
     // url: 'http://192.168.1.60:4200',
     cleartext: true
+  },
+  plugins: {
+    StatusBar: {
+      overlaysWebView: false
+    }
   }
 };
 

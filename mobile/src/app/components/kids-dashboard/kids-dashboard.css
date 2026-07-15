@@ -819,3 +819,303 @@
     margin-bottom: -180px;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   DYNAMIC THEME & BIOMES IMPLEMENTATION
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* ── 1. FOREST BIOME (Default) ── */
+.theme-forest.game-world-container {
+  background: linear-gradient(to bottom, #7dd3fc 0%, #bae6fd 40%, #e0f2fe 70%, #f0fdf4 100%) !important;
+}
+.theme-forest .base-path-line { stroke: #b0bec5; }
+.theme-forest .active-path-line {
+  stroke: #FFCA28;
+  filter: drop-shadow(0 0 8px rgba(255, 202, 40, 0.8));
+}
+
+/* ── 2. DESERT BIOME (Level Index 1) ── */
+.theme-desert.game-world-container {
+  background: linear-gradient(to bottom, #ff7e5f 0%, #feb47b 40%, #ffdeca 70%, #f4e3cf 100%) !important;
+}
+.theme-desert.game-world-container::after {
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 224, 130, 0.15) 0deg 15deg,
+    transparent 15deg 30deg
+  ) !important;
+}
+.theme-desert .hill-bg-3 {
+  background: linear-gradient(180deg, #d88b43 0%, #b26824 100%) !important;
+}
+.theme-desert .hill-bg-2 {
+  background: linear-gradient(180deg, #e59866 0%, #d35400 100%) !important;
+}
+.theme-desert .hill-bg-1 {
+  background: linear-gradient(180deg, #f5b041 0%, #eb984e 100%) !important;
+  border-top: 8px solid #f8c471 !important;
+  box-shadow: inset 0 15px 30px rgba(255,255,255,0.2), 0 -10px 20px rgba(0,0,0,0.15) !important;
+}
+/* Hide forest elements in desert */
+.theme-desert .css-pine-tree,
+.theme-desert .css-flower,
+.theme-desert .css-grass-clump {
+  display: none !important;
+}
+/* CSS Cactus */
+.css-cactus {
+  position: absolute;
+  width: 20px;
+  height: 60px;
+  z-index: 1;
+  pointer-events: none;
+}
+.cactus-stem {
+  width: 20px;
+  height: 60px;
+  background: #388e3c;
+  border: 3px solid #1b5e20;
+  border-radius: 10px;
+  position: absolute;
+}
+.cactus-arm-left {
+  width: 15px;
+  height: 30px;
+  border-left: 8px solid #388e3c;
+  border-bottom: 8px solid #388e3c;
+  border-radius: 0 0 0 15px;
+  position: absolute;
+  left: -15px;
+  top: 15px;
+}
+.cactus-arm-right {
+  width: 15px;
+  height: 30px;
+  border-right: 8px solid #388e3c;
+  border-bottom: 8px solid #388e3c;
+  border-radius: 0 0 15px 0;
+  position: absolute;
+  right: -15px;
+  top: 8px;
+}
+/* Desert path and nodes */
+.theme-desert .base-path-line { stroke: #d7ccc8; }
+.theme-desert .active-path-line {
+  stroke: #ff5722;
+  filter: drop-shadow(0 0 8px rgba(255, 87, 34, 0.8));
+}
+.theme-desert .completed-node {
+  background: radial-gradient(circle at 30% 30%, #ff8a65, #d84315) !important;
+  border-color: #ffe0b2 !important;
+  box-shadow: 0 12px 0 #bf360c, inset 0 5px 0 rgba(255,255,255,0.6) !important;
+}
+.theme-desert .active-node {
+  background: radial-gradient(circle at 30% 30%, #ffb74d, #f57c00) !important;
+  border-color: #fff !important;
+  box-shadow: 0 12px 0 #e65100, 0 0 30px #ffa726, inset 0 5px 0 rgba(255,255,255,0.7) !important;
+  animation: pulse-glow-desert 2.5s infinite;
+}
+@keyframes pulse-glow-desert {
+  0% { box-shadow: 0 12px 0 #e65100, 0 0 20px #ffa726, inset 0 5px 0 rgba(255,255,255,0.7); }
+  50% { box-shadow: 0 12px 0 #e65100, 0 0 40px #ffb74d, inset 0 5px 0 rgba(255,255,255,0.7); transform: scale(1.18); }
+  100% { box-shadow: 0 12px 0 #e65100, 0 0 20px #ffa726, inset 0 5px 0 rgba(255,255,255,0.7); }
+}
+
+/* ── 3. SPACE BIOME (Level Index 2) ── */
+.theme-space.game-world-container {
+  background: linear-gradient(to bottom, #1a1a2e 0%, #16213e 40%, #0f3460 70%, #4e1a3d 100%) !important;
+}
+.theme-space.game-world-container::after {
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(156, 39, 176, 0.15) 0deg 15deg,
+    transparent 15deg 30deg
+  ) !important;
+}
+.theme-space .hill-bg-3 {
+  background: linear-gradient(180deg, #4a148c 0%, #311b92 100%) !important;
+  opacity: 0.65 !important;
+}
+.theme-space .hill-bg-2 {
+  background: linear-gradient(180deg, #7b1fa2 0%, #4a148c 100%) !important;
+  opacity: 0.8 !important;
+}
+.theme-space .hill-bg-1 {
+  background: linear-gradient(180deg, #8e24aa 0%, #5e35b1 100%) !important;
+  border-top: 8px solid #e1bee7 !important;
+  box-shadow: inset 0 15px 30px rgba(255,255,255,0.1), 0 -10px 20px rgba(0,0,0,0.15) !important;
+}
+/* Hide forest elements in space */
+.theme-space .css-pine-tree,
+.theme-space .css-flower,
+.theme-space .css-grass-clump {
+  display: none !important;
+}
+/* CSS Planet */
+.css-planet {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  z-index: 1;
+  pointer-events: none;
+  animation: floatPlanet 6s ease-in-out infinite alternate;
+}
+.planet-body {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  z-index: 2;
+  box-shadow: inset -5px -5px 10px rgba(0,0,0,0.5);
+}
+.planet-ring {
+  width: 60px;
+  height: 15px;
+  border: 4px solid;
+  border-radius: 50%;
+  position: absolute;
+  top: 18px;
+  left: -5px;
+  z-index: 1;
+}
+@keyframes floatPlanet {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-15px); }
+}
+/* Space path and nodes */
+.theme-space .base-path-line { stroke: #37474f; }
+.theme-space .active-path-line {
+  stroke: #00e5ff;
+  filter: drop-shadow(0 0 12px rgba(0, 229, 255, 0.9));
+}
+.theme-space .completed-node {
+  background: radial-gradient(circle at 30% 30%, #e040fb, #aa00ff) !important;
+  border-color: #f3e5f5 !important;
+  box-shadow: 0 12px 0 #4a148c, inset 0 5px 0 rgba(255,255,255,0.8) !important;
+}
+.theme-space .active-node {
+  background: radial-gradient(circle at 30% 30%, #18ffff, #00b0ff) !important;
+  border-color: #fff !important;
+  box-shadow: 0 12px 0 #0a74da, 0 0 35px #00e5ff, inset 0 5px 0 rgba(255,255,255,0.8) !important;
+  animation: pulse-glow-space 2.5s infinite;
+}
+@keyframes pulse-glow-space {
+  0% { box-shadow: 0 12px 0 #0a74da, 0 0 20px #00e5ff, inset 0 5px 0 rgba(255,255,255,0.8); }
+  50% { box-shadow: 0 12px 0 #0a74da, 0 0 45px #FFF, inset 0 5px 0 rgba(255,255,255,0.8); transform: scale(1.18); }
+  100% { box-shadow: 0 12px 0 #0a74da, 0 0 20px #00e5ff, inset 0 5px 0 rgba(255,255,255,0.8); }
+}
+
+/* ── 4. MILESTONE TREASURE CHEST ── */
+.treasure-chest-container {
+  transition: transform 0.2s ease;
+}
+.treasure-chest-container:hover {
+  transform: scale(1.15);
+}
+.treasure-chest {
+  animation: chestGlow 3s ease-in-out infinite;
+  display: inline-flex;
+}
+.treasure-chest i {
+  transition: color 0.3s ease;
+}
+.chest-open i {
+  color: #ffca28 !important;
+}
+@keyframes chestGlow {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); filter: drop-shadow(0 0 10px rgba(255, 235, 59, 0.7)); }
+}
+
+/* ── 5. HORIZONTAL CAROUSEL ISLANDS (Level 2 / Desert theme) ── */
+.carousel-container::-webkit-scrollbar {
+  display: none !important;
+}
+.carousel-container {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.carousel-card-wrapper {
+  width: 320px;
+  flex-shrink: 0;
+  scroll-snap-align: center;
+}
+
+@media (max-width: 768px) {
+  .carousel-card-wrapper {
+    min-width: 82vw !important;
+    max-width: 320px !important;
+  }
+}
+
+.floating-island-card {
+  background: linear-gradient(to bottom, #4caf50 0px, #4caf50 25px, #a0522d 26px, #8b4513 60%, #5c2d16 100%) !important;
+  border: 5px solid #fff !important;
+  border-radius: 36px !important;
+  box-shadow: 0 16px 0 #3e1f0e, 0 25px 40px rgba(0, 0, 0, 0.45) !important;
+  color: #fff !important;
+  min-height: 380px;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
+  animation: floatIsland 4s ease-in-out infinite alternate;
+}
+
+.floating-island-card::before {
+  display: none !important;
+}
+
+.floating-island-card:hover {
+  transform: translateY(-8px) scale(1.03) !important;
+  box-shadow: 0 24px 0 #3e1f0e, 0 35px 50px rgba(0, 0, 0, 0.5) !important;
+}
+
+.floating-island-card:active {
+  transform: translateY(8px) scale(0.98) !important;
+  box-shadow: 0 8px 0 #3e1f0e, 0 10px 20px rgba(0, 0, 0, 0.3) !important;
+}
+
+.island-badge {
+  background: #ff5722 !important;
+  border: 2px solid #fff;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 0 #bf360c;
+  z-index: 2;
+}
+
+.island-title {
+  color: #ffffff !important;
+  text-shadow: 2px 3px 0px rgba(0,0,0,0.4);
+  font-weight: 800;
+  z-index: 2;
+}
+
+.island-illustration {
+  z-index: 2;
+  transition: transform 0.3s ease;
+}
+.floating-island-card:hover .island-illustration {
+  transform: scale(1.2) rotate(10deg);
+}
+
+.island-locked {
+  filter: grayscale(0.8) opacity(0.85) !important;
+  cursor: not-allowed !important;
+  animation: none !important;
+}
+.island-locked:hover {
+  transform: none !important;
+  box-shadow: 0 16px 0 #3e1f0e, 0 25px 40px rgba(0, 0, 0, 0.45) !important;
+}
+
+@keyframes floatIsland {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-16px) rotate(1deg);
+  }
+}

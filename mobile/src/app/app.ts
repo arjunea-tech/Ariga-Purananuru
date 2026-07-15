@@ -7,6 +7,7 @@ import { NotificationService } from './services/notification.service';
 import { LoaderService } from './services/loader.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../environments/environment';
+import { StatusBar } from '@capacitor/status-bar';
 import { 
   IonApp, IonRouterOutlet, IonMenu, IonHeader, IonToolbar, 
   IonContent, IonList, IonItem, IonIcon, 
@@ -57,6 +58,13 @@ export class App implements OnInit {
   }
 
   ngOnInit() {
+    // Disable StatusBar overlaying webview on mobile
+    try {
+      StatusBar.setOverlaysWebView({ overlay: false });
+    } catch (e) {
+      console.warn('StatusBar plugin not available:', e);
+    }
+
     const savedLang = localStorage.getItem('userLang') || 'en';
     this.translate.setDefaultLang('en');
     this.translate.use(savedLang);

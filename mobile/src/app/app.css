@@ -14,6 +14,9 @@
 .main-content {
   margin-left: 280px;
   transition: margin-left 0.3s ease-in-out;
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Sidebar Active/Hover States */
@@ -85,10 +88,19 @@
 /* Mobile Header Spacing Overrides */
 @media (max-width: 991.98px) {
   .mobile-header {
-    height: 60px;
+    height: calc(60px + max(28px, env(safe-area-inset-top))) !important;
+    padding-top: calc(0.75rem + max(28px, env(safe-area-inset-top))) !important;
+    padding-bottom: 0.75rem !important;
+    padding-left: max(16px, env(safe-area-inset-left)) !important;
+    padding-right: max(16px, env(safe-area-inset-right)) !important;
     box-sizing: border-box;
+    display: flex;
+    align-items: center;
+  }
+  .sidebar {
+    padding-top: max(28px, env(safe-area-inset-top)) !important;
   }
   .main-content > div {
-    margin-top: 60px !important;
+    margin-top: calc(60px + max(28px, env(safe-area-inset-top))) !important;
   }
 }

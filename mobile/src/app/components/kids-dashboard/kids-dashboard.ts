@@ -53,23 +53,41 @@ export class KidsDashboard implements OnChanges, AfterViewInit {
   scrollToActiveNode() {
     if (!this.isBrowser) return;
     setTimeout(() => {
-      const mapContainer = document.querySelector('.map-container') as HTMLElement;
-      const activeNode = document.querySelector('.active-node') as HTMLElement;
-      
-      if (mapContainer) {
-        if (activeNode) {
-          // Manually calculate scroll target to prevent scrolling overflow:hidden parent
-          const containerRect = mapContainer.getBoundingClientRect();
-          const nodeRect = activeNode.getBoundingClientRect();
-          const scrollTarget = mapContainer.scrollTop + (nodeRect.top - containerRect.top) - (containerRect.height / 2) + (nodeRect.height / 2);
+      const idx = this.levelIndex();
+      if (idx % 3 === 1) {
+        // Desert Carousel view
+        const carousel = document.querySelector('.carousel-container') as HTMLElement;
+        const activeId = this.currentPlayableChapterId();
+        const playableCard = document.getElementById('island-card-' + activeId) as HTMLElement;
+        
+        if (carousel && playableCard) {
+          const carouselRect = carousel.getBoundingClientRect();
+          const cardRect = playableCard.getBoundingClientRect();
           
-          mapContainer.scrollTo({ top: scrollTarget, behavior: 'smooth' });
-        } else {
-          // If all completed, scroll to top (last chapter is at top)
-          mapContainer.scrollTop = 0;
+          // Calculate the horizontal position to center the active card in the carousel viewport
+          const scrollTarget = carousel.scrollLeft + (cardRect.left - carouselRect.left) - (carouselRect.width / 2) + (cardRect.width / 2);
+          carousel.scrollTo({ left: scrollTarget, behavior: 'smooth' });
+        }
+      } else {
+        // Vertical path views
+        const mapContainer = document.querySelector('.map-container') as HTMLElement;
+        const activeNode = document.querySelector('.active-node') as HTMLElement;
+        
+        if (mapContainer) {
+          if (activeNode) {
+            // Manually calculate scroll target to prevent scrolling overflow:hidden parent
+            const containerRect = mapContainer.getBoundingClientRect();
+            const nodeRect = activeNode.getBoundingClientRect();
+            const scrollTarget = mapContainer.scrollTop + (nodeRect.top - containerRect.top) - (containerRect.height / 2) + (nodeRect.height / 2);
+            
+            mapContainer.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+          } else {
+            // If all completed, scroll to top (last chapter is at top)
+            mapContainer.scrollTop = 0;
+          }
         }
       }
-    }, 100);
+    }, 120);
   }
 
   @HostListener('document:mousemove', ['$event'])
@@ -93,13 +111,47 @@ export class KidsDashboard implements OnChanges, AfterViewInit {
     return struct.levels.find((l: any) => l.id === levId) || null;
   }
 
+  levelIndex(): number {
+    const struct = this.structure;
+    const levId = this.activeLevelId;
+    if (!struct || !levId) return 0;
+    return struct.levels.findIndex((l: any) => l.id === levId);
+  }
+
+  levelThemeClass(): string {
+    if (this.currentView === 'levels') return 'theme-forest';
+    const idx = this.levelIndex();
+    if (idx % 3 === 0) return 'theme-forest';
+    if (idx % 3 === 1) return 'theme-desert';
+    return 'theme-space';
+  }
+
+  levelLeafParticles(): string[] {
+    const idx = this.levelIndex();
+    if (idx % 3 === 1) {
+      return ['🌸', '🍂', '🌸', '🍁', '🌸', '🍂', '🍁'];
+    } else if (idx % 3 === 2) {
+      return ['✨', '💎', '✨', '⭐', '✨', '💎', '⭐'];
+    }
+    return ['🍃', '🍁', '🍃', '🍂', '🍃', '🍁', '🍂'];
+  }
+
   levelChaptersMap() {
     const level = this.selectedLevel();
     const map = new Map<number, { globalNumber: number; globalIndex: number; xOffset: number }>();
     if (!level) return map;
 
+    const idx = this.levelIndex();
     // Pattern for xOffset to make nodes snake left and right
-    const pattern = [0, -60, -90, -40, 20, 80, 50, 0];
+    let pattern = [0, -60, -90, -40, 20, 80, 50, 0];
+    if (idx % 3 === 1) {
+      // Desert Snake Pattern
+      pattern = [-90, 90, -90, 90, -90, 90];
+    } else if (idx % 3 === 2) {
+      // Space vertical wavy pattern
+      pattern = [-30, 30, -30, 30];
+    }
+
     level.chapters.forEach((chapter: any, idx: number) => {
       const xOffset = pattern[idx % pattern.length];
       map.set(chapter.id, {

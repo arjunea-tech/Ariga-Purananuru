@@ -810,7 +810,10 @@
     flex-direction: row !important;
     justify-content: space-between !important;
     align-items: center !important;
-    padding: 12px 15px !important;
+    padding-top: max(32px, env(safe-area-inset-top)) !important;
+    padding-bottom: 12px !important;
+    padding-left: max(24px, env(safe-area-inset-left)) !important;
+    padding-right: max(24px, env(safe-area-inset-right)) !important;
     z-index: 1050 !important;
     background: transparent !important;
   }
@@ -826,7 +829,7 @@
 
   /* Compact the map and levels container padding but leave room for absolute header */
   .map-container {
-    padding-top: 70px !important;
+    padding-top: calc(56px + max(32px, env(safe-area-inset-top))) !important;
   }
 
   .game-world-container {
@@ -836,7 +839,10 @@
 
 @media (max-width: 576px) {
   header.position-absolute:not(.d-none) {
-    padding: 10px 10px !important;
+    padding-top: max(32px, env(safe-area-inset-top)) !important;
+    padding-bottom: 10px !important;
+    padding-left: max(24px, env(safe-area-inset-left)) !important;
+    padding-right: max(24px, env(safe-area-inset-right)) !important;
     gap: 8px !important;
   }
 

@@ -1,4 +1,4 @@
-<div class="game-world-container w-100 position-relative overflow-hidden d-flex flex-column" style="height: 100vh;">
+<div class="game-world-container w-100 position-relative overflow-hidden d-flex flex-column" [ngClass]="levelThemeClass()" style="height: 100vh;">
 
   <!-- Base CSS Scenery (Hills, Trees, Fireflies/Pollen, Clouds) -->
   <div class="hill-bg-3"></div>
@@ -47,6 +47,32 @@
     <div class="trunk"></div>
   </div>
 
+  <!-- CSS Desert Cactuses -->
+  @if (levelThemeClass() === 'theme-desert') {
+  <div class="css-cactus" style="left: 12%; bottom: 15vh; transform: scale(0.8);">
+    <div class="cactus-stem"></div>
+    <div class="cactus-arm-left"></div>
+    <div class="cactus-arm-right"></div>
+  </div>
+  <div class="css-cactus" style="right: 15%; bottom: 18vh; transform: scale(1.1);">
+    <div class="cactus-stem"></div>
+    <div class="cactus-arm-left"></div>
+    <div class="cactus-arm-right"></div>
+  </div>
+  }
+
+  <!-- CSS Space Planets -->
+  @if (levelThemeClass() === 'theme-space') {
+  <div class="css-planet" style="left: 8%; bottom: 28vh; transform: scale(0.85);">
+    <div class="planet-body" style="background: radial-gradient(circle at 30% 30%, #ec407a, #880e4f);"></div>
+    <div class="planet-ring" style="border-color: #ec407a;"></div>
+  </div>
+  <div class="css-planet" style="right: 12%; bottom: 32vh; transform: scale(1.15);">
+    <div class="planet-body" style="background: radial-gradient(circle at 30% 30%, #26c6da, #006064);"></div>
+    <div class="planet-ring" style="border-color: #26c6da; transform: rotate(-15deg);"></div>
+  </div>
+  }
+
   <!-- Sunny Sparkles & Floating Pollen -->
   <div class="sparkles-container pointer-events-none">
     <div class="sparkle"></div>
@@ -60,15 +86,11 @@
     <div class="sparkle font-sparkle">✨</div>
   </div>
 
-  <!-- Animated Falling Leaves -->
+  <!-- Animated Falling Leaves / Particles -->
   <div class="leaves-container pointer-events-none">
-    <div class="leaf-particle">🍃</div>
-    <div class="leaf-particle">🍁</div>
-    <div class="leaf-particle">🍃</div>
-    <div class="leaf-particle">🍂</div>
-    <div class="leaf-particle">🍃</div>
-    <div class="leaf-particle">🍁</div>
-    <div class="leaf-particle">🍂</div>
+    @for (p of levelLeafParticles(); track $index; let idx = $index) {
+    <div class="leaf-particle" [style.animation-delay]="idx * 1.5 + 's'">{{ p }}</div>
+    }
   </div>
 
   <!-- Clouds Container -->
@@ -155,7 +177,8 @@
       @if (selectedLevel(); as activeLevel) {
       <!-- Level Header Banner (Pinned to the Top) -->
       <div
-        class="chapter-header-banner position-sticky top-0 z-3 align-self-center mt-4 pt-3 w-100 text-center pointer-events-none">
+        class="chapter-header-banner position-sticky z-3 align-self-center mt-4 pt-3 w-100 text-center pointer-events-none"
+        style="top: calc(12px + max(32px, env(safe-area-inset-top)));">
         <span
           class="chapter-badge bg-success text-white px-4 py-2 rounded-pill fw-bold shadow-lg border border-3 border-white d-inline-block pointer-events-auto">
           <i class="bi bi-journal-bookmark-fill me-2 text-warning"></i>
@@ -163,6 +186,76 @@
         </span>
       </div>
 
+      @if (levelThemeClass() === 'theme-desert') {
+      <!-- 🎠 HORIZONTAL CAROUSEL VIEW FOR DESERT LEVEL (Level 2) 🎠 -->
+      <div class="carousel-container w-100 d-flex align-items-center justify-content-start overflow-auto px-4"
+        style="scroll-snap-type: x mandatory; height: 65vh; margin-top: 8vh; scrollbar-width: none; -ms-overflow-style: none;">
+        
+        @for (chapter of activeLevel.chapters; track chapter.id) {
+        @if (levelChaptersMap().get(chapter.id); as info) {
+        <div [id]="'island-card-' + chapter.id" class="carousel-card-wrapper d-flex flex-column align-items-center justify-content-center px-3"
+          style="scroll-snap-align: center; flex-shrink: 0;">
+          
+          <!-- Floating Island Card -->
+          <div class="floating-island-card position-relative w-100 p-4 d-flex flex-column align-items-center justify-content-between text-center"
+            [ngClass]="{'island-locked': !isChapterUnlocked(chapter.id)}"
+            (click)="onChapterClick(chapter.id)">
+            
+            <!-- Island Number & Status -->
+            <div class="island-badge px-3 py-1 rounded-pill text-white fw-bold mb-3">
+              CHAPTER {{ info.globalNumber }}
+            </div>
+            
+            <!-- Star Ratings -->
+            @if (isChapterCompleted(chapter.id)) {
+            <div class="stars-container d-flex justify-content-center gap-1 mb-2">
+              @for (star of [1,2,3]; track star) {
+              <i class="bi bi-star-fill"
+                [ngClass]="star <= getChapterStars(chapter.id) ? 'text-warning' : 'text-secondary opacity-50'"
+                style="font-size: 1.3rem; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));"></i>
+              }
+            </div>
+            } @else {
+            <div class="stars-container d-flex justify-content-center gap-1 mb-2 opacity-25">
+              <i class="bi bi-star" style="font-size: 1.3rem;"></i>
+              <i class="bi bi-star" style="font-size: 1.3rem;"></i>
+              <i class="bi bi-star" style="font-size: 1.3rem;"></i>
+            </div>
+            }
+            
+            <!-- Island Mascot/Illustration -->
+            <div class="island-illustration my-3 position-relative">
+              @if (!isChapterUnlocked(chapter.id)) {
+              <div class="lock-overlay fs-1">🔒</div>
+              } @else {
+                <span class="fs-1 d-block" style="filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));">
+                  {{ ['🏜️', '🏝️', '🏕️', '🏡', '🎪'][info.globalIndex % 5] }}
+                </span>
+              }
+            </div>
+            
+            <!-- Island Name -->
+            <h3 class="island-title fw-extrabold text-shadow-sm mb-3 text-white fs-4" style="font-family: 'Fredoka', sans-serif;">{{ chapter.name }}</h3>
+            
+            <!-- Play / Lock Button -->
+            <button class="btn btn-warning rounded-pill border border-2 border-white px-4 py-2 fw-bold text-white shadow-lg transition-all"
+              style="background: #ff9800; box-shadow: 0 4px 0 #e65100 !important;">
+              @if (!isChapterUnlocked(chapter.id)) {
+                LOCKED
+              } @else if (isChapterCompleted(chapter.id)) {
+                PLAY AGAIN
+              } @else {
+                PLAY
+              }
+            </button>
+            
+          </div>
+        </div>
+        }
+        }
+      </div>
+      } @else {
+      <!-- 🗺️ VERTICAL SCROLL PATH VIEW FOR FOREST & SPACE LEVELS (Levels 1 & 3) 🗺️ -->
       <div class="chapter-group position-relative w-100 mt-5 mx-auto"
         style="max-width: 400px; padding-top: 40px; padding-bottom: 40px;">
 
@@ -172,11 +265,10 @@
           style="z-index: 0; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));">
 
           <!-- Inactive/Locked Base Path (Grey) -->
-          <path [attr.d]="svgPathData()" fill="none" stroke="#b0bec5" stroke-width="22" stroke-linecap="round"></path>
+          <path [attr.d]="svgPathData()" fill="none" class="base-path-line" stroke-width="22" stroke-linecap="round"></path>
 
           <!-- Active/Unlocked Overlay Path (Gold, glowing) -->
-          <path [attr.d]="svgPathData()" fill="none" stroke="#FFCA28" stroke-width="16" stroke-linecap="round"
-            style="filter: drop-shadow(0 0 8px rgba(255, 202, 40, 0.8));"></path>
+          <path [attr.d]="svgPathData()" fill="none" class="active-path-line" stroke-width="16" stroke-linecap="round"></path>
         </svg>
 
         <!-- Nodes Container (flex column-reverse so chapter 1 is at the bottom) -->
@@ -205,12 +297,24 @@
               </div>
               }
 
+              <!-- Milestone Treasure Chest (Candy Crush Style) -->
+              @if (info.globalNumber % 3 === 0) {
+              <div class="position-absolute z-3 treasure-chest-container"
+                [style.left]="info.xOffset >= 0 ? '-75px' : '75px'"
+                style="top: 15px;">
+                <div class="treasure-chest" [ngClass]="{'chest-open': isChapterCompleted(chapter.id)}">
+                  <i class="bi" [ngClass]="isChapterCompleted(chapter.id) ? 'bi-gift-fill text-warning' : 'bi-gift text-light-emphasis'" 
+                     style="font-size: 1.8rem; filter: drop-shadow(0 3px 5px rgba(0,0,0,0.35)); cursor: pointer;"></i>
+                </div>
+              </div>
+              }
+
               <!-- Floating Player Avatar (Indicator for active node) -->
               @if (currentPlayableChapterId() === chapter.id) {
               <div class="position-absolute z-4"
                 style="top: -65px; left: 50%; transform: translateX(-50%); animation: floatAvatar 1.5s ease-in-out infinite alternate;">
                 <div class="bg-white rounded-circle shadow-lg d-flex align-items-center justify-content-center"
-                  style="width: 45px; height: 45px; border: 3px solid #ff9800; box-shadow: 0 5px 15px rgba(255,152,0,0.5);">
+                   style="width: 45px; height: 45px; border: 3px solid #ff9800; box-shadow: 0 5px 15px rgba(255,152,0,0.5);">
                   <span
                     style="font-size: 1.6rem; line-height: 1; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));">🦊</span>
                 </div>
@@ -245,6 +349,7 @@
           }
         </div>
       </div>
+      }
       }
     </div>
   </div>

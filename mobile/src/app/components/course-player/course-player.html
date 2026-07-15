@@ -30,6 +30,7 @@
   @if (currentView() === 'content') {
   @if (theme() === 'kids') {
   <app-kids-lesson-player
+    [levelThemeClass]="levelThemeClass()"
     [lessonSequence]="lessonSequence()"
     [currentStepIndex]="currentStepIndex()"
     [lessonFinished]="lessonFinished()"
@@ -60,7 +61,7 @@
   <header class="position-absolute top-0 start-0 w-100 h-100 pe-none" style="z-index: 1050;"
     [class.d-none]="currentView() === 'content'">
     <!-- Left Navigation Actions (Floating Top Left) -->
-    <div class="position-absolute pe-auto" style="top: 20px; left: 20px;">
+    <div class="position-absolute pe-auto" style="top: calc(12px + max(25px, env(safe-area-inset-top))); left: max(24px, env(safe-area-inset-left));">
       <button
         class="btn btn-warning rounded-pill px-3 py-2 shadow-lg border border-2 border-white text-dark fw-bold d-flex align-items-center gap-2 hover-lift"
         (click)="goBack()">
@@ -70,7 +71,7 @@
     </div>
 
     <!-- Stats & Actions (Floating Top Right) -->
-    <div class="position-absolute d-flex gap-2 pe-auto" style="top: 20px; right: 20px;">
+    <div class="position-absolute d-flex gap-2 pe-auto" style="top: calc(12px + max(25px, env(safe-area-inset-top))); right: max(24px, env(safe-area-inset-right));">
       @if (currentView() === 'activity') {
       <div
         class="stat-badge d-flex align-items-center bg-white rounded-pill px-2 py-1 shadow-sm border border-2 border-danger"

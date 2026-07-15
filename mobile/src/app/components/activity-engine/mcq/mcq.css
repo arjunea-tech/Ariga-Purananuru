@@ -77,3 +77,33 @@
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+@media (max-width: 576px) {
+  .option-row {
+    padding: 0.65rem 0.85rem !important;
+    border-radius: 12px !important;
+  }
+  .option-row .bubble {
+    width: 1.8rem !important;
+    height: 1.8rem !important;
+    margin-right: 0.75rem !important;
+    font-size: 0.85rem !important;
+  }
+  .option-row span {
+    font-size: 0.9rem !important;
+  }
+  /* Target the flex container gap for options */
+  div.d-flex.flex-column.gap-3.w-100 {
+    gap: 0.5rem !important;
+  }
+  /* reduce question font size and margin */
+  .fs-3 {
+    font-size: 1.15rem !important;
+  }
+  .mb-4 {
+    margin-bottom: 0.5rem !important;
+  }
+  .pb-4 {
+    padding-bottom: 0.5rem !important;
+  }
+}
