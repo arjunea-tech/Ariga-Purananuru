@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'io.ionic.starter',
-  appName: 'mobile',
+  appName: 'தமிழ் யாப்பு',
   webDir: 'dist/language_app/browser',
   server: {
     androidScheme: 'https',

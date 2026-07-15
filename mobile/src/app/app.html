@@ -16,12 +16,7 @@
     class="mobile-header d-lg-none w-100 bg-dark text-light p-3 d-flex justify-content-between align-items-center position-fixed top-0 start-0 shadow-sm"
     style="z-index: 1100; background-color: var(--sidebar-bg) !important;">
     <div class="d-flex align-items-center gap-2">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--bs-primary)" stroke-width="2.5"
-        stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-        <path d="M2 17l10 5 10-5"></path>
-        <path d="M2 12l10 5 10-5"></path>
-      </svg>
+      <img src="assets/images/logo.png" class="rounded-circle" style="width: 24px; height: 24px; object-fit: contain; background: white; padding: 1px;" alt="Logo">
       <span class="h6 mb-0 fw-bold">{{ authService.getUser()?.name }}</span>
     </div>
     <button class="btn btn-link text-light p-0 border-0 shadow-none" (click)="toggleSidebar()">
@@ -43,12 +38,7 @@
         @if (tenantBranding()?.logo_url) {
           <img [src]="tenantBranding()?.logo_url" class="rounded-circle flex-shrink-0" style="width: 32px; height: 32px; object-fit: contain; background: white; padding: 2px;">
         } @else {
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--bs-primary)" stroke-width="2.5"
-            stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-            <path d="M2 17l10 5 10-5"></path>
-            <path d="M2 12l10 5 10-5"></path>
-          </svg>
+          <img src="assets/images/logo.png" class="rounded-circle flex-shrink-0" style="width: 32px; height: 32px; object-fit: contain; background: white; padding: 2px;" alt="Logo">
         }
         <div class="d-flex flex-column">
           <span class="h6 mb-0 fw-bold text-truncate" style="max-width: 130px;">
