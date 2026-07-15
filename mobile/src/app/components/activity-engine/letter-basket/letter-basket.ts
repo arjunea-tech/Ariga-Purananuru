@@ -15,14 +15,18 @@ export interface LetterBasketData {
   explanation?: string;
 }
 
-const BOTH_BASKET_LETTERS = ['க்', 'ச்', 'ட்', 'த்', 'ப்', 'ற்', 'ன்', 'ல்', 'ம்', 'ர்'];
+const BOTH_BASKET_LETTERS = [
+  'க்', 'ங்', 'ச்', 'ஞ்', 'ட்', 'ண்',
+  'த்', 'ந்', 'ப்', 'ம்', 'ய்', 'ர்',
+  'ல்', 'வ்', 'ழ்', 'ள்', 'ற்', 'ன்'
+];
 
 const DYNAMIC_KURIL = [
-  'அ', 'இ', 'உ', 'எ', 'ஒ', 
-  'க', 'கி', 'கு', 'கெ', 'கொ', 
-  'ச', 'சி', 'சு', 'செ', 'சொ', 
-  'த', 'தி', 'து', 'தெ', 'தொ', 
-  'ப', 'பி', 'பு', 'பெ', 'பொ', 
+  'அ', 'இ', 'உ', 'எ', 'ஒ',
+  'க', 'கி', 'கு', 'கெ', 'கொ',
+  'ச', 'சி', 'சு', 'செ', 'சொ',
+  'த', 'தி', 'து', 'தெ', 'தொ',
+  'ப', 'பி', 'பு', 'பெ', 'பொ',
   'ம', 'மி', 'மு', 'மெ', 'மொ',
   'ய', 'யி', 'யு', 'யெ', 'யொ',
   'ர', 'ரி', 'ரு', 'ரெ', 'ரொ',
@@ -32,11 +36,11 @@ const DYNAMIC_KURIL = [
 ];
 
 const DYNAMIC_NEDIL = [
-  'ஆ', 'ஈ', 'ஊ', 'ஏ', 'ஐ', 'ஓ', 'ஔ', 
-  'கா', 'கீ', 'கூ', 'கே', 'கை', 'கோ', 'கௌ', 
-  'சா', 'சீ', 'சூ', 'சே', 'சை', 'சோ', 'சௌ', 
-  'தா', 'தீ', 'தூ', 'தே', 'தை', 'தோ', 'தௌ', 
-  'பா', 'பீ', 'பூ', 'பே', 'பை', 'போ', 'பௌ', 
+  'ஆ', 'ஈ', 'ஊ', 'ஏ', 'ஐ', 'ஓ', 'ஔ',
+  'கா', 'கீ', 'கூ', 'கே', 'கை', 'கோ', 'கௌ',
+  'சா', 'சீ', 'சூ', 'சே', 'சை', 'சோ', 'சௌ',
+  'தா', 'தீ', 'தூ', 'தே', 'தை', 'தோ', 'தௌ',
+  'பா', 'பீ', 'பூ', 'பே', 'பை', 'போ', 'பௌ',
   'மா', 'மீ', 'மூ', 'மே', 'மை', 'மோ', 'மௌ',
   'யா', 'யீ', 'யூ', 'யே', 'யை', 'யோ', 'யௌ',
   'ரா', 'ரீ', 'ரூ', 'ரே', 'ரை', 'ரோ', 'ரௌ',
@@ -46,14 +50,14 @@ const DYNAMIC_NEDIL = [
 ];
 
 const DYNAMIC_MEI = [
-  'க்', 'ங்', 'ச்', 'ஞ்', 'ட்', 'ண்', 
-  'த்', 'ந்', 'ப்', 'ம்', 'ய்', 'ர்', 
+  'க்', 'ங்', 'ச்', 'ஞ்', 'ட்', 'ண்',
+  'த்', 'ந்', 'ப்', 'ம்', 'ய்', 'ர்',
   'ல்', 'வ்', 'ழ்', 'ள்', 'ற்', 'ன்'
 ];
 
 const DYNAMIC_OTTRU = [
-  'ஃ', 'க்', 'ங்', 'ச்', 'ஞ்', 'ட்', 'ண்', 
-  'த்', 'ந்', 'ப்', 'ம்', 'ய்', 'ர்', 
+  'ஃ', 'க்', 'ங்', 'ச்', 'ஞ்', 'ட்', 'ண்',
+  'த்', 'ந்', 'ப்', 'ம்', 'ய்', 'ர்',
   'ல்', 'வ்', 'ழ்', 'ள்', 'ற்', 'ன்'
 ];
 
@@ -82,6 +86,7 @@ export class LetterBasketComponent implements OnChanges {
   selectedLetter = signal<BasketItem | null>(null);
   isComplete = signal<boolean>(false);
   shakeId = signal<string | null>(null);
+  placedIntimation = signal<string | null>(null);
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['activity']) {
@@ -94,9 +99,9 @@ export class LetterBasketComponent implements OnChanges {
 
     let items: BasketItem[] = [];
 
-    const allItemsEmpty = !this.activity.items || 
-                          this.activity.items.length === 0 || 
-                          this.activity.items.every(item => !item.text || item.text.trim() === '');
+    const allItemsEmpty = !this.activity.items ||
+      this.activity.items.length === 0 ||
+      this.activity.items.every(item => !item.text || item.text.trim() === '');
 
     if (!allItemsEmpty) {
       items = this.activity.items.map((item, idx) => ({
@@ -120,6 +125,7 @@ export class LetterBasketComponent implements OnChanges {
     this.selectedLetter.set(null);
     this.isComplete.set(false);
     this.shakeId.set(null);
+    this.placedIntimation.set(null);
   }
 
   private generateDynamicItems(): BasketItem[] {
@@ -190,7 +196,7 @@ export class LetterBasketComponent implements OnChanges {
     this.selectedLetter.set(null);
 
     const isBothBasketLetter = item.text && BOTH_BASKET_LETTERS.includes(item.text);
-    const isCorrect = item.category === category || 
+    const isCorrect = item.category === category ||
       (isBothBasketLetter && (category === 'மெய்' || category === 'ஒற்று'));
 
     if (isCorrect) {
@@ -200,6 +206,17 @@ export class LetterBasketComponent implements OnChanges {
         copy[category] = [...copy[category], item];
         return copy;
       });
+
+      if (isBothBasketLetter) {
+        this.placedIntimation.set(`நன்று! "${item.text}" என்பது மெய் மற்றும் ஒற்று ஆகிய இரண்டு கூடைகளுக்கும் பொருந்தும்.`);
+        setTimeout(() => {
+          if (this.placedIntimation()?.includes(item.text)) {
+            this.placedIntimation.set(null);
+          }
+        }, 5000);
+      } else {
+        this.placedIntimation.set(null);
+      }
 
       if (this.cloudLetters().length === 0) {
         this.isComplete.set(true);

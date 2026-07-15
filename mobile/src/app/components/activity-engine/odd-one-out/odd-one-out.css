@@ -1,59 +1,108 @@
-.option-row {
-  border-color: #e2e8f0;
+.odd-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+@media (max-width: 480px) {
+  .odd-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+.odd-card-btn {
+  background: rgba(255, 255, 255, 0.8);
+  border: 2px solid #e2e8f0;
+  min-height: 120px;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
-.option-row:hover:not(:disabled) {
-  transform: translateY(-2px);
-  border-color: #3b82f6 !important;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+.odd-card-btn:hover:not(:disabled) {
+  transform: translateY(-4px) scale(1.02);
+  border-color: #6366f1 !important;
   background: #ffffff !important;
+  box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.15), 0 4px 6px -2px rgba(99, 102, 241, 0.05);
 }
 
-.option-row.selected {
-  border-color: #3b82f6 !important;
-  background: rgba(59, 130, 246, 0.04) !important;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+.odd-card-btn.selected {
+  border-color: #6366f1 !important;
+  background: rgba(99, 102, 241, 0.05) !important;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.1);
 }
 
-.option-row.correct {
+.odd-card-btn.correct {
   border-color: #10b981 !important;
-  background: rgba(16, 185, 129, 0.06) !important;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);
+  background: rgba(16, 185, 129, 0.08) !important;
+  box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.2);
 }
 
-.option-row.incorrect {
+.odd-card-btn.incorrect {
   border-color: #ef4444 !important;
-  background: rgba(239, 68, 68, 0.06) !important;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.1);
+  background: rgba(239, 68, 68, 0.08) !important;
+  box-shadow: 0 10px 15px -3px rgba(239, 68, 68, 0.2);
 }
 
-.option-row:hover:not(:disabled) .bubble {
-  background: rgba(59, 130, 246, 0.15) !important;
-  color: #3b82f6 !important;
+.odd-card-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.25rem 0.5rem;
+  border-color: #e2e8f0;
 }
 
-.option-row.selected .bubble {
-  background: #3b82f6 !important;
-  color: #ffffff !important;
+.odd-card-btn.selected .odd-card-badge {
+  background-color: #6366f1 !important;
+  color: white !important;
+  border-color: #6366f1 !important;
 }
 
-.option-row.correct .bubble {
-  background: #10b981 !important;
-  color: #ffffff !important;
+.odd-card-btn.correct .odd-card-badge {
+  background-color: #10b981 !important;
+  color: white !important;
+  border-color: #10b981 !important;
 }
 
-.option-row.incorrect .bubble {
-  background: #ef4444 !important;
-  color: #ffffff !important;
+.odd-card-btn.incorrect .odd-card-badge {
+  background-color: #ef4444 !important;
+  color: white !important;
+  border-color: #ef4444 !important;
+}
+
+.odd-card-text {
+  font-size: 1.5rem;
+  letter-spacing: 0.05em;
+  transition: color 0.2s ease;
+}
+
+.odd-card-btn.correct .odd-card-text {
+  color: #065f46 !important;
+}
+
+.odd-card-btn.incorrect .odd-card-text {
+  color: #991b1b !important;
 }
 
 /* Animations */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  20%, 60% { transform: translateX(-6px); }
-  40%, 80% { transform: translateX(6px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  20%,
+  60% {
+    transform: translateX(-6px);
+  }
+
+  40%,
+  80% {
+    transform: translateX(6px);
+  }
 }
 
 .shake {
@@ -61,8 +110,15 @@
 }
 
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
 }
 
 .bounce {
@@ -74,6 +130,13 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

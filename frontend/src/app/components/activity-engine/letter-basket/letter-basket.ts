@@ -15,7 +15,11 @@ export interface LetterBasketData {
   explanation?: string;
 }
 
-const BOTH_BASKET_LETTERS = ['க்', 'ச்', 'ட்', 'த்', 'ப்', 'ற்', 'ன்', 'ல்', 'ம்', 'ர்'];
+const BOTH_BASKET_LETTERS = [
+  'க்', 'ங்', 'ச்', 'ஞ்', 'ட்', 'ண்', 
+  'த்', 'ந்', 'ப்', 'ம்', 'ய்', 'ர்', 
+  'ல்', 'வ்', 'ழ்', 'ள்', 'ற்', 'ன்'
+];
 
 const DYNAMIC_KURIL = [
   'அ', 'இ', 'உ', 'எ', 'ஒ', 
@@ -82,6 +86,7 @@ export class LetterBasketComponent implements OnChanges {
   selectedLetter = signal<BasketItem | null>(null);
   isComplete = signal<boolean>(false);
   shakeId = signal<string | null>(null);
+  placedIntimation = signal<string | null>(null);
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['activity']) {
@@ -120,6 +125,7 @@ export class LetterBasketComponent implements OnChanges {
     this.selectedLetter.set(null);
     this.isComplete.set(false);
     this.shakeId.set(null);
+    this.placedIntimation.set(null);
   }
 
   private generateDynamicItems(): BasketItem[] {
@@ -200,6 +206,17 @@ export class LetterBasketComponent implements OnChanges {
         copy[category] = [...copy[category], item];
         return copy;
       });
+
+      if (isBothBasketLetter) {
+        this.placedIntimation.set(`நன்று! "${item.text}" என்பது மெய் மற்றும் ஒற்று ஆகிய இரண்டு கூடைகளுக்கும் பொருந்தும்.`);
+        setTimeout(() => {
+          if (this.placedIntimation()?.includes(item.text)) {
+            this.placedIntimation.set(null);
+          }
+        }, 5000);
+      } else {
+        this.placedIntimation.set(null);
+      }
 
       if (this.cloudLetters().length === 0) {
         this.isComplete.set(true);

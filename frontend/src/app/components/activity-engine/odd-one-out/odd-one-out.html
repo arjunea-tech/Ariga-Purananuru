@@ -20,11 +20,11 @@
     <h3 class="fw-bold text-dark m-0 mt-2 fs-3" style="line-height: 1.5; text-shadow: 0px 4px 10px rgba(255,255,255,0.8), 0px 8px 30px rgba(255,255,255,0.9);" [innerHTML]="activity?.question"></h3>
   </div>
 
-  <div class="d-flex flex-column gap-3 w-100">
+  <div class="odd-cards-grid w-100 mb-2">
     @for (option of activity?.options; track option.id; let idx = $index) {
       <button 
         type="button"
-        class="option-row w-100 d-flex align-items-center text-start border bg-white bg-opacity-75 rounded-4 p-3 position-relative"
+        class="odd-card-btn d-flex flex-column align-items-center justify-content-center border rounded-4 p-4 position-relative"
         [class.selected]="selectedOptionId() === option.id"
         [class.correct]="showFeedback && hasSubmitted() && option.isCorrect"
         [class.incorrect]="showFeedback && hasSubmitted() && selectedOptionId() === option.id && !option.isCorrect"
@@ -33,19 +33,21 @@
         [disabled]="showFeedback && hasSubmitted()"
         (click)="selectOption(option)">
         
-        <div class="bubble d-flex align-items-center justify-content-center rounded-circle fw-bold text-secondary flex-shrink-0 bg-light me-4" style="width: 2.2rem; height: 2.2rem; transition: all 0.2s ease;">
+        <!-- Letter indicator badge on top-left -->
+        <span class="odd-card-badge position-absolute top-0 start-0 m-2 badge rounded-pill bg-light text-secondary border">
           {{ getLetter(idx) }}
-        </div>
-        
-        <span class="flex-grow-1 fw-semibold text-dark" style="font-size: 1.1rem;">{{ option.text }}</span>
+        </span>
 
-        <div class="d-flex align-items-center ms-3 fs-5" *ngIf="showFeedback && hasSubmitted()">
+        <!-- State Icon top-right -->
+        <div class="position-absolute top-0 end-0 m-2 fs-5" *ngIf="showFeedback && hasSubmitted()">
           @if (option.isCorrect) {
             <i class="bi bi-check-circle-fill text-success"></i>
           } @else if (selectedOptionId() === option.id) {
             <i class="bi bi-x-circle-fill text-danger"></i>
           }
         </div>
+
+        <span class="odd-card-text fw-bold text-dark mb-0">{{ option.text }}</span>
       </button>
     }
   </div>
