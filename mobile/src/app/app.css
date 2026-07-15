@@ -7,6 +7,10 @@
   transition: transform 0.3s ease-in-out;
 }
 
+.sidebar, .sidebar * {
+  font-family: 'Times New Roman', 'Noto Serif Tamil', Times, serif !important;
+}
+
 .main-content {
   margin-left: 280px;
   transition: margin-left 0.3s ease-in-out;
