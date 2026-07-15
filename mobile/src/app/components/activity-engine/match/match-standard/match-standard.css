@@ -88,3 +88,61 @@
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   MOBILE LANDSCAPE ORIENTATION OPTIMIZATIONS (HEIGHT <= 500px)
+   ────────────────────────────────────────────────────────────────────────── */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Enforce columns to sit side-by-side instead of stacking vertically */
+  .standard-board {
+    padding: 0.5rem 0.75rem !important;
+    margin-bottom: 0.25rem !important;
+    border-radius: 12px !important;
+  }
+  
+  .standard-board .row {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 0.5rem !important;
+  }
+
+  .standard-board .col-12 {
+    width: 50% !important;
+    flex: 0 0 50% !important;
+    max-width: 50% !important;
+    gap: 0.35rem !important;
+  }
+
+  /* Shrink header column labels */
+  .standard-board span.text-uppercase {
+    font-size: 0.7rem !important;
+    padding-bottom: 0.15rem !important;
+    margin-bottom: 0.15rem !important;
+  }
+
+  /* Compact matching cards */
+  .standard-card {
+    min-height: 2.2rem !important;
+    padding: 0.35rem 0.65rem !important;
+    border-radius: 8px !important;
+  }
+
+  .standard-card span {
+    font-size: 0.85rem !important;
+  }
+
+  /* Compact speaker icon */
+  .btn-speaker-mini {
+    font-size: 0.8rem !important;
+    padding: 0.1rem !important;
+  }
+
+  /* Reduce matched image size */
+  .standard-match-image {
+    max-height: 34px !important;
+  }
+
+  .badge-check i {
+    font-size: 0.95rem !important;
+  }
+}

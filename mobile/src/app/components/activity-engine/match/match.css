@@ -279,3 +279,70 @@
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   MOBILE LANDSCAPE ORIENTATION OPTIMIZATIONS (HEIGHT <= 500px)
+   ────────────────────────────────────────────────────────────────────────── */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Shrink standard/sky board container */
+  .match-container {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  
+  /* Reset button position adjustment */
+  .position-absolute.end-0.z-3 {
+    top: -1.8rem !important;
+    right: 4px !important;
+  }
+  .position-absolute.end-0.z-3 button {
+    padding: 2px 10px !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Cloud match adjustments */
+  .sky-board {
+    min-height: 12rem !important;
+    padding: 0.5rem !important;
+    border-radius: 12px !important;
+  }
+  .big-cloud-container {
+    padding: 0.5rem 0.75rem !important;
+    min-height: 8rem !important;
+    gap: 0.5rem !important;
+    border-radius: 1rem !important;
+  }
+  .word-bubble {
+    padding: 0.35rem 0.85rem !important;
+    min-height: 2.2rem !important;
+    border-radius: 12px !important;
+    font-size: 0.85rem !important;
+  }
+  .cloud-match-image {
+    max-height: 34px !important;
+    max-width: 70px !important;
+  }
+
+  /* Bottom Matches Made checklist */
+  .matched-pairs-section {
+    margin-top: 0.35rem !important;
+    margin-bottom: 0.35rem !important;
+    padding: 0.25rem !important;
+  }
+  .matched-pairs-section h6 {
+    font-size: 0.75rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+  .matched-pair-card {
+    padding: 0.25rem 0.75rem !important;
+    font-size: 0.75rem !important;
+  }
+  .matched-img-mini {
+    height: 20px !important;
+  }
+
+  /* Footer progress info */
+  .progress-info span {
+    font-size: 0.7rem !important;
+  }
+}

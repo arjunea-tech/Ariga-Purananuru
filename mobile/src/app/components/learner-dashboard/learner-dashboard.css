@@ -717,7 +717,71 @@
   }
 
   .dashboard-scroll-content {
-    padding-top: 20px !important;
+    padding-top: calc(55px + max(12px, env(safe-area-inset-top))) !important;
+    padding-bottom: 20px !important;
+  }
+  .dashboard-scroll-content .container {
+    gap: 0.5rem !important;
+  }
+  .dashboard-scroll-content .text-center.mb-4.mt-4.pt-2 {
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.5rem !important;
+    padding-top: 0 !important;
+  }
+  .courses-grid-container {
+    margin-bottom: 1.5rem !important;
+  }
+  .courses-grid-container .row {
+    --bs-gutter-x: 0.5rem !important;
+    --bs-gutter-y: 0.5rem !important;
+    padding-bottom: 0 !important;
+  }
+  .course-card {
+    border-radius: 16px !important;
+    border-width: 2px !important;
+    margin-bottom: 0.25rem !important;
+  }
+  .course-card-header {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+    border-radius: 12px 12px 0 0 !important;
+  }
+  .course-card-header i {
+    font-size: 1.6rem !important;
+  }
+  .course-card-header div[style*="font-size"] {
+    font-size: 2.2rem !important;
+  }
+  .course-card .card-body {
+    padding: 0.5rem !important;
+  }
+  .course-card .card-title {
+    font-size: 0.85rem !important;
+    margin-bottom: 0.15rem !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .course-card .card-text {
+    font-size: 0.68rem !important;
+    margin-bottom: 0.25rem !important;
+    height: 36px !important;
+    line-height: 1.3 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+  .course-card .badge {
+    font-size: 0.62rem !important;
+    padding: 0.15rem 0.4rem !important;
+  }
+  .course-card div[style*="width: 30px"] {
+    width: 24px !important;
+    height: 24px !important;
+  }
+  .course-card div[style*="width: 30px"] i {
+    font-size: 0.85rem !important;
   }
 }
 

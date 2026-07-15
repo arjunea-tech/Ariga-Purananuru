@@ -1,0 +1,62 @@
+<div class="w-100 d-flex flex-column align-items-center justify-content-center pb-4 pt-2 max-w-md mx-auto" style="max-width: 600px;">
+  <div class="mb-4 text-center">
+    <h3 class="fw-bold text-dark m-0 mt-2 fs-3" style="line-height: 1.5; text-shadow: 0px 4px 10px rgba(255,255,255,0.8), 0px 8px 30px rgba(255,255,255,0.9);" [innerHTML]="activity?.question"></h3>
+  </div>
+
+  <!-- Dynamic grid columns using css variable -->
+  <div class="hunt-grid w-100 mb-4" 
+       [style.grid-template-columns]="'repeat(' + (activity?.gridSize || 2) + ', 1fr)'">
+    @for (box of dynamicBoxes(); track $index; let idx = $index) {
+      <button 
+        type="button"
+        class="hunt-cell d-flex align-items-center justify-content-center rounded-4 border font-bold"
+        [class.selected]="selectedIndices().has(idx)"
+        [class.correct]="showFeedback && hasSubmitted() && box.isCorrect"
+        [class.incorrect]="showFeedback && hasSubmitted() && selectedIndices().has(idx) && !box.isCorrect"
+        [class.missed]="showFeedback && hasSubmitted() && box.isCorrect && !selectedIndices().has(idx)"
+        [disabled]="showFeedback && hasSubmitted()"
+        (click)="toggleSelect(idx)">
+        <span class="cell-text">{{ box.text }}</span>
+        
+        <div class="cell-feedback" *ngIf="showFeedback && hasSubmitted()">
+          @if (box.isCorrect) {
+            <i class="bi bi-check-circle-fill text-success fs-5"></i>
+          } @else if (selectedIndices().has(idx)) {
+            <i class="bi bi-x-circle-fill text-danger fs-5"></i>
+          }
+        </div>
+      </button>
+    }
+  </div>
+
+  <div class="w-100 d-flex justify-content-center gap-3">
+    @if (!hasSubmitted()) {
+      <button 
+        type="button" 
+        class="btn btn-primary btn-lg rounded-pill px-5 py-3 shadow border-0 text-white font-semibold flex-grow-1"
+        style="transition: all 0.3s ease; background: linear-gradient(135deg, #3b82f6, #2563eb);"
+        [disabled]="selectedIndices().size === 0"
+        (click)="checkAnswers()">
+        Check Answer
+      </button>
+    } @else {
+      <button 
+        type="button" 
+        class="btn btn-outline-secondary btn-lg rounded-pill px-5 py-3 flex-grow-1"
+        (click)="reset()">
+        Retry
+      </button>
+    }
+  </div>
+
+  <!-- Expandable Explanation Block -->
+  @if (showFeedback && hasSubmitted() && activity?.explanation) {
+    <div class="animate-fade-in mt-4 rounded-3 p-4 bg-warning bg-opacity-10 border-start border-4 border-warning w-100">
+      <div class="d-flex align-items-center gap-2 fw-bold text-warning mb-2" style="font-size: 0.9rem;">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>Explanation</span>
+      </div>
+      <p class="m-0" style="color: #451a03; font-size: 0.925rem; line-height: 1.5;">{{ activity?.explanation }}</p>
+    </div>
+  }
+</div>

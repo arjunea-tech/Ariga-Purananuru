@@ -159,12 +159,35 @@
 /* Responsive Overrides */
 @media (max-width: 768px) {
   .reading-content {
-    font-size: 1.15rem !important;
+    font-size: 1.05rem !important;
   }
   
   .premium-card {
     border-width: 4px !important;
     border-radius: 16px !important;
+  }
+
+  /* Ensure the lesson player main fills height and passes it to children */
+  .lesson-player main {
+    flex: 1 1 auto !important;
+    height: 0 !important; /* Forces flex children to respect the flex-grow properly */
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .lesson-player main > .lesson-dynamic-wrapper {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: stretch !important;
+  }
+  .lesson-player main .reading-card {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: auto !important;
   }
 }
 
@@ -197,6 +220,32 @@
   flex-direction: column;
   flex: 1 1 auto;
   min-height: 0;
+}
+
+/* Hide mascot on small mobile portrait so text area uses full width */
+@media (max-width: 576px) and (orientation: portrait) {
+  .mascot-container {
+    display: none !important;
+  }
+  /* Reading card fills the full available content area (between header and nav btn) */
+  .reading-card {
+    height: 100% !important;
+    flex: 1 1 100% !important;
+    padding: 10px 14px 8px !important;
+    border-radius: 14px !important;
+  }
+  .reading-content {
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+  }
+  /* Lesson dynamic wrapper fills remaining height */
+  .lesson-dynamic-wrapper {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+    align-items: stretch !important;
+  }
 }
 
 /* ── BOTTOM NAV BUTTONS ── */
@@ -554,5 +603,197 @@
   }
   .feedback-mascot-container .mascot-sad {
     width: 120px !important;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   MOBILE LANDSCAPE ORIENTATION OPTIMIZATIONS (HEIGHT <= 500px)
+   ────────────────────────────────────────────────────────────────────────── */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Shrink Header height and safe-area top padding */
+  .lesson-player header {
+    padding-top: max(4px, env(safe-area-inset-top)) !important;
+    height: calc(38px + max(4px, env(safe-area-inset-top))) !important;
+  }
+
+  /* Shrink header controls and progress bar */
+  .lesson-player header button,
+  .lesson-player header .d-flex.text-danger {
+    transform: scale(0.85) !important;
+    transform-origin: center !important;
+  }
+  
+  .lesson-player header .flex-grow-1 {
+    margin-top: -2px !important;
+  }
+
+  /* Shrink main container top padding to match smaller header */
+  .lesson-player main {
+    padding-top: calc(44px + max(4px, env(safe-area-inset-top))) !important;
+    padding-bottom: 45px !important;
+  }
+
+  /* Reading/Content Slide Card adjustments */
+  .card-stack-container {
+    min-height: 55vh !important;
+    padding-bottom: 10px !important;
+  }
+
+  .stack-card {
+    min-height: 52vh !important;
+  }
+
+  .stack-card > div,
+  .reading-card,
+  .premium-card,
+  .pdf-card,
+  .remediation-card,
+  .assessment-card {
+    min-height: 60vh !important;
+    max-height: 68vh !important;
+    padding: 6px 12px !important;
+    border-width: 2px !important;
+    border-radius: 12px !important;
+    overflow-y: auto !important;
+  }
+
+  /* Hide Title Badges inside cards to save vertical space */
+  .stack-card .d-none.d-md-block,
+  .stack-card .d-block.d-md-none,
+  .reading-card .d-none.d-md-block,
+  .reading-card .d-block.d-md-none,
+  .remediation-card h2,
+  .assessment-card h2 {
+    display: none !important;
+  }
+
+  /* Hide Mascot in landscape to maximize text/content area */
+  .mascot-container {
+    display: none !important;
+  }
+
+  /* Tighter font sizes so more content is visible without scrolling */
+  .reading-content {
+    font-size: 0.82rem !important;
+    line-height: 1.35 !important;
+  }
+  .reading-content p,
+  .reading-content li {
+    margin-bottom: 0.2rem !important;
+  }
+  .reading-content h1,
+  .reading-content h2,
+  .reading-content h3 {
+    font-size: 0.95rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  /* Position navigation buttons higher and make them smaller to prevent viewport cutoff */
+  .nav-prev-btn,
+  .nav-next-btn {
+    bottom: max(15px, env(safe-area-inset-bottom)) !important;
+    padding: 5px 14px !important;
+    font-size: 0.85rem !important;
+    min-width: 80px !important;
+  }
+  .nav-prev-btn {
+    left: 15px !important;
+  }
+  .nav-next-btn {
+    right: 15px !important;
+  }
+
+  /* Position the Feedback Banner lower and hide mascot */
+  .feedback-mascot-container {
+    display: none !important; /* Hide feedback mascot on short landscape screens */
+  }
+  
+  /* Make the feedback banner sit compact at the bottom */
+  .position-absolute.start-50.translate-middle-x.animate-bounce-in.pe-auto {
+    bottom: 8px !important;
+    width: 98% !important;
+  }
+
+  .rounded-5.rounded-md-pill.p-3 {
+    padding: 6px 15px !important;
+    border-radius: 16px !important;
+    border-width: 2px !important;
+    gap: 8px !important;
+  }
+
+  .rounded-5.rounded-md-pill.p-3 .bg-white.text-success,
+  .rounded-5.rounded-md-pill.p-3 .bg-white.text-danger {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  .rounded-5.rounded-md-pill.p-3 .bg-white.text-success i,
+  .rounded-5.rounded-md-pill.p-3 .bg-white.text-danger i {
+    font-size: 1.4rem !important;
+  }
+
+  .rounded-5.rounded-md-pill.p-3 h2 {
+    font-size: 1.1rem !important;
+  }
+  .rounded-5.rounded-md-pill.p-3 p {
+    font-size: 0.8rem !important;
+  }
+
+  .rounded-5.rounded-md-pill.p-3 button {
+    padding: 4px 12px !important;
+    font-size: 0.85rem !important;
+    margin-top: 0 !important;
+  }
+
+  /* Generic scaling overrides for any inner activity components in landscape mode */
+  .premium-card h1,
+  .premium-card h2,
+  .premium-card h3,
+  .premium-card .fs-2,
+  .premium-card .fs-3 {
+    font-size: 1.05rem !important;
+    margin-top: 0 !important;
+    margin-bottom: 0.35rem !important;
+  }
+  
+  .premium-card .pb-4,
+  .premium-card .pt-2,
+  .premium-card .mb-4,
+  .premium-card .mt-4 {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .premium-card img:not(.matched-img-mini) {
+    max-height: 80px !important;
+    object-fit: contain !important;
+  }
+
+  .premium-card .btn-primary,
+  .premium-card .btn-warning,
+  .premium-card .btn-success {
+    padding: 0.35rem 0.85rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Shrink internal content navigation controls in reading card */
+  .reading-card .glow-btn {
+    width: 36px !important;
+    height: 36px !important;
+    border-width: 2px !important;
+  }
+  .reading-card .glow-btn i {
+    font-size: 1.1rem !important;
+  }
+  .reading-card .d-flex.gap-3.bg-white {
+    padding: 3px 12px !important;
+    gap: 0.5rem !important;
+  }
+  .reading-card .d-flex.gap-3.bg-white .rounded-pill {
+    height: 8px !important;
+  }
+  .reading-card .mt-2 {
+    margin-top: 0.25rem !important;
   }
 }

@@ -25,7 +25,7 @@
         }
       </div>
 
-      <div class="text-center" style="line-height: 2.2; font-size: 1.5rem; color: #1e293b; margin-bottom: 2rem; font-weight: 600; text-shadow: 1px 1px 0 rgba(255,255,255,0.7);">
+      <div class="text-center fill-blanks-sentence" style="line-height: 2.2; font-size: 1.5rem; color: #1e293b; margin-bottom: 2rem; font-weight: 600; text-shadow: 1px 1px 0 rgba(255,255,255,0.7);">
         @for (segment of segments; track $index) {
           @if (segment.type === 'text') {
             <span style="white-space: pre-wrap;">{{ segment.value }}</span>

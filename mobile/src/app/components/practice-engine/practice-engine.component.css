@@ -71,3 +71,47 @@ textarea::placeholder {
     padding-right: 0 !important;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   MOBILE LANDSCAPE ORIENTATION OPTIMIZATIONS (HEIGHT <= 500px)
+   ────────────────────────────────────────────────────────────────────────── */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Select Play Mode Screen Compacting */
+  .animate-slide-up h2 {
+    font-size: 1.25rem !important;
+    margin-bottom: 0.15rem !important;
+    margin-top: 0 !important;
+  }
+  .animate-slide-up p.fs-4 {
+    font-size: 0.85rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+  .animate-slide-up .text-center.mb-5,
+  .animate-slide-up .text-center.mb-4 {
+    margin-bottom: 0.35rem !important;
+  }
+  .animate-slide-up .d-flex.flex-column.flex-md-row {
+    flex-direction: row !important;
+    gap: 0.75rem !important;
+  }
+  .animate-slide-up button.btn.rounded-4.p-4 {
+    padding: 0.5rem 1rem !important;
+    font-size: 0.95rem !important;
+    border-radius: 12px !important;
+    flex-direction: row !important;
+    gap: 0.5rem !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+  .animate-slide-up button.btn.rounded-4.p-4 i.fs-1 {
+    font-size: 1.3rem !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Compact Input/Workspace steps */
+  .input-word-container input,
+  .input-word-container textarea {
+    padding: 6px 12px !important;
+    font-size: 0.9rem !important;
+  }
+}

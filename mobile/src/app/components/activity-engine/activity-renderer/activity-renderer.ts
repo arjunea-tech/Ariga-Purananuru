@@ -12,9 +12,12 @@ import { SequencingComponent, SequencingData } from '../sequencing/sequencing';
 import { PartsOfSpeechComponent, PartsOfSpeechData } from '../parts-of-speech/parts-of-speech';
 import { MindMapComponent, MindMapData } from '../mind-map/mind-map';
 import { WritingComponent, WritingData } from '../writing/writing';
+import { LetterBasketComponent } from '../letter-basket/letter-basket';
+import { WordHuntComponent } from '../word-hunt/word-hunt';
+import { OddOneOutComponent } from '../odd-one-out/odd-one-out';
 
 export interface NormalizedActivity {
-  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing';
+  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'letter_basket' | 'word_hunt' | 'odd_one_out';
   question?: string;
   text?: string;
   front?: string;
@@ -54,6 +57,10 @@ export interface NormalizedActivity {
   modelAnswer?: string;
   minWords?: number;
   maxWords?: number;
+
+  // New activities
+  items?: any[];
+  boxes?: any[];
 }
 
 @Component({
@@ -72,7 +79,10 @@ export interface NormalizedActivity {
     SequencingComponent,
     PartsOfSpeechComponent,
     MindMapComponent,
-    WritingComponent
+    WritingComponent,
+    LetterBasketComponent,
+    WordHuntComponent,
+    OddOneOutComponent
   ],
   templateUrl: './activity-renderer.html',
   styleUrls: ['./activity-renderer.css']
@@ -153,7 +163,7 @@ export class ActivityRenderer implements OnChanges {
     
     // 1. Determine type
     let typeInput = raw.type || raw.question_type || 'mcq';
-    let type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' = 'mcq';
+    let type: NormalizedActivity['type'] = 'mcq';
 
     if (['multiple_choice', 'mcq', 'multiple-choice', 'multiplechoice'].includes(typeInput.toLowerCase())) {
       type = 'mcq';
@@ -179,6 +189,12 @@ export class ActivityRenderer implements OnChanges {
       type = 'mind_map';
     } else if (['writing', 'essay', 'paragraph_writing', 'story_writing'].includes(typeInput.toLowerCase())) {
       type = 'writing';
+    } else if (['letter_basket', 'letter-basket', 'basket'].includes(typeInput.toLowerCase())) {
+      type = 'letter_basket';
+    } else if (['word_hunt', 'word-hunt', 'hunt', 'find-words'].includes(typeInput.toLowerCase())) {
+      type = 'word_hunt';
+    } else if (['odd_one_out', 'odd-one-out', 'find-odd'].includes(typeInput.toLowerCase())) {
+      type = 'odd_one_out';
     }
 
     // 2. Extract explanation & options
@@ -245,6 +261,22 @@ export class ActivityRenderer implements OnChanges {
       normalized.modelAnswer = raw.modelAnswer || additional.modelAnswer || '';
       normalized.minWords = raw.minWords || additional.minWords || 1;
       normalized.maxWords = raw.maxWords || additional.maxWords || 1000;
+    } else if (type === 'letter_basket') {
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.items = raw.items || additional.items || [];
+    } else if (type === 'word_hunt') {
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.gridSize = raw.gridSize || additional.gridSize || 2;
+      normalized.boxes = raw.boxes || additional.boxes || [];
+    } else if (type === 'odd_one_out') {
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.audioUrl = raw.media_url || additional.audioUrl || '';
+      const rawOptions = raw.options || additional.options || [];
+      normalized.options = rawOptions.map((opt: any, idx: number) => ({
+        id: opt.id ?? idx,
+        text: opt.option_text ?? opt.text ?? '',
+        isCorrect: !!(opt.is_correct ?? opt.isCorrect ?? false)
+      }));
     }
 
     this.normalizedActivity.set(normalized);
@@ -343,6 +375,30 @@ export class ActivityRenderer implements OnChanges {
     this.answered.emit({
       questionId: this.activity?.id,
       type: 'writing',
+      ...event
+    });
+  }
+
+  onLetterBasketAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'letter_basket',
+      ...event
+    });
+  }
+
+  onWordHuntAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'word_hunt',
+      ...event
+    });
+  }
+
+  onOddOneOutAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'odd_one_out',
       ...event
     });
   }

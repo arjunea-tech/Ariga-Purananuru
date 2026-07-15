@@ -85,6 +85,27 @@
               (answered)="onWritingAnswered($event)">
             </app-activity-writing>
           }
+          @case ('letter_basket') {
+            <app-activity-letter-basket
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onLetterBasketAnswered($event)">
+            </app-activity-letter-basket>
+          }
+          @case ('word_hunt') {
+            <app-activity-word-hunt
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onWordHuntAnswered($event)">
+            </app-activity-word-hunt>
+          }
+          @case ('odd_one_out') {
+            <app-activity-odd-one-out
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onOddOneOutAnswered($event)">
+            </app-activity-odd-one-out>
+          }
         }
       </div>
     }

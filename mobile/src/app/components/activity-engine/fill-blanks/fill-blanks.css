@@ -68,3 +68,44 @@
   from { opacity: 0; transform: translateY(5px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   MOBILE LANDSCAPE ORIENTATION OPTIMIZATIONS (HEIGHT <= 500px)
+   ────────────────────────────────────────────────────────────────────────── */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Scale down question image */
+  .my-3 img {
+    max-height: 80px !important;
+    margin: 4px 0 !important;
+  }
+  
+  /* Sentence font size and line height */
+  .fill-blanks-sentence {
+    font-size: 1.1rem !important;
+    line-height: 1.6 !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  /* Blank input fields */
+  .blank-input {
+    font-size: 0.95rem !important;
+    padding: 0.05rem 0.25rem !important;
+  }
+
+  /* Action/Check answers button */
+  .check-btn {
+    padding: 0.45rem 1.5rem !important;
+    font-size: 0.85rem !important;
+    margin-top: 0 !important;
+  }
+
+  /* Explanation block adjustments */
+  .animate-fade-in {
+    margin-top: 0.35rem !important;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 8px !important;
+  }
+  .animate-fade-in p {
+    font-size: 0.8rem !important;
+  }
+}

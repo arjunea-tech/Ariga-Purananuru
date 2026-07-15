@@ -830,6 +830,85 @@
   /* Compact the map and levels container padding but leave room for absolute header */
   .map-container {
     padding-top: calc(56px + max(32px, env(safe-area-inset-top))) !important;
+    padding-bottom: 25px !important;
+  }
+
+  .map-container .animate-slide-down h1 {
+    font-size: 1.4rem !important;
+    margin-bottom: 0.15rem !important;
+    margin-top: 0 !important;
+  }
+
+  .map-container .animate-slide-down p {
+    font-size: 0.8rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .map-container .container-fluid {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .map-container .row {
+    --bs-gutter-x: 0.5rem !important;
+    --bs-gutter-y: 0.5rem !important;
+  }
+
+  /* Compact chapter/level card */
+  .chapter-card {
+    border-radius: 16px !important;
+    border-width: 2px !important;
+    box-shadow: 0 4px 0 #cbd5e1, 0 8px 15px rgba(0,0,0,0.12) !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .chapter-card-header {
+    height: 70px !important;
+    border-radius: 12px 12px 0 0 !important;
+    border-bottom-width: 3px !important;
+  }
+
+  .chapter-card-header::after {
+    height: 6px !important;
+  }
+
+  .chapter-card-header .course-icon {
+    font-size: 1.8rem !important;
+  }
+
+  .chapter-card .card-body {
+    padding: 0.5rem !important;
+    border-radius: 0 0 14px 14px !important;
+  }
+
+  .chapter-card .card-title {
+    font-size: 0.85rem !important;
+    margin-bottom: 0.15rem !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .chapter-card .card-text {
+    font-size: 0.7rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .chapter-card .badge-level {
+    font-size: 0.65rem !important;
+    padding: 0.15rem 0.4rem !important;
+  }
+
+  .chapter-card .btn-play-bouncy,
+  .chapter-card .btn-locked-bouncy {
+    width: 26px !important;
+    height: 26px !important;
+    min-width: 26px !important;
+  }
+
+  .chapter-card .btn-play-bouncy i,
+  .chapter-card .btn-locked-bouncy i {
+    font-size: 0.8rem !important;
   }
 
   .game-world-container {

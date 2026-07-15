@@ -107,3 +107,70 @@
     padding-bottom: 0.5rem !important;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   MOBILE LANDSCAPE ORIENTATION OPTIMIZATIONS (HEIGHT <= 500px)
+   ────────────────────────────────────────────────────────────────────────── */
+@media (orientation: landscape) and (max-height: 500px) {
+  /* Limit max width of container to avoid spreading too wide */
+  .max-w-md.mx-auto {
+    max-width: 650px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  /* Question text optimization */
+  .fs-3 {
+    font-size: 1.05rem !important;
+    margin-top: 0 !important;
+  }
+  .mb-4 {
+    margin-bottom: 0.25rem !important;
+  }
+
+  /* Listen Audio button scaling */
+  .btn-primary {
+    padding: 0.35rem 0.85rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Display MCQ options in a 2x2 Grid */
+  .mcq-options-container {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.5rem !important;
+  }
+
+  /* Compact option rows */
+  .option-row {
+    padding: 0.45rem 0.75rem !important;
+    border-radius: 12px !important;
+    min-height: 48px !important;
+  }
+
+  /* Compact option bubbles */
+  .option-row .bubble {
+    width: 1.7rem !important;
+    height: 1.7rem !important;
+    margin-right: 0.5rem !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* Compact text and correct/incorrect indicators */
+  .option-row span {
+    font-size: 0.825rem !important;
+  }
+  .option-row .fs-5 {
+    font-size: 0.95rem !important;
+  }
+
+  /* Explanation block adjustments */
+  .animate-fade-in {
+    margin-top: 0.35rem !important;
+    padding: 0.5rem 0.75rem !important;
+    border-radius: 8px !important;
+  }
+  .animate-fade-in p {
+    font-size: 0.8rem !important;
+  }
+}

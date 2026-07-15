@@ -123,7 +123,7 @@
 
     <!-- Levels List -->
     <div class="container-fluid px-4 px-lg-5 z-2">
-      <div class="row g-4 justify-content-center row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
+      <div class="row g-4 justify-content-center row-cols-2 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
         @for (level of structure?.levels; track level.id; let idx = $index) {
         <div class="col animate-slide-down" [style.animation-delay]="idx * 0.1 + 's'">
           <div class="chapter-card card border-0 h-100 position-relative text-center"
