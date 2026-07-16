@@ -1,5 +1,17 @@
 <div class="dashboard-container w-100 position-fixed overflow-hidden d-flex flex-column" style="top: 0; bottom: 0; left: 0; right: 0; z-index: 0;">
 
+  <!-- ── COURSE NAVIGATION MASCOT OVERLAY ── -->
+  @if (isNavigating()) {
+  <div class="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center text-center"
+    style="background: #e8f5e9; z-index: 9999;">
+    <div class="mascot-loading-wrapper mb-3">
+      <img src="/assets/images/mascot.png" alt="Loading" class="mascot-loading"
+        style="width: 140px; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15));">
+    </div>
+    <h4 class="fw-bold text-dark animate-pulse" style="font-family: 'Nunito', sans-serif;">Loading your course...</h4>
+  </div>
+  }
+
   <!-- Top HUD (Heads Up Display) -->
   <header
     class="game-hud d-flex justify-content-end align-items-center w-100 p-3 position-absolute top-0 start-0 z-3 pointer-events-none">

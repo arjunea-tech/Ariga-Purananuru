@@ -6,12 +6,13 @@ import { finalize } from 'rxjs/operators';
 export const loaderInterceptor: HttpInterceptorFn = (req, next) => {
   const loaderService = inject(LoaderService);
   
-  // Don't show global loader for course structure, chapters, activities, content, or brand loading to keep page transitions seamless
+  // Don't show global loader for course structure, chapters, activities, content, student dashboard, or brand loading to keep page transitions seamless
   const skipLoader = req.url.includes('/player-structure') || 
                      req.url.includes('/api/contents/') || 
                      req.url.includes('/api/courses') ||
                      req.url.includes('/api/chapters') ||
                      req.url.includes('/api/activities') ||
+                     req.url.includes('/student/dashboard') ||
                      req.url.includes('/tenants/brand/');
   
   if (!skipLoader) {

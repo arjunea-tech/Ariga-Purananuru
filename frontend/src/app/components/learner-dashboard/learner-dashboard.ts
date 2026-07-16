@@ -1,8 +1,10 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationEnd } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { filter } from 'rxjs/operators';
 import { CourseService } from '../../services/course';
 import { AuthService } from '../../services/auth';
 import { LottieComponent, AnimationOptions } from 'ngx-lottie';
@@ -23,7 +25,7 @@ interface Course {
   templateUrl: './learner-dashboard.html',
   styleUrls: ['./learner-dashboard.css']
 })
-export class LearnerDashboard implements OnInit {
+export class LearnerDashboard implements OnInit, OnDestroy {
   private http = inject(HttpClient);
   private router = inject(Router);
   private courseService = inject(CourseService);
@@ -31,6 +33,8 @@ export class LearnerDashboard implements OnInit {
   courses = signal<Course[]>([]);
   isLoading = signal(true);
   isFullscreen = signal(false);
+  isNavigating = signal(false);
+  private navSub?: Subscription;
 
 
 
@@ -61,6 +65,14 @@ export class LearnerDashboard implements OnInit {
   ngOnInit() {
     this.fetchCourses();
     this.fetchStudentStats();
+    // Reset overlay whenever any navigation finishes (handles component caching)
+    this.navSub = this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe(() => this.isNavigating.set(false));
+  }
+
+  ngOnDestroy() {
+    this.navSub?.unsubscribe();
   }
 
   fetchStudentStats() {
@@ -93,22 +105,9 @@ export class LearnerDashboard implements OnInit {
   }
 
   playCourse(course: Course, event: MouseEvent) {
-    event.preventDefault(); // Prevent immediate navigation
-
-    // Pre-fetch the structure in the background
-    const url = `${environment.apiUrl}/courses/${course.id}/player-structure`;
-    this.http.get<any>(url).subscribe({
-      next: (structure) => {
-        // Cache the structure layout in the shared CourseService
-        this.courseService.cachedStructure = structure;
-        this.router.navigate(['/learn', course.id]);
-      },
-      error: (err) => {
-        console.error('Failed to pre-fetch course structure:', err);
-        // Fallback: navigate immediately
-        this.router.navigate(['/learn', course.id]);
-      }
-    });
+    event.preventDefault();
+    this.isNavigating.set(true);
+    this.router.navigate(['/learn', course.id]);
   }
 
   triggerAchievement() {

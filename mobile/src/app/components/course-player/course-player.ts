@@ -89,6 +89,8 @@ export class CoursePlayer implements OnInit, OnDestroy {
 
   lessonSequence = signal<LessonStep[]>([]);
   isLoadingLesson = signal<boolean>(true);
+  isLoadingMap = signal<boolean>(false);
+  private mapLoadTimer: any = null;
   currentStepIndex = signal<number>(0);
   learningMode = signal<'strict' | 'easy'>('easy'); // Strict mode prevents skipping activities
   isStepCompleted = signal<boolean>(false);
@@ -218,6 +220,12 @@ export class CoursePlayer implements OnInit, OnDestroy {
       const levelId = params['levelId'] ? +params['levelId'] : null;
       const chapterId = params['chapterId'] ? +params['chapterId'] : null;
 
+      // If navigating BACK to levels, immediately cancel any pending map loader
+      if (view === 'levels' && this.isLoadingMap()) {
+        if (this.mapLoadTimer) { clearTimeout(this.mapLoadTimer); this.mapLoadTimer = null; }
+        this.isLoadingMap.set(false);
+      }
+
       if (levelId && levelId !== this.activeLevelId()) {
         this.activeLevelId.set(levelId);
       }
@@ -332,7 +340,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
 
   goBack() {
     if (this.currentView() === 'levels') {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/learn/dashboard']);
     } else if (this.currentView() === 'map') {
       this.goToLevels();
     } else if (this.currentView() === 'content') {
@@ -351,11 +359,17 @@ export class CoursePlayer implements OnInit, OnDestroy {
       this.triggerMascotWarning('🔒 Level is locked! Complete all chapters of the previous level to unlock.');
       return;
     }
+    if (this.mapLoadTimer) { clearTimeout(this.mapLoadTimer); }
+    this.isLoadingMap.set(true);
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { view: 'map', levelId: id },
       queryParamsHandling: 'merge'
     });
+    this.mapLoadTimer = setTimeout(() => {
+      this.isLoadingMap.set(false);
+      this.mapLoadTimer = null;
+    }, 1200);
   }
 
   selectChapterNode(id: number) {
