@@ -571,7 +571,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
             let processedReadingBlocks: any[] = [];
             for (let i = 0; i < readingBlocks.length; i++) {
               let b = readingBlocks[i];
-              if ((b.type === 'paragraph' || b.type === 'text') && b.data && b.data.text && b.data.text.length > 400) {
+              if ((b.type === 'paragraph' || b.type === 'text') && b.data && b.data.text && b.data.text.length > 400 && !b.data.text.includes('<table') && !b.data.text.includes('<ul') && !b.data.text.includes('<ol')) {
                  const rawHtml = b.data.text;
                  let parts = rawHtml.split(/(?<=[\.\?\!]\s+)|(?=<h[1-6]|<p|<ul|<ol|<li|<div|<br|\n)/gi);
                  if (parts.length === 1 && parts[0].length > 500) {
@@ -636,44 +636,46 @@ export class CoursePlayer implements OnInit, OnDestroy {
               });
             });
           } else {
-            // AUTO INJECT PRACTICE MODE FOR TAMIL YAAPPU COURSE
+            // AUTO INJECT PRACTICE MODE FOR TAMIL YAAPPU COURSE (Skip for introductory content)
             const courseName = this.courseStructure()?.name?.toLowerCase() || '';
             const cNameOrig = this.courseStructure()?.name || '';
             if (courseName.includes('yappu') || cNameOrig.includes('யாப்பு')) {
-              let topic = 'alahidu';
-              let word = 'தமிழ்';
               const cTitle = (content.title || content.name).toLowerCase();
-              if (cTitle.includes('எழுத்து') || cTitle.includes('eluthu')) { 
-                topic = 'eluthu'; 
-                const words = ['கல்வி', 'அம்மா', 'பள்ளி', 'நூல்', 'தமிழ்', 'இலக்கணம்'];
-                word = words[Math.floor(Math.random() * words.length)]; 
-              }
-              else if (cTitle.includes('அசை') || cTitle.includes('asai')) { 
-                topic = 'asai'; 
-                const words = ['அகழ்வாரைத்', 'தாங்கும்', 'நிலம்போலத்', 'தம்மை', 'இகழ்வார்ப்', 'பொறுத்தல்', 'தலை'];
-                word = words[Math.floor(Math.random() * words.length)]; 
-              }
-              else if (cTitle.includes('சீர்') || cTitle.includes('seer')) { 
-                topic = 'seer'; 
-                const words = ['தேமாங்காய்', 'புளிமாங்காய்', 'கருவிளங்காய்', 'கூவிளங்காய்', 'தேமா', 'புளிமா', 'கருவிளம்', 'கூவிளம்'];
-                word = words[Math.floor(Math.random() * words.length)]; 
-              }
-              else if (cTitle.includes('தளை') || cTitle.includes('thalai')) { 
-                topic = 'thalai'; 
-                word = 'துப்பார்க்குத் துப்பாய'; 
-              }
-              else if (cTitle.includes('அலகிடு') || cTitle.includes('alahidu')) { 
-                topic = 'alahidu'; 
-                word = 'அகழ்வாரைத் தாங்கும் நிலம்போலத் தம்மை'; 
-              }
+              if (!cTitle.includes('அறிமுகம்') && !cTitle.includes('intro')) {
+                let topic = 'alahidu';
+                let word = 'தமிழ்';
+                if (cTitle.includes('எழுத்து') || cTitle.includes('eluthu')) { 
+                  topic = 'eluthu'; 
+                  const words = ['கல்வி', 'அம்மா', 'பள்ளி', 'நூல்', 'தமிழ்', 'இலக்கணம்'];
+                  word = words[Math.floor(Math.random() * words.length)]; 
+                }
+                else if (cTitle.includes('அசை') || cTitle.includes('asai')) { 
+                  topic = 'asai'; 
+                  const words = ['அகழ்வாரைத்', 'தாங்கும்', 'நிலம்போலத்', 'தம்மை', 'இகழ்வார்ப்', 'பொறுத்தல்', 'தலை'];
+                  word = words[Math.floor(Math.random() * words.length)]; 
+                }
+                else if (cTitle.includes('சீர்') || cTitle.includes('seer')) { 
+                  topic = 'seer'; 
+                  const words = ['தேமாங்காய்', 'புளிமாங்காய்', 'கருவிளங்காய்', 'கூவிளங்காய்', 'தேமா', 'புளிமா', 'கருவிளம்', 'கூவிளம்'];
+                  word = words[Math.floor(Math.random() * words.length)]; 
+                }
+                else if (cTitle.includes('தளை') || cTitle.includes('thalai')) { 
+                  topic = 'thalai'; 
+                  word = 'துப்பார்க்குத் துப்பாய'; 
+                }
+                else if (cTitle.includes('அலகிடு') || cTitle.includes('alahidu')) { 
+                  topic = 'alahidu'; 
+                  word = 'அகழ்வாரைத் தாங்கும் நிலம்போலத் தம்மை'; 
+                }
 
-              // Inject practice step before activity
-              if (readingBlocks.length > 0 || activityBlocks.length > 0) {
-                  steps.push({
-                    type: 'practice',
-                    title: 'Practice Mode - ' + topic,
-                    data: { topic: topic, word: word }
-                  });
+                // Inject practice step before activity
+                if (readingBlocks.length > 0 || activityBlocks.length > 0) {
+                    steps.push({
+                      type: 'practice',
+                      title: 'Practice Mode - ' + topic,
+                      data: { topic: topic, word: word }
+                    });
+                }
               }
             }
           }
