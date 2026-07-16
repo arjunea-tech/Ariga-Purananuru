@@ -71,10 +71,32 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
         if (!pageData) return '';
 
         const renderBlock = (block: any) => {
-          if (block.type === 'paragraph' || block.type === 'text') return `<div class="opacity-75 mb-4 text-start text-sm-center">${block.data.text}</div>`;
-          else if (block.type === 'header') return `<h3 class="fw-bold text-primary mb-3 text-center" style="font-size: clamp(1.3rem, 4vw, 1.7rem);">${block.data.text}</h3>`;
+          if (block.type === 'paragraph' || block.type === 'text') {
+            return `<div class="rc-paragraph mb-3 text-start">${block.data.text}</div>`;
+          }
+          else if (block.type === 'header') {
+            const level = block.data.level || 2;
+            const tag = level <= 2 ? 'h3' : 'h4';
+            return `<${tag} class="rc-heading fw-bold text-primary mb-3 text-center">${block.data.text}</${tag}>`;
+          }
           else if (block.type === 'list') {
-            return `<div class="w-100 text-center"><ul class="mb-4 ps-4 opacity-75 text-start d-inline-block">` + block.data.items.map((i: any) => `<li class="mb-2">${typeof i === 'string' ? i : (i.content || '')}</li>`).join('') + `</ul></div>`;
+            const style = block.data.style || 'unordered';
+            if (style === 'ordered') {
+              // Render as styled numbered list with colored circles
+              const items = block.data.items.map((item: any, idx: number) => {
+                const colors = ['#6366f1','#22c55e','#f59e0b','#ef4444','#3b82f6','#8b5cf6','#ec4899'];
+                const bg = colors[idx % colors.length];
+                const text = typeof item === 'string' ? item : (item.content || '');
+                return `<div class="rc-list-item d-flex align-items-start gap-2 mb-3">
+                  <span class="rc-num-badge flex-shrink-0" style="background:${bg}">${idx + 1}</span>
+                  <span class="rc-list-text">${text}</span>
+                </div>`;
+              }).join('');
+              return `<div class="rc-ordered-list w-100">${items}</div>`;
+            } else {
+              const items = block.data.items.map((i: any) => `<li class="mb-2">${typeof i === 'string' ? i : (i.content || '')}</li>`).join('');
+              return `<div class="w-100 text-center"><ul class="rc-ul mb-3 ps-4 text-start d-inline-block">${items}</ul></div>`;
+            }
           }
           else if (block.type === 'image') {
             const url = block.data.file?.url || block.data.url || '';
@@ -97,6 +119,19 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
             html += `</table></div>`;
             return html;
           }
+          else if (block.type === 'raw' || block.type === 'html') {
+            // Render raw HTML blocks directly
+            return `<div class="rc-raw w-100 mb-3">${block.data.html || ''}</div>`;
+          }
+          else if (block.type === 'delimiter') {
+            return `<hr class="my-3 border-2 opacity-25">`;
+          }
+          else if (block.type === 'quote') {
+            return `<blockquote class="rc-quote mb-3 px-3 py-2 rounded-3 border-start border-4 border-primary">${block.data.text}${block.data.caption ? `<footer class="blockquote-footer mt-1">${block.data.caption}</footer>` : ''}</blockquote>`;
+          }
+          // Fallback: try to render any text/html present in data
+          const fallbackHtml = block.data?.text || block.data?.html || block.data?.content || '';
+          if (fallbackHtml) return `<div class="rc-paragraph mb-3 text-start">${fallbackHtml}</div>`;
           return '';
         };
 

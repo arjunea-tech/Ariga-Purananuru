@@ -571,7 +571,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
             let processedReadingBlocks: any[] = [];
             for (let i = 0; i < readingBlocks.length; i++) {
               let b = readingBlocks[i];
-              if ((b.type === 'paragraph' || b.type === 'text') && b.data && b.data.text && b.data.text.length > 400 && !b.data.text.includes('<table') && !b.data.text.includes('<ul') && !b.data.text.includes('<ol')) {
+              if ((b.type === 'paragraph' || b.type === 'text') && b.data && b.data.text && b.data.text.length > 400 && !b.data.text.includes('<table') && !b.data.text.includes('<ul') && !b.data.text.includes('<ol') && !b.data.text.includes('<div') && !b.data.text.includes('<li') && !b.data.text.includes('class=')) {
                  const rawHtml = b.data.text;
                  let parts = rawHtml.split(/(?<=[\.\?\!]\s+)|(?=<h[1-6]|<p|<ul|<ol|<li|<div|<br|\n)/gi);
                  if (parts.length === 1 && parts[0].length > 500) {
