@@ -31,6 +31,7 @@
   @if (theme() === 'kids') {
   <app-kids-lesson-player
     [lessonSequence]="lessonSequence()"
+    [isLoading]="isLoadingLesson()"
     [currentStepIndex]="currentStepIndex()"
     [lessonFinished]="lessonFinished()"
     [showGameOver]="showGameOver()"

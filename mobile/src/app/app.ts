@@ -9,9 +9,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../environments/environment';
 import { StatusBar } from '@capacitor/status-bar';
 import { 
-  IonApp, IonRouterOutlet, IonMenu, IonHeader, IonToolbar, 
-  IonContent, IonList, IonItem, IonIcon, 
-  IonMenuToggle, IonButtons, IonButton, IonSplitPane, IonMenuButton, IonLabel, IonFooter
+  IonApp, IonRouterOutlet
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import { 
@@ -27,9 +25,7 @@ import {
   standalone: true,
   imports: [
     CommonModule, RouterOutlet, RouterLink, RouterLinkActive, TranslateModule, 
-    IonApp, IonRouterOutlet, IonMenu, IonHeader, IonToolbar, 
-    IonContent, IonList, IonItem, IonIcon, 
-    IonMenuToggle, IonButtons, IonButton, IonSplitPane, IonMenuButton, IonLabel, IonFooter
+    IonApp, IonRouterOutlet
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'

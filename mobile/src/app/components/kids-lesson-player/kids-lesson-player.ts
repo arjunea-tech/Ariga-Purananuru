@@ -23,6 +23,7 @@ export interface LessonStep {
 export class KidsLessonPlayer implements OnInit, OnDestroy {
   levelThemeClass = input<string>('theme-forest');
   lessonSequence = input<LessonStep[]>([]);
+  isLoading = input<boolean>(true);
   currentStepIndex = input<number>(0);
   lessonFinished = input<boolean>(false);
   showGameOver = input<boolean>(false);

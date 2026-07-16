@@ -2,8 +2,8 @@ import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '
 import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ActivatedRoute } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
+import { map, switchMap, catchError } from 'rxjs/operators';
 
 export interface LessonStep {
   type: 'video' | 'pdf' | 'reading' | 'activity' | 'assessment' | 'practice' | 'remediation';
@@ -33,7 +33,7 @@ interface CourseStructure {
   levels: Level[];
 }
 
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { ActivityRenderer } from '../activity-engine/activity-renderer/activity-renderer';
 import { CourseService } from '../../services/course';
 import { KidsDashboard } from '../kids-dashboard/kids-dashboard';
@@ -88,6 +88,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
   completedChapterIds = signal<number[]>([]);
 
   lessonSequence = signal<LessonStep[]>([]);
+  isLoadingLesson = signal<boolean>(true);
   currentStepIndex = signal<number>(0);
   learningMode = signal<'strict' | 'easy'>('easy'); // Strict mode prevents skipping activities
   isStepCompleted = signal<boolean>(false);
@@ -371,8 +372,73 @@ export class CoursePlayer implements OnInit, OnDestroy {
     });
   }
 
+  resolveActivityReferences(contents: Content[]): Observable<Content[]> {
+    const referencePositions: Array<{ contentIdx: number, blockIdx: number, refId: number }> = [];
+    const uniqueIds = new Set<number>();
+
+    contents.forEach((content, contentIdx) => {
+      if (content.text_content) {
+        const trimmed = content.text_content.trim();
+        if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+          try {
+            const parsed = JSON.parse(trimmed);
+            const blocks = parsed.blocks || [];
+            blocks.forEach((block: any, blockIdx: number) => {
+              if (block.type === 'activity' && block.data && block.data.type === 'activity_reference') {
+                const refId = block.data.activityReferenceId;
+                if (refId) {
+                  referencePositions.push({ contentIdx, blockIdx, refId });
+                  uniqueIds.add(refId);
+                }
+              }
+            });
+          } catch (e) {}
+        }
+      }
+    });
+
+    if (uniqueIds.size === 0) {
+      return of(contents);
+    }
+
+    const idsArray = Array.from(uniqueIds);
+    return this.http.get<any[]>(`${environment.apiUrl}/activities`, { params: { ids: idsArray.join(',') } }).pipe(
+      map(activities => {
+        const activityMap = new Map<number, any>();
+        activities.forEach(act => {
+          activityMap.set(act.id, act);
+        });
+
+        referencePositions.forEach(pos => {
+          const act = activityMap.get(pos.refId);
+          if (!act) return;
+          const content = contents[pos.contentIdx];
+          if (!content.text_content) return;
+          try {
+            const parsed = JSON.parse(content.text_content);
+            const block = parsed.blocks[pos.blockIdx];
+            const realData = typeof act.data_json === 'string' ? JSON.parse(act.data_json) : act.data_json;
+            
+            block.data = {
+              ...realData,
+              type: act.type,
+              title: act.title
+            };
+            content.text_content = JSON.stringify(parsed);
+          } catch (e) {}
+        });
+        return contents;
+      }),
+      catchError(err => {
+        console.error('Failed to resolve activity references', err);
+        return of(contents);
+      })
+    );
+  }
+
   loadLessonSequence(chapterId: number) {
     this.lessonSequence.set([]);
+    this.isLoadingLesson.set(true);
     this.currentStepIndex.set(0);
     this.isVideoCompleted.set(false);
     this.hearts.set(5);
@@ -391,21 +457,28 @@ export class CoursePlayer implements OnInit, OnDestroy {
       }
     }
 
-    const chapter = this.selectedChapter();
-    if (!chapter) return;
+    // Fetch the full chapter details including contents and assessments in a single request
+    this.http.get<any>(`${environment.apiUrl}/chapters/${chapterId}`).pipe(
+      switchMap(chapterData => {
+        const contents: Content[] = (chapterData.contents || [])
+          .filter((c: any) => c.is_active !== false)
+          .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
 
-    const contentIds = chapter.contents.map(c => c.id);
-    if (contentIds.length === 0) {
-      this.generateLessonSequence([], chapter.assessments || []);
-      return;
-    }
-
-    const requests = contentIds.map(id => this.http.get<Content>(`${environment.apiUrl}/contents/${id}`));
-    forkJoin(requests).subscribe({
-      next: (fullContents) => {
-        this.generateLessonSequence(fullContents, chapter.assessments || []);
+        return this.resolveActivityReferences(contents).pipe(
+          map(resolvedContents => ({
+            contents: resolvedContents,
+            assessments: chapterData.assessments || []
+          }))
+        );
+      })
+    ).subscribe({
+      next: (result) => {
+        this.generateLessonSequence(result.contents, result.assessments);
       },
-      error: (err) => console.error('Failed to load chapter contents', err)
+      error: (err) => {
+        console.error('Failed to load chapter contents', err);
+        this.isLoadingLesson.set(false);
+      }
     });
   }
 
@@ -665,6 +738,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
 
     this.lessonSequence.set(steps);
     this.evaluateStepCompletion();
+    this.isLoadingLesson.set(false);
   }
 
   handleStepCompleted(isCompleted: boolean) {

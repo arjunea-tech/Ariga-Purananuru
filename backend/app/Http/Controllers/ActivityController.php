@@ -12,9 +12,17 @@ class ActivityController extends Controller
     {
         $query = Activity::query();
         
-        // Scope to tenant if applicable
+        // Scope to tenant or global activities if applicable
         if ($request->user() && $request->user()->tenant_id) {
-            $query->where('tenant_id', $request->user()->tenant_id);
+            $query->where(function ($q) use ($request) {
+                $q->where('tenant_id', $request->user()->tenant_id)
+                  ->orWhereNull('tenant_id');
+            });
+        }
+
+        if ($request->has('ids')) {
+            $ids = is_array($request->ids) ? $request->ids : explode(',', $request->ids);
+            $query->whereIn('id', $ids);
         }
 
         if ($request->has('type')) {
