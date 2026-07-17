@@ -113,6 +113,12 @@
               (answered)="onWordBuilderAnswered($event)">
             </app-activity-word-builder>
           }
+          @case ('yappu_flashcard') {
+            <app-yappu-flashcard
+              [activity]="data"
+              (answered)="onYappuFlashcardAnswered($event)">
+            </app-yappu-flashcard>
+          }
         }
       </div>
     }

@@ -17,15 +17,30 @@ class TamilYappuSeeder extends Seeder
      */
     public function run(): void
     {
+        $package = \App\Models\Package::firstOrCreate(
+            ['code' => 'PKG-001'],
+            [
+                'name' => 'Default Tamil Package',
+                'description' => 'A default package for Tamil courses',
+                'is_active' => true,
+            ]
+        );
+
         $course = Course::where('name', 'LIKE', '%அழகுத் தமிழ் யாப்பு%')->first();
         
         if (!$course) {
-            echo "Course 'அழகுத் தமிழ் யாப்பு (யாப்பிலக்கணம்)' not found!\n";
-            return;
+            $course = Course::create([
+                'name' => 'அழகுத் தமிழ் யாப்பு (யாப்பிலக்கணம்)',
+                'code' => 'YAPPU-101',
+                'description' => 'தமிழ் யாப்பிலக்கணம் கற்பதற்கான பாடத்திட்டம்.',
+                'no_of_levels' => 3,
+                'is_active' => true,
+            ]);
         }
 
         $this->deleteCourseContents($course);
         $uniqueSuffix = time();
+        $packageId = $package->id;
 
         $levelsData = [
   0 => 
@@ -254,6 +269,13 @@ class TamilYappuSeeder extends Seeder
           [
             'type' => 'word_builder',
             'q' => 'சரியான அசை வாய்பாடுகளுக்கு ஏற்ப வார்த்தைகளை உருவாக்கவும்:',
+            'text' => 'கல்வி, வாழ்க, தமிழ், அம்மா'
+          ],
+          8 => 
+          [
+            'type' => 'yappu_flashcard',
+            'q' => '30 வினாடிகளில் சரியான அசை வாய்பாட்டைத் தேர்ந்தெடுக்கவும் (Speed Race):',
+            'syllableCount' => 2,
             'text' => 'கல்வி, வாழ்க, தமிழ், அம்மா'
           ]
         ],
@@ -896,7 +918,7 @@ class TamilYappuSeeder extends Seeder
 
             DB::table('course_package_levels')->insert([
                 'course_id' => $course->id,
-                'package_id' => 1, 
+                'package_id' => $packageId, 
                 'level_id' => $level->id,
                 'is_active' => true,
             ]);

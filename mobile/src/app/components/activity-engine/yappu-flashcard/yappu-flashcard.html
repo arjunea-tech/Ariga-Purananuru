@@ -1,0 +1,127 @@
+<div class="yappu-flashcard-activity card border-0 shadow-sm rounded-4 p-4 mb-4">
+  <!-- QUESTION HEADER -->
+  <div class="d-flex align-items-center mb-4">
+    <div class="activity-icon-container bg-warning-subtle text-warning rounded-3 p-2 me-3">
+      <i class="bi bi-lightning-fill fs-4"></i>
+    </div>
+    <div>
+      <h3 class="h5 fw-bold text-dark mb-1">யாப்பு அட்டை (Yappu Flashcard)</h3>
+      <p class="text-secondary small mb-0">{{ activity?.question || '30 வினாடிகளில் சரியான அசை வாய்பாட்டைத் தேர்ந்தெடுக்கவும்:' }}</p>
+    </div>
+  </div>
+
+  <!-- STATE 1: START SCREEN -->
+  @if (!gameStarted() && !gameEnded()) {
+    <div class="start-screen text-center py-5 rounded-4 bg-light border border-light-subtle">
+      <div class="start-icon-container mb-4">
+        <i class="bi bi-lightning-charge-fill text-warning display-3 animate-pulse"></i>
+      </div>
+      <h4 class="fw-bold text-dark mb-2">யாப்பு அசை வேகப் போட்டி!</h4>
+      <p class="text-secondary px-3 max-w-500 mx-auto mb-4">
+        30 வினாடிகளில் காட்டப்படும் சொற்களுக்குரிய சரியான அசை வாய்பாட்டைத் தேர்ந்தெடுங்கள். நீங்கள் எத்தனை சொற்களுக்குச் சரியாகப் பதிலளிக்கிறீர்கள் என்று பார்ப்போம்!
+      </p>
+      
+      <div class="badge bg-primary-subtle text-primary-emphasis px-3 py-2 fs-6 mb-4">
+        அசை எண்ணிக்கை (Syllables): {{ activity?.syllableCount || 1 }}
+      </div>
+
+      <div>
+        <button class="btn btn-warning btn-lg text-white fw-bold px-5 py-3 rounded-pill shadow" (click)="startGame()">
+          <i class="bi bi-play-fill me-2 fs-5"></i>தொடங்கு (Start Race)
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- STATE 2: ACTIVE GAME SCREEN -->
+  @if (gameStarted() && !gameEnded()) {
+    <div class="game-screen">
+      <!-- Top Timer and Score Header -->
+      <div class="game-header d-flex align-items-center justify-content-between mb-4">
+        <!-- Timer bar -->
+        <div class="timer-container d-flex align-items-center gap-3 flex-grow-1 me-4">
+          <i class="bi bi-clock-history text-danger fs-4"></i>
+          <div class="progress flex-grow-1 bg-secondary-subtle" style="height: 12px; border-radius: 999px;">
+            <div 
+              class="progress-bar progress-bar-striped progress-bar-animated bg-danger" 
+              role="progressbar" 
+              [style.width.%]="(timeLeft() / 30) * 100"
+              [attr.aria-valuenow]="timeLeft()" 
+              aria-valuemin="0" 
+              aria-valuemax="30">
+            </div>
+          </div>
+          <span class="timer-text font-monospace fw-bold text-danger fs-5">{{ timeLeft() }}s</span>
+        </div>
+
+        <!-- Score Counter -->
+        <div class="score-badge bg-dark text-white px-3 py-2 rounded-3 d-flex align-items-center gap-2">
+          <i class="bi bi-trophy-fill text-warning"></i>
+          <span class="fw-bold fs-6">{{ correctCount() }} / {{ totalAnswered() }}</span>
+        </div>
+      </div>
+
+      <!-- Flashcard Display Box -->
+      <div class="word-card-container d-flex justify-content-center mb-4">
+        <div class="word-card shadow-sm rounded-4 d-flex align-items-center justify-content-center p-5 text-center">
+          <h2 class="display-3 fw-bold text-primary mb-0 tamil-word">{{ currentWord() }}</h2>
+        </div>
+      </div>
+
+      <!-- Options Grid -->
+      <div class="options-grid-container">
+        <h5 class="text-secondary text-center mb-3 small fw-bold">சரியான வாய்பாட்டைத் தேர்ந்தெடுக்கவும்:</h5>
+        
+        <div class="options-grid">
+          @for (opt of options; track opt) {
+            <button 
+              class="btn btn-outline-primary option-btn py-3 px-4 fw-bold rounded-3 transition-all"
+              [class.correct]="selectedOption() === opt && opt === correctFormula"
+              [class.incorrect]="selectedOption() === opt && opt !== correctFormula"
+              [class.revealed-correct]="selectedOption() !== null && opt === correctFormula && selectedOption() !== correctFormula"
+              [disabled]="isAnswerProcessing()"
+              (click)="selectOption(opt)">
+              {{ opt }}
+            </button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- STATE 3: GAME OVER / RESULT SCREEN -->
+  @if (gameEnded()) {
+    <div class="result-screen text-center py-5 rounded-4 bg-light border border-light-subtle">
+      <div class="result-icon-container mb-4">
+        <i class="bi bi-patch-check-fill text-success display-2 animate-bounce"></i>
+      </div>
+      
+      <h4 class="fw-bold text-dark mb-2">சவால் முடிந்தது! (Race Completed)</h4>
+      <p class="text-secondary mb-4">நேரம் முடிந்துவிட்டது. உங்களது மதிப்பெண்:</p>
+
+      <div class="score-display display-1 fw-bold text-success mb-2 font-monospace">
+        {{ correctCount() }}
+      </div>
+      <p class="text-muted mb-4">சரியான பதில்கள் (மொத்தம் {{ totalAnswered() }} கேள்விகளில்)</p>
+
+      <div class="mb-4">
+        @if (correctCount() >= 10) {
+          <span class="badge bg-success text-white px-4 py-2 fs-6 rounded-pill">அதிவேக சாதனையாளர்! 🏆🌟</span>
+        } @else if (correctCount() >= 5) {
+          <span class="badge bg-primary text-white px-4 py-2 fs-6 rounded-pill">அருமையான முயற்சி! 👏⭐</span>
+        } @else {
+          <span class="badge bg-warning text-dark px-4 py-2 fs-6 rounded-pill">மீண்டும் முயற்சி செய்க! 👍</span>
+        }
+      </div>
+
+      <div class="d-flex justify-content-center gap-3">
+        <button class="btn btn-outline-secondary btn-lg px-4 rounded-pill" (click)="resetGame()">
+          <i class="bi bi-arrow-counterclockwise me-2"></i>மறுதொடக்கம் (Reset)
+        </button>
+        <button class="btn btn-warning btn-lg text-white fw-bold px-4 rounded-pill shadow" (click)="startGame()">
+          <i class="bi bi-play-fill me-2"></i>மீண்டும் விளையாடு (Play Again)
+        </button>
+      </div>
+    </div>
+  }
+</div>

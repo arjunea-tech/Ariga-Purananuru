@@ -23,6 +23,7 @@ import { renderOddOneOutForm } from './activity-block/forms/odd-one-out';
 import { renderWordHuntForm } from './activity-block/forms/word-hunt';
 import { renderLetterBasketForm } from './activity-block/forms/letter-basket';
 import { renderWordBuilderForm } from './activity-block/forms/word-builder';
+import { renderYappuFlashcardForm } from './activity-block/forms/yappu-flashcard';
 
 export class ActivityBlock {
   private data: any;
@@ -104,7 +105,8 @@ export class ActivityBlock {
         { text: 'த்', category: 'மெய் / ஒற்று' }
       ] : []),
       targetWord: data?.targetWord || (type === 'word_hunt' ? 'கல்வி' : ''),
-      letterCount: data?.letterCount || data?.items?.length || 10
+      letterCount: data?.letterCount || data?.items?.length || 10,
+      syllableCount: data?.syllableCount || 1
     };
     this.api = api;
     this.readOnly = readOnly;
@@ -216,6 +218,11 @@ export class ActivityBlock {
         icon = 'bi-grid-fill';
         details = `Question: "${this.data.question || ''}" | Words: "${this.data.text || ''}"`;
         break;
+      case 'yappu_flashcard':
+        typeLabel = 'Yappu Flashcard';
+        icon = 'bi-lightning-fill';
+        details = `Question: "${this.data.question || ''}" | Syllable Count: ${this.data.syllableCount || 1}`;
+        break;
     }
     return { typeLabel, icon, details };
   }
@@ -283,6 +290,7 @@ export class ActivityBlock {
             <option value="word_hunt" ${tempData.type === 'word_hunt' ? 'selected' : ''}>Hunt Words</option>
             <option value="letter_basket" ${tempData.type === 'letter_basket' ? 'selected' : ''}>Letter Basket</option>
             <option value="word_builder" ${tempData.type === 'word_builder' ? 'selected' : ''}>Word Builder</option>
+            <option value="yappu_flashcard" ${tempData.type === 'yappu_flashcard' ? 'selected' : ''}>Yappu Flashcard (30s Speed Race)</option>
           </select>
           <div class="modal-form-container"></div>
         </div>
@@ -336,6 +344,8 @@ export class ActivityBlock {
         renderLetterBasketForm(formContainer, tempData, this.renderExplanationInput);
       } else if (type === 'word_builder') {
         renderWordBuilderForm(formContainer, tempData, this.renderExplanationInput);
+      } else if (type === 'yappu_flashcard') {
+        renderYappuFlashcardForm(formContainer, tempData, this.renderExplanationInput);
       }
     };
 
@@ -582,6 +592,10 @@ export class ActivityBlock {
       }));
     } else if (type === 'word_builder') {
       savedData.question = this.data.question || '';
+      savedData.text = this.data.text || '';
+    } else if (type === 'yappu_flashcard') {
+      savedData.question = this.data.question || '';
+      savedData.syllableCount = parseInt(this.data.syllableCount) || 1;
       savedData.text = this.data.text || '';
     }
 
