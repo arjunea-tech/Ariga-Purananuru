@@ -15,9 +15,10 @@ import { WritingComponent, WritingData } from '../writing/writing';
 import { OddOneOutComponent, OddOneOutData } from '../odd-one-out/odd-one-out';
 import { WordHuntComponent, WordHuntData } from '../word-hunt/word-hunt';
 import { LetterBasketComponent, LetterBasketData } from '../letter-basket/letter-basket';
+import { BalloonPopComponent, BalloonPopData } from '../balloon-pop/balloon-pop';
 
 export interface NormalizedActivity {
-  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket';
+  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop';
   question?: string;
   text?: string;
   front?: string;
@@ -59,6 +60,11 @@ export interface NormalizedActivity {
   maxWords?: number;
   boxes?: any[];
   items?: any[];
+  level?: number;
+  target?: 'ner' | 'nirai';
+  timer?: number;
+  nerWords?: string[];
+  niraiWords?: string[];
 }
 
 @Component({
@@ -80,7 +86,8 @@ export interface NormalizedActivity {
     WritingComponent,
     OddOneOutComponent,
     WordHuntComponent,
-    LetterBasketComponent
+    LetterBasketComponent,
+    BalloonPopComponent
   ],
   templateUrl: './activity-renderer.html',
   styleUrls: ['./activity-renderer.css']
@@ -161,7 +168,7 @@ export class ActivityRenderer implements OnChanges {
     
     // 1. Determine type
     let typeInput = raw.type || raw.question_type || 'mcq';
-    let type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' = 'mcq';
+    let type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' = 'mcq';
 
     if (['multiple_choice', 'mcq', 'multiple-choice', 'multiplechoice'].includes(typeInput.toLowerCase())) {
       type = 'mcq';
@@ -193,6 +200,8 @@ export class ActivityRenderer implements OnChanges {
       type = 'word_hunt';
     } else if (['letter_basket', 'letter-basket', 'letterbasket'].includes(typeInput.toLowerCase())) {
       type = 'letter_basket';
+    } else if (['balloon_pop', 'balloon-pop', 'balloonpop'].includes(typeInput.toLowerCase())) {
+      type = 'balloon_pop';
     }
 
     // 2. Extract explanation & options
@@ -275,6 +284,14 @@ export class ActivityRenderer implements OnChanges {
     } else if (type === 'letter_basket') {
       normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.items = raw.items || additional.items || [];
+    } else if (type === 'balloon_pop') {
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.level = raw.level || additional.level || 1;
+      normalized.target = raw.target || additional.target || 'ner';
+      normalized.timer = raw.timer || additional.timer || 30;
+      // Pass through custom word lists if provided (dynamic mode)
+      normalized.nerWords = raw.nerWords || additional.nerWords || [];
+      normalized.niraiWords = raw.niraiWords || additional.niraiWords || [];
     }
 
     this.normalizedActivity.set(normalized);
@@ -397,6 +414,14 @@ export class ActivityRenderer implements OnChanges {
     this.answered.emit({
       questionId: this.activity?.id,
       type: 'letter_basket',
+      ...event
+    });
+  }
+
+  onBalloonPopAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'balloon_pop',
       ...event
     });
   }

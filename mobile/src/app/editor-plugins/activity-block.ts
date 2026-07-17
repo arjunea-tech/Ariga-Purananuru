@@ -22,6 +22,7 @@ import { renderWritingForm } from './activity-block/forms/writing';
 import { renderOddOneOutForm } from './activity-block/forms/odd-one-out';
 import { renderWordHuntForm } from './activity-block/forms/word-hunt';
 import { renderLetterBasketForm } from './activity-block/forms/letter-basket';
+import { renderBalloonPopForm } from './activity-block/forms/balloon-pop';
 
 export class ActivityBlock {
   private data: any;
@@ -46,7 +47,8 @@ export class ActivityBlock {
       type,
       question: data?.question || 
                 (type === 'word_hunt' ? "'கல்வி' என்ற சொல்லிலுள்ள குறில் எழுத்துக்களைக் கண்டறிக" : 
-                 (type === 'letter_basket' ? "எழுத்துக்களை சரியான கூடைகளில் இடுக" : '')),
+                 (type === 'letter_basket' ? "எழுத்துக்களை சரியான கூடைகளில் இடுக" : 
+                  (type === 'balloon_pop' ? "நேர் அசைகளை மட்டும் தட்டுக! (Pop only Ner balloons!)" : ''))),
       options: data?.options || [
         { text: '', isCorrect: true },
         { text: '', isCorrect: false }
@@ -101,6 +103,9 @@ export class ActivityBlock {
         { text: 'க்', category: 'மெய் / ஒற்று' },
         { text: 'த்', category: 'மெய் / ஒற்று' }
       ] : []),
+      level: data?.level || 1,
+      target: data?.target || 'ner',
+      timer: data?.timer || 30,
       targetWord: data?.targetWord || (type === 'word_hunt' ? 'கல்வி' : ''),
       letterCount: data?.letterCount || data?.items?.length || 10
     };
@@ -209,6 +214,11 @@ export class ActivityBlock {
         icon = 'bi-bucket';
         details = `Question: "${this.data.question || ''}" | Letters: ${this.data.items?.length || 0}`;
         break;
+      case 'balloon_pop':
+        typeLabel = 'Balloon Pop Game';
+        icon = 'bi-balloon';
+        details = `Question: "${this.data.question || ''}" | Level: ${this.data.level} | Target: ${this.data.target}`;
+        break;
     }
     return { typeLabel, icon, details };
   }
@@ -275,6 +285,7 @@ export class ActivityBlock {
             <option value="odd_one_out" ${tempData.type === 'odd_one_out' ? 'selected' : ''}>Odd One Out</option>
             <option value="word_hunt" ${tempData.type === 'word_hunt' ? 'selected' : ''}>Hunt Words</option>
             <option value="letter_basket" ${tempData.type === 'letter_basket' ? 'selected' : ''}>Letter Basket</option>
+            <option value="balloon_pop" ${tempData.type === 'balloon_pop' ? 'selected' : ''}>Balloon Pop Game</option>
           </select>
           <div class="modal-form-container"></div>
         </div>
@@ -326,6 +337,8 @@ export class ActivityBlock {
         renderWordHuntForm(formContainer, tempData, this.renderExplanationInput);
       } else if (type === 'letter_basket') {
         renderLetterBasketForm(formContainer, tempData, this.renderExplanationInput);
+      } else if (type === 'balloon_pop') {
+        renderBalloonPopForm(formContainer, tempData, this.renderExplanationInput);
       }
     };
 
@@ -394,6 +407,14 @@ export class ActivityBlock {
             { text: 'த்', category: 'மெய் / ஒற்று' }
           ];
         }
+      }
+      if (tempData.type === 'balloon_pop') {
+        if (!tempData.question || tempData.question === '') {
+          tempData.question = "நேர் அசைகளை மட்டும் தட்டுக! (Pop only Ner balloons!)";
+        }
+        if (tempData.level === undefined) tempData.level = 1;
+        if (tempData.target === undefined) tempData.target = 'ner';
+        if (tempData.timer === undefined) tempData.timer = 30;
       }
       renderForm();
     });
@@ -562,6 +583,18 @@ export class ActivityBlock {
         text: item.text || '',
         category: item.category || 'குறில்'
       }));
+    } else if (type === 'balloon_pop') {
+      savedData.question = this.data.question || '';
+      savedData.level = parseInt(this.data.level) || 1;
+      savedData.target = this.data.target || 'ner';
+      savedData.timer = parseInt(this.data.timer) || 30;
+      // Save custom word lists (empty array = use built-in fallback pools)
+      savedData.nerWords = Array.isArray(this.data.nerWords)
+        ? this.data.nerWords.filter((w: string) => w.trim().length > 0)
+        : [];
+      savedData.niraiWords = Array.isArray(this.data.niraiWords)
+        ? this.data.niraiWords.filter((w: string) => w.trim().length > 0)
+        : [];
     }
 
     return savedData;
