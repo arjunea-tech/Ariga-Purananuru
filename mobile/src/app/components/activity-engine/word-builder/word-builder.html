@@ -123,7 +123,7 @@
   @if (isAllCorrect() && activity?.explanation) {
     <div class="activity-explanation mt-4 p-3 bg-primary-subtle text-primary-emphasis rounded-3 border border-primary-subtle animate-fade-in">
       <h5 class="h6 fw-bold mb-2"><i class="bi bi-info-circle-fill me-2"></i>விளக்கம் (Explanation):</h5>
-      <p class="small mb-0">{{ activity?.explanation }}</p>
+      <p class="small mb-0" [innerHTML]="activity!.explanation"></p>
     </div>
   }
 </div>
