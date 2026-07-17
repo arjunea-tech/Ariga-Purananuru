@@ -39,7 +39,7 @@ class TamilYappuSeeder extends Seeder
         'title' => 'அறிமுகம்',
         'reading_pages' => [
           '<h2 class="text-primary text-center mb-4">யாப்பு - அறிமுகம்</h2><p>யாப்பிலக்கணம் என்பது தமிழின் செய்யுள் (மரபுக்கவிதை) எழுதுவதற்கான இலக்கணத்தை விளக்குகிறது. இதை அறிந்து கொள்வதால், செய்யுள் எழுதுவதற்கான அடிப்படை விதிகளைப் புரிந்து கொள்ள முடியும்.</p>',
-          '<h2 class="text-primary text-center mb-4">யாப்பின் உறுப்புகள்</h2><p>யாப்பின் உறுப்புகள் ஆறு வகைப்படும். அவை பின்வருமாறு:</p><ol class="fs-5 text-dark mt-3"><li><strong>1. எழுத்து</strong></li><li><strong>2. அசை</strong></li><li><strong>3. சீர்</strong></li><li><strong>4. தளை</strong></li><li><strong>5. அடி</strong></li><li><strong>6. தொடை</strong></li></ol>'
+          '<h2 class="text-primary text-center mb-4">யாப்பின் உறுப்புகள்</h2><p>யாப்பின் உறுப்புகள் ஆறு வகைப்படும். அவை பின்வருமாறு:</p><ol class="fs-5 text-dark mt-3"><li><strong> எழுத்து</strong></li><li><strong> அசை</strong></li><li><strong> சீர்</strong></li><li><strong> தளை</strong></li><li><strong> அடி</strong></li><li><strong> தொடை</strong></li></ol>'
         ]
       ]
     ]
@@ -249,6 +249,12 @@ class TamilYappuSeeder extends Seeder
               3 => 'கால் மாத்திரை',
             ],
             'ans' => 'அரை மாத்திரை',
+          ],
+          7 => 
+          [
+            'type' => 'word_builder',
+            'q' => 'சரியான அசை வாய்பாடுகளுக்கு ஏற்ப வார்த்தைகளை உருவாக்கவும்:',
+            'text' => 'கல்வி, வாழ்க, தமிழ், அம்மா'
           ]
         ],
         'practice_word' => 'கல்வி',
@@ -1035,7 +1041,14 @@ class TamilYappuSeeder extends Seeder
                             'question' => $act['q'],
                             'level' => $act['level'] ?? 1,
                             'target' => $act['target'] ?? 'ner',
-                            'timer' => $act['timer'] ?? 30
+                            'timer' => $act['timer'] ?? 30,
+                            'nerWords' => $act['nerWords'] ?? [],
+                            'niraiWords' => $act['niraiWords'] ?? [],
+                        ];
+                    } else if ($type === 'word_builder') {
+                        $dataJson = [
+                            'question' => $act['q'],
+                            'text' => $act['text']
                         ];
                     }
 

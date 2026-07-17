@@ -63,5 +63,12 @@ class DatabaseSeeder extends Seeder
                 'tenant_id' => $tenant->id,
             ]
         );
+        $this->call([
+            TamilYappuSeeder::class,
+        ]);
+        $this->call([
+            Generate_Seeder::class,
+        ]);
+
     }
 }

@@ -113,6 +113,13 @@
               (answered)="onBalloonPopAnswered($event)">
             </app-activity-balloon-pop>
           }
+          @case ('word_builder') {
+            <app-activity-word-builder
+              [activity]="data"
+              [showFeedback]="showFeedback"
+              (answered)="onWordBuilderAnswered($event)">
+            </app-activity-word-builder>
+          }
         }
       </div>
     }

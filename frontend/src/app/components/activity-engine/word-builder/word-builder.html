@@ -1,0 +1,129 @@
+<div class="word-builder-activity card border-0 shadow-sm rounded-4 p-4 mb-4">
+  <!-- Question Title -->
+  <div class="d-flex align-items-center mb-4">
+    <div class="activity-icon-container bg-primary-subtle text-primary rounded-3 p-2 me-3">
+      <i class="bi bi-grid-fill fs-4"></i>
+    </div>
+    <div>
+      <h3 class="h5 fw-bold text-dark mb-1">சொல் உருவாக்குபவர் (Word Builder)</h3>
+      <p class="text-secondary small mb-0">{{ activity?.question || 'சரியான அசை வாய்பாடுகளுக்கு ஏற்ப வார்த்தைகளை உருவாக்கவும்:' }}</p>
+    </div>
+  </div>
+
+  <!-- Challenge Rows -->
+  <div class="challenge-rows-container d-flex flex-column gap-4 mb-4">
+    @for (row of challengeRows(); track rowIdx; let rowIdx = $index) {
+      <div class="challenge-row p-3 rounded-3" [class.row-correct]="row.isCorrect" [class.row-incorrect]="row.isError">
+        <div class="row-header d-flex justify-content-between align-items-center mb-2">
+          <span class="badge bg-secondary-subtle text-secondary-emphasis fw-bold">சவால் {{ rowIdx + 1 }}</span>
+          @if (!row.isCorrect) {
+            <button class="btn btn-sm btn-link text-danger text-decoration-none p-0" (click)="clearRow(rowIdx)">
+              <i class="bi bi-trash3 me-1"></i>அழி
+            </button>
+          }
+        </div>
+
+        <div class="formula-assembly-grid d-flex flex-wrap align-items-center gap-3 py-2">
+          <!-- Formula Display -->
+          <div class="formula-parts d-flex align-items-center gap-2 font-monospace fw-bold text-primary">
+            @for (asaiType of row.formula; track asaiIdx; let asaiIdx = $index) {
+              <span class="asai-type-label px-3 py-2 rounded-2">{{ asaiType }}</span>
+              @if (asaiIdx < row.formula.length - 1) {
+                <span class="formula-plus text-secondary fs-5">+</span>
+              }
+            }
+          </div>
+
+          <div class="formula-equals text-secondary fs-4">=</div>
+
+          <!-- Drop Boxes -->
+          <div class="boxes-container d-flex align-items-center gap-3 flex-wrap">
+            @for (box of row.boxes; track boxIdx; let boxIdx = $index) {
+              <div 
+                class="dropzone-box d-flex align-items-center justify-content-center gap-1 rounded-3 px-3 position-relative"
+                [class.empty]="box.letters.length === 0"
+                [class.active-target]="selectedLetter() !== null"
+                [class.correct-box]="row.isCorrect"
+                (dragover)="allowDrop($event)"
+                (drop)="drop($event, rowIdx, boxIdx)"
+                (click)="selectBox(rowIdx, boxIdx)">
+                
+                @if (box.letters.length === 0) {
+                  <span class="box-placeholder font-monospace text-secondary small">{{ box.expectedType }}</span>
+                } @else {
+                  <div class="box-letters-wrapper d-flex align-items-center">
+                    @for (letter of box.letters; track letterIdx; let letterIdx = $index) {
+                      <span 
+                        class="placed-letter badge bg-white border border-secondary-subtle text-dark fs-6 px-2 py-1 rounded-2 position-relative cursor-pointer"
+                        (click)="$event.stopPropagation(); removeLetterFromBox(rowIdx, boxIdx, letterIdx)"
+                        title="Click to remove">
+                        {{ letter }}
+                      </span>
+                    }
+                  </div>
+                }
+              </div>
+              @if (boxIdx < row.boxes.length - 1) {
+                <span class="box-separator text-secondary fs-5">+</span>
+              }
+            }
+          </div>
+        </div>
+
+        <!-- Success or Error Feedback Message -->
+        @if (row.message) {
+          <div class="row-message mt-2 d-flex align-items-center gap-2 small animate-fade-in"
+               [class.text-success]="row.isCorrect"
+               [class.text-danger]="row.isError">
+            <i class="bi" [class.bi-check-circle-fill]="row.isCorrect" [class.bi-exclamation-triangle-fill]="row.isError"></i>
+            <span>{{ row.message }}</span>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Draggable Letter Pool -->
+  <div class="letter-pool-section p-3 bg-light rounded-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4 class="h6 fw-bold text-dark mb-0">எழுத்துக்கள் குவியல் (Letter Pool)</h4>
+      <small class="text-muted">இழுத்து விடவும் (Drag & Drop) அல்லது தேர்ந்தெடுத்து பெட்டியை சொடுக்கவும்</small>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 justify-content-center p-2 min-h-80">
+      @for (letter of letterPool(); track letter.id) {
+        <div 
+          class="letter-bubble d-flex align-items-center justify-content-center rounded-3 shadow-sm border"
+          [class.used]="letter.isUsed"
+          [class.selected]="selectedLetter()?.id === letter.id"
+          [draggable]="!letter.isUsed && !isAllCorrect()"
+          (dragstart)="dragStart($event, letter)"
+          (click)="selectPoolLetter(letter)">
+          {{ letter.text }}
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Overall Actions / Bottom feedback -->
+  <div class="d-flex justify-content-between align-items-center border-top pt-3">
+    <button class="btn btn-outline-secondary rounded-3 px-4" (click)="resetPuzzle()">
+      <i class="bi bi-arrow-counterclockwise me-2"></i>மறுதொடக்கம் (Reset)
+    </button>
+
+    @if (isAllCorrect()) {
+      <div class="d-flex align-items-center gap-2 text-success fw-bold animate-fade-in">
+        <i class="bi bi-patch-check-fill fs-4"></i>
+        <span>அனைத்தும் சரி! அருமை! 🌟</span>
+      </div>
+    }
+  </div>
+
+  <!-- Lesson Explanation Feedback if incorrect before completion or if completed -->
+  @if (isAllCorrect() && activity?.explanation) {
+    <div class="activity-explanation mt-4 p-3 bg-primary-subtle text-primary-emphasis rounded-3 border border-primary-subtle animate-fade-in">
+      <h5 class="h6 fw-bold mb-2"><i class="bi bi-info-circle-fill me-2"></i>விளக்கம் (Explanation):</h5>
+      <p class="small mb-0">{{ activity?.explanation }}</p>
+    </div>
+  }
+</div>
