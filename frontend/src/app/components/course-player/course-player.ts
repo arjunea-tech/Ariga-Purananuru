@@ -127,6 +127,17 @@ export class CoursePlayer implements OnInit, OnDestroy {
     return structure.levels.find(l => l.id === levId) || null;
   });
 
+  levelThemeClass = computed(() => {
+    const structure = this.courseStructure();
+    const levId = this.activeLevelId();
+    if (!structure || !levId) return 'theme-forest';
+    const idx = structure.levels.findIndex(l => l.id === levId);
+    if (idx < 0) return 'theme-forest';
+    if (idx % 3 === 0) return 'theme-forest';
+    if (idx % 3 === 1) return 'theme-desert';
+    return 'theme-space';
+  });
+
   selectedChapter = computed(() => {
     const chapId = this.activeChapterId();
     const structure = this.courseStructure();

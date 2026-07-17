@@ -8,8 +8,21 @@
 
 @media (max-width: 480px) {
   .odd-cards-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+    margin-top: 0.75rem !important;
+  }
+  .odd-card-btn {
+    min-height: 80px !important;
+    padding: 0.5rem !important;
+    border-radius: 12px !important;
+  }
+  .odd-card-text {
+    font-size: 1.25rem !important;
+  }
+  .odd-card-badge {
+    font-size: 0.65rem !important;
+    padding: 0.15rem 0.35rem !important;
   }
 }
 
@@ -138,5 +151,40 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   MOBILE LANDSCAPE ORIENTATION OPTIMIZATIONS (HEIGHT <= 500px)
+   ────────────────────────────────────────────────────────────────────────── */
+@media (orientation: landscape) and (max-height: 500px) {
+  .w-100.d-flex.flex-column {
+    padding-bottom: 0.5rem !important;
+  }
+  .fs-3 {
+    font-size: 1.1rem !important;
+    margin-top: 0 !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .odd-cards-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 0.5rem !important;
+    margin-top: 0.5rem !important;
+  }
+  .odd-card-btn {
+    min-height: 75px !important;
+    padding: 0.5rem !important;
+    border-radius: 12px !important;
+  }
+  .odd-card-text {
+    font-size: 1.15rem !important;
+  }
+  .odd-card-badge {
+    font-size: 0.65rem !important;
+    padding: 0.15rem 0.35rem !important;
+  }
+  .animate-fade-in {
+    margin-top: 0.35rem !important;
+    padding: 0.5rem 0.75rem !important;
   }
 }

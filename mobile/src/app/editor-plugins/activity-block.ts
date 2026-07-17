@@ -22,13 +22,14 @@ import { renderWritingForm } from './activity-block/forms/writing';
 import { renderOddOneOutForm } from './activity-block/forms/odd-one-out';
 import { renderWordHuntForm } from './activity-block/forms/word-hunt';
 import { renderLetterBasketForm } from './activity-block/forms/letter-basket';
+import { renderBalloonPopForm } from './activity-block/forms/balloon-pop';
 import { renderWordBuilderForm } from './activity-block/forms/word-builder';
 import { renderYappuFlashcardForm } from './activity-block/forms/yappu-flashcard';
 
 export class ActivityBlock {
   private data: any;
   private api: any;
-  private readOnly: boolean;
+  private readOnly: boolean = false;
   private container: HTMLDivElement | null = null;
 
   static get toolbox() {
@@ -46,10 +47,11 @@ export class ActivityBlock {
 
     this.data = {
       type,
-      question: data?.question || 
-                (type === 'word_hunt' ? "'கல்வி' என்ற சொல்லிலுள்ள குறில் எழுத்துக்களைக் கண்டறிக" : 
-                 (type === 'letter_basket' ? "எழுத்துக்களை சரியான கூடைகளில் இடுக" : 
-                  (type === 'word_builder' ? "சரியான அசை வாய்பாடுகளுக்கு ஏற்ப வார்த்தைகளை உருவாக்கவும்:" : ''))),
+      question: data?.question ||
+        (type === 'word_hunt' ? "'கல்வி' என்ற சொல்லிலுள்ள குறில் எழுத்துக்களைக் கண்டறிக" :
+          (type === 'letter_basket' ? "எழுத்துக்களை சரியான கூடைகளில் இடுக" :
+            (type === 'balloon_pop' ? "நேர் அசைகளை மட்டும் தட்டுக! (Pop only Ner balloons!)" :
+              (type === 'word_builder' ? "சரியான அசை வாய்பாடுகளுக்கு ஏற்ப வார்த்தைகளை உருவாக்கவும்:" : '')))),
       options: data?.options || [
         { text: '', isCorrect: true },
         { text: '', isCorrect: false }
@@ -91,7 +93,7 @@ export class ActivityBlock {
       modelAnswer: data?.modelAnswer || '',
       minWords: data?.minWords || 1,
       maxWords: data?.maxWords || 1000,
-      
+
       // New activities properties
       boxes: data?.boxes?.length ? data.boxes : (type === 'word_hunt' ? [
         { text: 'க', isCorrect: true },
@@ -104,6 +106,9 @@ export class ActivityBlock {
         { text: 'க்', category: 'மெய் / ஒற்று' },
         { text: 'த்', category: 'மெய் / ஒற்று' }
       ] : []),
+      level: data?.level || 1,
+      target: data?.target || 'ner',
+      timer: data?.timer || 30,
       targetWord: data?.targetWord || (type === 'word_hunt' ? 'கல்வி' : ''),
       letterCount: data?.letterCount || data?.items?.length || 10,
       syllableCount: data?.syllableCount || 1
@@ -225,6 +230,94 @@ export class ActivityBlock {
         break;
     }
     return { typeLabel, icon, details };
+    switch (type) {
+      case 'mcq':
+        typeLabel = 'Multiple Choice';
+        icon = 'bi-record-circle';
+        details = `Question: "${this.data.question || '(No Question)'}" | Options: ${this.data.options?.length || 0}`;
+        break;
+      case 'fill_blanks':
+        typeLabel = 'Fill in the Blanks';
+        icon = 'bi-input-cursor-text';
+        details = `Text: "${this.data.text || '(No Text)'}"`;
+        break;
+      case 'flashcard':
+        typeLabel = '3D Flashcard';
+        icon = 'bi-square-half';
+        details = `Front: "${this.data.front || ''}" | Back: "${this.data.back || ''}"`;
+        break;
+      case 'match':
+        typeLabel = 'Match It';
+        icon = 'bi-puzzle';
+        details = `Pairs: ${this.data.pairs?.length || 0} | Theme: ${this.data.theme || 'standard'}`;
+        break;
+      case 'crossword':
+        typeLabel = 'Crossword Puzzle';
+        icon = 'bi-grid-3x3';
+        details = `Words: ${this.data.words?.length || 0} | Grid: ${this.data.gridSize}x${this.data.gridSize}`;
+        break;
+      case 'word_arrange':
+        typeLabel = 'Word Arrangement';
+        icon = 'bi-sort-alpha-down';
+        details = `Sentence: "${this.data.text || ''}"`;
+        break;
+      case 'speaking':
+        typeLabel = 'Speaking Practice';
+        icon = 'bi-mic';
+        details = `Target: "${this.data.targetText || ''}"`;
+        break;
+      case 'role_play':
+        typeLabel = 'Role Play Conversation';
+        icon = 'bi-chat-quote';
+        details = `Dialogue: ${this.data.dialogue?.length || 0} lines`;
+        break;
+      case 'sequencing':
+        typeLabel = 'Sequencing (Ordering)';
+        icon = 'bi-list-ol';
+        details = `Events: ${this.data.events?.length || 0}`;
+        break;
+      case 'parts_of_speech':
+        typeLabel = 'Parts of Speech Tagger';
+        icon = 'bi-tags';
+        details = `Sentence: "${this.data.text || ''}" | Tagged: ${this.data.parts?.length || 0}`;
+        break;
+      case 'mind_map':
+        typeLabel = 'Mind Mapping Diagram';
+        icon = 'bi-diagram-3';
+        details = `Nodes: ${this.data.nodes?.length || 0}`;
+        break;
+      case 'writing':
+        typeLabel = 'Writing Practice';
+        icon = 'bi-pencil-square';
+        details = `Prompt: "${this.data.text || ''}"`;
+        break;
+      case 'odd_one_out':
+        typeLabel = 'Odd One Out';
+        icon = 'bi-exclamation-triangle';
+        details = `Question: "${this.data.question || ''}" | Options: ${this.data.options?.length || 0}`;
+        break;
+      case 'word_hunt':
+        typeLabel = 'Hunt Words';
+        icon = 'bi-grid';
+        details = `Question: "${this.data.question || ''}" | Grid: ${this.data.gridSize}x${this.data.gridSize}`;
+        break;
+      case 'letter_basket':
+        typeLabel = 'Letter Basket';
+        icon = 'bi-bucket';
+        details = `Question: "${this.data.question || ''}" | Letters: ${this.data.items?.length || 0}`;
+        break;
+      case 'balloon_pop':
+        typeLabel = 'Balloon Pop Game';
+        icon = 'bi-balloon';
+        details = `Question: "${this.data.question || ''}" | Level: ${this.data.level} | Target: ${this.data.target}`;
+        break;
+      case 'word_builder':
+        typeLabel = 'Word Builder';
+        icon = 'bi-grid-fill';
+        details = `Question: "${this.data.question || ''}" | Words: "${this.data.text || ''}"`;
+        break;
+    }
+    return { typeLabel, icon, details };
   }
 
   private updatePreview(): void {
@@ -289,6 +382,7 @@ export class ActivityBlock {
             <option value="odd_one_out" ${tempData.type === 'odd_one_out' ? 'selected' : ''}>Odd One Out</option>
             <option value="word_hunt" ${tempData.type === 'word_hunt' ? 'selected' : ''}>Hunt Words</option>
             <option value="letter_basket" ${tempData.type === 'letter_basket' ? 'selected' : ''}>Letter Basket</option>
+            <option value="balloon_pop" ${tempData.type === 'balloon_pop' ? 'selected' : ''}>Balloon Pop Game</option>
             <option value="word_builder" ${tempData.type === 'word_builder' ? 'selected' : ''}>Word Builder</option>
             <option value="yappu_flashcard" ${tempData.type === 'yappu_flashcard' ? 'selected' : ''}>Yappu Flashcard (30s Speed Race)</option>
           </select>
@@ -342,6 +436,8 @@ export class ActivityBlock {
         renderWordHuntForm(formContainer, tempData, this.renderExplanationInput);
       } else if (type === 'letter_basket') {
         renderLetterBasketForm(formContainer, tempData, this.renderExplanationInput);
+      } else if (type === 'balloon_pop') {
+        renderBalloonPopForm(formContainer, tempData, this.renderExplanationInput);
       } else if (type === 'word_builder') {
         renderWordBuilderForm(formContainer, tempData, this.renderExplanationInput);
       } else if (type === 'yappu_flashcard') {
@@ -414,6 +510,14 @@ export class ActivityBlock {
             { text: 'த்', category: 'மெய் / ஒற்று' }
           ];
         }
+      }
+      if (tempData.type === 'balloon_pop') {
+        if (!tempData.question || tempData.question === '') {
+          tempData.question = "நேர் அசைகளை மட்டும் தட்டுக! (Pop only Ner balloons!)";
+        }
+        if (tempData.level === undefined) tempData.level = 1;
+        if (tempData.target === undefined) tempData.target = 'ner';
+        if (tempData.timer === undefined) tempData.timer = 30;
       }
       if (tempData.type === 'word_builder') {
         if (!tempData.question || tempData.question === '') {
@@ -590,6 +694,18 @@ export class ActivityBlock {
         text: item.text || '',
         category: item.category || 'குறில்'
       }));
+    } else if (type === 'balloon_pop') {
+      savedData.question = this.data.question || '';
+      savedData.level = parseInt(this.data.level) || 1;
+      savedData.target = this.data.target || 'ner';
+      savedData.timer = parseInt(this.data.timer) || 30;
+      // Save custom word lists (empty array = use built-in fallback pools)
+      savedData.nerWords = Array.isArray(this.data.nerWords)
+        ? this.data.nerWords.filter((w: string) => w.trim().length > 0)
+        : [];
+      savedData.niraiWords = Array.isArray(this.data.niraiWords)
+        ? this.data.niraiWords.filter((w: string) => w.trim().length > 0)
+        : [];
     } else if (type === 'word_builder') {
       savedData.question = this.data.question || '';
       savedData.text = this.data.text || '';

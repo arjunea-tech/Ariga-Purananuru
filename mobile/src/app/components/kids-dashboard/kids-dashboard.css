@@ -1207,3 +1207,50 @@
     font-size: 0.8rem !important;
   }
 }
+
+/* Landscape optimization for Dashboard Carousel Cards to prevent clipping */
+@media (orientation: landscape) and (max-height: 500px) {
+  .carousel-container {
+    height: 76vh !important;
+    margin-top: 2vh !important;
+  }
+  
+  .floating-island-card {
+    min-height: 240px !important;
+    padding: 12px 16px !important;
+    border-radius: 24px !important;
+    box-shadow: 0 8px 0 #3e1f0e, 0 12px 20px rgba(0, 0, 0, 0.3) !important;
+    margin-top: 0 !important;
+  }
+  
+  .floating-island-card .island-badge {
+    margin-bottom: 0.25rem !important;
+    font-size: 0.75rem !important;
+    padding: 2px 10px !important;
+  }
+  
+  .floating-island-card .stars-container {
+    margin-bottom: 0.25rem !important;
+  }
+  .floating-island-card .stars-container i {
+    font-size: 1rem !important;
+  }
+  
+  .floating-island-card .island-illustration {
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+  .floating-island-card .island-illustration span {
+    font-size: 2rem !important;
+  }
+  
+  .floating-island-card .island-title {
+    font-size: 1.15rem !important;
+    margin-bottom: 0.35rem !important;
+  }
+  
+  .floating-island-card button {
+    padding: 4px 16px !important;
+    font-size: 0.8rem !important;
+  }
+}

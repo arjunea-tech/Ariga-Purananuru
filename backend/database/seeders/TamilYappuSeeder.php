@@ -437,6 +437,14 @@ class TamilYappuSeeder extends Seeder
             ],
             'ans' => 'ஓர் எழுத்து',
           ],
+          3 => 
+          [
+            'type' => 'balloon_pop',
+            'q' => 'நேர் அசைகளை மட்டும் தட்டுக! (Pop only Ner balloons!)',
+            'level' => 1,
+            'target' => 'ner',
+            'timer' => 30
+          ],
         ],
         'practice_word' => 'பல்',
       ],
@@ -482,6 +490,14 @@ class TamilYappuSeeder extends Seeder
             ],
             'ans' => 'நிரையசை',
           ],
+          3 => 
+          [
+            'type' => 'balloon_pop',
+            'q' => 'நிரை அசைகளை மட்டும் தட்டுக! (Pop only Nirai balloons!)',
+            'level' => 1,
+            'target' => 'nirai',
+            'timer' => 30
+          ],
         ],
         'practice_word' => 'அணில்',
       ],
@@ -514,6 +530,22 @@ class TamilYappuSeeder extends Seeder
               3 => 'நிரைபு',
             ],
             'ans' => 'நேரசை',
+          ],
+          2 => 
+          [
+            'type' => 'balloon_pop',
+            'q' => 'நேர் அசைகளை மட்டும் தட்டுக! (Pop only Ner balloons!)',
+            'level' => 2,
+            'target' => 'ner',
+            'timer' => 30
+          ],
+          3 => 
+          [
+            'type' => 'balloon_pop',
+            'q' => 'நிரை அசைகளை மட்டும் தட்டுக! (Pop only Nirai balloons!)',
+            'level' => 2,
+            'target' => 'nirai',
+            'timer' => 30
           ],
         ],
         'practice_word' => 'அகழ்வாரைத்',
@@ -614,6 +646,14 @@ class TamilYappuSeeder extends Seeder
             ],
             'ans' => '2',
           ],
+          3 => 
+          [
+            'type' => 'balloon_pop',
+            'q' => 'நேர் அசைகளை மட்டும் தட்டுக! (Pop only Ner balloons!)',
+            'level' => 2,
+            'target' => 'ner',
+            'timer' => 30
+          ],
         ],
         'practice_word' => 'தேமா',
       ],
@@ -646,6 +686,14 @@ class TamilYappuSeeder extends Seeder
               3 => 'நிழல்சீர்',
             ],
             'ans' => 'காய்ச்சீர்',
+          ],
+          2 => 
+          [
+            'type' => 'balloon_pop',
+            'q' => 'நிரை அசைகளை மட்டும் தட்டுக! (Pop only Nirai balloons!)',
+            'level' => 3,
+            'target' => 'nirai',
+            'timer' => 30
           ],
         ],
         'practice_word' => 'தேமாங்காய்',
@@ -1009,6 +1057,15 @@ class TamilYappuSeeder extends Seeder
                         $dataJson = [
                             'question' => $act['q'],
                             'items' => $act['items']
+                        ];
+                    } else if ($type === 'balloon_pop') {
+                        $dataJson = [
+                            'question' => $act['q'],
+                            'level' => $act['level'] ?? 1,
+                            'target' => $act['target'] ?? 'ner',
+                            'timer' => $act['timer'] ?? 30,
+                            'nerWords' => $act['nerWords'] ?? [],
+                            'niraiWords' => $act['niraiWords'] ?? [],
                         ];
                     } else if ($type === 'word_builder') {
                         $dataJson = [

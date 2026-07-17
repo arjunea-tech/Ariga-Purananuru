@@ -1,4 +1,6 @@
-<div class="lesson-player w-100 h-100 lesson-bg-pattern d-flex flex-column position-fixed top-0 start-0 z-3 animate-slide-up overflow-hidden" style="z-index: 1200 !important; height: 100dvh !important; width: 100vw !important;">
+<div class="lesson-player w-100 h-100 lesson-bg-pattern d-flex flex-column position-fixed top-0 start-0 z-3 animate-slide-up overflow-hidden"
+  [ngClass]="levelThemeClass()"
+  style="z-index: 1200 !important; height: 100dvh !important; width: 100vw !important;">
   
   <!-- Top HUD (Floating widgets) -->
   <header class="position-absolute top-0 start-0 w-100 h-100 pe-none" style="z-index: 1000;">
@@ -181,14 +183,7 @@
            (touchstart)="onTouchStart($event)"
            (touchend)="onTouchEnd($event)">
            
-        <!-- Left Side Floating Chevron -->
-        <button *ngIf="currentContentPage() > 0"
-          type="button"
-          class="btn btn-light rounded-circle shadow-lg hover-lift d-flex align-items-center justify-content-center position-absolute start-0 slide-nav-btn glow-btn"
-          style="z-index: 150;"
-          (click)="prevContentPage()">
-          <i class="bi bi-chevron-left text-secondary fw-bold"></i>
-        </button>
+
 
         <!-- Card Stack Deck Container (Overflow visible so stacked cards can peek out at bottom) -->
         <div class="card-stack-container w-100 position-relative d-flex align-items-center justify-content-center" 
@@ -244,6 +239,36 @@
                           </div>
                         </div>
                       </div>
+                      <!-- Navigation Controls -->
+                      <div class="d-flex justify-content-between align-items-center w-100 mt-2 px-2 px-md-4 reading-nav-container" style="z-index: 100;">
+                        <!-- Left Arrow -->
+                        <button
+                          class="btn btn-light rounded-circle shadow-sm hover-lift d-flex align-items-center justify-content-center glow-btn inner-page-btn prev-page-btn"
+                          style="width: 50px; height: 50px; border: 3px solid #cbd5e1;" (click)="prevContentPage()"
+                          [disabled]="currentContentPage() === 0">
+                          <i class="bi bi-chevron-left fs-4 text-secondary fw-bold"></i>
+                        </button>
+                        
+                        <!-- Dots -->
+                        <div class="d-flex gap-3 bg-white px-4 py-2 rounded-pill shadow-sm border border-2 border-light dots-container">
+                          @if (step.data.isJson) {
+                          @for (b of step.data.blocks; track $index) {
+                          <div class="rounded-pill"
+                            style="height: 12px; transition: all 0.3s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);"
+                            [style.width]="$index === currentContentPage() ? '40px' : '12px'"
+                            [ngClass]="$index === currentContentPage() ? 'bg-primary' : 'bg-secondary opacity-25'"></div>
+                          }
+                          }
+                        </div>
+                        
+                        <!-- Right Arrow -->
+                        <button
+                          class="btn btn-primary rounded-circle shadow-sm hover-lift d-flex align-items-center justify-content-center text-white glow-btn inner-page-btn next-page-btn"
+                          style="width: 50px; height: 50px; border: 3px solid white; background: #6366f1; border-color: #4f46e5;" (click)="nextContentPage()"
+                          [disabled]="(step.data.isJson && currentContentPage() === step.data.blocks.length - 1) || !step.data.isJson">
+                          <i class="bi bi-chevron-right fs-4 fw-bold"></i>
+                        </button>
+                      </div>
                     </ng-container>
                   </div>
                 </div>
@@ -285,14 +310,7 @@
 
         </div>
 
-        <!-- Right Side Floating Chevron -->
-        <button *ngIf="step.data.isJson && currentContentPage() < step.data.blocks.length - 1"
-          type="button"
-          class="btn btn-primary rounded-circle shadow-lg hover-lift d-flex align-items-center justify-content-center position-absolute end-0 slide-nav-btn glow-btn text-white"
-          style="background: #6366f1; border-color: #4f46e5; z-index: 150;"
-          (click)="nextContentPage()">
-          <i class="bi bi-chevron-right fw-bold"></i>
-        </button>
+
       </div>
       }
 
@@ -324,10 +342,12 @@
       }
 
       @if (step.type === 'activity') {
-      <div class="w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-center mx-auto"
-        style="max-width: 1600px; width: 95%;">
+      <div class="w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-start mx-auto"
+        [class.p-0]="isBalloonPop(step)"
+        [style.max-width]="isBalloonPop(step) ? '100%' : '1600px'"
+        [style.width]="isBalloonPop(step) ? '100%' : '95%'">
         <app-activity-renderer [activity]="step.data.data" [showFeedback]="true"
-          (answered)="onActivityAnswered($event)" class="w-100 h-100"></app-activity-renderer>
+          (answered)="onActivityAnswered($event)" class="w-100 h-100" [class.my-auto]="!isBalloonPop(step)"></app-activity-renderer>
       </div>
       }
 

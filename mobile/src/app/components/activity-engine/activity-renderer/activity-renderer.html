@@ -1,5 +1,6 @@
 @if (normalizedActivity(); as data) {
-<div class="activity-renderer-container">
+<div class="activity-renderer-container" [class.h-100]="data.type === 'balloon_pop'"
+  [class.m-0]="data.type === 'balloon_pop'">
   @switch (data.type) {
   @case ('mcq') {
   <app-activity-mcq [activity]="data" [showFeedback]="showFeedback" (answered)="onMCQAnswered($event)">
@@ -63,9 +64,12 @@
     (answered)="onLetterBasketAnswered($event)">
   </app-activity-letter-basket>
   }
+  @case ('balloon_pop') {
+  <app-activity-balloon-pop [activity]="data" [showFeedback]="showFeedback" (answered)="onBalloonPopAnswered($event)">
+  </app-activity-balloon-pop>
+  }
   @case ('word_builder') {
-  <app-activity-word-builder [activity]="data" [showFeedback]="showFeedback"
-    (answered)="onWordBuilderAnswered($event)">
+  <app-activity-word-builder [activity]="data" [showFeedback]="showFeedback" (answered)="onWordBuilderAnswered($event)">
   </app-activity-word-builder>
   }
   @case ('yappu_flashcard') {

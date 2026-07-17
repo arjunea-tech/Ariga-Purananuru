@@ -709,13 +709,21 @@
 
   .stack-card > div,
   .reading-card,
-  .premium-card,
   .pdf-card,
   .remediation-card,
   .assessment-card {
-    min-height: 60vh !important;
-    max-height: 68vh !important;
-    padding: 6px 12px !important;
+    min-height: 75vh !important;
+    max-height: 82vh !important;
+    padding: 4px 12px !important;
+    border-width: 2px !important;
+    border-radius: 12px !important;
+    overflow-y: auto !important;
+  }
+
+  .premium-card {
+    min-height: auto !important;
+    max-height: 82vh !important;
+    padding: 4px 12px !important;
     border-width: 2px !important;
     border-radius: 12px !important;
     overflow-y: auto !important;
@@ -860,6 +868,44 @@
   .reading-card .mt-2 {
     margin-top: 0.25rem !important;
   }
+
+  /* Reposition inner navigation controls in landscape */
+  .reading-nav-container {
+    position: static !important;
+    justify-content: center !important;
+  }
+
+  /* Prevent text from overlapping side buttons in landscape */
+  .reading-content {
+    padding-left: 65px !important;
+    padding-right: 65px !important;
+  }
+  
+  .prev-page-btn,
+  .next-page-btn {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 100 !important;
+  }
+  
+  .prev-page-btn {
+    left: 15px !important;
+  }
+  
+  .next-page-btn {
+    right: 15px !important;
+  }
+
+  /* Custom hover/active scales that preserve translateY(-50%) centering */
+  .prev-page-btn:hover,
+  .next-page-btn:hover {
+    transform: translateY(-50%) scale(1.08) !important;
+  }
+  .prev-page-btn:active,
+  .next-page-btn:active {
+    transform: translateY(-50%) scale(0.92) !important;
+  }
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -951,4 +997,16 @@
 
 .font-nunito {
   font-family: 'Nunito', sans-serif;
+}
+
+/* Inner Page Nav Button Hover/Active transitions (preserves translateY(-50%)) */
+.inner-page-btn {
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+.inner-page-btn:hover {
+  transform: translateY(-50%) scale(1.08) !important;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15) !important;
+}
+.inner-page-btn:active {
+  transform: translateY(-50%) scale(0.92) !important;
 }

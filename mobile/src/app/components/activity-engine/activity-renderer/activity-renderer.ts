@@ -15,11 +15,12 @@ import { WritingComponent, WritingData } from '../writing/writing';
 import { OddOneOutComponent, OddOneOutData } from '../odd-one-out/odd-one-out';
 import { WordHuntComponent, WordHuntData } from '../word-hunt/word-hunt';
 import { LetterBasketComponent, LetterBasketData } from '../letter-basket/letter-basket';
+import { BalloonPopComponent, BalloonPopData } from '../balloon-pop/balloon-pop';
 import { WordBuilderComponent, WordBuilderData } from '../word-builder/word-builder';
 import { YappuFlashcardComponent } from '../yappu-flashcard/yappu-flashcard';
 
 export interface NormalizedActivity {
-  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'word_builder' | 'yappu_flashcard';
+  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard';
   question?: string;
   text?: string;
   front?: string;
@@ -62,6 +63,11 @@ export interface NormalizedActivity {
   boxes?: any[];
   items?: any[];
   syllableCount?: number;
+  level?: number;
+  target?: 'ner' | 'nirai';
+  timer?: number;
+  nerWords?: string[];
+  niraiWords?: string[];
 }
 
 @Component({
@@ -84,6 +90,7 @@ export interface NormalizedActivity {
     OddOneOutComponent,
     WordHuntComponent,
     LetterBasketComponent,
+    BalloonPopComponent,
     WordBuilderComponent,
     YappuFlashcardComponent
   ],
@@ -166,7 +173,7 @@ export class ActivityRenderer implements OnChanges {
 
     // 1. Determine type
     let typeInput = raw.type || raw.question_type || 'mcq';
-    let type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'word_builder' | 'yappu_flashcard' = 'mcq';
+    let type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard' = 'mcq';
 
     if (['multiple_choice', 'mcq', 'multiple-choice', 'multiplechoice'].includes(typeInput.toLowerCase())) {
       type = 'mcq';
@@ -198,6 +205,8 @@ export class ActivityRenderer implements OnChanges {
       type = 'word_hunt';
     } else if (['letter_basket', 'letter-basket', 'letterbasket'].includes(typeInput.toLowerCase())) {
       type = 'letter_basket';
+    } else if (['balloon_pop', 'balloon-pop', 'balloonpop'].includes(typeInput.toLowerCase())) {
+      type = 'balloon_pop';
     } else if (['word_builder', 'word-builder', 'wordbuilder'].includes(typeInput.toLowerCase())) {
       type = 'word_builder';
     } else if (['yappu_flashcard', 'yappu-flashcard', 'yappuflashcard', 'flashcard_yappu'].includes(typeInput.toLowerCase())) {
@@ -284,6 +293,14 @@ export class ActivityRenderer implements OnChanges {
     } else if (type === 'letter_basket') {
       normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.items = raw.items || additional.items || [];
+    } else if (type === 'balloon_pop') {
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.level = raw.level || additional.level || 1;
+      normalized.target = raw.target || additional.target || 'ner';
+      normalized.timer = raw.timer || additional.timer || 30;
+      // Pass through custom word lists if provided (dynamic mode)
+      normalized.nerWords = raw.nerWords || additional.nerWords || [];
+      normalized.niraiWords = raw.niraiWords || additional.niraiWords || [];
     } else if (type === 'word_builder') {
       normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.text = raw.text || raw.question_text || '';
@@ -413,6 +430,14 @@ export class ActivityRenderer implements OnChanges {
     this.answered.emit({
       questionId: this.activity?.id,
       type: 'letter_basket',
+      ...event
+    });
+  }
+
+  onBalloonPopAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'balloon_pop',
       ...event
     });
   }

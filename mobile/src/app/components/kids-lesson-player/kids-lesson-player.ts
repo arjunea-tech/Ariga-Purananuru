@@ -250,6 +250,7 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
     this.continueFeedback.emit();
   }
 
+
   nextLessonStep() {
     this.nextStep.emit();
     this.currentContentPage.set(0);
@@ -488,5 +489,11 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
     };
 
     type();
+  }
+
+  isBalloonPop(step: any): boolean {
+    if (!step || step.type !== 'activity' || !step.data?.data) return false;
+    const type = step.data.data.type || step.data.data.question_type || '';
+    return ['balloon_pop', 'balloon-pop', 'balloonpop'].includes(type.toLowerCase());
   }
 }
