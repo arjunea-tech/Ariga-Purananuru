@@ -1,0 +1,156 @@
+.word-builder-activity {
+  background: #ffffff;
+  transition: all 0.3s ease;
+}
+
+/* Challenge Row Styling */
+.challenge-row {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s ease;
+}
+
+.challenge-row.row-correct {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.challenge-row.row-incorrect {
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+/* Asai/Syllable Formula Labels */
+.asai-type-label {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  box-shadow: 0 1px 3px rgba(30, 64, 175, 0.05);
+}
+
+.formula-plus {
+  color: #94a3b8;
+}
+
+.formula-equals {
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* Drop Boxes */
+.dropzone-box {
+  min-width: 90px;
+  height: 48px;
+  border: 2px dashed #cbd5e1;
+  background: #ffffff;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dropzone-box.empty {
+  color: #94a3b8;
+}
+
+.dropzone-box.empty:hover {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.dropzone-box.active-target.empty {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  transform: scale(1.02);
+}
+
+.dropzone-box.correct-box {
+  border-style: solid;
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.box-placeholder {
+  pointer-events: none;
+}
+
+.box-letters-wrapper {
+  gap: 4px;
+}
+
+/* Placed Letter Badge */
+.placed-letter {
+  transition: all 0.2s ease;
+  animation: popIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  font-weight: 600;
+}
+
+.placed-letter:hover {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  border-color: #fca5a5 !important;
+  transform: scale(1.05);
+}
+
+/* Letter Bubble Pool */
+.letter-bubble {
+  min-width: 46px;
+  height: 46px;
+  padding: 0 0.75rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: grab;
+  user-select: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.letter-bubble:active {
+  cursor: grabbing;
+}
+
+.letter-bubble:hover:not(.used) {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 16px -4px rgba(59, 130, 246, 0.15) !important;
+  border-color: #3b82f6;
+  color: #2563eb;
+}
+
+.letter-bubble.selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+  transform: scale(1.08);
+}
+
+.letter-bubble.used {
+  opacity: 0.25;
+  cursor: not-allowed;
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  box-shadow: none !important;
+}
+
+.min-h-80 {
+  min-height: 80px;
+}
+
+/* Animations */
+@keyframes popIn {
+  0% { transform: scale(0.6); opacity: 0; }
+  75% { transform: scale(1.08); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}

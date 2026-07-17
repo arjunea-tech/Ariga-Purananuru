@@ -63,6 +63,11 @@
     (answered)="onLetterBasketAnswered($event)">
   </app-activity-letter-basket>
   }
+  @case ('word_builder') {
+  <app-activity-word-builder [activity]="data" [showFeedback]="showFeedback"
+    (answered)="onWordBuilderAnswered($event)">
+  </app-activity-word-builder>
+  }
   }
 </div>
 }

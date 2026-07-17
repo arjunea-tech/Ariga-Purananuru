@@ -22,6 +22,7 @@ import { renderWritingForm } from './activity-block/forms/writing';
 import { renderOddOneOutForm } from './activity-block/forms/odd-one-out';
 import { renderWordHuntForm } from './activity-block/forms/word-hunt';
 import { renderLetterBasketForm } from './activity-block/forms/letter-basket';
+import { renderWordBuilderForm } from './activity-block/forms/word-builder';
 
 export class ActivityBlock {
   private data: any;
@@ -46,12 +47,13 @@ export class ActivityBlock {
       type,
       question: data?.question || 
                 (type === 'word_hunt' ? "'கல்வி' என்ற சொல்லிலுள்ள குறில் எழுத்துக்களைக் கண்டறிக" : 
-                 (type === 'letter_basket' ? "எழுத்துக்களை சரியான கூடைகளில் இடுக" : '')),
+                 (type === 'letter_basket' ? "எழுத்துக்களை சரியான கூடைகளில் இடுக" : 
+                  (type === 'word_builder' ? "சரியான அசை வாய்பாடுகளுக்கு ஏற்ப வார்த்தைகளை உருவாக்கவும்:" : ''))),
       options: data?.options || [
         { text: '', isCorrect: true },
         { text: '', isCorrect: false }
       ],
-      text: data?.text || '',
+      text: data?.text || (type === 'word_builder' ? 'கல்வி, வாழ்க' : ''),
       front: data?.front || '',
       back: data?.back || '',
       audioUrl: data?.audioUrl || '',
@@ -209,6 +211,11 @@ export class ActivityBlock {
         icon = 'bi-bucket';
         details = `Question: "${this.data.question || ''}" | Letters: ${this.data.items?.length || 0}`;
         break;
+      case 'word_builder':
+        typeLabel = 'Word Builder';
+        icon = 'bi-grid-fill';
+        details = `Question: "${this.data.question || ''}" | Words: "${this.data.text || ''}"`;
+        break;
     }
     return { typeLabel, icon, details };
   }
@@ -275,6 +282,7 @@ export class ActivityBlock {
             <option value="odd_one_out" ${tempData.type === 'odd_one_out' ? 'selected' : ''}>Odd One Out</option>
             <option value="word_hunt" ${tempData.type === 'word_hunt' ? 'selected' : ''}>Hunt Words</option>
             <option value="letter_basket" ${tempData.type === 'letter_basket' ? 'selected' : ''}>Letter Basket</option>
+            <option value="word_builder" ${tempData.type === 'word_builder' ? 'selected' : ''}>Word Builder</option>
           </select>
           <div class="modal-form-container"></div>
         </div>
@@ -326,6 +334,8 @@ export class ActivityBlock {
         renderWordHuntForm(formContainer, tempData, this.renderExplanationInput);
       } else if (type === 'letter_basket') {
         renderLetterBasketForm(formContainer, tempData, this.renderExplanationInput);
+      } else if (type === 'word_builder') {
+        renderWordBuilderForm(formContainer, tempData, this.renderExplanationInput);
       }
     };
 
@@ -393,6 +403,14 @@ export class ActivityBlock {
             { text: 'க்', category: 'மெய் / ஒற்று' },
             { text: 'த்', category: 'மெய் / ஒற்று' }
           ];
+        }
+      }
+      if (tempData.type === 'word_builder') {
+        if (!tempData.question || tempData.question === '') {
+          tempData.question = "சரியான அசை வாய்பாடுகளுக்கு ஏற்ப வார்த்தைகளை உருவாக்கவும்:";
+        }
+        if (!tempData.text || tempData.text === '') {
+          tempData.text = 'கல்வி, வாழ்க';
         }
       }
       renderForm();
@@ -562,6 +580,9 @@ export class ActivityBlock {
         text: item.text || '',
         category: item.category || 'குறில்'
       }));
+    } else if (type === 'word_builder') {
+      savedData.question = this.data.question || '';
+      savedData.text = this.data.text || '';
     }
 
     return savedData;

@@ -15,9 +15,10 @@ import { WritingComponent, WritingData } from '../writing/writing';
 import { OddOneOutComponent, OddOneOutData } from '../odd-one-out/odd-one-out';
 import { WordHuntComponent, WordHuntData } from '../word-hunt/word-hunt';
 import { LetterBasketComponent, LetterBasketData } from '../letter-basket/letter-basket';
+import { WordBuilderComponent, WordBuilderData } from '../word-builder/word-builder';
 
 export interface NormalizedActivity {
-  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket';
+  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'word_builder';
   question?: string;
   text?: string;
   front?: string;
@@ -80,7 +81,8 @@ export interface NormalizedActivity {
     WritingComponent,
     OddOneOutComponent,
     WordHuntComponent,
-    LetterBasketComponent
+    LetterBasketComponent,
+    WordBuilderComponent
   ],
   templateUrl: './activity-renderer.html',
   styleUrls: ['./activity-renderer.css']
@@ -161,7 +163,7 @@ export class ActivityRenderer implements OnChanges {
     
     // 1. Determine type
     let typeInput = raw.type || raw.question_type || 'mcq';
-    let type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' = 'mcq';
+    let type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'word_builder' = 'mcq';
 
     if (['multiple_choice', 'mcq', 'multiple-choice', 'multiplechoice'].includes(typeInput.toLowerCase())) {
       type = 'mcq';
@@ -193,6 +195,8 @@ export class ActivityRenderer implements OnChanges {
       type = 'word_hunt';
     } else if (['letter_basket', 'letter-basket', 'letterbasket'].includes(typeInput.toLowerCase())) {
       type = 'letter_basket';
+    } else if (['word_builder', 'word-builder', 'wordbuilder'].includes(typeInput.toLowerCase())) {
+      type = 'word_builder';
     }
 
     // 2. Extract explanation & options
@@ -275,6 +279,9 @@ export class ActivityRenderer implements OnChanges {
     } else if (type === 'letter_basket') {
       normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.items = raw.items || additional.items || [];
+    } else if (type === 'word_builder') {
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.text = raw.text || raw.question_text || '';
     }
 
     this.normalizedActivity.set(normalized);
@@ -397,6 +404,14 @@ export class ActivityRenderer implements OnChanges {
     this.answered.emit({
       questionId: this.activity?.id,
       type: 'letter_basket',
+      ...event
+    });
+  }
+
+  onWordBuilderAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'word_builder',
       ...event
     });
   }
