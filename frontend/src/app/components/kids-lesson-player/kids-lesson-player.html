@@ -1,4 +1,6 @@
-<div class="lesson-player w-100 h-100 lesson-bg-pattern d-flex flex-column position-fixed top-0 start-0 z-3 animate-slide-up overflow-hidden" style="z-index: 1200 !important; height: 100dvh !important; width: 100vw !important;">
+<div class="lesson-player w-100 h-100 lesson-bg-pattern d-flex flex-column position-fixed top-0 start-0 z-3 animate-slide-up overflow-hidden"
+  [ngClass]="levelThemeClass()"
+  style="z-index: 1200 !important; height: 100dvh !important; width: 100vw !important;">
   
   <!-- Top HUD (Floating widgets) -->
   <header class="position-absolute top-0 start-0 w-100 h-100 pe-none" style="z-index: 1000;">
@@ -340,10 +342,12 @@
       }
 
       @if (step.type === 'activity') {
-      <div class="w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-center mx-auto"
-        style="max-width: 1600px; width: 95%;">
+      <div class="w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-start mx-auto"
+        [class.p-0]="isBalloonPop(step)"
+        [style.max-width]="isBalloonPop(step) ? '100%' : '1600px'"
+        [style.width]="isBalloonPop(step) ? '100%' : '95%'">
         <app-activity-renderer [activity]="step.data.data" [showFeedback]="true"
-          (answered)="onActivityAnswered($event)" class="w-100 h-100"></app-activity-renderer>
+          (answered)="onActivityAnswered($event)" class="w-100 h-100" [class.my-auto]="!isBalloonPop(step)"></app-activity-renderer>
       </div>
       }
 

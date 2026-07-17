@@ -149,7 +149,7 @@
   color: #fff;
   font-weight: 700;
   font-size: 0.9rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
   margin-top: 2px;
 }
 
@@ -208,11 +208,11 @@
   .lesson-player main {
     padding-top: 70px !important;
   }
-  
+
   .reading-content {
     font-size: 1.15rem !important;
   }
-  
+
   .premium-card {
     border-width: 4px !important;
     border-radius: 16px !important;
@@ -223,19 +223,19 @@
   .lesson-player main {
     padding-top: 60px !important;
   }
-  
+
   .reading-content {
     font-size: 1rem !important;
   }
-  
+
   .progress-bar {
     height: 12px !important;
   }
-  
+
   .lesson-player header {
     height: 60px !important;
   }
-  
+
   .lesson-player header button {
     width: 35px !important;
     height: 35px !important;
@@ -264,6 +264,7 @@
     height: 50px;
     border-width: 3px !important;
   }
+
   .slide-nav-btn i {
     font-size: 1.3rem;
   }
@@ -275,6 +276,7 @@
     height: 42px;
     border-width: 2px !important;
   }
+
   .slide-nav-btn i {
     font-size: 1.1rem;
   }
@@ -309,6 +311,7 @@
   .card-stack-container {
     padding-bottom: 30px;
   }
+
   .stack-card {
     padding: 0 15px;
   }
@@ -331,12 +334,16 @@
 }
 
 @keyframes mascotBounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0) scaleY(1);
   }
+
   50% {
     transform: translateY(-20px) scaleY(1.05);
   }
+
   55% {
     transform: translateY(-20px) scaleY(1.05);
   }
@@ -350,6 +357,7 @@
    MOBILE LANDSCAPE ORIENTATION OPTIMIZATIONS (HEIGHT <= 500px)
    ────────────────────────────────────────────────────────────────────────── */
 @media (orientation: landscape) and (max-height: 500px) {
+
   /* Shrink Header height and safe-area top padding */
   .lesson-player header {
     padding-top: max(4px, env(safe-area-inset-top)) !important;
@@ -362,7 +370,7 @@
     transform: scale(0.85) !important;
     transform-origin: center !important;
   }
-  
+
   .lesson-player header .flex-grow-1 {
     margin-top: -2px !important;
   }
@@ -383,7 +391,7 @@
     min-height: 52vh !important;
   }
 
-  .stack-card > div,
+  .stack-card>div,
   .reading-card,
   .pdf-card,
   .remediation-card,
@@ -425,10 +433,12 @@
     font-size: 0.82rem !important;
     line-height: 1.35 !important;
   }
+
   .reading-content p,
   .reading-content li {
     margin-bottom: 0.2rem !important;
   }
+
   .reading-content h1,
   .reading-content h2,
   .reading-content h3 {
@@ -444,18 +454,21 @@
     font-size: 0.85rem !important;
     min-width: 80px !important;
   }
+
   .nav-prev-btn {
     left: 15px !important;
   }
+
   .nav-next-btn {
     right: 15px !important;
   }
 
   /* Position the Feedback Banner lower and hide mascot */
   .feedback-mascot-container {
-    display: none !important; /* Hide feedback mascot on short landscape screens */
+    display: none !important;
+    /* Hide feedback mascot on short landscape screens */
   }
-  
+
   /* Make the feedback banner sit compact at the bottom */
   .position-absolute.start-50.translate-middle-x.animate-bounce-in.pe-auto {
     bottom: 8px !important;
@@ -474,6 +487,7 @@
     width: 36px !important;
     height: 36px !important;
   }
+
   .rounded-5.rounded-md-pill.p-3 .bg-white.text-success i,
   .rounded-5.rounded-md-pill.p-3 .bg-white.text-danger i {
     font-size: 1.4rem !important;
@@ -482,6 +496,7 @@
   .rounded-5.rounded-md-pill.p-3 h2 {
     font-size: 1.1rem !important;
   }
+
   .rounded-5.rounded-md-pill.p-3 p {
     font-size: 0.8rem !important;
   }
@@ -502,7 +517,7 @@
     margin-top: 0 !important;
     margin-bottom: 0.35rem !important;
   }
-  
+
   .premium-card .pb-4,
   .premium-card .pt-2,
   .premium-card .mb-4,
@@ -531,16 +546,20 @@
     height: 36px !important;
     border-width: 2px !important;
   }
+
   .reading-card .glow-btn i {
     font-size: 1.1rem !important;
   }
+
   .reading-card .d-flex.gap-3.bg-white {
     padding: 3px 12px !important;
     gap: 0.5rem !important;
   }
+
   .reading-card .d-flex.gap-3.bg-white .rounded-pill {
     height: 8px !important;
   }
+
   .reading-card .mt-2 {
     margin-top: 0.25rem !important;
   }
@@ -556,7 +575,7 @@
     padding-left: 65px !important;
     padding-right: 65px !important;
   }
-  
+
   .prev-page-btn,
   .next-page-btn {
     position: absolute !important;
@@ -564,11 +583,11 @@
     transform: translateY(-50%) !important;
     z-index: 100 !important;
   }
-  
+
   .prev-page-btn {
     left: 15px !important;
   }
-  
+
   .next-page-btn {
     right: 15px !important;
   }
@@ -578,6 +597,7 @@
   .next-page-btn:hover {
     transform: translateY(-50%) scale(1.08) !important;
   }
+
   .prev-page-btn:active,
   .next-page-btn:active {
     transform: translateY(-50%) scale(0.92) !important;
@@ -589,6 +609,7 @@
    Fixes: mascot wasting horizontal space, reading card whitespace gap
    ────────────────────────────────────────────────────────────────────────── */
 @media (orientation: portrait) and (max-width: 600px) {
+
   /* Hide mascot so full width is used for reading text */
   .mascot-container {
     display: none !important;
@@ -605,7 +626,7 @@
   }
 
   /* The flex row holding mascot + text becomes a full-width column */
-  .reading-card > div.d-flex.gap-4 {
+  .reading-card>div.d-flex.gap-4 {
     flex-direction: column !important;
     gap: 0 !important;
     flex: 1 1 auto !important;
@@ -632,6 +653,7 @@
     padding: 4px 10px !important;
     gap: 6px !important;
   }
+
   .reading-card .d-flex.gap-3.bg-white .rounded-pill {
     height: 10px !important;
   }
@@ -647,10 +669,219 @@
 .inner-page-btn {
   transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
 }
+
 .inner-page-btn:hover {
   transform: translateY(-50%) scale(1.08) !important;
   box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15) !important;
 }
+
 .inner-page-btn:active {
   transform: translateY(-50%) scale(0.92) !important;
+
+  /* 🌵 1. DESERT THEME OVERRIDES 🌵 */
+  .theme-desert.lesson-bg-pattern {
+    background-color: #fdf5e6 !important;
+    background-image: radial-gradient(#f4e3cf 20%, transparent 20%), radial-gradient(#f4e3cf 20%, transparent 20%) !important;
+  }
+
+  .theme-desert .premium-card,
+  .theme-desert .parchment-board {
+    background: #fff8e1 !important;
+    border: 6px solid #f4a460 !important;
+    /* Clay/Desert Orange border */
+    box-shadow: 0 10px 0 rgba(244, 164, 96, 0.5), 0 20px 40px rgba(0, 0, 0, 0.3) !important;
+    color: #5d4037 !important;
+  }
+
+  .theme-desert .text-dark {
+    color: #4e342e !important;
+  }
+
+  .theme-desert .text-secondary {
+    color: #6d4c41 !important;
+  }
+
+  .theme-desert th {
+    background: #ffe0b2 !important;
+    color: #e65100 !important;
+  }
+
+  /* 🌌 2. SPACE THEME OVERRIDES 🌌 */
+  .theme-space.lesson-bg-pattern {
+    background-color: #0d0e15 !important;
+    background-image: radial-gradient(rgba(139, 92, 246, 0.15) 20%, transparent 20%), radial-gradient(rgba(139, 92, 246, 0.15) 20%, transparent 20%) !important;
+  }
+
+  .theme-space .premium-card,
+  .theme-space .parchment-board {
+    background: rgba(22, 24, 43, 0.85) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 4px solid #00e5ff !important;
+    /* Glowing Neon Cyan border */
+    box-shadow: 0 0 30px rgba(0, 229, 255, 0.35), inset 0 0 15px rgba(0, 229, 255, 0.1) !important;
+    color: #e2e8f0 !important;
+  }
+
+  .theme-space .text-dark:not(.reading-card *):not(.option-row *):not(.bubble *):not(.rounded-pill *):not(.btn *):not(.h3 *),
+  .theme-space .text-secondary:not(.reading-card *):not(.option-row *):not(.bubble *):not(.rounded-pill *):not(.btn *):not(.h3 *) {
+    color: #cbd5e1 !important;
+  }
+
+  .theme-space h3.text-primary,
+  .theme-space .text-primary {
+    color: #38bdf8 !important;
+  }
+
+  .theme-space .table-responsive table {
+    background: #16182b !important;
+    color: #e2e8f0 !important;
+    border-color: #2a2e45 !important;
+  }
+
+  .theme-space th {
+    background: #1f223f !important;
+    color: #00e5ff !important;
+    border-bottom: 2px solid #2a2e45 !important;
+  }
+
+  .theme-space td {
+    color: #94a3b8 !important;
+  }
+
+  .theme-space .btn-light {
+    background: #1f223f !important;
+    color: #fff !important;
+    border-color: #2a2e45 !important;
+  }
+
+  /* 🌌 Space Theme Top HUD Buttons & Controls (Glow & High Contrast) 🌌 */
+  .theme-space header button.btn-light {
+    background: rgba(0, 229, 255, 0.15) !important;
+    border-color: #00e5ff !important;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.4) !important;
+  }
+
+  .theme-space header button.btn-light i {
+    color: #00e5ff !important;
+  }
+
+  .theme-space header button.btn-light:hover {
+    background: rgba(0, 229, 255, 0.3) !important;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.7) !important;
+  }
+
+  /* Make progress bar glow in Space theme */
+  .theme-space header .progress {
+    background: rgba(22, 24, 43, 0.8) !important;
+    border-color: #00e5ff !important;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2) !important;
+  }
+
+  .theme-space header .progress-bar {
+    background: linear-gradient(90deg, #00e5ff, #00ff6c) !important;
+    box-shadow: 0 0 8px #00e5ff !important;
+  }
+
+  /* Make heart badge glow in Space theme */
+  .theme-space header .d-flex.text-danger {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4) !important;
+  }
+
+  .theme-space header .d-flex.text-danger span,
+  .theme-space header .d-flex.text-danger i {
+    color: #ff8a8a !important;
+  }
+
+  /* 🌌 Space Theme Child Activity Styles 🌌 */
+  ::ng-deep .theme-space .premium-card h1,
+  ::ng-deep .theme-space .premium-card h2,
+  ::ng-deep .theme-space .premium-card h3,
+  ::ng-deep .theme-space .premium-card h4,
+  ::ng-deep .theme-space .premium-card h5,
+  ::ng-deep .theme-space .premium-card p,
+  ::ng-deep .theme-space .premium-card label,
+  ::ng-deep .theme-space .premium-card .text-dark,
+  ::ng-deep .theme-space .premium-card .text-secondary {
+    color: #f8fafc !important;
+    text-shadow: none !important;
+  }
+
+  /* Keep choice option row labels and bubble letters dark/high contrast on their light backgrounds */
+  ::ng-deep .theme-space .premium-card .option-row,
+  ::ng-deep .theme-space .premium-card .option-row span,
+  ::ng-deep .theme-space .premium-card .option-row .bubble,
+  ::ng-deep .theme-space .premium-card .btn-light,
+  ::ng-deep .theme-space .premium-card .btn-light span,
+  ::ng-deep .theme-space .premium-card .draggable-item,
+  ::ng-deep .theme-space .premium-card .draggable-item *,
+  ::ng-deep .theme-space .premium-card .basket-item,
+  ::ng-deep .theme-space .premium-card .basket-item *,
+  ::ng-deep .theme-space .premium-card .match-card,
+  ::ng-deep .theme-space .premium-card .match-card *,
+  ::ng-deep .theme-space .premium-card .word-box,
+  ::ng-deep .theme-space .premium-card .word-box * {
+    color: #1e293b !important;
+    text-shadow: none !important;
+  }
+
+  /* 🌵 Desert Theme Child Activity Styles 🌵 */
+  ::ng-deep .theme-desert .premium-card h1,
+  ::ng-deep .theme-desert .premium-card h2,
+  ::ng-deep .theme-desert .premium-card h3,
+  ::ng-deep .theme-desert .premium-card h4,
+  ::ng-deep .theme-desert .premium-card h5,
+  ::ng-deep .theme-desert .premium-card p,
+  ::ng-deep .theme-desert .premium-card label,
+  ::ng-deep .theme-desert .premium-card .text-dark,
+  ::ng-deep .theme-desert .premium-card .text-secondary {
+    color: #4e342e !important;
+    text-shadow: none !important;
+  }
+
+  ::ng-deep .theme-desert .premium-card .option-row,
+  ::ng-deep .theme-desert .premium-card .option-row span,
+  ::ng-deep .theme-desert .premium-card .option-row .bubble,
+  ::ng-deep .theme-desert .premium-card .btn-light,
+  ::ng-deep .theme-desert .premium-card .btn-light span,
+  ::ng-deep .theme-desert .premium-card .draggable-item,
+  ::ng-deep .theme-desert .premium-card .draggable-item *,
+  ::ng-deep .theme-desert .premium-card .basket-item,
+  ::ng-deep .theme-desert .premium-card .basket-item *,
+  ::ng-deep .theme-desert .premium-card .match-card,
+  ::ng-deep .theme-desert .premium-card .match-card *,
+  ::ng-deep .theme-desert .premium-card .word-box,
+  ::ng-deep .theme-desert .premium-card .word-box * {
+    color: #4e342e !important;
+    text-shadow: none !important;
+  }
+
+  /* Force solid opaque backgrounds on MCQ correct/incorrect choices to avoid bleeding */
+  ::ng-deep body .premium-card .option-row.correct {
+    background: #d1fae5 !important;
+    border-color: #10b981 !important;
+  }
+
+  ::ng-deep body .premium-card .option-row.correct span {
+    color: #065f46 !important;
+  }
+
+  ::ng-deep body .premium-card .option-row.incorrect {
+    background: #fee2e2 !important;
+    border-color: #ef4444 !important;
+  }
+
+  ::ng-deep body .premium-card .option-row.incorrect span {
+    color: #991b1b !important;
+  }
+
+  /* Keep inner cards (like sub-blocks inside Practice Engine) and button groups dark-labeled */
+  ::ng-deep .theme-space .premium-card .card,
+  ::ng-deep .theme-space .premium-card .card *,
+  ::ng-deep .theme-space .premium-card .btn-group,
+  ::ng-deep .theme-space .premium-card .btn-group * {
+    color: #1e293b !important;
+    text-shadow: none !important;
+  }
 }

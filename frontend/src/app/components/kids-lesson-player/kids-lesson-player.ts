@@ -31,6 +31,7 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
   coins = input<number>(0);
   activityFeedbackState = input<'correct' | 'incorrect' | null>(null);
   heartRefillTimer = input<number>(0);
+  levelThemeClass = input<string>('theme-forest');
 
   @ViewChild('practiceEngine') practiceEngine?: PracticeEngineComponent;
 
@@ -611,5 +612,11 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
     };
 
     type();
+  }
+
+  isBalloonPop(step: any): boolean {
+    if (!step || step.type !== 'activity' || !step.data?.data) return false;
+    const type = step.data.data.type || step.data.data.question_type || '';
+    return ['balloon_pop', 'balloon-pop', 'balloonpop'].includes(type.toLowerCase());
   }
 }
