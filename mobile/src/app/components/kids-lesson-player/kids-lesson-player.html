@@ -231,14 +231,17 @@
         </div>
 
         <!-- Navigation Controls -->
-        <div class="d-flex justify-content-between align-items-center w-100 mt-2 px-2 px-md-4">
+        <div class="d-flex justify-content-between align-items-center w-100 mt-2 px-2 px-md-4 reading-nav-container" style="z-index: 100;">
+          <!-- Left Arrow -->
           <button
-            class="btn btn-light rounded-circle shadow-sm hover-lift d-flex align-items-center justify-content-center glow-btn"
+            class="btn btn-light rounded-circle shadow-sm hover-lift d-flex align-items-center justify-content-center glow-btn inner-page-btn prev-page-btn"
             style="width: 50px; height: 50px; border: 3px solid #cbd5e1;" (click)="prevContentPage()"
             [disabled]="currentContentPage() === 0">
             <i class="bi bi-chevron-left fs-4 text-secondary fw-bold"></i>
           </button>
-          <div class="d-flex gap-3 bg-white px-4 py-2 rounded-pill shadow-sm border border-2 border-light">
+          
+          <!-- Dots -->
+          <div class="d-flex gap-3 bg-white px-4 py-2 rounded-pill shadow-sm border border-2 border-light dots-container">
             @if (step.data.isJson) {
             @for (b of step.data.blocks; track $index) {
             <div class="rounded-pill"
@@ -248,9 +251,11 @@
             }
             }
           </div>
+          
+          <!-- Right Arrow -->
           <button
-            class="btn btn-primary rounded-circle shadow-sm hover-lift d-flex align-items-center justify-content-center text-white glow-btn"
-            style="width: 50px; height: 50px; border: 3px solid white;" (click)="nextContentPage()"
+            class="btn btn-primary rounded-circle shadow-sm hover-lift d-flex align-items-center justify-content-center text-white glow-btn inner-page-btn next-page-btn"
+            style="width: 50px; height: 50px; border: 3px solid white; background: #6366f1; border-color: #4f46e5;" (click)="nextContentPage()"
             [disabled]="(step.data.isJson && currentContentPage() === step.data.blocks.length - 1) || !step.data.isJson">
             <i class="bi bi-chevron-right fs-4 fw-bold"></i>
           </button>

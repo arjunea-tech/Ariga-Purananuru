@@ -372,6 +372,7 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
     this.continueFeedback.emit();
   }
 
+
   nextLessonStep() {
     this.nextStep.emit();
     this.currentContentPage.set(0);

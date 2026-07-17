@@ -1,5 +1,5 @@
-<div class="w-100 d-flex flex-column align-items-center justify-content-center pb-4 pt-2 max-w-md mx-auto" style="max-width: 600px;">
-  <div class="mb-4 text-center">
+<div class="word-hunt-container w-100 d-flex flex-column align-items-center justify-content-center pb-4 pt-2 max-w-md mx-auto" style="max-width: 600px;">
+  <div class="word-hunt-header mb-4 text-center">
     <h3 class="fw-bold text-dark m-0 mt-2 fs-3" style="line-height: 1.5; text-shadow: 0px 4px 10px rgba(255,255,255,0.8), 0px 8px 30px rgba(255,255,255,0.9);" [innerHTML]="activity?.question"></h3>
   </div>
 
@@ -31,34 +31,36 @@
     }
   </div>
 
-  <div class="w-100 d-flex justify-content-center gap-3">
-    @if (!hasSubmitted()) {
-      <button 
-        type="button" 
-        class="btn btn-primary btn-lg rounded-pill px-5 py-3 shadow border-0 text-white font-semibold flex-grow-1"
-        style="transition: all 0.3s ease; background: linear-gradient(135deg, #3b82f6, #2563eb);"
-        [disabled]="selectedIndices().size === 0"
-        (click)="checkAnswers()">
-        Check Answer
-      </button>
-    } @else {
-      <button 
-        type="button" 
-        class="btn btn-outline-secondary btn-lg rounded-pill px-5 py-3 flex-grow-1"
-        (click)="reset()">
-        Retry
-      </button>
+  <div class="word-hunt-actions w-100 d-flex flex-column gap-3">
+    <div class="w-100 d-flex justify-content-center gap-3">
+      @if (!hasSubmitted()) {
+        <button 
+          type="button" 
+          class="btn btn-primary btn-lg rounded-pill px-5 py-3 shadow border-0 text-white font-semibold flex-grow-1"
+          style="transition: all 0.3s ease; background: linear-gradient(135deg, #3b82f6, #2563eb);"
+          [disabled]="selectedIndices().size === 0"
+          (click)="checkAnswers()">
+          Check Answer
+        </button>
+      } @else {
+        <button 
+          type="button" 
+          class="btn btn-outline-secondary btn-lg rounded-pill px-5 py-3 flex-grow-1"
+          (click)="reset()">
+          Retry
+        </button>
+      }
+    </div>
+
+    <!-- Expandable Explanation Block -->
+    @if (showFeedback && hasSubmitted() && activity?.explanation) {
+      <div class="animate-fade-in mt-4 rounded-3 p-4 bg-warning bg-opacity-10 border-start border-4 border-warning w-100">
+        <div class="d-flex align-items-center gap-2 fw-bold text-warning mb-2" style="font-size: 0.9rem;">
+          <i class="bi bi-info-circle-fill"></i>
+          <span>Explanation</span>
+        </div>
+        <p class="m-0" style="color: #451a03; font-size: 0.925rem; line-height: 1.5;">{{ activity?.explanation }}</p>
+      </div>
     }
   </div>
-
-  <!-- Expandable Explanation Block -->
-  @if (showFeedback && hasSubmitted() && activity?.explanation) {
-    <div class="animate-fade-in mt-4 rounded-3 p-4 bg-warning bg-opacity-10 border-start border-4 border-warning w-100">
-      <div class="d-flex align-items-center gap-2 fw-bold text-warning mb-2" style="font-size: 0.9rem;">
-        <i class="bi bi-info-circle-fill"></i>
-        <span>Explanation</span>
-      </div>
-      <p class="m-0" style="color: #451a03; font-size: 0.925rem; line-height: 1.5;">{{ activity?.explanation }}</p>
-    </div>
-  }
 </div>
