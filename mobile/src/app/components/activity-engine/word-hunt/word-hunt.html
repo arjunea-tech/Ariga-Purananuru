@@ -18,13 +18,15 @@
         (click)="toggleSelect(idx)">
         <span class="cell-text">{{ box.text }}</span>
         
-        <div class="cell-feedback" *ngIf="showFeedback && hasSubmitted()">
-          @if (box.isCorrect) {
-            <i class="bi bi-check-circle-fill text-success fs-5"></i>
-          } @else if (selectedIndices().has(idx)) {
-            <i class="bi bi-x-circle-fill text-danger fs-5"></i>
-          }
-        </div>
+        @if (showFeedback && hasSubmitted()) {
+          <div class="cell-feedback">
+            @if (box.isCorrect) {
+              <i class="bi bi-check-circle-fill text-success fs-5"></i>
+            } @else if (selectedIndices().has(idx)) {
+              <i class="bi bi-x-circle-fill text-danger fs-5"></i>
+            }
+          </div>
+        }
       </button>
     }
   </div>

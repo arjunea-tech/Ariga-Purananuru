@@ -98,8 +98,8 @@ export class ActivityBlock {
       items: data?.items?.length ? data.items : (type === 'letter_basket' ? [
         { text: 'அ', category: 'குறில்' },
         { text: 'ஆ', category: 'நெடில்' },
-        { text: 'க்', category: 'மெய்' },
-        { text: 'த்', category: 'ஒற்று' }
+        { text: 'க்', category: 'மெய் / ஒற்று' },
+        { text: 'த்', category: 'மெய் / ஒற்று' }
       ] : []),
       targetWord: data?.targetWord || (type === 'word_hunt' ? 'கல்வி' : ''),
       letterCount: data?.letterCount || data?.items?.length || 10
@@ -390,8 +390,8 @@ export class ActivityBlock {
           tempData.items = [
             { text: 'அ', category: 'குறில்' },
             { text: 'ஆ', category: 'நெடில்' },
-            { text: 'க்', category: 'மெய்' },
-            { text: 'த்', category: 'ஒற்று' }
+            { text: 'க்', category: 'மெய் / ஒற்று' },
+            { text: 'த்', category: 'மெய் / ஒற்று' }
           ];
         }
       }

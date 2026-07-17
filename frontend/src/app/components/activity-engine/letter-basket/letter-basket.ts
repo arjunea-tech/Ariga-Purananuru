@@ -74,13 +74,12 @@ export class LetterBasketComponent implements OnChanges {
 
   @Output() answered = new EventEmitter<{ isCorrect: boolean }>();
 
-  categories = ['குறில்', 'நெடில்', 'மெய்', 'ஒற்று'];
+  categories = ['குறில்', 'நெடில்', 'மெய் / ஒற்று'];
   cloudLetters = signal<BasketItem[]>([]);
   placedLetters = signal<{ [key: string]: BasketItem[] }>({
     'குறில்': [],
     'நெடில்': [],
-    'மெய்': [],
-    'ஒற்று': []
+    'மெய் / ஒற்று': []
   });
 
   selectedLetter = signal<BasketItem | null>(null);
@@ -104,11 +103,17 @@ export class LetterBasketComponent implements OnChanges {
                           this.activity.items.every(item => !item.text || item.text.trim() === '');
 
     if (!allItemsEmpty) {
-      items = this.activity.items.map((item, idx) => ({
-        id: `item-${idx}`,
-        text: item.text,
-        category: item.category
-      }));
+      items = this.activity.items.map((item, idx) => {
+        let category = item.category;
+        if (category === 'மெய்' || category === 'ஒற்று') {
+          category = 'மெய் / ஒற்று';
+        }
+        return {
+          id: `item-${idx}`,
+          text: item.text,
+          category
+        };
+      });
     } else {
       items = this.generateDynamicItems();
     }
@@ -118,8 +123,7 @@ export class LetterBasketComponent implements OnChanges {
     this.placedLetters.set({
       'குறில்': [],
       'நெடில்': [],
-      'மெய்': [],
-      'ஒற்று': []
+      'மெய் / ஒற்று': []
     });
 
     this.selectedLetter.set(null);
@@ -131,16 +135,16 @@ export class LetterBasketComponent implements OnChanges {
   private generateDynamicItems(): BasketItem[] {
     const kurilSelected = this.shuffleArray([...DYNAMIC_KURIL]).slice(0, 4);
     const nedilSelected = this.shuffleArray([...DYNAMIC_NEDIL]).slice(0, 4);
-    const meiSelected = this.shuffleArray([...DYNAMIC_MEI]).slice(0, 4);
-    const ottruSelected = this.shuffleArray([...DYNAMIC_OTTRU]).slice(0, 3);
+    
+    const combinedMeiOttru = [...new Set([...DYNAMIC_MEI, ...DYNAMIC_OTTRU])];
+    const meiOttruSelected = this.shuffleArray(combinedMeiOttru).slice(0, 5);
 
     const items: BasketItem[] = [];
     let idx = 0;
 
     kurilSelected.forEach(text => items.push({ id: `item-${idx++}`, text, category: 'குறில்' }));
     nedilSelected.forEach(text => items.push({ id: `item-${idx++}`, text, category: 'நெடில்' }));
-    meiSelected.forEach(text => items.push({ id: `item-${idx++}`, text, category: 'மெய்' }));
-    ottruSelected.forEach(text => items.push({ id: `item-${idx++}`, text, category: 'ஒற்று' }));
+    meiOttruSelected.forEach(text => items.push({ id: `item-${idx++}`, text, category: 'மெய் / ஒற்று' }));
 
     return items;
   }
@@ -195,9 +199,7 @@ export class LetterBasketComponent implements OnChanges {
   placeItem(item: BasketItem, category: string): void {
     this.selectedLetter.set(null);
 
-    const isBothBasketLetter = item.text && BOTH_BASKET_LETTERS.includes(item.text);
-    const isCorrect = item.category === category || 
-      (isBothBasketLetter && (category === 'மெய்' || category === 'ஒற்று'));
+    const isCorrect = item.category === category;
 
     if (isCorrect) {
       this.cloudLetters.update(letters => letters.filter(l => l.id !== item.id));
@@ -207,16 +209,7 @@ export class LetterBasketComponent implements OnChanges {
         return copy;
       });
 
-      if (isBothBasketLetter) {
-        this.placedIntimation.set(`நன்று! "${item.text}" என்பது மெய் மற்றும் ஒற்று ஆகிய இரண்டு கூடைகளுக்கும் பொருந்தும்.`);
-        setTimeout(() => {
-          if (this.placedIntimation()?.includes(item.text)) {
-            this.placedIntimation.set(null);
-          }
-        }, 5000);
-      } else {
-        this.placedIntimation.set(null);
-      }
+      this.placedIntimation.set(null);
 
       if (this.cloudLetters().length === 0) {
         this.isComplete.set(true);
