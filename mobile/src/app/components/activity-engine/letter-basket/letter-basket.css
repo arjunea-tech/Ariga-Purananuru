@@ -100,6 +100,68 @@
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
+   DESKTOP / TABLET 2-COLUMN LAYOUT
+   ────────────────────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .letter-basket-container {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    grid-template-rows: auto 1fr !important;
+    gap: 24px !important;
+    max-width: 1000px !important;
+  }
+
+  .letter-basket-header {
+    grid-column: 1 / span 2 !important;
+    grid-row: 1 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .cloud-container {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    height: 100% !important;
+    margin-bottom: 0 !important;
+  }
+
+  .baskets-grid {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  .basket-card {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    min-height: 80px !important;
+    padding: 0.5rem 1rem !important;
+  }
+
+  .basket-header {
+    font-size: 1.1rem !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+    border-bottom: none !important;
+    border-right: 2px dashed #cbd5e1 !important;
+    padding-right: 1rem !important;
+    margin-right: 1rem !important;
+    min-width: 120px !important;
+    text-align: right !important;
+  }
+
+  .basket-dropzone {
+    min-height: 60px !important;
+    flex-grow: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
    MOBILE LANDSCAPE ORIENTATION OPTIMIZATIONS (HEIGHT <= 500px)
    ────────────────────────────────────────────────────────────────────────── */
 @media (orientation: landscape) and (max-height: 500px) {

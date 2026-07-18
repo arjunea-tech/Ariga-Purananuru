@@ -287,3 +287,12 @@
     padding-top: 4px !important;
   }
 }
+
+/* On desktop/laptop/large screens, show challenges side by side in a 2-column grid to avoid vertical scrolling */
+@media (min-width: 992px) {
+  .challenge-rows-container {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 16px !important;
+  }
+}

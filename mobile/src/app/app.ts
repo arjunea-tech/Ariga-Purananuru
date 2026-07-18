@@ -1,6 +1,7 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Location } from '@angular/common';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from './services/auth';
 import { NotificationService } from './services/notification.service';
@@ -8,6 +9,8 @@ import { LoaderService } from './services/loader.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../environments/environment';
 import { StatusBar } from '@capacitor/status-bar';
+import { App as CapApp } from '@capacitor/app';
+import { Capacitor } from '@capacitor/core';
 import { 
   IonApp, IonRouterOutlet
 } from '@ionic/angular/standalone';
@@ -38,6 +41,8 @@ export class App implements OnInit {
   protected notificationService = inject(NotificationService);
   public loaderService = inject(LoaderService);
   private http = inject(HttpClient);
+  private router = inject(Router);
+  private location = inject(Location);
 
   currentLang = signal('en');
   isSidebarOpen = signal(false);
@@ -54,11 +59,31 @@ export class App implements OnInit {
   }
 
   ngOnInit() {
-    // Disable StatusBar overlaying webview on mobile
-    try {
-      StatusBar.setOverlaysWebView({ overlay: false });
-    } catch (e) {
-      console.warn('StatusBar plugin not available:', e);
+    // Only configure native plugins on physical/emulated mobile platforms
+    if (Capacitor.isNativePlatform()) {
+      // Disable StatusBar overlaying webview on mobile
+      try {
+        StatusBar.setOverlaysWebView({ overlay: false }).catch(e => {
+          console.warn('StatusBar plugin not available:', e);
+        });
+      } catch (e) {
+        console.warn('StatusBar plugin error:', e);
+      }
+
+      // Handle Capacitor system back button / back swipe
+      try {
+        CapApp.addListener('backButton', ({ canGoBack }) => {
+          const currentUrl = this.router.url;
+          // If we are on login, dashboard, or there is no history to navigate back to, exit app
+          if (currentUrl === '/login' || currentUrl === '/learn/dashboard' || !canGoBack) {
+            CapApp.exitApp();
+          } else {
+            this.location.back();
+          }
+        });
+      } catch (e) {
+        console.warn('CapApp backButton listener not active:', e);
+      }
     }
 
     const savedLang = localStorage.getItem('userLang') || 'en';

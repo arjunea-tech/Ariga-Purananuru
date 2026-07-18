@@ -292,11 +292,21 @@
       }
 
       @if (step.type === 'activity') {
-        <div class="w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-start mx-auto p-0"
-          style="max-width: 100%; width: 100%; min-height: 0;">
-          <app-activity-renderer [activity]="step.data.data" [showFeedback]="true"
-            (answered)="onActivityAnswered($event)" class="w-100 h-100"></app-activity-renderer>
-        </div>
+        @if (isBalloonPop(step)) {
+          <div class="w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-start mx-auto p-0"
+            style="max-width: 100%; width: 100%; min-height: 0;">
+            <app-activity-renderer [activity]="step.data.data" [showFeedback]="true"
+              (answered)="onActivityAnswered($event)" class="w-100 h-100"></app-activity-renderer>
+          </div>
+        } @else {
+          <div class="w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-center mx-auto p-2"
+            style="max-width: 1000px; width: 100%;">
+            <div class="premium-card w-100 p-3 p-md-4 rounded-4 shadow-lg overflow-y-auto animate-pop-in" style="max-height: 72vh;">
+              <app-activity-renderer [activity]="step.data.data" [showFeedback]="true"
+                (answered)="onActivityAnswered($event)" class="w-100 h-100"></app-activity-renderer>
+            </div>
+          </div>
+        }
       }
 
       @if (step.type === 'practice') {
@@ -359,45 +369,45 @@
     <!-- Floating Feedback Banner -->
     @if (activityFeedbackState() === 'correct') {
     <div class="position-absolute start-50 translate-middle-x animate-bounce-in pe-auto"
-      style="bottom: 30px; width: 95%; max-width: 800px; z-index: 1050;">
-      <div class="rounded-5 rounded-md-pill p-3 px-md-5 d-flex flex-column flex-md-row justify-content-between align-items-center position-relative shadow-lg gap-3 gap-md-0"
-        style="background: #d7ffb8; border: 4px solid #bbf7d0; box-shadow: 0 20px 40px rgba(74, 222, 128, 0.3) !important;">
+      style="bottom: 15px; width: 95%; max-width: 800px; z-index: 1050;">
+      <div class="rounded-5 rounded-md-pill p-2 px-md-4 d-flex flex-column flex-md-row justify-content-between align-items-center position-relative shadow-lg gap-2 gap-md-3"
+        style="background: #d7ffb8; border: 3px solid #bbf7d0; box-shadow: 0 10px 25px rgba(74, 222, 128, 0.3) !important;">
 
         <!-- Mascot Reaction -->
         <div class="position-absolute feedback-mascot-container" style="bottom: -10px;">
           <img src="assets/images/mascot.png" alt="Happy Mascot" class="mascot-happy"
             style="filter: drop-shadow(0 10px 15px rgba(34, 197, 94, 0.5)); transform-origin: bottom center;">
           <i class="bi bi-stars text-warning position-absolute mascot-stars"
-            style="top: -10px; right: -20px; font-size: 2.5rem; animation: ping 1s infinite;"></i>
+            style="top: -10px; right: -20px; font-size: 2rem; animation: ping 1s infinite;"></i>
         </div>
 
         <!-- Message -->
-        <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start gap-2 gap-md-4 ms-md-5 ps-md-5">
+        <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start gap-2 gap-md-3 ms-md-5 ps-md-3">
           <div class="bg-white text-success rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0"
-            style="width: 60px; height: 60px;">
-            <i class="bi bi-check-lg" style="font-size: 2.5rem; -webkit-text-stroke: 3px;"></i>
+            style="width: 45px; height: 45px;">
+            <i class="bi bi-check-lg" style="font-size: 2rem; -webkit-text-stroke: 2px;"></i>
           </div>
           <div>
-            <h2 class="text-success fw-bold mb-0" style="font-size: clamp(1.5rem, 5vw, 2rem); font-family: 'Nunito', sans-serif;">
+            <h2 class="text-success fw-bold mb-0" style="font-size: clamp(1.2rem, 4vw, 1.6rem); font-family: 'Nunito', sans-serif;">
               Awesome!</h2>
-            <p class="text-success text-opacity-75 mb-0 fw-bold fs-6 fs-md-5">You got it right. <span
+            <p class="text-success text-opacity-75 mb-0 fw-bold fs-6">You got it right. <span
                 class="text-warning text-shadow">+10 XP</span></p>
           </div>
         </div>
 
         <!-- Continue Action -->
         <button
-          class="btn btn-success btn-lg rounded-pill px-4 py-2 fw-bold text-white shadow-sm hover-lift border-bottom border-4 w-100 w-md-auto mt-2 mt-md-0"
-          style="border-color: #16a34a !important; font-size: clamp(1.1rem, 4vw, 1.5rem);" (click)="continueFromFeedback()">
+          class="btn btn-success rounded-pill px-4 py-2 fw-bold text-white shadow-sm hover-lift border-bottom border-3 w-100 w-md-auto mt-2 mt-md-0"
+          style="border-color: #16a34a !important; font-size: clamp(1rem, 3vw, 1.2rem);" (click)="continueFromFeedback()">
           CONTINUE <i class="bi bi-arrow-right"></i>
         </button>
       </div>
     </div>
     } @else if (activityFeedbackState() === 'incorrect') {
     <div class="position-absolute start-50 translate-middle-x animate-bounce-in pe-auto"
-      style="bottom: 30px; width: 95%; max-width: 800px; z-index: 1050;">
-      <div class="rounded-5 rounded-md-pill p-3 px-md-5 d-flex flex-column flex-md-row justify-content-between align-items-center position-relative shadow-lg gap-3 gap-md-0"
-        style="background: #fee2e2; border: 4px solid #fecaca; box-shadow: 0 20px 40px rgba(248, 113, 113, 0.3) !important;">
+      style="bottom: 15px; width: 95%; max-width: 800px; z-index: 1050;">
+      <div class="rounded-5 rounded-md-pill p-2 px-md-4 d-flex flex-column flex-md-row justify-content-between align-items-center position-relative shadow-lg gap-2 gap-md-3"
+        style="background: #fee2e2; border: 3px solid #fecaca; box-shadow: 0 10px 25px rgba(248, 113, 113, 0.3) !important;">
 
         <!-- Mascot Reaction -->
         <div class="position-absolute feedback-mascot-container" style="bottom: -10px;">
@@ -406,22 +416,22 @@
         </div>
 
         <!-- Message -->
-        <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start gap-2 gap-md-4 ms-md-5 ps-md-4">
+        <div class="d-flex flex-column flex-md-row align-items-center text-center text-md-start gap-2 gap-md-3 ms-md-5 ps-md-3">
           <div class="bg-white text-danger rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0"
-            style="width: 60px; height: 60px;">
-            <i class="bi bi-x-lg" style="font-size: 2.5rem; -webkit-text-stroke: 3px;"></i>
+            style="width: 45px; height: 45px;">
+            <i class="bi bi-x-lg" style="font-size: 2rem; -webkit-text-stroke: 2px;"></i>
           </div>
           <div>
-            <h2 class="text-danger fw-bold mb-0" style="font-size: clamp(1.5rem, 5vw, 2rem); font-family: 'Nunito', sans-serif;">Not quite
+            <h2 class="text-danger fw-bold mb-0" style="font-size: clamp(1.2rem, 4vw, 1.6rem); font-family: 'Nunito', sans-serif;">Not quite
               right</h2>
-            <p class="text-danger text-opacity-75 mb-0 fw-bold fs-6 fs-md-5">Let's try that again!</p>
+            <p class="text-danger text-opacity-75 mb-0 fw-bold fs-6">Let's try that again!</p>
           </div>
         </div>
 
         <!-- Continue Action -->
         <button
-          class="btn btn-danger btn-lg rounded-pill px-4 py-2 fw-bold text-white shadow-sm hover-lift border-bottom border-4 w-100 w-md-auto mt-2 mt-md-0"
-          style="border-color: #dc2626 !important; font-size: clamp(1.1rem, 4vw, 1.5rem);" (click)="continueFromFeedback()">
+          class="btn btn-danger rounded-pill px-4 py-2 fw-bold text-white shadow-sm hover-lift border-bottom border-3 w-100 w-md-auto mt-2 mt-md-0"
+          style="border-color: #dc2626 !important; font-size: clamp(1rem, 3vw, 1.2rem);" (click)="continueFromFeedback()">
           GOT IT <i class="bi bi-arrow-right"></i>
         </button>
       </div>

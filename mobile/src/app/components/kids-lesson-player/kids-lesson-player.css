@@ -623,44 +623,24 @@
   color: #ff8a8a !important;
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
-   RESPONSIVE MASCOT STYLING
-   ────────────────────────────────────────────────────────────────────────── */
-.mascot-container {
-  width: 90px;
-}
-@media (min-width: 576px) {
-  .mascot-container {
-    width: 120px;
-  }
-}
-@media (min-width: 992px) {
-  .mascot-container {
-    width: 180px;
-  }
+/* Feedback Mascot Styling */
+.feedback-mascot-container {
+  position: absolute !important;
+  bottom: -10px !important;
+  left: 10px !important;
+  z-index: 10 !important;
+  pointer-events: none !important;
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
-   RESPONSIVE FEEDBACK MASCOT STYLING
-   ────────────────────────────────────────────────────────────────────────── */
-.feedback-mascot-container {
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  bottom: calc(100% - 15px) !important;
-  z-index: 10;
-}
-.feedback-mascot-container .mascot-happy {
-  width: 115px !important;
-}
+.feedback-mascot-container .mascot-happy,
 .feedback-mascot-container .mascot-sad {
-  width: 105px !important;
+  width: 90px !important;
+  height: auto !important;
 }
 
 @media (min-width: 768px) {
   .feedback-mascot-container {
     left: -20px !important;
-    transform: none !important;
-    bottom: -10px !important;
   }
   .feedback-mascot-container .mascot-happy {
     width: 130px !important;
@@ -670,14 +650,12 @@
   }
 }
 
-/* ──────────────────────────────────────────────────────────────────────────
-   MOBILE LANDSCAPE ORIENTATION OPTIMIZATIONS (HEIGHT <= 500px)
-   ────────────────────────────────────────────────────────────────────────── */
-@media (orientation: landscape) and (max-height: 500px) {
+/* LANDSCAPE ORIENTATION OPTIMIZATIONS */
+@media (orientation: landscape) {
   /* Shrink Header height and safe-area top padding */
   .lesson-player header {
     padding-top: max(4px, env(safe-area-inset-top)) !important;
-    height: calc(38px + max(4px, env(safe-area-inset-top))) !important;
+    height: calc(44px + max(4px, env(safe-area-inset-top))) !important;
   }
 
   /* Shrink header controls and progress bar */
@@ -693,18 +671,18 @@
 
   /* Shrink main container top padding to match smaller header */
   .lesson-player main {
-    padding-top: calc(44px + max(4px, env(safe-area-inset-top))) !important;
+    padding-top: calc(50px + max(4px, env(safe-area-inset-top))) !important;
     padding-bottom: 45px !important;
   }
 
   /* Reading/Content Slide Card adjustments */
   .card-stack-container {
-    min-height: 55vh !important;
+    min-height: 60vh !important;
     padding-bottom: 10px !important;
   }
 
   .stack-card {
-    min-height: 52vh !important;
+    min-height: 55vh !important;
   }
 
   .stack-card > div,
@@ -712,21 +690,31 @@
   .pdf-card,
   .remediation-card,
   .assessment-card {
-    min-height: 75vh !important;
-    max-height: 82vh !important;
-    padding: 4px 12px !important;
+    height: 76vh !important;
+    min-height: auto !important;
+    max-height: 78vh !important;
+    padding: 10px 20px !important;
     border-width: 2px !important;
-    border-radius: 12px !important;
-    overflow-y: auto !important;
+    border-radius: 16px !important;
+    overflow: hidden !important; /* Prevents card itself from scrolling */
   }
 
   .premium-card {
     min-height: auto !important;
-    max-height: 82vh !important;
-    padding: 4px 12px !important;
+    max-height: 78vh !important;
+    padding: 10px 20px !important;
     border-width: 2px !important;
-    border-radius: 12px !important;
+    border-radius: 16px !important;
     overflow-y: auto !important;
+  }
+
+  /* Let the text zone scroll internally with smooth scroll */
+  .reading-content {
+    max-height: 52vh !important;
+    height: auto !important;
+    overflow-y: auto !important;
+    padding-left: 65px !important;
+    padding-right: 65px !important;
   }
 
   /* Hide Title Badges inside cards to save vertical space */
@@ -745,14 +733,11 @@
   }
 
   /* Tighter font sizes so more content is visible without scrolling */
-  .reading-content {
-    font-size: 0.82rem !important;
-    line-height: 1.35 !important;
-  }
   .reading-content p,
   .reading-content li {
     margin-bottom: 0.2rem !important;
   }
+
   .reading-content h1,
   .reading-content h2,
   .reading-content h3 {
@@ -775,9 +760,16 @@
     right: 15px !important;
   }
 
-  /* Position the Feedback Banner lower and hide mascot */
-  .feedback-mascot-container {
-    display: none !important; /* Hide feedback mascot on short landscape screens */
+  /* Scale down the mascot on mobile landscape (short screens) to fit the viewport */
+  @media (max-height: 670px) {
+    .feedback-mascot-container {
+      bottom: -5px !important;
+      left: 5px !important;
+    }
+    .feedback-mascot-container .mascot-happy,
+    .feedback-mascot-container .mascot-sad {
+      width: 70px !important;
+    }
   }
   
   /* Make the feedback banner sit compact at the bottom */
@@ -814,6 +806,110 @@
     padding: 4px 12px !important;
     font-size: 0.85rem !important;
     margin-top: 0 !important;
+  }
+
+  /* Generic scaling overrides for any inner activity components in landscape mode */
+  .premium-card h1,
+  .premium-card h2,
+  .premium-card h3,
+  .premium-card .fs-2,
+  .premium-card .fs-3 {
+    font-size: 1.05rem !important;
+    margin-top: 0 !important;
+    margin-bottom: 0.35rem !important;
+  }
+  
+  .premium-card .pb-4,
+  .premium-card .pt-2,
+  .premium-card .mb-4,
+  .premium-card .mt-4 {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .premium-card img:not(.matched-img-mini) {
+    max-height: 80px !important;
+    object-fit: contain !important;
+  }
+
+  .premium-card .btn-primary,
+  .premium-card .btn-warning,
+  .premium-card .btn-success {
+    padding: 0.35rem 0.85rem !important;
+    font-size: 0.75rem !important;
+  }
+
+  /* Shrink internal content navigation controls in reading card */
+  .reading-card .glow-btn {
+    width: 36px !important;
+    height: 36px !important;
+    border-width: 2px !important;
+  }
+  .reading-card .glow-btn i {
+    font-size: 1.1rem !important;
+  }
+  .reading-card .d-flex.gap-3.bg-white {
+    padding: 3px 12px !important;
+    gap: 0.5rem !important;
+  }
+  .reading-card .d-flex.gap-3.bg-white .rounded-pill {
+    height: 8px !important;
+  }
+  .reading-card .mt-2 {
+    margin-top: 0.25rem !important;
+  }
+
+  /* Reposition inner navigation controls in landscape */
+  .reading-nav-container {
+    position: static !important;
+    justify-content: center !important;
+  }
+
+  .prev-page-btn,
+  .next-page-btn {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 100 !important;
+  }
+  
+  .prev-page-btn {
+    left: 15px !important;
+  }
+  
+  .next-page-btn {
+    right: 15px !important;
+  }
+
+  /* Custom hover/active scales that preserve translateY(-50%) centering */
+  .prev-page-btn:hover,
+  .next-page-btn:hover {
+    transform: translateY(-50%) scale(1.08) !important;
+  }
+  .prev-page-btn:active,
+  .next-page-btn:active {
+    transform: translateY(-50%) scale(0.92) !important;
+  }
+
+  /* For short mobile viewports in landscape */
+  @media (max-height: 600px) {
+    .reading-content {
+      font-size: 0.85rem !important;
+      line-height: 1.35 !important;
+    }
+    .stack-card>div,
+    .reading-card,
+    .pdf-card,
+    .remediation-card,
+    .assessment-card {
+      height: 82vh !important;
+      max-height: 86vh !important;
+    }
+    .reading-content {
+      max-height: 58vh !important;
+    }
   }
 
   /* Generic scaling overrides for any inner activity components in landscape mode */
