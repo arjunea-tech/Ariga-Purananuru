@@ -1,6 +1,6 @@
 <div class="word-builder-activity card border-0 shadow-sm rounded-4 p-4 mb-4">
   <!-- Question Title -->
-  <div class="d-flex align-items-center mb-4">
+  <div class="d-flex align-items-center mb-4 wb-activity-header">
     <div class="activity-icon-container bg-primary-subtle text-primary rounded-3 p-2 me-3">
       <i class="bi bi-grid-fill fs-4"></i>
     </div>
@@ -85,7 +85,7 @@
 
   <!-- Draggable Letter Pool -->
   <div class="letter-pool-section p-3 bg-light rounded-4 mb-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 wb-pool-header">
       <h4 class="h6 fw-bold text-dark mb-0">எழுத்துக்கள் குவியல் (Letter Pool)</h4>
       <small class="text-muted">இழுத்து விடவும் (Drag & Drop) அல்லது தேர்ந்தெடுத்து பெட்டியை சொடுக்கவும்</small>
     </div>
@@ -106,7 +106,7 @@
   </div>
 
   <!-- Overall Actions / Bottom feedback -->
-  <div class="d-flex justify-content-between align-items-center border-top pt-3">
+  <div class="d-flex justify-content-between align-items-center border-top pt-3 wb-bottom-actions">
     <button class="btn btn-outline-secondary rounded-3 px-4" (click)="resetPuzzle()">
       <i class="bi bi-arrow-counterclockwise me-2"></i>மறுதொடக்கம் (Reset)
     </button>
