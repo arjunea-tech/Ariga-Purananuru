@@ -71,3 +71,89 @@ textarea::placeholder {
     padding-right: 0 !important;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   MOBILE LANDSCAPE ORIENTATION OPTIMIZATIONS (HEIGHT <= 670px)
+   ────────────────────────────────────────────────────────────────────────── */
+@media (orientation: landscape) and (max-height: 670px) {
+  /* Scale down the main menu header / input headers */
+  h2, h3, h4 {
+    font-size: 1.3rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+  p {
+    font-size: 0.85rem !important;
+    margin-bottom: 0.2rem !important;
+  }
+  
+  /* Shrink cards and buttons */
+  .card.p-4, .card.p-3 {
+    padding: 10px !important;
+  }
+  .btn.p-4 {
+    padding: 8px 12px !important;
+    font-size: 0.95rem !important;
+  }
+  .btn i.fs-1 {
+    font-size: 1.5rem !important;
+    margin-bottom: 0 !important;
+    margin-right: 8px !important;
+    display: inline-block !important;
+  }
+  
+  /* Make the Mode selection buttons horizontal */
+  .btn.d-flex.flex-column {
+    flex-direction: row !important;
+    justify-content: center !important;
+    gap: 8px !important;
+  }
+
+  /* Hide main standalone header in landscape to save vertical space */
+  .bg-primary.text-white.p-4.text-center.position-relative {
+    display: none !important;
+  }
+
+  /* Shrink Textarea in landscape */
+  textarea.form-control {
+    font-size: 1rem !important;
+    padding: 8px !important;
+    height: 60px !important;
+    min-height: 60px !important;
+  }
+
+  /* Force Input container to always be a row in landscape */
+  .flex-column.flex-md-row {
+    flex-direction: row !important;
+  }
+
+  /* Make sure tables have a max height and can scroll internally */
+  .table-responsive {
+    max-height: 40vh !important;
+    overflow-y: auto !important;
+  }
+
+  /* Shrink table content */
+  .table td, .table th {
+    padding: 4px 8px !important;
+    font-size: 0.9rem !important;
+  }
+  .fs-2 {
+    font-size: 1.3rem !important;
+  }
+  .fs-5 {
+    font-size: 0.95rem !important;
+  }
+  
+  /* Asai/Seer Result blocks */
+  .card.shadow-sm.p-2 {
+    padding: 4px !important;
+  }
+  .card h3 {
+    font-size: 1.1rem !important;
+    margin-bottom: 4px !important;
+  }
+  .btn-group .btn {
+    padding: 2px 6px !important;
+    font-size: 0.8rem !important;
+  }
+}

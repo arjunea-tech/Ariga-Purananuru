@@ -437,8 +437,8 @@
   color: #e2e8f0 !important;
 }
 
-.theme-space .text-dark:not(.reading-card *):not(.option-row *):not(.bubble *):not(.rounded-pill *):not(.btn *):not(.h3 *),
-.theme-space .text-secondary:not(.reading-card *):not(.option-row *):not(.bubble *):not(.rounded-pill *):not(.btn *):not(.h3 *) {
+.theme-space .text-dark:not(.reading-card *):not(.option-row *):not(.bubble *):not(.rounded-pill *):not(.btn *):not(.h3 *):not(textarea):not(.form-control),
+.theme-space .text-secondary:not(.reading-card *):not(.option-row *):not(.bubble *):not(.rounded-pill *):not(.btn *):not(.h3 *):not(textarea):not(.form-control) {
   color: #cbd5e1 !important;
 }
 
@@ -487,6 +487,16 @@
   text-shadow: none !important;
 }
 
+/* Restore text colors for dark elements that are explicitly placed on light backgrounds */
+::ng-deep .theme-space .premium-card .bg-white .text-dark,
+::ng-deep .theme-space .premium-card .bg-light .text-dark {
+  color: #212529 !important;
+}
+::ng-deep .theme-space .premium-card .bg-white .text-secondary,
+::ng-deep .theme-space .premium-card .bg-light .text-secondary {
+  color: #6c757d !important;
+}
+
 /* Keep choice option row labels and bubble letters dark/high contrast on their light backgrounds */
 ::ng-deep .theme-space .premium-card .option-row,
 ::ng-deep .theme-space .premium-card .option-row span,
@@ -500,9 +510,22 @@
 ::ng-deep .theme-space .premium-card .match-card,
 ::ng-deep .theme-space .premium-card .match-card *,
 ::ng-deep .theme-space .premium-card .word-box,
-::ng-deep .theme-space .premium-card .word-box * {
+::ng-deep .theme-space .premium-card .word-box *,
+::ng-deep .theme-space .premium-card textarea,
+::ng-deep .theme-space .premium-card .form-control {
   color: #1e293b !important;
   text-shadow: none !important;
+}
+
+/* Protect Remediation Card text color from being inverted by theme overrides */
+::ng-deep .theme-space .remediation-card .text-dark,
+::ng-deep .remediation-card .text-dark {
+  color: #212529 !important;
+  text-shadow: none !important;
+}
+::ng-deep .theme-space .remediation-card .text-danger,
+::ng-deep .remediation-card .text-danger {
+  color: #dc2626 !important;
 }
 
 /* 🌵 Desert Theme Child Activity Styles 🌵 */
@@ -760,6 +783,25 @@
     right: 15px !important;
   }
 
+  .remediation-card {
+    padding: 15px !important;
+    border-width: 4px !important;
+  }
+  .remediation-card h2 {
+    font-size: 1.5rem !important;
+    margin-bottom: 0.5rem !important;
+    margin-top: 1rem !important;
+  }
+  .remediation-card p {
+    font-size: 1rem !important;
+    margin-bottom: 1rem !important;
+    line-height: 1.4 !important;
+  }
+  .remediation-card button {
+    font-size: 1rem !important;
+    padding: 8px 16px !important;
+  }
+
   /* Scale down the mascot on mobile landscape (short screens) to fit the viewport */
   @media (max-height: 670px) {
     .feedback-mascot-container {
@@ -778,34 +820,46 @@
     width: 98% !important;
   }
 
-  .rounded-5.rounded-md-pill.p-3 {
-    padding: 6px 15px !important;
-    border-radius: 16px !important;
+  .rounded-5.rounded-md-pill.p-2 {
+    padding: 4px 12px !important;
+    border-radius: 12px !important;
     border-width: 2px !important;
     gap: 8px !important;
+    flex-direction: row !important;
   }
 
-  .rounded-5.rounded-md-pill.p-3 .bg-white.text-success,
-  .rounded-5.rounded-md-pill.p-3 .bg-white.text-danger {
-    width: 36px !important;
-    height: 36px !important;
-  }
-  .rounded-5.rounded-md-pill.p-3 .bg-white.text-success i,
-  .rounded-5.rounded-md-pill.p-3 .bg-white.text-danger i {
-    font-size: 1.4rem !important;
+  .rounded-5.rounded-md-pill.p-2 > .d-flex {
+    flex-direction: row !important;
+    gap: 8px !important;
+    text-align: left !important;
+    margin-left: 0 !important;
+    padding-left: 20px !important; /* Space for scaled down mascot */
   }
 
-  .rounded-5.rounded-md-pill.p-3 h2 {
+  .rounded-5.rounded-md-pill.p-2 .bg-white.text-success,
+  .rounded-5.rounded-md-pill.p-2 .bg-white.text-danger {
+    width: 32px !important;
+    height: 32px !important;
+  }
+  .rounded-5.rounded-md-pill.p-2 .bg-white.text-success i,
+  .rounded-5.rounded-md-pill.p-2 .bg-white.text-danger i {
+    font-size: 1.2rem !important;
+  }
+
+  .rounded-5.rounded-md-pill.p-2 h2 {
     font-size: 1.1rem !important;
+    white-space: nowrap !important;
   }
-  .rounded-5.rounded-md-pill.p-3 p {
+  .rounded-5.rounded-md-pill.p-2 p {
     font-size: 0.8rem !important;
+    white-space: nowrap !important;
   }
 
-  .rounded-5.rounded-md-pill.p-3 button {
+  .rounded-5.rounded-md-pill.p-2 button {
     padding: 4px 12px !important;
     font-size: 0.85rem !important;
     margin-top: 0 !important;
+    width: auto !important;
   }
 
   /* Generic scaling overrides for any inner activity components in landscape mode */
