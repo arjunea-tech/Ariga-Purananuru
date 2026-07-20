@@ -18,9 +18,15 @@ import { LetterBasketComponent, LetterBasketData } from '../letter-basket/letter
 import { BalloonPopComponent, BalloonPopData } from '../balloon-pop/balloon-pop';
 import { WordBuilderComponent, WordBuilderData } from '../word-builder/word-builder';
 import { YappuFlashcardComponent } from '../yappu-flashcard/yappu-flashcard';
+import { YappuSeerComponent } from '../yappu-seer/yappu-seer';
+import { YappuSeerP2nComponent } from '../yappu-seer-p2n/yappu-seer-p2n';
+import { YappuSeerN2pComponent } from '../yappu-seer-n2p/yappu-seer-n2p';
+import { YappuSeerBuildComponent } from '../yappu-seer-build/yappu-seer-build';
+import { YappuSeerSpeedComponent } from '../yappu-seer-speed/yappu-seer-speed';
+import { YappuSeerMatchComponent } from '../yappu-seer-match/yappu-seer-match';
 
 export interface NormalizedActivity {
-  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard';
+  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard' | 'yappu_seer' | 'yappu_seer_p2n' | 'yappu_seer_n2p' | 'yappu_seer_build' | 'yappu_seer_speed' | 'yappu_seer_match';
   question?: string;
   text?: string;
   front?: string;
@@ -92,7 +98,13 @@ export interface NormalizedActivity {
     LetterBasketComponent,
     BalloonPopComponent,
     WordBuilderComponent,
-    YappuFlashcardComponent
+    YappuFlashcardComponent,
+    YappuSeerComponent,
+    YappuSeerP2nComponent,
+    YappuSeerN2pComponent,
+    YappuSeerBuildComponent,
+    YappuSeerSpeedComponent,
+    YappuSeerMatchComponent
   ],
   templateUrl: './activity-renderer.html',
   styleUrls: ['./activity-renderer.css']
@@ -173,7 +185,7 @@ export class ActivityRenderer implements OnChanges {
 
     // 1. Determine type
     let typeInput = raw.type || raw.question_type || 'mcq';
-    let type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard' = 'mcq';
+    let type: NormalizedActivity['type'] = 'mcq';
 
     if (['multiple_choice', 'mcq', 'multiple-choice', 'multiplechoice'].includes(typeInput.toLowerCase())) {
       type = 'mcq';
@@ -211,6 +223,18 @@ export class ActivityRenderer implements OnChanges {
       type = 'word_builder';
     } else if (['yappu_flashcard', 'yappu-flashcard', 'yappuflashcard', 'flashcard_yappu'].includes(typeInput.toLowerCase())) {
       type = 'yappu_flashcard';
+    } else if (['yappu_seer', 'yappu-seer', 'seer_game', 'seer-game'].includes(typeInput.toLowerCase())) {
+      type = 'yappu_seer';
+    } else if (typeInput.toLowerCase() === 'yappu_seer_p2n') {
+      type = 'yappu_seer_p2n';
+    } else if (typeInput.toLowerCase() === 'yappu_seer_n2p') {
+      type = 'yappu_seer_n2p';
+    } else if (typeInput.toLowerCase() === 'yappu_seer_build') {
+      type = 'yappu_seer_build';
+    } else if (typeInput.toLowerCase() === 'yappu_seer_speed') {
+      type = 'yappu_seer_speed';
+    } else if (typeInput.toLowerCase() === 'yappu_seer_match') {
+      type = 'yappu_seer_match';
     }
 
     // 2. Extract explanation & options
@@ -308,6 +332,9 @@ export class ActivityRenderer implements OnChanges {
       normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.text = raw.text || raw.question_text || '';
       normalized.syllableCount = raw.syllableCount || additional.syllableCount || 1;
+    } else if (type === 'yappu_seer' || type.startsWith('yappu_seer_')) {
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.level = raw.level || additional.level || 2;
     }
 
     this.normalizedActivity.set(normalized);
@@ -454,6 +481,14 @@ export class ActivityRenderer implements OnChanges {
     this.answered.emit({
       questionId: this.activity?.id,
       type: 'yappu_flashcard',
+      ...event
+    });
+  }
+
+  onYappuSeerAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: this.activity?.type || 'yappu_seer',
       ...event
     });
   }

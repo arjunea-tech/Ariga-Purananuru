@@ -1,0 +1,74 @@
+<div class="seer-container">
+  <div class="seer-stage">
+    
+    <!-- HEADER BAR -->
+    <div class="seer-header">
+      <div class="header-logo">
+        <span class="logo-sub">யாப்பு விளையாட்டு</span>
+        <h1 class="logo-title">சீர் கட்டமைப்பு</h1>
+      </div>
+    </div>
+
+    <!-- GAMEPLAY SCREEN -->
+    <div class="screen-play animate-fade">
+      <div class="game-mode-box">
+        <div class="game-nav-bar">
+        </div>
+
+        <!-- Score progress bar -->
+        <div class="score-progress-bar">
+          <div class="bar-bg">
+            <div class="bar-fill" [style.width.%]="total() > 0 ? (score() / total() * 100) : 0"></div>
+          </div>
+          <span class="score-text">{{ score() }}/{{ total() }}</span>
+        </div>
+
+        <p class="hint-text">அசைகளைத் தேர்ந்தெடுத்து சீரை உருவாக்குங்கள்</p>
+
+        @if (question(); as q) {
+          <!-- Target word -->
+          <div class="target-word animate-pop">
+            {{ q.fruit }} {{ q.name }}
+          </div>
+
+          <!-- Slots -->
+          <div class="slots-container">
+            @for (slot of q.pattern; track $index) {
+              <div class="pattern-slot" 
+                [class.filled]="builtPattern()[$index]"
+                [class.neer]="builtPattern()[$index] === 'நேர்'"
+                [class.nirai]="builtPattern()[$index] === 'நிரை'">
+                {{ builtPattern()[$index] ? (builtPattern()[$index] === 'நேர்' ? 'நே' : 'நி') : ($index + 1) }}
+              </div>
+            }
+          </div>
+
+          @if (buildResult(); as result) {
+            <div class="build-status-card" [class.correct]="result === 'correct'" [class.wrong]="result === 'wrong'">
+              {{ result === 'correct' ? '✓ சரி!' : '✗ தவறு — ' + q.mnemonic }}
+            </div>
+          }
+
+          <!-- Builder Buttons -->
+          <div class="action-buttons-row">
+            <button class="asai-btn neer-btn" [disabled]="buildResult() || builtPattern().length >= q.pattern.length" (click)="addAsai('நேர்')">
+              <span class="asai-title">நேர்</span>
+              <span class="asai-sub">■ சதுரம்</span>
+            </button>
+
+            <button class="asai-btn nirai-btn" [disabled]="buildResult() || builtPattern().length >= q.pattern.length" (click)="addAsai('நிரை')">
+              <span class="asai-title">நிரை</span>
+              <span class="asai-sub">● வட்டம்</span>
+            </button>
+
+            <button class="asai-btn undo-btn" [disabled]="buildResult() || builtPattern().length === 0" (click)="removeLastAsai()">
+              <span class="asai-title">↩</span>
+              <span class="asai-sub">நீக்கு</span>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+</div>

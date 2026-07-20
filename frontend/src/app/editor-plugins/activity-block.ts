@@ -25,6 +25,7 @@ import { renderLetterBasketForm } from './activity-block/forms/letter-basket';
 import { renderBalloonPopForm } from './activity-block/forms/balloon-pop';
 import { renderWordBuilderForm } from './activity-block/forms/word-builder';
 import { renderYappuFlashcardForm } from './activity-block/forms/yappu-flashcard';
+import { renderYappuSeerForm } from './activity-block/forms/yappu-seer';
 
 export class ActivityBlock {
   private data: any;
@@ -228,6 +229,16 @@ export class ActivityBlock {
         icon = 'bi-lightning-fill';
         details = `Question: "${this.data.question || ''}" | Syllable Count: ${this.data.syllableCount || 1}`;
         break;
+      case 'yappu_seer':
+      case 'yappu_seer_p2n':
+      case 'yappu_seer_n2p':
+      case 'yappu_seer_build':
+      case 'yappu_seer_speed':
+      case 'yappu_seer_match':
+        typeLabel = type === 'yappu_seer' ? 'Yappu Seer Game (5-in-1)' : `Yappu Seer: ${type.replace('yappu_seer_', '').toUpperCase()}`;
+        icon = 'bi-lightning-fill';
+        details = `Question: "${this.data.question || ''}" | Level: ${this.data.level || 2}`;
+        break;
     }
     return { typeLabel, icon, details };
     switch (type) {
@@ -316,6 +327,11 @@ export class ActivityBlock {
         icon = 'bi-grid-fill';
         details = `Question: "${this.data.question || ''}" | Words: "${this.data.text || ''}"`;
         break;
+      case 'yappu_seer':
+        typeLabel = 'Yappu Seer Game';
+        icon = 'bi-lightning-fill';
+        details = `Question: "${this.data.question || ''}" | Level: ${this.data.level || 2}`;
+        break;
     }
     return { typeLabel, icon, details };
   }
@@ -385,6 +401,12 @@ export class ActivityBlock {
             <option value="balloon_pop" ${tempData.type === 'balloon_pop' ? 'selected' : ''}>Balloon Pop Game</option>
             <option value="word_builder" ${tempData.type === 'word_builder' ? 'selected' : ''}>Word Builder</option>
             <option value="yappu_flashcard" ${tempData.type === 'yappu_flashcard' ? 'selected' : ''}>Yappu Flashcard (30s Speed Race)</option>
+            <option value="yappu_seer" ${tempData.type === 'yappu_seer' ? 'selected' : ''}>Yappu Seer Game (சீர் கண்டறிதல் - 5-in-1)</option>
+            <option value="yappu_seer_p2n" ${tempData.type === 'yappu_seer_p2n' ? 'selected' : ''}>Yappu Seer: வடிவம் ➔ பெயர் (Pattern to Name)</option>
+            <option value="yappu_seer_n2p" ${tempData.type === 'yappu_seer_n2p' ? 'selected' : ''}>Yappu Seer: பெயர் ➔ வடிவம் (Name to Pattern)</option>
+            <option value="yappu_seer_build" ${tempData.type === 'yappu_seer_build' ? 'selected' : ''}>Yappu Seer: சீர் கட்டமைப்பு (Pattern Builder)</option>
+            <option value="yappu_seer_speed" ${tempData.type === 'yappu_seer_speed' ? 'selected' : ''}>Yappu Seer: வேக வினா (Speed Round)</option>
+            <option value="yappu_seer_match" ${tempData.type === 'yappu_seer_match' ? 'selected' : ''}>Yappu Seer: ஜோடி பொருத்து (Match Pairs)</option>
           </select>
           <div class="modal-form-container"></div>
         </div>
@@ -442,6 +464,8 @@ export class ActivityBlock {
         renderWordBuilderForm(formContainer, tempData, this.renderExplanationInput);
       } else if (type === 'yappu_flashcard') {
         renderYappuFlashcardForm(formContainer, tempData, this.renderExplanationInput);
+      } else if (type === 'yappu_seer' || type.startsWith('yappu_seer_')) {
+        renderYappuSeerForm(formContainer, tempData, this.renderExplanationInput);
       }
     };
 
@@ -526,6 +550,12 @@ export class ActivityBlock {
         if (!tempData.text || tempData.text === '') {
           tempData.text = 'கல்வி, வாழ்க';
         }
+      }
+      if (tempData.type === 'yappu_seer' || tempData.type.startsWith('yappu_seer_')) {
+        if (!tempData.question || tempData.question === '') {
+          tempData.question = "சரியான சீரைக் கண்டறிக (Identify the correct Seer):";
+        }
+        if (tempData.level === undefined) tempData.level = 2;
       }
       renderForm();
     });
@@ -738,6 +768,9 @@ export class ActivityBlock {
         savedData.question = this.data.question || '';
         savedData.syllableCount = parseInt(this.data.syllableCount) || 1;
         savedData.text = this.data.text || '';
+      } else if (type === 'yappu_seer') {
+        savedData.question = this.data.question || '';
+        savedData.level = parseInt(this.data.level) || 2;
       } else if (type === 'speaking') {
         savedData.question = this.data.question || '';
         savedData.text = this.data.text || this.data.targetText || '';
@@ -812,6 +845,9 @@ export class ActivityBlock {
       } else if (type === 'word_builder') {
         savedData.question = this.data.question || '';
         savedData.text = this.data.text || '';
+      } else if (type === 'yappu_seer' || type.startsWith('yappu_seer_')) {
+        savedData.question = this.data.question || '';
+        savedData.level = parseInt(this.data.level) || 2;
       }
 
       return savedData;

@@ -1,0 +1,59 @@
+<div class="seer-container">
+  <div class="seer-stage">
+    
+    <!-- HEADER BAR -->
+    <div class="seer-header">
+      <div class="header-logo">
+        <span class="logo-sub">யாப்பு விளையாட்டு</span>
+        <h1 class="logo-title">பெயர் ➔ வடிவம்</h1>
+      </div>
+    </div>
+
+    <!-- GAMEPLAY SCREEN -->
+    <div class="screen-play animate-fade">
+      <div class="game-mode-box">
+        <div class="game-nav-bar">
+          @if (streak() >= 3) {
+            <span class="streak-badge">🔥 {{ streak() }} தொடர்!</span>
+          }
+        </div>
+
+        <!-- Score progress bar -->
+        <div class="score-progress-bar">
+          <div class="bar-bg">
+            <div class="bar-fill" [style.width.%]="total() > 0 ? (score() / total() * 100) : 0"></div>
+          </div>
+          <span class="score-text">{{ score() }}/{{ total() }}</span>
+        </div>
+
+        <p class="hint-text">இந்தச் சீரின் வடிவம் எது?</p>
+
+        @if (question(); as q) {
+          <!-- Target word -->
+          <div class="target-word animate-pop">
+            {{ q.fruit }} {{ q.name }}
+          </div>
+
+          <!-- Options grid -->
+          <div class="options-grid">
+            @for (opt of options(); track opt.name) {
+              <button class="opt-btn-pattern"
+                [class.correct]="selectedAnswer() && opt.name === q.name"
+                [class.wrong]="selectedAnswer() === opt.name && opt.name !== q.name"
+                (click)="handleAnswer(opt)">
+                <div class="mini-pattern">
+                  @for (asai of opt.pattern; track $index) {
+                    <span class="asai-badge sm" [class.neer]="asai === 'நேர்'" [class.nirai]="asai === 'நிரை'">
+                      {{ asai === 'நேர்' ? 'நே' : 'நி' }}
+                    </span>
+                  }
+                </div>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+</div>

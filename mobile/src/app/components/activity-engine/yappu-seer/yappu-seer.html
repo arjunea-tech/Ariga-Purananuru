@@ -1,0 +1,364 @@
+<div class="seer-container">
+  <div class="seer-stage">
+    
+    <!-- HEADER BAR -->
+    <div class="seer-header">
+      <div class="header-logo">
+        <span class="logo-sub">யாப்பு விளையாட்டு</span>
+        <h1 class="logo-title">சீர் கண்டறிதல்</h1>
+      </div>
+    </div>
+
+    <!-- 1. HOME SCREEN -->
+    @if (screen() === 'home') {
+      <div class="screen-home animate-fade">
+        <div class="legend-box">
+          <div class="legend-item">
+            <span class="legend-shape square">நே</span>
+            <span class="legend-lbl">நேர் (சதுரம்)</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-shape circle">நி</span>
+            <span class="legend-lbl">நிரை (வட்டம்)</span>
+          </div>
+        </div>
+
+        <div class="games-list">
+          @for (g of GAMES; track g.id) {
+            <button class="game-selector-card" (click)="selectGame(g.id)">
+              <span class="game-icon">{{ g.icon }}</span>
+              <div class="game-details">
+                <span class="game-title">{{ g.title }}</span>
+                <span class="game-desc">{{ g.desc }}</span>
+              </div>
+            </button>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- 2. LEVEL SCREEN -->
+    @if (screen() === 'level') {
+      <div class="screen-level animate-fade">
+        @if (!activity?.type?.startsWith('yappu_seer_')) {
+          <button class="btn-back" (click)="resetToHome()">← முகப்பு</button>
+        }
+        
+        <h2 class="section-title">
+          {{ GAMES[0].title }}
+        </h2>
+        <p class="section-subtitle">விளையாட்டு நிலையைத் தேர்ந்தெடுக்கவும்</p>
+
+        <div class="level-list">
+          <button class="level-card" (click)="startGame(2)">
+            <span class="level-icon">🌱</span>
+            <div class="level-details">
+              <span class="level-name">ஈரசைச் சீர்</span>
+              <span class="level-desc">தேமா · புளிமா · கூவிளம் · கருவிளம்</span>
+            </div>
+          </button>
+          
+          <button class="level-card" (click)="startGame(3)">
+            <span class="level-icon">🌿</span>
+            <div class="level-details">
+              <span class="level-name">மூவசைச் சீர்</span>
+              <span class="level-desc">காய் & கனி வகைகள் (8 சீர்கள்)</span>
+            </div>
+          </button>
+          
+          <button class="level-card" (click)="startGame(0)">
+            <span class="level-icon">🌳</span>
+            <div class="level-details">
+              <span class="level-name">அனைத்துச் சீர்கள்</span>
+              <span class="level-desc">12 சீர்களும் கலந்து</span>
+            </div>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- 3. GAMEPLAY SCREEN -->
+    @if (screen() === 'play') {
+      <div class="screen-play animate-fade">
+        
+        <!-- MODE: Pattern to Name (p2n) -->
+        @if (selectedGameId() === 'p2n') {
+          <div class="game-mode-box">
+            <div class="game-nav-bar">
+              @if (!activity?.type?.startsWith('yappu_seer_')) {
+                <button class="btn-back" (click)="screen.set('level')">← பின்</button>
+              }
+              @if (streak() >= 3) {
+                <span class="streak-badge">🔥 {{ streak() }} தொடர்!</span>
+              }
+            </div>
+
+            <!-- Score bar -->
+            <div class="score-progress-bar">
+              <div class="bar-bg">
+                <div class="bar-fill" [style.width.%]="total() > 0 ? (score() / total() * 100) : 0"></div>
+              </div>
+              <span class="score-text">{{ score() }}/{{ total() }}</span>
+            </div>
+
+            <p class="hint-text">இந்த வடிவம் எந்தச் சீர்?</p>
+
+            @if (question(); as q) {
+              <!-- Pattern display -->
+              <div class="pattern-display-area animate-pop">
+                @for (asai of q.pattern; track $index) {
+                  <span class="asai-badge" [class.neer]="asai === 'நேர்'" [class.nirai]="asai === 'நிரை'">
+                    {{ asai === 'நேர்' ? 'நே' : 'நி' }}
+                  </span>
+                }
+              </div>
+
+              <!-- Options -->
+              <div class="options-grid">
+                @for (opt of options(); track opt.name) {
+                  <button class="opt-btn" 
+                    [class.correct]="selectedAnswer() && opt.name === q.name"
+                    [class.wrong]="selectedAnswer() === opt.name && opt.name !== q.name"
+                    (click)="handleAnswer(opt)">
+                    <span class="opt-label">{{ opt.fruit }} {{ opt.name }}</span>
+                    @if (selectedAnswer() && opt.name === q.name) {
+                      <span class="mnemonic-lbl">{{ opt.mnemonic }}</span>
+                    }
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- MODE: Name to Pattern (n2p) -->
+        @if (selectedGameId() === 'n2p') {
+          <div class="game-mode-box">
+            <div class="game-nav-bar">
+              @if (!activity?.type?.startsWith('yappu_seer_')) {
+                <button class="btn-back" (click)="screen.set('level')">← பின்</button>
+              }
+            </div>
+
+            <div class="score-progress-bar">
+              <div class="bar-bg">
+                <div class="bar-fill" [style.width.%]="total() > 0 ? (score() / total() * 100) : 0"></div>
+              </div>
+              <span class="score-text">{{ score() }}/{{ total() }}</span>
+            </div>
+
+            <p class="hint-text">இந்தச் சீரின் வடிவம் எது?</p>
+
+            @if (question(); as q) {
+              <div class="target-word animate-pop">
+                {{ q.fruit }} {{ q.name }}
+              </div>
+
+              <div class="options-grid">
+                @for (opt of options(); track opt.name) {
+                  <button class="opt-btn-pattern"
+                    [class.correct]="selectedAnswer() && opt.name === q.name"
+                    [class.wrong]="selectedAnswer() === opt.name && opt.name !== q.name"
+                    (click)="handleAnswer(opt)">
+                    <div class="mini-pattern">
+                      @for (asai of opt.pattern; track $index) {
+                        <span class="asai-badge sm" [class.neer]="asai === 'நேர்'" [class.nirai]="asai === 'நிரை'">
+                          {{ asai === 'நேர்' ? 'நே' : 'நி' }}
+                        </span>
+                      }
+                    </div>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- MODE: Build Pattern (build) -->
+        @if (selectedGameId() === 'build') {
+          <div class="game-mode-box">
+            <div class="game-nav-bar">
+              @if (!activity?.type?.startsWith('yappu_seer_')) {
+                <button class="btn-back" (click)="screen.set('level')">← பின்</button>
+              }
+            </div>
+
+            <div class="score-progress-bar">
+              <div class="bar-bg">
+                <div class="bar-fill" [style.width.%]="total() > 0 ? (score() / total() * 100) : 0"></div>
+              </div>
+              <span class="score-text">{{ score() }}/{{ total() }}</span>
+            </div>
+
+            <p class="hint-text">அசைகளைத் தேர்ந்தெடுத்து சீரை உருவாக்குங்கள்</p>
+
+            @if (question(); as q) {
+              <div class="target-word animate-pop">
+                {{ q.fruit }} {{ q.name }}
+              </div>
+
+              <!-- Slots -->
+              <div class="slots-container">
+                @for (slot of q.pattern; track $index) {
+                  <div class="pattern-slot" 
+                    [class.filled]="builtPattern()[$index]"
+                    [class.neer]="builtPattern()[$index] === 'நேர்'"
+                    [class.nirai]="builtPattern()[$index] === 'நிரை'">
+                    {{ builtPattern()[$index] ? (builtPattern()[$index] === 'நேர்' ? 'நே' : 'நி') : ($index + 1) }}
+                  </div>
+                }
+              </div>
+
+              @if (buildResult(); as result) {
+                <div class="build-status-card" [class.correct]="result === 'correct'" [class.wrong]="result === 'wrong'">
+                  {{ result === 'correct' ? '✓ சரி!' : '✗ தவறு — ' + q.mnemonic }}
+                </div>
+              }
+
+              <!-- Builder Buttons -->
+              <div class="action-buttons-row">
+                <button class="asai-btn neer-btn" [disabled]="buildResult() || builtPattern().length >= q.pattern.length" (click)="addAsai('நேர்')">
+                  <span class="asai-title">நேர்</span>
+                  <span class="asai-sub">■ சதுரம்</span>
+                </button>
+
+                <button class="asai-btn nirai-btn" [disabled]="buildResult() || builtPattern().length >= q.pattern.length" (click)="addAsai('நிரை')">
+                  <span class="asai-title">நிரை</span>
+                  <span class="asai-sub">● வட்டம்</span>
+                </button>
+
+                <button class="asai-btn undo-btn" [disabled]="buildResult() || builtPattern().length === 0" (click)="removeLastAsai()">
+                  <span class="asai-title">↩</span>
+                  <span class="asai-sub">நீக்கு</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- MODE: Speed Round (speed) -->
+        @if (selectedGameId() === 'speed') {
+          <div class="game-mode-box">
+            @if (speedPhase() === 'ready') {
+              <div class="ready-panel animate-fade">
+                @if (!activity?.type?.startsWith('yappu_seer_')) {
+                  <button class="btn-back" (click)="screen.set('level')">← பின்</button>
+                }
+                <div class="badge-icon">⏱️</div>
+                <h3 class="panel-title">வேக வினா</h3>
+                <p class="panel-desc">30 வினாடிகளில் எத்தனை சீர்களைக் கண்டறிய முடியும்?</p>
+                <button class="btn-primary" (click)="startSpeedRound()">தொடங்கு!</button>
+              </div>
+            }
+
+            @if (speedPhase() === 'playing') {
+              <div class="speed-gameplay animate-fade">
+                <div class="speed-nav">
+                  <span class="timer-lbl">⏱️ {{ timeLeft() }}s</span>
+                  <span class="speed-score">🎯 {{ score() }}</span>
+                </div>
+                
+                <div class="speed-timer-bar">
+                  <div class="speed-timer-fill" 
+                    [class.warning]="timeLeft() <= 5"
+                    [style.width.%]="(timeLeft() / 30) * 100">
+                  </div>
+                </div>
+
+                @if (question(); as q) {
+                  <div class="pattern-display-area">
+                    @for (asai of q.pattern; track $index) {
+                      <span class="asai-badge" [class.neer]="asai === 'நேர்'" [class.nirai]="asai === 'நிரை'">
+                        {{ asai === 'நேர்' ? 'நே' : 'நி' }}
+                      </span>
+                    }
+                  </div>
+
+                  <div class="options-grid compact">
+                    @for (opt of options(); track opt.name) {
+                      <button class="opt-btn" (click)="handleSpeedAnswer(opt)">
+                        {{ opt.fruit }} {{ opt.name }}
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+            @if (speedPhase() === 'done') {
+              <div class="done-panel animate-fade">
+                <div class="badge-icon">
+                  {{ score() >= 15 ? '🥇' : score() >= 10 ? '🥈' : score() >= 5 ? '🥉' : '🎯' }}
+                </div>
+                <h3 class="panel-title">முடிவு!</h3>
+                <div class="final-score">
+                  {{ score() }}<span class="sub-score">/{{ total() }}</span>
+                </div>
+                <p class="panel-desc">
+                  {{ score() >= 15 ? 'அருமை! சீர் வல்லுநர்!' : score() >= 10 ? 'நன்று! பயிற்சி தொடருங்கள்!' : 'மீண்டும் முயற்சிக்கவும்!' }}
+                </p>
+                <div class="panel-actions">
+                  <button class="btn-primary" (click)="startSpeedRound()">மீண்டும்</button>
+                  @if (!activity?.type?.startsWith('yappu_seer_')) {
+                    <button class="btn-secondary" (click)="screen.set('level')">பின்</button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- MODE: Match Pairs (match) -->
+        @if (selectedGameId() === 'match') {
+          <div class="game-mode-box">
+            <div class="game-nav-bar">
+              @if (!activity?.type?.startsWith('yappu_seer_')) {
+                <button class="btn-back" (click)="screen.set('level')">← பின்</button>
+              }
+              <span class="move-counter">நகர்வுகள்: {{ matchMoves() }}</span>
+            </div>
+
+            @if (matchWon()) {
+              <div class="match-success animate-pop">
+                <span class="success-message">🎉 வெற்றி! {{ matchMoves() }} நகர்வுகளில் முடித்தீர்கள்!</span>
+                <button class="btn-primary-sm" (click)="setupMatchPairs()">மீண்டும்</button>
+              </div>
+            }
+
+            <div class="cards-grid">
+              @for (card of matchCards(); track card.id; let idx = $index) {
+                <button class="card-item"
+                  [class.flipped]="matchFlipped().includes(idx) || matchMatched().has(card.matchId)"
+                  [class.matched]="matchMatched().has(card.matchId)"
+                  [class.incorrect]="matchIncorrect().includes(idx)"
+                  (click)="handleCardFlip(idx)">
+                  
+                  @if (matchFlipped().includes(idx) || matchMatched().has(card.matchId)) {
+                    @if (card.type === 'name') {
+                      <div class="card-face card-name">
+                        <span class="fruit-emoji">{{ card.fruit }}</span>
+                        <span class="name-text">{{ card.name }}</span>
+                      </div>
+                    } @else {
+                      <div class="card-face card-pattern">
+                        @for (asai of card.pattern; track $index) {
+                          <span class="asai-badge xs" [class.neer]="asai === 'நேர்'" [class.nirai]="asai === 'நிரை'">
+                            {{ asai === 'நேர்' ? 'நே' : 'நி' }}
+                          </span>
+                        }
+                      </div>
+                    }
+                  } @else {
+                    <div class="card-face card-back">?</div>
+                  }
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+      </div>
+    }
+
+  </div>
+</div>

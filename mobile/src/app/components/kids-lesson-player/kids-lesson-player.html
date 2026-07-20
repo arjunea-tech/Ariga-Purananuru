@@ -273,21 +273,23 @@
           <i class="bi bi-stars text-warning animate-bounce d-block" style="font-size: clamp(2rem, 8vw, 4rem); filter: drop-shadow(0 5px 15px rgba(251,191,36,0.4));"></i>
         </div>
         
-        <h2 class="fw-bold text-danger text-center mb-2 mt-3" style="font-size: clamp(1.5rem, 5vw, 2.5rem); font-family: 'Fredoka One', cursive;">
-          {{ step.title }}
-        </h2>
-        
-        <p class="text-dark text-center fw-bold lh-base mb-3 px-2 px-md-4" style="font-size: clamp(1.1rem, 3.5vw, 1.5rem); font-family: 'Nunito', sans-serif;">
-          {{ step.data.text }}
-        </p>
+        <div class="my-auto w-100 d-flex flex-column align-items-center justify-content-center">
+          <h2 class="fw-bold text-danger text-center mb-2 mt-3" style="font-size: clamp(1.5rem, 5vw, 2.5rem); font-family: 'Fredoka One', cursive;">
+            {{ step.title }}
+          </h2>
+          
+          <p class="text-dark text-center fw-bold lh-base mb-3 px-2 px-md-4" style="font-size: clamp(1.1rem, 3.5vw, 1.5rem); font-family: 'Nunito', sans-serif;">
+            {{ step.data.text }}
+          </p>
 
-        <button class="btn btn-danger rounded-pill px-4 px-md-5 py-2 shadow-lg fw-bold d-flex align-items-center justify-content-center gap-2 hover-lift text-white w-100 w-md-auto text-nowrap"
-          style="font-size: clamp(1.1rem, 3.5vw, 1.4rem); border-bottom: 6px solid #9f1239; transition: transform 0.2s;"
-          (click)="nextStep.emit()"
-          onmousedown="this.style.transform='translateY(4px)'; this.style.borderBottomWidth='2px';"
-          onmouseup="this.style.transform='translateY(0)'; this.style.borderBottomWidth='6px';">
-          மீண்டும் செல்வோம்! <i class="bi bi-rocket-takeoff-fill"></i>
-        </button>
+          <button class="btn btn-danger rounded-pill px-4 px-md-5 py-2 shadow-lg fw-bold d-flex align-items-center justify-content-center gap-2 hover-lift text-white w-100 w-md-auto text-nowrap"
+            style="font-size: clamp(1.1rem, 3.5vw, 1.4rem); border-bottom: 6px solid #9f1239; transition: transform 0.2s;"
+            (click)="nextStep.emit()"
+            onmousedown="this.style.transform='translateY(4px)'; this.style.borderBottomWidth='2px';"
+            onmouseup="this.style.transform='translateY(0)'; this.style.borderBottomWidth='6px';">
+            மீண்டும் செல்வோம்! <i class="bi bi-rocket-takeoff-fill"></i>
+          </button>
+        </div>
       </div>
       }
 

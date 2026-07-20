@@ -28,7 +28,12 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "howler",
+              "lottie-web",
+              "quill-delta"
+            ]
           },
           "configurations": {
             "production": {
@@ -46,12 +51,12 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2MB",
+                  "maximumWarning": "3MB",
                   "maximumError": "5MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "20kB",
+                  "maximumWarning": "30kB",
                   "maximumError": "50kB"
                 }
               ],

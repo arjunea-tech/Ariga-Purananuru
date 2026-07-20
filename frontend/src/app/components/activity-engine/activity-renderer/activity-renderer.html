@@ -1,5 +1,5 @@
     @if (normalizedActivity(); as data) {
-      <div class="activity-renderer-container" [class.h-100]="data.type === 'balloon_pop'" [class.m-0]="data.type === 'balloon_pop'">
+      <div class="activity-renderer-container" [class.h-100]="data.type === 'balloon_pop' || data.type.startsWith('yappu_seer')" [class.m-0]="data.type === 'balloon_pop' || data.type.startsWith('yappu_seer')">
         @switch (data.type) {
           @case ('mcq') {
             <app-activity-mcq 
@@ -125,6 +125,42 @@
               [activity]="data"
               (answered)="onYappuFlashcardAnswered($event)">
             </app-yappu-flashcard>
+          }
+          @case ('yappu_seer') {
+            <app-yappu-seer
+              [activity]="data"
+              (answered)="onYappuSeerAnswered($event)">
+            </app-yappu-seer>
+          }
+          @case ('yappu_seer_p2n') {
+            <app-yappu-seer-p2n
+              [activity]="data"
+              (answered)="onYappuSeerAnswered($event)">
+            </app-yappu-seer-p2n>
+          }
+          @case ('yappu_seer_n2p') {
+            <app-yappu-seer-n2p
+              [activity]="data"
+              (answered)="onYappuSeerAnswered($event)">
+            </app-yappu-seer-n2p>
+          }
+          @case ('yappu_seer_build') {
+            <app-yappu-seer-build
+              [activity]="data"
+              (answered)="onYappuSeerAnswered($event)">
+            </app-yappu-seer-build>
+          }
+          @case ('yappu_seer_speed') {
+            <app-yappu-seer-speed
+              [activity]="data"
+              (answered)="onYappuSeerAnswered($event)">
+            </app-yappu-seer-speed>
+          }
+          @case ('yappu_seer_match') {
+            <app-yappu-seer-match
+              [activity]="data"
+              (answered)="onYappuSeerAnswered($event)">
+            </app-yappu-seer-match>
           }
         }
       </div>

@@ -95,6 +95,7 @@
   border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
+
 .game-title {
   color: #1e293b;
   font-size: 1.8rem;
@@ -702,18 +703,49 @@
     box-shadow: none !important;
   }
   .overlay-card {
-    padding: 20px 16px !important;
-    width: 95% !important;
+    padding: 15px 12px !important;
+    width: 92% !important;
+    max-width: 380px !important;
+    border-radius: 16px !important;
+  }
+  .decor-balloons {
+    display: none !important;
   }
   .game-title {
-    font-size: 1.4rem !important;
+    font-size: 1.35rem !important;
+    margin-bottom: 2px !important;
+  }
+  .game-subtitle {
+    font-size: 0.75rem !important;
+    margin-bottom: 8px !important;
+  }
+  .instruction-box {
+    padding: 10px 12px !important;
+    margin-bottom: 10px !important;
   }
   .ins-title {
-    font-size: 0.9rem !important;
+    font-size: 0.85rem !important;
+    margin-bottom: 4px !important;
   }
   .instruction-box ul {
-    font-size: 0.8rem !important;
+    font-size: 0.76rem !important;
+    line-height: 1.35 !important;
+    padding-left: 15px !important;
   }
+  .setup-details {
+    margin-bottom: 12px !important;
+    gap: 8px !important;
+  }
+  .setup-badge {
+    padding: 4px 10px !important;
+    font-size: 0.75rem !important;
+  }
+  .btn-start {
+    padding: 10px 28px !important;
+    font-size: 0.95rem !important;
+    width: auto !important;
+  }
+  
   .game-header {
     padding: 0 10px !important;
     top: 10px !important;
@@ -743,16 +775,242 @@
   .balloon-wrapper {
     width: 54px !important;
   }
-  .decor-balloons {
-    top: -30px !important;
+  
+  .gameover-card {
+    padding: 15px 12px !important;
   }
   .gameover-title {
-    font-size: 1.8rem !important;
+    font-size: 1.6rem !important;
+    margin-bottom: 2px !important;
+  }
+  .gameover-subtitle {
+    font-size: 0.75rem !important;
+    margin-bottom: 8px !important;
+  }
+  .score-display {
+    margin: 12px 0 !important;
   }
   .score-num {
     font-size: 2.8rem !important;
   }
   .stat-box-val {
     font-size: 1rem !important;
+  }
+  .feedback-message {
+    font-size: 0.82rem !important;
+    margin-bottom: 15px !important;
+  }
+  .btn-action {
+    padding: 10px !important;
+    font-size: 0.95rem !important;
+  }
+}
+
+/* Landscape/Short Screen Height Optimizations */
+@media (max-height: 600px) {
+  .balloon-game-container {
+    min-height: 0 !important;
+    height: 100% !important;
+  }
+  
+  .overlay-card.start-card {
+    display: grid !important;
+    grid-template-columns: 1.2fr 1fr !important;
+    grid-template-rows: auto auto auto auto !important;
+    column-gap: 20px !important;
+    row-gap: 4px !important;
+    max-width: 680px !important;
+    width: 95% !important;
+    padding: 15px 20px !important;
+    align-items: center !important;
+    text-align: left !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .overlay-card.start-card .decor-balloons {
+    display: none !important;
+  }
+
+  .overlay-card.start-card .game-title {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    font-size: 1.25rem !important;
+    margin: 0 !important;
+    text-align: left !important;
+  }
+
+  .overlay-card.start-card .game-subtitle {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    font-size: 0.75rem !important;
+    margin-bottom: 8px !important;
+    text-align: left !important;
+  }
+
+  .overlay-card.start-card .setup-details {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+    margin-bottom: 12px !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+  }
+
+  .overlay-card.start-card .btn-start {
+    grid-column: 1 !important;
+    grid-row: 4 !important;
+    width: 100% !important;
+    padding: 8px 16px !important;
+    font-size: 0.95rem !important;
+    margin: 0 !important;
+  }
+
+  .overlay-card.start-card .instruction-box {
+    grid-column: 2 !important;
+    grid-row: 1 / span 4 !important;
+    margin: 0 !important;
+    padding: 10px 12px !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+  }
+
+  .overlay-card.start-card .instruction-box ul {
+    font-size: 0.72rem !important;
+    line-height: 1.3 !important;
+    padding-left: 15px !important;
+  }
+  
+  .overlay-card.start-card .ins-title {
+    font-size: 0.8rem !important;
+    margin-bottom: 4px !important;
+  }
+
+  .game-header {
+    top: 5px !important;
+    padding: 0 10px !important;
+  }
+  .header-stat {
+    min-width: 55px !important;
+    padding: 2px 6px !important;
+    border-radius: 8px !important;
+  }
+  .stat-label {
+    font-size: 0.6rem !important;
+  }
+  .stat-value {
+    font-size: 0.85rem !important;
+  }
+  .target-panel {
+    padding: 2px 10px !important;
+    border-radius: 10px !important;
+  }
+  .target-label {
+    font-size: 0.6rem !important;
+  }
+  .target-text {
+    font-size: 0.85rem !important;
+  }
+
+  .overlay-card.gameover-card {
+    display: grid !important;
+    grid-template-columns: 1fr 1.2fr !important;
+    grid-template-rows: auto auto auto auto !important;
+    column-gap: 20px !important;
+    row-gap: 4px !important;
+    max-width: 680px !important;
+    width: 95% !important;
+    padding: 15px 20px !important;
+    align-items: center !important;
+    text-align: left !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .overlay-card.gameover-card .gameover-title {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    font-size: 1.5rem !important;
+    margin: 0 !important;
+    text-align: left !important;
+  }
+
+  .overlay-card.gameover-card .gameover-subtitle {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    font-size: 0.75rem !important;
+    margin-bottom: 4px !important;
+    text-align: left !important;
+  }
+
+  .overlay-card.gameover-card .score-display {
+    grid-column: 1 !important;
+    grid-row: 3 !important;
+    margin: 4px 0 !important;
+    align-items: flex-start !important;
+  }
+
+  .overlay-card.gameover-card .score-num {
+    font-size: 2.2rem !important;
+  }
+
+  .overlay-card.gameover-card .score-lbl {
+    font-size: 0.65rem !important;
+    margin-top: 0 !important;
+    text-align: left !important;
+  }
+
+  .overlay-card.gameover-card .action-buttons {
+    grid-column: 1 !important;
+    grid-row: 4 !important;
+    width: 100% !important;
+  }
+
+  .overlay-card.gameover-card .btn-action {
+    padding: 8px !important;
+    font-size: 0.95rem !important;
+  }
+
+  .overlay-card.gameover-card .stats-grid {
+    grid-column: 2 !important;
+    grid-row: 1 / span 2 !important;
+    margin: 0 !important;
+    gap: 6px !important;
+  }
+
+  .overlay-card.gameover-card .stat-box {
+    padding: 6px !important;
+  }
+
+  .overlay-card.gameover-card .stat-box-lbl {
+    font-size: 0.55rem !important;
+  }
+
+  .overlay-card.gameover-card .stat-box-val {
+    font-size: 0.95rem !important;
+  }
+
+  .overlay-card.gameover-card .feedback-message {
+    grid-column: 2 !important;
+    grid-row: 3 / span 2 !important;
+    margin: 0 !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+/* Safety Scale for Short Viewports in Portrait */
+@media (max-height: 780px) and (orientation: portrait) {
+  .overlay-card {
+    transform: translate(-50%, -50%) scale(0.85) !important;
+    transform-origin: center center !important;
+  }
+}
+@media (max-height: 700px) and (orientation: portrait) {
+  .overlay-card {
+    transform: translate(-50%, -50%) scale(0.78) !important;
+    transform-origin: center center !important;
   }
 }
