@@ -70,7 +70,7 @@ class CourseController extends Controller
         $course->delete();
         return response()->noContent();
     }
-    public function getPlayerStructure(Course $course)
+    public function getPlayerStructure(\Illuminate\Http\Request $request, Course $course)
     {
         $structure = $course->load([
             'levels' => function ($query) {
@@ -91,6 +91,31 @@ class CourseController extends Controller
             }
         ]);
 
-        return response()->json($structure);
+        $mode = 'strict'; // Default fallback
+        $user = $request->user();
+        if ($user && $user->role === 'student' && $user->tenant_id) {
+            $propPackage = \Illuminate\Support\Facades\DB::table('property_packages')
+                ->join('properties', 'property_packages.property_id', '=', 'properties.id')
+                ->where('properties.tenant_id', $user->tenant_id)
+                ->where('property_packages.course_id', $course->id)
+                ->where('property_packages.is_active', true)
+                ->select('property_packages.learning_mode_ids')
+                ->first();
+
+            if ($propPackage && $propPackage->learning_mode_ids) {
+                $modeIds = is_string($propPackage->learning_mode_ids) ? json_decode($propPackage->learning_mode_ids, true) : $propPackage->learning_mode_ids;
+                if (is_array($modeIds) && count($modeIds) > 0) {
+                    $learningModeObj = \App\Models\LearningMode::find($modeIds[0]);
+                    if ($learningModeObj) {
+                        $mode = $learningModeObj->code;
+                    }
+                }
+            }
+        }
+
+        $structureArray = $structure->toArray();
+        $structureArray['learning_mode'] = $mode;
+
+        return response()->json($structureArray);
     }
 }

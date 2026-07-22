@@ -64,5 +64,130 @@
       <i class="bi bi-box-arrow-right"></i>
       <span>Log Out</span>
     </button>
+<!-- ============================================== -->
+<!-- MODALS OVERLAYS -->
+<!-- ============================================== -->
+<div *ngIf="activeModal() !== 'none'" class="modal-overlay d-flex align-items-end align-items-md-center justify-content-center" (click)="closeModal()">
+  <div class="modal-content-card bg-white w-100 rounded-top-4 rounded-md-4 shadow-lg animate-slide-up" style="max-width: 500px; max-height: 90vh; overflow-y: auto;" (click)="$event.stopPropagation()">
+    
+    <!-- Modal Header -->
+    <div class="d-flex align-items-center justify-content-between p-3 border-bottom position-sticky top-0 bg-white z-3">
+      <h5 class="fw-bold mb-0 text-dark">
+        <i *ngIf="activeModal() === 'personal_info'" class="bi bi-person-badge text-primary me-2"></i>
+        <i *ngIf="activeModal() === 'certificates'" class="bi bi-award text-warning me-2"></i>
+        <i *ngIf="activeModal() === 'stats'" class="bi bi-graph-up text-success me-2"></i>
+        <i *ngIf="activeModal() === 'help'" class="bi bi-question-circle text-info me-2"></i>
+        {{ activeModal() === 'personal_info' ? 'Personal Info' : (activeModal() === 'certificates' ? 'My Certificates' : (activeModal() === 'stats' ? 'My Statistics' : 'Help & Support')) }}
+      </h5>
+      <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" (click)="closeModal()" style="width: 36px; height: 36px;">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-4">
+      
+      <!-- PERSONAL INFO MODAL -->
+      <div *ngIf="activeModal() === 'personal_info'">
+        <div class="text-center mb-4">
+          <img src="assets/images/logo.png" alt="Avatar" class="rounded-circle shadow-sm border border-3 border-white bg-light" style="width: 100px; height: 100px; object-fit: contain;">
+        </div>
+        
+        <div class="mb-3">
+          <label class="small text-muted fw-bold mb-1">Full Name</label>
+          <div class="p-3 bg-light rounded-3 fw-semibold text-dark border">{{ userName() }}</div>
+        </div>
+        <div class="mb-3">
+          <label class="small text-muted fw-bold mb-1">Email Address</label>
+          <div class="p-3 bg-light rounded-3 fw-semibold text-dark border">{{ userEmail() || 'Not Provided' }}</div>
+        </div>
+        <div class="mb-3">
+          <label class="small text-muted fw-bold mb-1">Phone Number</label>
+          <div class="p-3 bg-light rounded-3 fw-semibold text-dark border">{{ studentPhone() }}</div>
+        </div>
+        <div class="mb-4">
+          <label class="small text-muted fw-bold mb-1">Organization / School</label>
+          <div class="p-3 bg-light rounded-3 fw-semibold text-dark border">{{ studentSchool() }}</div>
+        </div>
+        <button class="btn btn-primary w-100 rounded-pill py-2 fw-bold" (click)="closeModal()">Close</button>
+      </div>
+
+      <!-- CERTIFICATES MODAL -->
+      <div *ngIf="activeModal() === 'certificates'">
+        <div *ngIf="completionPercentage() >= 100" class="certificate-card p-4 rounded-4 text-center text-white shadow" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
+          <i class="bi bi-award-fill text-warning mb-2" style="font-size: 3rem; text-shadow: 0 4px 10px rgba(0,0,0,0.2);"></i>
+          <h3 class="fw-bold mb-1" style="font-family: 'Times New Roman', serif;">Certificate of Completion</h3>
+          <p class="mb-3 opacity-75 small">This certifies that</p>
+          <h2 class="fw-bold mb-3 text-warning" style="font-family: 'Great Vibes', cursive, 'Times New Roman'; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 10px; display: inline-block;">
+            {{ userName() }}
+          </h2>
+          <p class="mb-0 opacity-75 small">Has successfully completed the course</p>
+          <h5 class="fw-bold mb-0">யாப்பு இலக்கணம்</h5>
+        </div>
+        
+        <div *ngIf="completionPercentage() < 100" class="text-center py-5">
+          <i class="bi bi-lock-fill text-muted mb-3" style="font-size: 3rem;"></i>
+          <h5 class="fw-bold text-dark">Certificate Locked</h5>
+          <p class="text-secondary">You have completed {{ completionPercentage() }}% of the course. Reach 100% to unlock your certificate!</p>
+          <div class="progress mt-3 rounded-pill" style="height: 10px;">
+            <div class="progress-bar bg-primary" [style.width.%]="completionPercentage()"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATS MODAL -->
+      <div *ngIf="activeModal() === 'stats'">
+        <div class="row g-3 mb-4">
+          <div class="col-6">
+            <div class="bg-light border rounded-4 p-3 text-center h-100">
+              <i class="bi bi-bullseye text-primary fs-3 mb-1"></i>
+              <h3 class="fw-bold text-dark mb-0">{{ accuracyPercentage() }}%</h3>
+              <span class="small text-secondary fw-semibold">Accuracy</span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="bg-light border rounded-4 p-3 text-center h-100">
+              <i class="bi bi-lightning-charge-fill text-warning fs-3 mb-1"></i>
+              <h3 class="fw-bold text-dark mb-0">{{ streakDays() }} <span class="fs-6 text-muted">Days</span></h3>
+              <span class="small text-secondary fw-semibold">Current Streak</span>
+            </div>
+          </div>
+        </div>
+
+        <h6 class="fw-bold text-dark mb-3">Skill Mastery (திறன் அறிக்கை)</h6>
+        
+        <div class="skills-list">
+          <div *ngFor="let skill of skillMastery()" class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="fw-semibold text-dark">{{ skill.topic }}</span>
+              <span class="fw-bold" [style.color]="skill.color">{{ skill.mastery }}%</span>
+            </div>
+            <div class="progress rounded-pill bg-light border" style="height: 12px;">
+              <div class="progress-bar rounded-pill" [style.width.%]="skill.mastery" [style.background-color]="skill.color"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 p-3 rounded-4 text-center">
+          <i class="bi bi-check-circle-fill fs-4 mb-2"></i>
+          <h6 class="fw-bold mb-1">Questions Answered</h6>
+          <h2 class="fw-bold mb-0">{{ questionsAnswered() }}</h2>
+        </div>
+      </div>
+
+      <!-- HELP MODAL -->
+      <div *ngIf="activeModal() === 'help'">
+        <div class="text-center py-4">
+          <i class="bi bi-envelope-paper text-primary mb-3" style="font-size: 3rem;"></i>
+          <h5 class="fw-bold text-dark">Need Help?</h5>
+          <p class="text-secondary mb-4">If you face any issues or need guidance on learning Yaappu grammar, reach out to us!</p>
+          <a href="mailto:support@yaappu.app" class="btn btn-outline-primary rounded-pill w-100 fw-bold py-2"><i class="bi bi-envelope me-2"></i> Email Support</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
   </div>
 </div>

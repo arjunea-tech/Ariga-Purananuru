@@ -106,6 +106,9 @@ export class CoursePlayer implements OnInit, OnDestroy {
   activityFeedbackState = signal<'correct' | 'incorrect' | null>(null);
   heartRefillTimer = signal<number>(0);
   private timerInterval: any;
+  
+  showRewardModal = signal<boolean>(false);
+  rewardData = signal<{ xp_earned: number, badges: any[] } | null>(null);
 
   constructor() {}
 
@@ -461,6 +464,29 @@ export class CoursePlayer implements OnInit, OnDestroy {
       }
     }
     this.saveLocalProgress();
+
+    // Call backend to sync progress and calculate rewards
+    this.http.post<any>(`${environment.apiUrl}/chapters/${chapterId}/complete`, {}, {
+      headers: { Authorization: `Bearer ${this.authService.getToken()}` }
+    }).subscribe({
+      next: (res) => {
+        if (res.rewards && res.rewards.xp_earned > 0) {
+          this.rewardData.set(res.rewards);
+          
+          // Small delay before showing modal to allow confetti to start
+          setTimeout(() => {
+            this.showRewardModal.set(true);
+            this.audioService.playSuccess(); // Optional extra jingle
+          }, 800);
+        }
+      },
+      error: (err) => console.error('Failed to sync chapter completion', err)
+    });
+  }
+
+  closeRewardModal() {
+    this.showRewardModal.set(false);
+    this.rewardData.set(null);
   }
 
   goBack() {

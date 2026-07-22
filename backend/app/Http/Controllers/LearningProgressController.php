@@ -101,6 +101,15 @@ class LearningProgressController extends Controller
             $courseId = $coursePackageLevel ? $coursePackageLevel->course_id : 0;
         }
 
+        $isNewCompletion = false;
+        $progress = \App\Models\UserCourseProgress::where('user_id', $user->id)
+            ->where('chapter_id', $chapterId)
+            ->first();
+
+        if (!$progress || $progress->status !== 'completed') {
+            $isNewCompletion = true;
+        }
+
         \App\Models\UserCourseProgress::updateOrCreate(
             [
                 'user_id' => $user->id,
@@ -114,9 +123,44 @@ class LearningProgressController extends Controller
             ]
         );
 
+        // Calculate Realistic Rewards
+        $xpEarned = 0;
+        $unlockedBadges = [];
+
+        if ($isNewCompletion) {
+            $xpEarned = 100; // Base XP for completing a chapter
+
+            $completedChapters = \DB::table('user_course_progress')
+                ->where('user_id', $user->id)
+                ->where('status', 'completed')
+                ->whereNotNull('chapter_id')
+                ->distinct('chapter_id')
+                ->count('chapter_id');
+
+            if ($completedChapters == 1) {
+                $unlockedBadges[] = [
+                    'id' => 'first_step',
+                    'title' => 'First Step',
+                    'icon' => '🚀'
+                ];
+            } else if ($completedChapters == 5) {
+                $unlockedBadges[] = [
+                    'id' => 'bookworm',
+                    'title' => 'Bookworm',
+                    'icon' => '📚'
+                ];
+            }
+            
+            // Note: If you want to check graduation, you can count total chapters in course, but for now we stick to absolute thresholds
+        }
+
         return response()->json([
             'status' => 'success',
-            'message' => 'Chapter marked as completed successfully'
+            'message' => 'Chapter marked as completed successfully',
+            'rewards' => [
+                'xp_earned' => $xpEarned,
+                'badges' => $unlockedBadges
+            ]
         ]);
     }
 }
