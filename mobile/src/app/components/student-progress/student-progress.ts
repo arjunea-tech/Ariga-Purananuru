@@ -112,32 +112,41 @@ export class StudentProgressComponent implements OnInit {
   }
 
   loadProgressData(): void {
-    const userId = this.authService.getUser()?.id || 1;
-    const courseId = 1;
-    try {
-      const legacyChaptersRaw = localStorage.getItem('completed_chapters');
-      const scopedChaptersRaw = localStorage.getItem(`lang_app_completed_chapters_${userId}_${courseId}`);
+    const token = this.authService.getToken();
+    if (!token) return;
 
-      const legacyIds: number[] = legacyChaptersRaw ? JSON.parse(legacyChaptersRaw) : [];
-      const scopedIds: number[] = scopedChaptersRaw ? JSON.parse(scopedChaptersRaw) : [];
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    this.http.get<any>(`${environment.apiUrl}/student/dashboard`, { headers }).pipe(
+      catchError((e) => {
+        console.error('Failed to load dynamic progress:', e);
+        return of(null);
+      })
+    ).subscribe((data) => {
+      if (!data) return;
 
-      const allCompletedSet = new Set<number>([...legacyIds, ...scopedIds]);
-      const completedChapterIds = Array.from(allCompletedSet);
-
-      const storedLevelsRaw = localStorage.getItem(`lang_app_completed_levels_${userId}_${courseId}`);
-      const completedLevelIds: number[] = storedLevelsRaw ? JSON.parse(storedLevelsRaw) : [];
-
-      const storedXp = localStorage.getItem(`lang_app_xp_${userId}`);
-      if (storedXp) {
-        this.totalXp.set(+storedXp);
+      if (typeof data.completion_percentage === 'number') {
+        this.overallProgressPercentage.set(data.completion_percentage);
+      }
+      
+      if (typeof data.xp_points === 'number') {
+        this.totalXp.set(data.xp_points);
+      }
+      
+      if (typeof data.streak_days === 'number') {
+        this.streakDays.set(data.streak_days);
+      }
+      
+      if (typeof data.passed_attempts === 'number') {
+        this.questionsAnswered.set(data.passed_attempts * 15 + 40);
+      }
+      
+      if (typeof data.average_score === 'number') {
+        this.accuracyPercentage.set(Math.round(data.average_score));
       }
 
-      const storedStreak = localStorage.getItem(`lang_app_streak_${userId}`);
-      if (storedStreak) {
-        this.streakDays.set(+storedStreak);
-      }
+      const completedChapterIds: number[] = data.completed_chapter_ids || [];
 
-      // Dynamic calculation per module
+      // Dynamic calculation per module based on real completed chapters
       const getModuleProgress = (chapterIds: number[]) => {
         const completedCount = completedChapterIds.filter(id => chapterIds.includes(id)).length;
         if (completedCount >= chapterIds.length) return 100;
@@ -162,103 +171,45 @@ export class StudentProgressComponent implements OnInit {
       const calcAlagidhal = alagidhalPct > 0 ? alagidhalPct : 0;
 
       const updatedModules: ModuleProgressItem[] = [
-        {
-          id: 'ezhuthu',
-          nameTa: 'எழுத்து',
-          nameEn: 'Ezhuthu',
-          percentage: calcEzhuthu,
-          isUnlocked: true,
-          color: '#22c55e'
-        },
-        {
-          id: 'asai',
-          nameTa: 'அசை',
-          nameEn: 'Asai',
-          percentage: calcAsai,
-          isUnlocked: calcEzhuthu > 0,
-          color: '#00B894'
-        },
-        {
-          id: 'seer',
-          nameTa: 'சீர்',
-          nameEn: 'Seer',
-          percentage: calcSeer,
-          isUnlocked: calcAsai > 0,
-          color: '#3b82f6'
-        },
-        {
-          id: 'thalai',
-          nameTa: 'தளை',
-          nameEn: 'Thalai',
-          percentage: calcThalai,
-          isUnlocked: calcSeer > 0,
-          color: '#8b5cf6'
-        },
-        {
-          id: 'alagidhal',
-          nameTa: 'அளகிடுதல்',
-          nameEn: 'Alagidhal',
-          percentage: calcAlagidhal,
-          isUnlocked: calcThalai > 0,
-          color: '#ec4899'
-        }
+        { id: 'ezhuthu', nameTa: 'எழுத்து', nameEn: 'Ezhuthu', percentage: calcEzhuthu, isUnlocked: true, color: '#22c55e' },
+        { id: 'asai', nameTa: 'அசை', nameEn: 'Asai', percentage: calcAsai, isUnlocked: calcEzhuthu > 0, color: '#00B894' },
+        { id: 'seer', nameTa: 'சீர்', nameEn: 'Seer', percentage: calcSeer, isUnlocked: calcAsai > 0, color: '#3b82f6' },
+        { id: 'thalai', nameTa: 'தளை', nameEn: 'Thalai', percentage: calcThalai, isUnlocked: calcSeer > 0, color: '#8b5cf6' },
+        { id: 'alagidhal', nameTa: 'அளகிடுதல்', nameEn: 'Alagidhal', percentage: calcAlagidhal, isUnlocked: calcThalai > 0, color: '#ec4899' }
       ];
-
       this.moduleProgressList.set(updatedModules);
 
-      // Overall Progress: Mathematical average of all 5 modules
-      const totalPctSum = updatedModules.reduce((acc, curr) => acc + curr.percentage, 0);
-      const overallAvg = Math.round(totalPctSum / updatedModules.length);
-      this.overallProgressPercentage.set(overallAvg);
+      // Studied today mins dynamically using weekly activity array
+      const todayDayOfWeek = (new Date().getDay() || 7) - 1; // 0 for Mon, 6 for Sun
+      const activitiesToday = data.weekly_activity && data.weekly_activity[todayDayOfWeek] ? data.weekly_activity[todayDayOfWeek] : 0;
+      const dynamicMins = Math.max(15, (activitiesToday * 12) + 15);
+      this.studiedTodayMins.set(dynamicMins);
 
-      // Dynamic Questions Answered
-      const storedQuestions = localStorage.getItem(`lang_app_questions_answered_${userId}`);
-      if (storedQuestions) {
-        this.questionsAnswered.set(+storedQuestions);
-      } else {
-        const dynamicQuestions = (completedChapterIds.length * 16) + 48;
-        this.questionsAnswered.set(dynamicQuestions);
-      }
-
-      // Dynamic Studied Today Mins
-      const storedMins = localStorage.getItem(`lang_app_study_mins_${userId}`);
-      if (storedMins) {
-        this.studiedTodayMins.set(+storedMins);
-      } else {
-        const dynamicMins = Math.max(15, (completedChapterIds.length * 12) + 15);
-        this.studiedTodayMins.set(dynamicMins);
-      }
-
-      // Dynamic Accuracy Percentage
-      const storedAccuracy = localStorage.getItem(`lang_app_accuracy_${userId}`);
-      if (storedAccuracy) {
-        this.accuracyPercentage.set(+storedAccuracy);
-      } else {
-        const dynamicAccuracy = completedChapterIds.length > 0 ? Math.min(98, 85 + (completedChapterIds.length * 3)) : 92;
-        this.accuracyPercentage.set(dynamicAccuracy);
-      }
-
-      // Fetch dynamic stats from backend API only if valid token exists
-      const token = this.authService.getToken();
-      if (token) {
-        const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-        this.http.get<any>(`${environment.apiUrl}/users/${userId}/progress-stats`, { headers }).pipe(
-          catchError(() => of(null))
-        ).subscribe((data) => {
-          if (data && typeof data.completion_percentage === 'number') {
-            this.overallProgressPercentage.set(data.completion_percentage);
-          }
-          if (data && typeof data.passed_attempts === 'number') {
-            this.questionsAnswered.set(data.passed_attempts * 15 + 40);
-          }
-          if (data && typeof data.average_score === 'number') {
-            this.accuracyPercentage.set(Math.round(data.average_score));
-          }
+      // Map dynamic badges
+      if (data.badges && Array.isArray(data.badges)) {
+        const earnedBadges = data.badges.filter((b: any) => b.unlocked).map((b: any, index: number) => {
+          const colors = ['primary', 'purple', 'warning', 'success', 'danger', 'info'];
+          const c = colors[index % colors.length];
+          
+          let biIcon = 'bi-award-fill';
+          if (b.id === 'first_step') biIcon = 'bi-rocket-takeoff-fill';
+          else if (b.id === 'bookworm') biIcon = 'bi-book-half';
+          else if (b.id === 'scholar') biIcon = 'bi-mortarboard-fill';
+          else if (b.id === 'chapter_champ') biIcon = 'bi-trophy-fill';
+          
+          return {
+            id: b.id,
+            title: b.title,
+            icon: biIcon,
+            bgClass: `bg-${c}-subtle`,
+            textClass: `text-${c}`
+          };
         });
+        if (earnedBadges.length > 0) {
+          this.earnedBadgesList.set(earnedBadges);
+        }
       }
-    } catch (e) {
-      console.error('Failed to calculate dynamic progress:', e);
-    }
+    });
   }
 
   loadStudents(): void {

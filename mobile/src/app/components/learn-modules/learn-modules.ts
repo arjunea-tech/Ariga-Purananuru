@@ -91,7 +91,96 @@ export class LearnModulesComponent implements OnInit {
     // Persist last open module so returning from lesson restores it
     if (next) {
       localStorage.setItem('lang_app_last_expanded_module', next);
+      this.prefetchModuleChapters(next);
     }
+  }
+
+  prefetchModuleChapters(moduleId: string): void {
+    const targetMod = this.modules().find(m => m.id === moduleId);
+    if (!targetMod || !targetMod.chapters) return;
+
+    targetMod.chapters.forEach((chap: any) => {
+      const chapterId = chap.id;
+      const cacheKey = `lang_app_resolved_chapter_${chapterId}`;
+      
+      // Fetch silently if not already cached
+      if (!localStorage.getItem(cacheKey)) {
+        this.http.get<any>(`${environment.apiUrl}/chapters/${chapterId}`).subscribe({
+          next: (chapterData) => {
+            const contents: any[] = (chapterData.contents || [])
+              .filter((c: any) => c.is_active !== false)
+              .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
+
+            const uniqueIds = new Set<number>();
+            const referencePositions: Array<{ contentIdx: number; blockIdx: number; refId: number }> = [];
+
+            contents.forEach((content, contentIdx) => {
+              if (!content.text_content) return;
+              try {
+                const parsed = JSON.parse(content.text_content);
+                if (parsed.blocks && Array.isArray(parsed.blocks)) {
+                  parsed.blocks.forEach((block: any, blockIdx: number) => {
+                    if (block.type === 'activity' && block.data && block.data.activityId) {
+                      const refId = +block.data.activityId;
+                      uniqueIds.add(refId);
+                      referencePositions.push({ contentIdx, blockIdx, refId });
+                    }
+                  });
+                }
+              } catch (e) {}
+            });
+
+            if (uniqueIds.size === 0) {
+              const result = {
+                chapterInfo: chapterData,
+                contents: contents,
+                assessments: chapterData.assessments || []
+              };
+              localStorage.setItem(cacheKey, JSON.stringify(result));
+              return;
+            }
+
+            const idsArray = Array.from(uniqueIds);
+            this.http.get<any[]>(`${environment.apiUrl}/activities`, { params: { ids: idsArray.join(',') } }).subscribe({
+              next: (activities) => {
+                const activityMap = new Map<number, any>();
+                activities.forEach(act => {
+                  activityMap.set(act.id, act);
+                });
+
+                referencePositions.forEach(pos => {
+                  const act = activityMap.get(pos.refId);
+                  if (!act) return;
+                  const content = contents[pos.contentIdx];
+                  if (!content.text_content) return;
+                  try {
+                    const parsed = JSON.parse(content.text_content);
+                    const block = parsed.blocks[pos.blockIdx];
+                    const realData = typeof act.data_json === 'string' ? JSON.parse(act.data_json) : act.data_json;
+                    
+                    block.data = {
+                      ...realData,
+                      type: act.type,
+                      title: act.title
+                    };
+                    content.text_content = JSON.stringify(parsed);
+                  } catch (e) {}
+                });
+
+                const result = {
+                  chapterInfo: chapterData,
+                  contents: contents,
+                  assessments: chapterData.assessments || []
+                };
+                localStorage.setItem(cacheKey, JSON.stringify(result));
+              },
+              error: () => {}
+            });
+          },
+          error: () => {}
+        });
+      }
+    });
   }
 
   loadUserProgressFromStorage(): void {
@@ -272,13 +361,21 @@ export class LearnModulesComponent implements OnInit {
 
     this.modules.set(dynamicModules);
 
+    // Prefetch all unlocked modules' chapters silently in the background
+    dynamicModules.forEach(mod => {
+      if (mod.status !== 'locked') {
+        this.prefetchModuleChapters(mod.id);
+      }
+    });
+
     // Restore last open module; if none saved, auto-expand the first in-progress module
     const savedExpanded = localStorage.getItem('lang_app_last_expanded_module');
     if (savedExpanded && dynamicModules.find(m => m.id === savedExpanded)) {
       this.expandedModuleId.set(savedExpanded);
     } else {
       const inProgress = dynamicModules.find(m => m.status === 'in-progress');
-      this.expandedModuleId.set(inProgress ? inProgress.id : (dynamicModules[0]?.id || null));
+      const autoExpand = inProgress ? inProgress.id : (dynamicModules[0]?.id || null);
+      this.expandedModuleId.set(autoExpand);
     }
 
     this.isLoadingChapters.set(false);
