@@ -6,7 +6,7 @@ import { forkJoin, Observable, of } from 'rxjs';
 import { map, switchMap, catchError } from 'rxjs/operators';
 
 export interface LessonStep {
-  type: 'video' | 'pdf' | 'reading' | 'activity' | 'assessment' | 'practice' | 'remediation';
+  type: 'intro' | 'video' | 'pdf' | 'reading' | 'activity' | 'assessment' | 'practice' | 'remediation';
   title: string;
   data: any;
 }
@@ -259,7 +259,92 @@ export class CoursePlayer implements OnInit, OnDestroy {
         next: (structure) => {
           this.initializeStructure(structure);
         },
-        error: (err) => console.error('Failed to load course structure:', err)
+        error: (err) => {
+          console.warn('Backend course 404/error, serving fallback Tamil Yaappu structure:', err);
+          const fallbackStructure: CourseStructure = {
+            id: this.courseId() || 1,
+            name: 'தமிழ் யாப்பிலக்கணம் (Tamil Yaappu)',
+            description: 'Master Tamil grammar with 5 core modules',
+            levels: [
+              {
+                id: 101,
+                name: 'எழுத்து (Ezhuthu)',
+                chapters: [
+                  { 
+                    id: 1001, 
+                    name: 'அடிப்படை & சிறப்பு எழுத்துக்கள்', 
+                    contents: [{ 
+                      id: 10001, 
+                      name: 'Basic & Special Letters', 
+                      text_content: '{"blocks":[{"type":"header","data":{"text":"தமிழ் எழுத்துக்கள்"}},{"type":"paragraph","data":{"text":"தமிழ் எழுத்துக்கள் மொத்தம் 247. உயிர் எழுத்துக்கள் 12, மெய் எழுத்துக்கள் 18, உயிர்மெய் 216, ஆய்த எழுத்து 1."}}]}' 
+                    }] 
+                  }
+                ]
+              },
+              {
+                id: 102,
+                name: 'அசை (Asai)',
+                chapters: [
+                  { 
+                    id: 1002, 
+                    name: 'நேரசை & நிரையசை', 
+                    contents: [{ 
+                      id: 10002, 
+                      name: 'Syllabification', 
+                      text_content: '{"blocks":[{"type":"header","data":{"text":"அசை இலக்கணம்"}},{"type":"paragraph","data":{"text":"அசை என்பது செய்யுளின் ஓர் உறுப்பு. இது நேரசை (Ner Asai) மற்றும் நிரையசை (Nirai Asai) என இரு வகைப்படும்."}}]}' 
+                    }] 
+                  }
+                ]
+              },
+              {
+                id: 103,
+                name: 'சீர் (Seer)',
+                chapters: [
+                  { 
+                    id: 103, 
+                    name: 'ஈரசை & மூவசை சீர்', 
+                    contents: [{ 
+                      id: 10003, 
+                      name: 'Metrical Feet', 
+                      text_content: '{"blocks":[{"type":"header","data":{"text":"சீர் இலக்கணம்"}},{"type":"paragraph","data":{"text":"ஒன்றிற்கு மேற்பட்ட அசைகள் சேர்ந்து அமைவது சீர் ஆகும்."}}]}' 
+                    }] 
+                  }
+                ]
+              },
+              {
+                id: 104,
+                name: 'தளை (Thalai)',
+                chapters: [
+                  { 
+                    id: 104, 
+                    name: 'ஏழு வகை தளைகள்', 
+                    contents: [{ 
+                      id: 10004, 
+                      name: 'Poetic Meter', 
+                      text_content: '{"blocks":[{"type":"header","data":{"text":"தளை இலக்கணம்"}},{"type":"paragraph","data":{"text":"நின்ற சீரின் ஈற்றசையும் வரும் சீரின் முதலசையும் பொருந்துவது தளை ஆகும்."}}]}' 
+                    }] 
+                  }
+                ]
+              },
+              {
+                id: 105,
+                name: 'அளகிடுதல் (Alagidhal)',
+                chapters: [
+                  { 
+                    id: 105, 
+                    name: 'திருக்குறள் அலகிடுதல்', 
+                    contents: [{ 
+                      id: 10005, 
+                      name: 'Verse Analysis', 
+                      text_content: '{"blocks":[{"type":"header","data":{"text":"அளகிடுதல்"}},{"type":"paragraph","data":{"text":"செய்யுள் அடிகளை அசை பிரித்து வாய்ப்பாடு காண்பதே அலகிடுதல் ஆகும்."}}]}' 
+                    }] 
+                  }
+                ]
+              }
+            ]
+          };
+          this.initializeStructure(fallbackStructure);
+        }
       });
     }
   }
@@ -307,6 +392,23 @@ export class CoursePlayer implements OnInit, OnDestroy {
       const chaptersKey = `lang_app_completed_chapters_${uid}_${cid}`;
       localStorage.setItem(levelsKey, JSON.stringify(this.completedLevelIds()));
       localStorage.setItem(chaptersKey, JSON.stringify(this.completedChapterIds()));
+
+      // Synchronize with legacy global keys and module completion keys
+      const existingLegacyRaw = localStorage.getItem('completed_chapters');
+      const existingLegacy: number[] = existingLegacyRaw ? JSON.parse(existingLegacyRaw) : [];
+      const mergedChapters = Array.from(new Set([...existingLegacy, ...this.completedChapterIds()]));
+      localStorage.setItem('completed_chapters', JSON.stringify(mergedChapters));
+
+      if (mergedChapters.length > 0) {
+        localStorage.setItem('ezhuthu_completed', 'true');
+        const completedModsRaw = localStorage.getItem('completed_modules');
+        const completedMods: string[] = completedModsRaw ? JSON.parse(completedModsRaw) : [];
+        if (!completedMods.includes('ezhuthu')) {
+          completedMods.push('ezhuthu');
+          localStorage.setItem('completed_modules', JSON.stringify(completedMods));
+          localStorage.setItem(`lang_app_completed_modules_${uid}`, JSON.stringify(completedMods));
+        }
+      }
     } catch (e) {
       console.error('Failed to save local progress:', e);
     }
@@ -483,6 +585,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
 
         return this.resolveActivityReferences(contents).pipe(
           map(resolvedContents => ({
+            chapterInfo: chapterData,
             contents: resolvedContents,
             assessments: chapterData.assessments || []
           }))
@@ -490,17 +593,37 @@ export class CoursePlayer implements OnInit, OnDestroy {
       })
     ).subscribe({
       next: (result) => {
-        this.generateLessonSequence(result.contents, result.assessments);
+        this.generateLessonSequence(result.contents, result.assessments, result.chapterInfo);
       },
       error: (err) => {
-        console.error('Failed to load chapter contents', err);
-        this.isLoadingLesson.set(false);
+        console.warn('Failed to load chapter contents from backend, generating fallback sequence:', err);
+        const fallbackContents: Content[] = [
+          {
+            id: chapterId,
+            name: 'Tamil Grammar Concept',
+            text_content: '{"blocks":[{"type":"header","data":{"text":"தமிழ் இலக்கண பாடம்"}},{"type":"paragraph","data":{"text":"அடிப்படை இலக்கண கருத்துக்களை கற்றுக்கொண்டு பயிற்சி செய்து தேர்ச்சி பெறுக!"}}]}'
+          }
+        ];
+        this.generateLessonSequence(fallbackContents, []);
       }
     });
   }
 
-  generateLessonSequence(contents: Content[], chapterAssessments: any[]) {
+  generateLessonSequence(contents: Content[], chapterAssessments: any[], chapterInfo?: any) {
     const steps: LessonStep[] = [];
+
+    // Step 1: Chapter Intro
+    const firstContent = contents.length > 0 ? contents[0] : null;
+    const chapTitle = chapterInfo?.name || firstContent?.name || firstContent?.title || 'பாட அறிமுகம் (Lesson Intro)';
+    const introTa = chapterInfo?.description || 'இப்பாடத்தில் உள்ள கருத்துக்களை தெளிவாக கற்றுக்கொண்டு பயிற்சி செய்து தேர்ச்சி பெறுக!';
+    steps.push({
+      type: 'intro',
+      title: chapTitle,
+      data: {
+        introTextTa: introTa,
+        introTextEn: 'Master this chapter through interactive stories, fun practice games, and assessments!'
+      }
+    });
 
     contents.forEach(content => {
       // if (content.id === 1) {
@@ -627,6 +750,8 @@ export class CoursePlayer implements OnInit, OnDestroy {
             });
           }
 
+          // Practice mode steps are now accessed directly via the Games tab
+          /*
           if (practiceBlocks.length > 0) {
             practiceBlocks.forEach((block: any, idx: number) => {
               steps.push({
@@ -635,50 +760,8 @@ export class CoursePlayer implements OnInit, OnDestroy {
                 data: block.data
               });
             });
-          } else {
-            // AUTO INJECT PRACTICE MODE FOR TAMIL YAAPPU COURSE (Skip for introductory content)
-            const courseName = this.courseStructure()?.name?.toLowerCase() || '';
-            const cNameOrig = this.courseStructure()?.name || '';
-            if (courseName.includes('yappu') || cNameOrig.includes('யாப்பு')) {
-              const cTitle = (content.title || content.name).toLowerCase();
-              if (!cTitle.includes('அறிமுகம்') && !cTitle.includes('intro')) {
-                let topic = 'alahidu';
-                let word = 'தமிழ்';
-                if (cTitle.includes('எழுத்து') || cTitle.includes('eluthu')) { 
-                  topic = 'eluthu'; 
-                  const words = ['கல்வி', 'அம்மா', 'பள்ளி', 'நூல்', 'தமிழ்', 'இலக்கணம்'];
-                  word = words[Math.floor(Math.random() * words.length)]; 
-                }
-                else if (cTitle.includes('அசை') || cTitle.includes('asai')) { 
-                  topic = 'asai'; 
-                  const words = ['அகழ்வாரைத்', 'தாங்கும்', 'நிலம்போலத்', 'தம்மை', 'இகழ்வார்ப்', 'பொறுத்தல்', 'தலை'];
-                  word = words[Math.floor(Math.random() * words.length)]; 
-                }
-                else if (cTitle.includes('சீர்') || cTitle.includes('seer')) { 
-                  topic = 'seer'; 
-                  const words = ['தேமாங்காய்', 'புளிமாங்காய்', 'கருவிளங்காய்', 'கூவிளங்காய்', 'தேமா', 'புளிமா', 'கருவிளம்', 'கூவிளம்'];
-                  word = words[Math.floor(Math.random() * words.length)]; 
-                }
-                else if (cTitle.includes('தளை') || cTitle.includes('thalai')) { 
-                  topic = 'thalai'; 
-                  word = 'துப்பார்க்குத் துப்பாய'; 
-                }
-                else if (cTitle.includes('அலகிடு') || cTitle.includes('alahidu')) { 
-                  topic = 'alahidu'; 
-                  word = 'அகழ்வாரைத் தாங்கும் நிலம்போலத் தம்மை'; 
-                }
-
-                // Inject practice step before activity
-                if (readingBlocks.length > 0 || activityBlocks.length > 0) {
-                    steps.push({
-                      type: 'practice',
-                      title: 'Practice Mode - ' + topic,
-                      data: { topic: topic, word: word }
-                    });
-                }
-              }
-            }
           }
+          */
 
           if (activityBlocks.length > 0) {
             activityBlocks.forEach((block: any, idx: number) => {
@@ -813,11 +896,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
   }
 
   goToMap(): void {
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { view: 'map', chapterId: null },
-      queryParamsHandling: 'merge'
-    });
+    this.router.navigate(['/tabs/learn']);
   }
 
   goToActivity(): void {
@@ -996,7 +1075,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
   finishLesson() {
     this.audioService.playSuccess();
 
-    const duration = 3 * 1000;
+    const duration = 2.5 * 1000;
     const end = Date.now() + duration;
 
     const frame = () => {
@@ -1027,8 +1106,8 @@ export class CoursePlayer implements OnInit, OnDestroy {
     }
 
     setTimeout(() => {
-      this.goToMap();
-    }, 3500);
+      this.router.navigate(['/tabs/learn']);
+    }, 2000);
   }
 
   completeActiveChapterAndGoToMap() {

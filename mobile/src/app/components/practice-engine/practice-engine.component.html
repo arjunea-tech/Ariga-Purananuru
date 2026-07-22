@@ -1,10 +1,10 @@
-<div class="w-100 d-flex flex-column align-items-center justify-content-center" [ngClass]="{'p-2 p-md-4': !isGameMode}">
+<div class="w-100 d-flex flex-column align-items-center justify-content-start p-0"
+  [style.min-height]="isGameMode ? 'auto' : '100vh'" [style.background]="isGameMode ? 'transparent' : '#f1f5f9'">
 
   <div
-    [ngClass]="isGameMode ? 'w-100 px-2 px-md-4' : 'card premium-card border-0 shadow-lg rounded-5 overflow-hidden w-100 position-relative animate-pop-in'"
-    [style.max-width]="isGameMode ? '100%' : '1200px'"
-    [style.background]="isGameMode ? 'transparent' : 'rgba(255, 255, 255, 0.95)'"
-    [style.backdrop-filter]="isGameMode ? 'none' : 'blur(10px)'">
+    [ngClass]="isGameMode ? 'w-100 position-relative animate-pop-in bg-transparent border-0 shadow-none' : 'card border-0 shadow-lg rounded-4 overflow-hidden w-100 position-relative animate-pop-in bg-white'"
+    [style.max-width]="isGameMode ? '100%' : '480px'" [style.margin]="isGameMode ? '0' : '0 auto'"
+    [style.min-height]="isGameMode ? 'auto' : '94vh'">
 
     <!-- Header (Only for standalone mode) -->
     <div *ngIf="!isGameMode" class="bg-primary text-white p-4 text-center position-relative"
@@ -205,31 +205,60 @@
     </div>
 
     <!-- INTERACTIVE FLOW (When used inside Course Player or started from Practice Arena) -->
-    <div *ngIf="step !== 'dashboard_menu' && step !== 'dashboard_input'" class="p-4 p-md-5 w-100">
+    <div *ngIf="step !== 'dashboard_menu' && step !== 'dashboard_input'" class="p-3 p-md-4 w-100">
+
+      <!-- Top Mobile App Navigation Bar (Shown when opened from Games Hub) -->
+      <div *ngIf="!isEmbeddedInLesson"
+        class="w-100 d-flex align-items-center justify-content-between px-3 py-2 bg-white shadow-sm border-bottom position-sticky top-0 z-3"
+        style="border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; padding-top: max(70px, calc(env(safe-area-inset-top, 40px) + 30px)) !important;">
+        <button
+          class="btn btn-light rounded-circle shadow-sm hover-lift d-flex align-items-center justify-content-center"
+          style="width: 42px; height: 42px; background: #f1f5f9; border: 1px solid #cbd5e1;" (click)="goBackToGames()">
+          <i class="bi bi-arrow-left fs-5 text-dark"></i>
+        </button>
+        <h5 class="fw-bold mb-0 text-dark" style="font-family: 'Fredoka', sans-serif;">
+          {{ getModuleTitle() }}
+        </h5>
+        <div style="width: 42px;"></div>
+      </div>
 
       <!-- Step: Select Mode -->
-      <div *ngIf="step === 'select_mode'" class="animate-slide-up w-100 d-flex flex-column align-items-center mt-2">
-        <div class="text-center mb-5">
-          <h2 class="text-dark fw-bold mb-2" style="font-size: 2.5rem; font-family: 'Fredoka', sans-serif;">பயிற்சி முறை
-          </h2>
-          <p class="text-secondary fs-4">எப்படிப் பயில விரும்புகிறீர்கள்?</p>
+      <div *ngIf="step === 'select_mode'" class="animate-slide-up w-100 d-flex flex-column align-items-center mt-3 px-2"
+        style="max-width: 480px; margin: 0 auto;">
+        <div class="text-center mb-4">
+          <h2 class="text-dark fw-bold mb-1" style="font-size: 2rem; font-family: 'Fredoka', sans-serif;">எப்படிப் பயில
+            விரும்புகிறீர்கள்?</h2>
         </div>
 
-        <div class="d-flex flex-column flex-md-row justify-content-center gap-4 w-100" style="max-width: 600px;">
+        <div class="d-flex flex-column gap-3 w-100">
           <button
-            class="btn rounded-4 p-4 fw-bold shadow-sm hover-lift flex-grow-1 d-flex flex-column align-items-center"
-            style="border: 3px solid #3b82f6; background: #eff6ff; color: #1e3a8a; font-size: 1.3rem;"
+            class="btn rounded-4 p-3 p-md-4 fw-bold shadow-sm hover-lift w-100 d-flex align-items-center justify-content-between transition-all"
+            style="border: 2px solid #3b82f6; background: #eff6ff; color: #1e3a8a; font-size: 1.2rem;"
             (click)="selectPlayMode('explain')">
-            <i class="bi bi-book-half fs-1 mb-2 text-primary"></i>
-            <span>1. விளக்க முறை</span>
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="bg-primary text-white rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm"
+                style="width: 44px; height: 44px;">
+                <i class="bi bi-book-half fs-4"></i>
+              </div>
+              <span class="fw-bold fs-5">1. விளக்க முறை</span>
+            </div>
+            <i class="bi bi-chevron-right text-primary fs-4"></i>
           </button>
 
           <button *ngIf="practiceType !== 'eluthu'"
-            class="btn rounded-4 p-4 fw-bold shadow-sm hover-lift flex-grow-1 d-flex flex-column align-items-center"
-            style="border: 3px solid #10b981; background: #ecfdf5; color: #064e3b; font-size: 1.3rem;"
+            class="btn rounded-4 p-3 p-md-4 fw-bold shadow-sm hover-lift w-100 d-flex align-items-center justify-content-between transition-all"
+            style="border: 2px solid #10b981; background: #ecfdf5; color: #064e3b; font-size: 1.2rem;"
             (click)="selectPlayMode('practice')">
-            <i class="bi bi-controller fs-1 mb-2 text-success"></i>
-            <span>2. பயிற்சி முறை</span>
+            <div class="d-flex align-items-center gap-3">
+              <div
+                class="bg-success text-white rounded-circle p-2 d-flex align-items-center justify-content-center shadow-sm"
+                style="width: 44px; height: 44px;">
+                <i class="bi bi-controller fs-4"></i>
+              </div>
+              <span class="fw-bold fs-5">2. பயிற்சி முறை</span>
+            </div>
+            <i class="bi bi-chevron-right text-success fs-4"></i>
           </button>
         </div>
       </div>
@@ -800,7 +829,8 @@
             practiceType === 'seer' ? 'சீர் விளக்கம்' : 'அசை விளக்கம்' }}</h2>
           <p class="text-secondary mb-1" style="font-size: clamp(0.8rem, 2.5vw, 1.1rem);">நீங்கள் உள்ளிட்ட வார்த்தை:
             <span class="fw-bold text-primary">{{
-              interactiveWord }}</span></p>
+              interactiveWord }}</span>
+          </p>
         </div>
 
         <!-- Results Container -->

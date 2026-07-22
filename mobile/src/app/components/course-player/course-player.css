@@ -954,3 +954,19 @@
     font-size: 0.85rem !important;
   }
 }
+
+@media (max-width: 768px) {
+  .mobile-player-shell {
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+  .mobile-player-frame {
+    width: 100vw !important;
+    max-width: 100% !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+}

@@ -1,0 +1,112 @@
+.mobile-tabs-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  max-width: 100%;
+  overflow: hidden;
+  background-color: #F8F9FD;
+}
+
+.tab-content-area {
+  flex: 1;
+  width: 100%;
+  overflow-y: auto;
+  padding-bottom: 76px; /* Space for fixed bottom nav bar */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Bottom Navigation Bar */
+.bottom-nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 72px;
+  background: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 12px env(safe-area-inset-bottom, 8px) 12px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.08);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  z-index: 1050;
+  backdrop-filter: blur(10px);
+}
+
+.nav-tab-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  text-decoration: none;
+  color: #8E9AAF;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 6px 0;
+  border-radius: 16px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav-tab-icon-wrapper {
+  width: 42px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  font-size: 1.35rem;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-tab-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-top: 2px;
+  transition: color 0.2s ease;
+  letter-spacing: 0.2px;
+}
+
+/* Active State */
+.nav-tab-item.is-active, 
+.nav-tab-item.active {
+  color: var(--tab-theme-color, #6C5CE7);
+}
+
+.nav-tab-item.is-active .nav-tab-icon-wrapper,
+.nav-tab-item.active .nav-tab-icon-wrapper {
+  background: color-mix(in sgb, var(--tab-theme-color, #6C5CE7) 15%, transparent);
+  transform: translateY(-2px) scale(1.1);
+  color: var(--tab-theme-color, #6C5CE7);
+}
+
+.nav-tab-item.is-active .nav-tab-label,
+.nav-tab-item.active .nav-tab-label {
+  font-weight: 700;
+  color: var(--tab-theme-color, #6C5CE7);
+}
+
+/* Hover & Active Press feedback */
+.nav-tab-item:active {
+  transform: scale(0.95);
+}
+
+@media (min-width: 768px) {
+  .mobile-tabs-shell {
+    max-width: 480px;
+    margin: 0 auto;
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
+    border-radius: 24px;
+    height: 92vh;
+    margin-top: 4vh;
+  }
+  
+  .bottom-nav-bar {
+    max-width: 480px;
+    margin: 0 auto;
+    border-radius: 0 0 24px 24px;
+  }
+}

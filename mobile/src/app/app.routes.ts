@@ -22,13 +22,34 @@ import { guestGuard } from './guards/guest.guard';
 import { AdminUploadComponent } from './components/admin-upload/admin-upload.component';
 import { ActivityBuilder } from './components/activity-builder/activity-builder';
 import { PracticeEngineComponent } from './components/practice-engine/practice-engine.component';
+import { StudentTabsComponent } from './components/student-tabs/student-tabs';
+import { LearnModulesComponent } from './components/learn-modules/learn-modules';
+import { GamesHubComponent } from './components/games-hub/games-hub';
+import { StudentProfileComponent } from './components/student-profile/student-profile';
+import { KidsDashboard } from './components/kids-dashboard/kids-dashboard';
 
 export const routes: Routes = [
   // Public Login route
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   
+  // 📱 Mobile Native 5-Tab Navigation Shell
+  {
+    path: 'tabs',
+    component: StudentTabsComponent,
+    canActivate: [roleGuard(['student', 'super_admin', 'admin', 'staff'])],
+    children: [
+      { path: '', redirectTo: 'home', pathMatch: 'full' },
+      { path: 'home', component: KidsDashboard },
+      { path: 'learn', component: LearnModulesComponent },
+      { path: 'games', component: GamesHubComponent },
+      { path: 'progress', component: StudentProgressComponent },
+      { path: 'profile', component: StudentProfileComponent }
+    ]
+  },
+  
   // Safe Fallback redirect
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '', redirectTo: 'tabs/home', pathMatch: 'full' },
+
 
   /*
    * 👑 Super Admin Only Pages
@@ -127,7 +148,7 @@ export const routes: Routes = [
    */
   { 
     path: 'learn', 
-    redirectTo: 'learn/dashboard', 
+    redirectTo: 'tabs/home', 
     pathMatch: 'full' 
   },
   { 

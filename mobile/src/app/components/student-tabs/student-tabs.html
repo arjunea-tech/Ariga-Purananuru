@@ -1,0 +1,23 @@
+<div class="mobile-tabs-shell">
+  <!-- Dynamic Screen View Container -->
+  <main class="tab-content-area">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Persistent Native Bottom Navigation Bar -->
+  <nav class="bottom-nav-bar">
+    @for (tab of tabs; track tab.id) {
+      <a [routerLink]="tab.route"
+         routerLinkActive="active"
+         (click)="selectTab(tab.id)"
+         class="nav-tab-item"
+         [class.is-active]="activeTab() === tab.id"
+         [style.--tab-theme-color]="tab.color">
+        <div class="nav-tab-icon-wrapper">
+          <i class="bi" [ngClass]="tab.icon"></i>
+        </div>
+        <span class="nav-tab-label">{{ tab.label }}</span>
+      </a>
+    }
+  </nav>
+</div>

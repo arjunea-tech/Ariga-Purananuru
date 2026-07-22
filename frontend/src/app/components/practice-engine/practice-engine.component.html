@@ -210,9 +210,9 @@
       <!-- Step: Select Mode -->
       <div *ngIf="step === 'select_mode'" class="animate-slide-up w-100 d-flex flex-column align-items-center mt-2">
         <div class="text-center mb-5">
-          <h2 class="text-dark fw-bold mb-2" style="font-size: 2.5rem; font-family: 'Fredoka', sans-serif;">பயிற்சி முறை
-          </h2>
-          <p class="text-secondary fs-4">எப்படிப் பயில விரும்புகிறீர்கள்?</p>
+          <h2 class="text-dark fw-bold mb-2" style="font-size: 2.5rem; font-family: 'Fredoka', sans-serif;">எப்படிப்
+            பயில விரும்புகிறீர்கள்? </h2>
+          <p class="text-secondary fs-4"></p>
         </div>
 
         <div class="d-flex flex-column flex-md-row justify-content-center gap-4 w-100" style="max-width: 600px;">
@@ -281,8 +281,10 @@
       <div *ngIf="step === 'analyze_word'" class="animate-slide-up w-100 d-flex flex-column align-items-center mt-2">
 
         <!-- ELUTHU MODE: Just show the breakdown -->
-        <div *ngIf="practiceType === 'eluthu' && interactiveAnalysis" class="w-100 flex-grow-1 overflow-auto" style="max-width: 800px; min-height: 0;">
-          <h2 class="text-dark fw-bold text-center mb-2" style="font-size: clamp(1.4rem, 4vw, 2.5rem); font-family: 'Fredoka', sans-serif;">
+        <div *ngIf="practiceType === 'eluthu' && interactiveAnalysis" class="w-100 flex-grow-1 overflow-auto"
+          style="max-width: 800px; min-height: 0;">
+          <h2 class="text-dark fw-bold text-center mb-2"
+            style="font-size: clamp(1.4rem, 4vw, 2.5rem); font-family: 'Fredoka', sans-serif;">
             எழுத்து விளக்கம்</h2>
           <div class="table-responsive bg-white rounded-4 shadow-sm border p-2 mb-2">
             <table class="table table-borderless align-middle mb-0 text-center">
@@ -294,10 +296,11 @@
                 </tr>
               </thead>
               <tbody>
-                 <tr *ngFor="let char of interactiveCharAnalysis" class="border-bottom">
+                <tr *ngFor="let char of interactiveCharAnalysis" class="border-bottom">
                   <td class="fw-bold text-primary" style="font-size: clamp(1.2rem, 4vw, 2rem);">{{ char.char }}</td>
                   <td class="text-secondary" style="font-size: clamp(0.9rem, 3vw, 1.25rem);">{{ char.type }}</td>
-                  <td class="fw-bold"><span class="badge bg-warning text-dark rounded-pill px-3 py-1 text-wrap" style="font-size: clamp(0.8rem, 2.5vw, 1.1rem); line-height: 1.2;">{{
+                  <td class="fw-bold"><span class="badge bg-warning text-dark rounded-pill px-3 py-1 text-wrap"
+                      style="font-size: clamp(0.8rem, 2.5vw, 1.1rem); line-height: 1.2;">{{
                       char.mathirai === 0.5 ? '(1/2) மாத்திரை' : char.mathirai + ' மாத்திரை' }}</span></td>
                 </tr>
               </tbody>
@@ -334,9 +337,12 @@
                       [ngClass]="hasCheckedInteractiveAsai ? (interactiveAsaiResults[wIndex][aIndex] ? 'bg-success bg-opacity-10 border border-success' : 'bg-danger bg-opacity-10 border border-danger') : 'bg-light'">
                       <span class="fs-5 fw-bold text-dark mb-1">{{ asai.text }}</span>
 
-                      <div class="btn-group shadow-sm flex-wrap" role="group" style="border-radius: 8px; overflow: hidden;">
-                        <ng-container *ngIf="interactiveAnalysis.word_analysis.length === 7 && wIndex === 6; else normalAsai">
-                          <button *ngFor="let opt of ['நாள்', 'மலர்', 'காசு', 'பிறப்பு']" type="button" class="btn fw-bold px-2 py-1 border-0" style="font-size: 0.85rem;"
+                      <div class="btn-group shadow-sm flex-wrap" role="group"
+                        style="border-radius: 8px; overflow: hidden;">
+                        <ng-container
+                          *ngIf="interactiveAnalysis.word_analysis.length === 7 && wIndex === 6; else normalAsai">
+                          <button *ngFor="let opt of ['நாள்', 'மலர்', 'காசு', 'பிறப்பு']" type="button"
+                            class="btn fw-bold px-2 py-1 border-0" style="font-size: 0.85rem;"
                             [ngClass]="interactiveAsaiGuesses[wIndex][aIndex] === opt ? 'bg-primary text-white' : 'bg-white text-primary'"
                             (click)="selectInteractiveAsaiByWord(wIndex, aIndex, opt)"
                             [disabled]="hasCheckedInteractiveAsai && interactiveAsaiResults[wIndex][aIndex]">
@@ -389,9 +395,12 @@
                       [ngClass]="hasCheckedInteractiveAsai ? (interactiveAsaiResults[i + 4][aIndex] ? 'bg-success bg-opacity-10 border border-success' : 'bg-danger bg-opacity-10 border border-danger') : 'bg-light'">
                       <span class="fs-5 fw-bold text-dark mb-1">{{ asai.text }}</span>
 
-                      <div class="btn-group shadow-sm flex-wrap" role="group" style="border-radius: 8px; overflow: hidden;">
-                        <ng-container *ngIf="interactiveAnalysis.word_analysis.length === 7 && (i + 4) === 6; else normalAsaiLine2">
-                          <button *ngFor="let opt of ['நாள்', 'மலர்', 'காசு', 'பிறப்பு']" type="button" class="btn fw-bold px-2 py-1 border-0" style="font-size: 0.85rem;"
+                      <div class="btn-group shadow-sm flex-wrap" role="group"
+                        style="border-radius: 8px; overflow: hidden;">
+                        <ng-container
+                          *ngIf="interactiveAnalysis.word_analysis.length === 7 && (i + 4) === 6; else normalAsaiLine2">
+                          <button *ngFor="let opt of ['நாள்', 'மலர்', 'காசு', 'பிறப்பு']" type="button"
+                            class="btn fw-bold px-2 py-1 border-0" style="font-size: 0.85rem;"
                             [ngClass]="interactiveAsaiGuesses[i + 4][aIndex] === opt ? 'bg-primary text-white' : 'bg-white text-primary'"
                             (click)="selectInteractiveAsaiByWord(i + 4, aIndex, opt)"
                             [disabled]="hasCheckedInteractiveAsai && interactiveAsaiResults[i + 4][aIndex]">
@@ -786,9 +795,11 @@
       <div *ngIf="step === 'auto_explain' && interactiveAnalysis"
         class="animate-slide-up w-100 d-flex flex-column align-items-center mt-2 px-2 px-md-4">
         <div class="text-center mb-1">
-          <h2 class="text-dark fw-bold mb-1" style="font-size: clamp(1.2rem, 4vw, 1.75rem); font-family: 'Fredoka', sans-serif;">{{
+          <h2 class="text-dark fw-bold mb-1"
+            style="font-size: clamp(1.2rem, 4vw, 1.75rem); font-family: 'Fredoka', sans-serif;">{{
             practiceType === 'seer' ? 'சீர் விளக்கம்' : 'அசை விளக்கம்' }}</h2>
-          <p class="text-secondary mb-1" style="font-size: clamp(0.8rem, 2.5vw, 1.1rem);">நீங்கள் உள்ளிட்ட வார்த்தை: <span class="fw-bold text-primary">{{
+          <p class="text-secondary mb-1" style="font-size: clamp(0.8rem, 2.5vw, 1.1rem);">நீங்கள் உள்ளிட்ட வார்த்தை:
+            <span class="fw-bold text-primary">{{
               interactiveWord }}</span></p>
         </div>
 
@@ -800,30 +811,36 @@
             <div class="col-12 d-flex flex-column align-items-center">
               <div class="table-responsive bg-white rounded-4 shadow-sm border p-2 w-100 mt-2 flex-shrink-0"
                 *ngFor="let word of interactiveAnalysis.word_analysis">
-                <h3 *ngIf="interactiveAnalysis.word_analysis.length > 1" class="text-primary fw-bold text-center mb-2" style="font-size: clamp(1.1rem, 3.5vw, 1.5rem);">
+                <h3 *ngIf="interactiveAnalysis.word_analysis.length > 1" class="text-primary fw-bold text-center mb-2"
+                  style="font-size: clamp(1.1rem, 3.5vw, 1.5rem);">
                   வார்த்தை: {{ word.word }}</h3>
 
                 <table class="table table-borderless align-middle mb-0 text-center w-100" style="table-layout: fixed;">
                   <thead
                     style="background: linear-gradient(90deg, #fef3c7, #fef08a); border-bottom: 2px solid #fde047;">
                     <tr>
-                      <th class="py-1 px-1 text-dark fw-bold text-uppercase text-center" style="font-size: clamp(0.7rem, 2vw, 0.85rem); width: 25%;"><i
+                      <th class="py-1 px-1 text-dark fw-bold text-uppercase text-center"
+                        style="font-size: clamp(0.7rem, 2vw, 0.85rem); width: 25%;"><i
                           class="bi bi-puzzle-fill me-1 text-warning d-none d-sm-inline"></i> அசை</th>
-                      <th class="py-1 px-1 text-dark fw-bold text-uppercase text-center" style="font-size: clamp(0.7rem, 2vw, 0.85rem); width: 35%;"><i
+                      <th class="py-1 px-1 text-dark fw-bold text-uppercase text-center"
+                        style="font-size: clamp(0.7rem, 2vw, 0.85rem); width: 35%;"><i
                           class="bi bi-tag-fill me-1 text-warning d-none d-sm-inline"></i> வகை</th>
-                      <th class="py-1 px-1 text-dark fw-bold text-uppercase text-center" style="font-size: clamp(0.7rem, 2vw, 0.85rem); width: 40%;"><i
+                      <th class="py-1 px-1 text-dark fw-bold text-uppercase text-center"
+                        style="font-size: clamp(0.7rem, 2vw, 0.85rem); width: 40%;"><i
                           class="bi bi-info-circle-fill me-1 text-warning d-none d-sm-inline"></i> விளக்கம்</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr *ngFor="let asai of word.asai_groups; let last = last"
                       [ngStyle]="{'border-bottom': last ? 'none' : '1px dashed #e2e8f0'}">
-                      <td class="py-1 px-1 fw-bold text-dark text-center" style="font-size: clamp(0.9rem, 3.5vw, 1.25rem);">{{ asai.text }}</td>
+                      <td class="py-1 px-1 fw-bold text-dark text-center"
+                        style="font-size: clamp(0.9rem, 3.5vw, 1.25rem);">{{ asai.text }}</td>
                       <td class="py-1 px-1 text-center"><span class="badge px-2 py-1 rounded-pill shadow-sm text-wrap"
                           style="font-size: clamp(0.65rem, 2vw, 0.9rem); line-height: 1.2;"
                           [ngClass]="asai.type.includes('நேர்') ? 'bg-primary text-white' : 'bg-success text-white'">{{
                           asai.type }}</span></td>
-                      <td class="py-1 px-1 text-secondary fw-bold text-center" style="font-size: clamp(0.65rem, 2vw, 0.9rem);">{{
+                      <td class="py-1 px-1 text-secondary fw-bold text-center"
+                        style="font-size: clamp(0.65rem, 2vw, 0.9rem);">{{
                         getAsaiExplanation(asai.text) }}</td>
                     </tr>
                   </tbody>
@@ -1019,14 +1036,18 @@
 
               <!-- Mobile List View -->
               <div class="d-block d-sm-none">
-                <div *ngFor="let word of analysisResult.word_analysis" class="card shadow-sm border rounded-4 p-3 mb-3 bg-white" style="border: 2px solid #e2e8f0 !important;">
+                <div *ngFor="let word of analysisResult.word_analysis"
+                  class="card shadow-sm border rounded-4 p-3 mb-3 bg-white"
+                  style="border: 2px solid #e2e8f0 !important;">
                   <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
                     <span class="text-secondary small fw-bold">சொல் (Word)</span>
-                    <span class="fs-5 fw-bold text-dark" style="font-family: 'Nunito', sans-serif;">{{ word.word }}</span>
+                    <span class="fs-5 fw-bold text-dark" style="font-family: 'Nunito', sans-serif;">{{ word.word
+                      }}</span>
                   </div>
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="text-secondary small">பிரிப்பு (Split)</span>
-                    <span class="badge bg-light text-dark border px-3 py-1 rounded-pill fs-6">{{ word.asai_text }}</span>
+                    <span class="badge bg-light text-dark border px-3 py-1 rounded-pill fs-6">{{ word.asai_text
+                      }}</span>
                   </div>
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="text-secondary small">அசை (Asai)</span>
@@ -1034,7 +1055,9 @@
                   </div>
                   <div *ngIf="practiceType !== 'asai'" class="d-flex justify-content-between align-items-center">
                     <span class="text-secondary small">சீர் (Seer)</span>
-                    <span class="badge text-white px-3 py-1 rounded-pill" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 1px solid #047857;">{{ word.seer_pattern }}</span>
+                    <span class="badge text-white px-3 py-1 rounded-pill"
+                      style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border: 1px solid #047857;">{{
+                      word.seer_pattern }}</span>
                   </div>
                 </div>
               </div>
@@ -1044,7 +1067,7 @@
             <div *ngIf="practiceType === 'thalai' || practiceType === 'alahidu'" class="mt-4">
               <h4 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="bi bi-link-45deg text-primary me-2"></i>
                 Linkage (தளை)</h4>
-              
+
               <!-- Desktop Table View -->
               <div class="table-responsive bg-white rounded-4 shadow-sm border border-2 d-none d-sm-block"
                 style="border-color: #e2e8f0 !important;">
@@ -1078,7 +1101,9 @@
 
               <!-- Mobile List View -->
               <div class="d-block d-sm-none">
-                <div *ngFor="let thalai of analysisResult.thalai_analysis" class="card shadow-sm border rounded-4 p-3 mb-3 bg-white" style="border-left: 5px solid #fbbf24 !important; border-top: 1px solid #e2e8f0 !important; border-right: 1px solid #e2e8f0 !important; border-bottom: 1px solid #e2e8f0 !important;">
+                <div *ngFor="let thalai of analysisResult.thalai_analysis"
+                  class="card shadow-sm border rounded-4 p-3 mb-3 bg-white"
+                  style="border-left: 5px solid #fbbf24 !important; border-top: 1px solid #e2e8f0 !important; border-right: 1px solid #e2e8f0 !important; border-bottom: 1px solid #e2e8f0 !important;">
                   <div class="row g-2">
                     <div class="col-6">
                       <div class="small text-secondary fw-bold" style="font-size: 0.75rem;">நின்ற சீர்</div>
@@ -1093,11 +1118,13 @@
                   <hr class="my-2 opacity-25">
                   <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="small text-secondary">இணைப்பு</span>
-                    <span class="small text-dark fw-bold" style="font-size: 0.8rem;">{{ thalai.first_seer_type }} முன் {{ thalai.second_word_first_asai }}</span>
+                    <span class="small text-dark fw-bold" style="font-size: 0.8rem;">{{ thalai.first_seer_type }} முன்
+                      {{ thalai.second_word_first_asai }}</span>
                   </div>
                   <div class="d-flex justify-content-between align-items-center">
                     <span class="small text-secondary">தளை</span>
-                    <span class="badge bg-warning text-dark border border-warning rounded-pill px-3 py-1 shadow-sm" style="font-size: 0.8rem;">{{ thalai.thalai_type }}</span>
+                    <span class="badge bg-warning text-dark border border-warning rounded-pill px-3 py-1 shadow-sm"
+                      style="font-size: 0.8rem;">{{ thalai.thalai_type }}</span>
                   </div>
                 </div>
               </div>

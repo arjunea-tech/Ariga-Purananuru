@@ -279,3 +279,39 @@ ion-router-outlet > * {
 .global-loader {
   z-index: 1400 !important;
 }
+
+/* ── UNIVERSAL MOBILE RESPONSIVENESS & ZERO-LAG GPU PERFORMANCE ── */
+*, *::before, *::after {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* GPU hardware acceleration for smooth 60fps transitions on budget phones */
+.tab-content-area,
+.mobile-tabs-shell,
+.page-header,
+.home-header,
+.card,
+.btn,
+.nav-tab-item {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+/* Responsive adjustment for extra small / budget mobile screens (e.g. 320px - 360px) */
+@media (max-width: 360px) {
+  .page-title {
+    font-size: 1.25rem !important;
+  }
+  .greeting-text {
+    font-size: 1.1rem !important;
+  }
+  .nav-tab-label {
+    font-size: 0.65rem !important;
+  }
+  .px-3 {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+}
+

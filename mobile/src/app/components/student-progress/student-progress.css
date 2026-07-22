@@ -1,16 +1,110 @@
-.avatar {
-    font-size: 1.25rem;
+.progress-page {
+  min-height: 100%;
+  background: #F8F9FD;
+}
+
+/* Header */
+.page-header.blue-theme {
+  background: linear-gradient(135deg, #0984E3 0%, #74B9FF 100%);
+  color: #FFFFFF;
+  padding: max(76px, calc(env(safe-area-inset-top, 40px) + 36px)) 20px 20px 20px;
+  border-radius: 0 0 24px 24px;
+  box-shadow: 0 4px 15px rgba(9, 132, 227, 0.25);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.trophy-badge {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.overall-card {
+  border-radius: 18px !important;
+}
+
+.module-mini-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.metric-card {
+  border-radius: 16px !important;
+}
+
+.metric-value {
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.streak-xp-card {
+  border-radius: 18px !important;
+  background: linear-gradient(135deg, #FFFFFF 0%, #F1F2F6 100%);
+}
+
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  text-align: center;
+}
+
+.badge-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.badge-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+
+.badge-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #2D3436;
+}
+
+.bg-purple-subtle {
+  background-color: rgba(108, 92, 231, 0.12) !important;
+}
+.text-purple {
+  color: #6C5CE7 !important;
+}
+
+@media (max-width: 360px) {
+  .metrics-grid {
+    grid-template-columns: repeat(1, 1fr);
   }
-  
-  .table > :not(caption) > * > * {
-    background-color: transparent;
-  }
-  
-  .modal-backdrop {
-    background-color: rgba(0, 0, 0, 0.5);
-  }
-  
-  .progress {
-    background-color: #e9ecef;
-    border-radius: 0.5rem;
-  }
+}

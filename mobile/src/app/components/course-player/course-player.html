@@ -1,6 +1,8 @@
-<div class="w-100 position-relative overflow-hidden bg-light" style="height: 100vh;">
+<div class="mobile-player-shell d-flex justify-content-center align-items-center min-vh-100 bg-secondary bg-opacity-10 py-0 py-md-3">
+  <div class="mobile-player-frame position-relative shadow-lg overflow-hidden d-flex flex-column bg-white border border-2 border-white"
+       style="width: 100%; max-width: 480px; height: 100vh; max-height: 900px; border-radius: 24px;">
 
-  <!-- Mascot Progression Warning Bubble -->
+    <!-- Mascot Progression Warning Bubble -->
   @if (showMascotWarning()) {
   <div
     class="mascot-warning-toast position-fixed top-0 start-50 translate-middle-x mt-5 p-3 rounded-4 shadow-lg border border-3 border-danger d-flex align-items-center gap-3 animate-pop-in z-5"
@@ -80,7 +82,7 @@
 
     <!-- Top HUD (Floating widgets for Dashboard) -->
     <header class="position-absolute top-0 start-0 w-100 h-100 pe-none" style="z-index: 1050;"
-      [class.d-none]="currentView() === 'content' || isLoadingMap()">
+      [class.d-none]="currentView() === 'levels' || currentView() === 'content' || isLoadingMap()">
       <!-- Left Navigation Actions (Floating Top Left) -->
       <div class="position-absolute pe-auto" style="top: calc(12px + max(25px, env(safe-area-inset-top))); left: max(24px, env(safe-area-inset-left));">
         <button
@@ -133,4 +135,5 @@
     </header>
   }
 
+  </div>
 </div>

@@ -1,5 +1,24 @@
 .lesson-player {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  width: 100vw !important;
+  box-sizing: border-box !important;
+}
+
+.intro-step-card {
+  width: 100% !important;
+  max-width: min(650px, 92vw) !important;
+  box-sizing: border-box !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
   overflow: hidden !important;
+}
+
+.intro-step-card .badge {
+  white-space: normal !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+  line-height: 1.35 !important;
 }
 
 /* ── LESSON PLAYER BACKGROUND ── */

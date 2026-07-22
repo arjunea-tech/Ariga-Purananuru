@@ -8,7 +8,7 @@ import { NotificationService } from './services/notification.service';
 import { LoaderService } from './services/loader.service';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../environments/environment';
-import { StatusBar } from '@capacitor/status-bar';
+import { StatusBar, Style } from '@capacitor/status-bar';
 import { App as CapApp } from '@capacitor/app';
 import { Capacitor } from '@capacitor/core';
 import { 
@@ -61,11 +61,11 @@ export class App implements OnInit {
   ngOnInit() {
     // Only configure native plugins on physical/emulated mobile platforms
     if (Capacitor.isNativePlatform()) {
-      // Disable StatusBar overlaying webview on mobile
+      // Disable StatusBar overlaying webview on mobile & enforce light theme (dark status bar icons)
       try {
-        StatusBar.setOverlaysWebView({ overlay: false }).catch(e => {
-          console.warn('StatusBar plugin not available:', e);
-        });
+        StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
+        StatusBar.setStyle({ style: Style.Light }).catch(() => {});
+        StatusBar.setBackgroundColor({ color: '#ffffff' }).catch(() => {});
       } catch (e) {
         console.warn('StatusBar plugin error:', e);
       }

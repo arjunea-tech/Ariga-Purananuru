@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, Output, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { TamilNLPService, SeiyulAnalysis } from '../../services/tamil-nlp.service';
 
 @Component({
@@ -32,6 +32,7 @@ export class PracticeEngineComponent implements OnInit {
 
   // Game Mode variables (for when used inside a course player)
   @Input() isGameMode: boolean = false;
+  @Input() isEmbeddedInLesson: boolean = false;
   isFullscreen: boolean = false;
   step: 'dashboard_menu' | 'dashboard_input' | 'select_mode' | 'input_word' | 'split_word' | 'analyze_word' | 'auto_explain' | 'sandbox' | 'result' | 'identify_seer' | 'identify_thalai' = 'select_mode';
 
@@ -81,7 +82,9 @@ export class PracticeEngineComponent implements OnInit {
 
   constructor(
     private tamilNLP: TamilNLPService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute,
+    private router: Router
   ) { }
 
   getRandomTamilLetter(): string {
@@ -108,6 +111,46 @@ export class PracticeEngineComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      const mode = params['mode'];
+      const mod = params['module'];
+
+      if (mod && mod !== 'all') {
+        if (mod === 'ezhuthu') this.activeTab = 'eluthu';
+        else if (mod === 'asai') this.activeTab = 'asai';
+        else if (mod === 'seer') this.activeTab = 'seer';
+        else if (mod === 'thalai') this.activeTab = 'thalai';
+        else if (mod === 'alagidhal') this.activeTab = 'alahidu';
+        this.practiceType = this.activeTab;
+      } else {
+        // When All Modules is selected, pick activeTab dynamically based on game type
+        if (mode === 'memory' || mode === 'audio' || mode === 'build') {
+          this.activeTab = 'eluthu';
+        } else if (mode === 'match' || mode === 'drag_drop') {
+          this.activeTab = 'asai';
+        } else if (mode === 'mistake' || mode === 'speed') {
+          this.activeTab = 'seer';
+        } else {
+          this.activeTab = 'eluthu';
+        }
+        this.practiceType = this.activeTab;
+      }
+
+      if (mode) {
+        this.isGameMode = true;
+        this.playMode = 'practice';
+        this.step = 'input_word';
+        if (this.practiceType === 'eluthu') {
+          this.interactiveWord = this.getRandomTamilLetter();
+        } else {
+          this.interactiveWord = this.getRandomAsaiWord();
+        }
+      } else if (mod) {
+        this.isGameMode = true;
+        this.step = 'select_mode';
+      }
+    });
+
     if (this.practiceContent) {
       this.isGameMode = true;
       this.activeTab = this.practiceType;
@@ -131,7 +174,7 @@ export class PracticeEngineComponent implements OnInit {
         // Eluthu, Asai, Seer, Alahidu will use the new Interactive Flow
         this.step = 'select_mode';
       }
-    } else {
+    } else if (!this.isGameMode) {
       // Standalone Dashboard mode
       this.step = 'dashboard_menu';
       // Reset input as they start from menu
@@ -141,6 +184,19 @@ export class PracticeEngineComponent implements OnInit {
   }
 
   // --- INTERACTIVE FLOW METHODS --- //
+
+  goBackToGames() {
+    this.router.navigate(['/tabs/games']);
+  }
+
+  getModuleTitle(): string {
+    if (this.practiceType === 'eluthu') return '1. எழுத்து இலக்கணம்';
+    if (this.practiceType === 'asai') return '2. அசை இலக்கணம்';
+    if (this.practiceType === 'seer') return '3. சீர் இலக்கணம்';
+    if (this.practiceType === 'thalai') return '4. தளை இலக்கணம்';
+    if (this.practiceType === 'alahidu' || this.practiceType === 'alagidhal') return '5. முழுமையான அலகிடுதல்';
+    return 'இலக்கணப் பயிற்சி';
+  }
 
   selectPlayMode(mode: 'explain' | 'practice') {
     this.playMode = mode;
@@ -478,6 +534,16 @@ export class PracticeEngineComponent implements OnInit {
       this.allCorrect = allThalaiCorrect;
       if (allThalaiCorrect) {
         this.showFeedback('அற்புதம்! முழுமையாக அலகிட்டு முடித்துவிட்டீர்கள். 🌟', 'success');
+        try {
+          const modKey = this.practiceType || 'asai';
+          localStorage.setItem(`${modKey}_completed`, 'true');
+          const completedModsRaw = localStorage.getItem('completed_modules');
+          const completedMods: string[] = completedModsRaw ? JSON.parse(completedModsRaw) : [];
+          if (!completedMods.includes(modKey)) {
+            completedMods.push(modKey);
+            localStorage.setItem('completed_modules', JSON.stringify(completedMods));
+          }
+        } catch (e) {}
         setTimeout(() => {
           this.step = 'result';
           this.practiceCompleted.emit();

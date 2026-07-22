@@ -8,7 +8,7 @@ import confetti from 'canvas-confetti';
 import { gsap } from 'gsap';
 
 export interface LessonStep {
-  type: 'video' | 'pdf' | 'reading' | 'practice' | 'activity' | 'assessment' | 'remediation';
+  type: 'intro' | 'video' | 'pdf' | 'reading' | 'practice' | 'activity' | 'assessment' | 'remediation';
   title: string;
   data: any;
 }
@@ -141,7 +141,8 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
           return renderBlock(pageData);
         }
       } else {
-        return `<div class="fw-bold opacity-75 text-start text-sm-center" style="font-size: clamp(1.1rem, 3.2vw, 1.8rem); line-height: 1.6; font-family: 'Nunito', 'Comic Sans MS', sans-serif;">${step.data.text}</div>`;
+        const rawContent = (typeof step.data === 'string' ? step.data : (step.data.html || step.data.text || step.data.content || ''));
+        return `<div class="fw-bold text-start" style="font-size: clamp(1.1rem, 3.2vw, 1.4rem); line-height: 1.8; font-family: 'Nunito', 'Comic Sans MS', sans-serif;">${rawContent}</div>`;
       }
     }
     return '';
@@ -157,7 +158,7 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
       //   this.stopSpeech();
       //   this.typedContent.set('');
       // }
-    }, { allowSignalWrites: true });
+    });
 
     effect(() => {
       const state = this.activityFeedbackState();

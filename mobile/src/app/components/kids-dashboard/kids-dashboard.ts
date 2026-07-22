@@ -1,17 +1,19 @@
-import { Component, Input, Output, EventEmitter, computed, HostListener, OnChanges, SimpleChanges, AfterViewInit, Inject, PLATFORM_ID } from '@angular/core';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { gsap } from 'gsap';
+import { Component, Input, Output, EventEmitter, signal, inject, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth';
+import { environment } from '../../../environments/environment';
 
-interface Level {
-  id: number;
-  name: string;
-  chapters: any[];
-}
-
-interface CourseStructure {
-  id: number;
-  name: string;
-  levels: Level[];
+export interface DynamicModuleItem {
+  id: string;
+  nameTa: string;
+  nameEn: string;
+  totalChapters: number;
+  completedChapters: number;
+  progress: number;
+  status: 'completed' | 'in-progress' | 'locked';
+  color: string;
 }
 
 @Component({
@@ -21,227 +23,131 @@ interface CourseStructure {
   templateUrl: './kids-dashboard.html',
   styleUrls: ['./kids-dashboard.css']
 })
-export class KidsDashboard implements OnChanges, AfterViewInit {
-  @Input() structure: CourseStructure | null = null;
+export class KidsDashboard implements OnInit {
+  @Input() structure: any = null;
   @Input() currentView: string = 'levels';
-  @Input() activeLevelId: number | null = null;
-  @Input() activeChapterId: number | null = null;
-  @Input() completedLevels: number[] = [];
-  @Input() completedChapters: number[] = [];
+  @Input() activeLevelId: any = null;
+  @Input() activeChapterId: any = null;
+  @Input() completedLevels: any[] = [];
+  @Input() completedChapters: any[] = [];
 
   @Output() selectLevel = new EventEmitter<number>();
   @Output() selectChapterNode = new EventEmitter<number>();
 
-  isBrowser: boolean;
+  protected authService = inject(AuthService);
+  private http = inject(HttpClient);
+  private router = inject(Router);
 
-  constructor(@Inject(PLATFORM_ID) platformId: Object) {
-    this.isBrowser = isPlatformBrowser(platformId);
+  userName = signal<string>('Student');
+  streakDays = signal<number>(1);
+  xpPoints = signal<number>(150);
+  completedCount = signal<number>(0);
+  totalCount = signal<number>(15);
+  overallProgress = signal<number>(0);
+
+  activeCourse = signal({
+    title: 'அழகுத் தமிழ் யாப்பிலக்கணம்',
+    chapterName: 'பாடம் 1: எழுத்து இலக்கணம்',
+    progress: 0,
+    chapterId: 1
+  });
+
+  dynamicModules = signal<DynamicModuleItem[]>([]);
+
+  ngOnInit(): void {
+    this.loadUserData();
+    this.fetchDashboardData();
   }
 
-  ngOnChanges(changes: SimpleChanges) {
-    if (changes['currentView'] && changes['currentView'].currentValue === 'map') {
-      this.scrollToActiveNode();
+  loadUserData(): void {
+    const user = this.authService.getUser();
+    if (user && user.name) {
+      this.userName.set(user.name);
     }
+    const userId = user?.id || 1;
+
+    // Load streak & XP dynamically from storage
+    const storedStreak = localStorage.getItem(`lang_app_streak_${userId}`);
+    if (storedStreak) this.streakDays.set(+storedStreak);
+
+    const storedXp = localStorage.getItem(`lang_app_xp_${userId}`);
+    if (storedXp) this.xpPoints.set(+storedXp);
+
+    // Calculate completed chapter IDs
+    const legacyChaptersRaw = localStorage.getItem('completed_chapters');
+    const scopedChaptersRaw = localStorage.getItem(`lang_app_completed_chapters_${userId}_1`);
+    const legacyIds: number[] = legacyChaptersRaw ? JSON.parse(legacyChaptersRaw) : [];
+    const scopedIds: number[] = scopedChaptersRaw ? JSON.parse(scopedChaptersRaw) : [];
+    const allCompleted = Array.from(new Set([...legacyIds, ...scopedIds]));
+
+    const doneCount = allCompleted.length;
+    this.completedCount.set(doneCount);
+    const percent = Math.min(Math.round((doneCount / 15) * 100), 100);
+    this.overallProgress.set(percent);
+
+    this.activeCourse.set({
+      title: 'அழகுத் தமிழ் யாப்பிலக்கணம்',
+      chapterName: doneCount > 0 ? `பாடம் ${doneCount + 1}: தொடர் பயிற்சி` : 'பாடம் 1: எழுத்து இலக்கணம்',
+      progress: percent,
+      chapterId: doneCount + 1
+    });
+
+    this.initializeModules(allCompleted);
   }
 
-  ngAfterViewInit() {
-    if (this.currentView === 'map') {
-      this.scrollToActiveNode();
-    }
+  initializeModules(completedIds: number[]): void {
+    // Standard Tamil Grammar 5 Modules with dynamic calculation
+    const defaultMods: DynamicModuleItem[] = [
+      { id: 'ezhuthu', nameTa: 'எழுத்து', nameEn: 'Ezhuthu', totalChapters: 3, completedChapters: Math.min(completedIds.length, 3), progress: Math.min(Math.round((Math.min(completedIds.length, 3) / 3) * 100), 100), status: completedIds.length >= 3 ? 'completed' : 'in-progress', color: '#10B981' },
+      { id: 'asai', nameTa: 'அசை', nameEn: 'Asai', totalChapters: 3, completedChapters: Math.max(0, Math.min(completedIds.length - 3, 3)), progress: completedIds.length <= 3 ? 0 : Math.min(Math.round((Math.max(0, completedIds.length - 3) / 3) * 100), 100), status: completedIds.length >= 6 ? 'completed' : (completedIds.length >= 3 ? 'in-progress' : 'locked'), color: '#6366F1' },
+      { id: 'seer', nameTa: 'சீர்', nameEn: 'Seer', totalChapters: 3, completedChapters: Math.max(0, Math.min(completedIds.length - 6, 3)), progress: completedIds.length <= 6 ? 0 : Math.min(Math.round((Math.max(0, completedIds.length - 6) / 3) * 100), 100), status: completedIds.length >= 9 ? 'completed' : (completedIds.length >= 6 ? 'in-progress' : 'locked'), color: '#F59E0B' },
+      { id: 'thalai', nameTa: 'தளை', nameEn: 'Thalai', totalChapters: 3, completedChapters: Math.max(0, Math.min(completedIds.length - 9, 3)), progress: completedIds.length <= 9 ? 0 : Math.min(Math.round((Math.max(0, completedIds.length - 9) / 3) * 100), 100), status: completedIds.length >= 12 ? 'completed' : (completedIds.length >= 9 ? 'in-progress' : 'locked'), color: '#EC4899' },
+      { id: 'alagidhal', nameTa: 'அளகிடுதல்', nameEn: 'Alagidhal', totalChapters: 3, completedChapters: Math.max(0, Math.min(completedIds.length - 12, 3)), progress: completedIds.length <= 12 ? 0 : Math.min(Math.round((Math.max(0, completedIds.length - 12) / 3) * 100), 100), status: completedIds.length >= 15 ? 'completed' : (completedIds.length >= 12 ? 'in-progress' : 'locked'), color: '#8B5CF6' }
+    ];
+    this.dynamicModules.set(defaultMods);
   }
 
-  scrollToActiveNode() {
-    if (!this.isBrowser) return;
-    setTimeout(() => {
-      const idx = this.levelIndex();
-      if (idx % 3 === 1) {
-        // Desert Carousel view
-        const carousel = document.querySelector('.carousel-container') as HTMLElement;
-        const activeId = this.currentPlayableChapterId();
-        const playableCard = document.getElementById('island-card-' + activeId) as HTMLElement;
-        
-        if (carousel && playableCard) {
-          const carouselRect = carousel.getBoundingClientRect();
-          const cardRect = playableCard.getBoundingClientRect();
-          
-          // Calculate the horizontal position to center the active card in the carousel viewport
-          const scrollTarget = carousel.scrollLeft + (cardRect.left - carouselRect.left) - (carouselRect.width / 2) + (cardRect.width / 2);
-          carousel.scrollTo({ left: scrollTarget, behavior: 'smooth' });
-        }
-      } else {
-        // Vertical path views
-        const mapContainer = document.querySelector('.map-container') as HTMLElement;
-        const activeNode = document.querySelector('.active-node') as HTMLElement;
-        
-        if (mapContainer) {
-          if (activeNode) {
-            // Manually calculate scroll target to prevent scrolling overflow:hidden parent
-            const containerRect = mapContainer.getBoundingClientRect();
-            const nodeRect = activeNode.getBoundingClientRect();
-            const scrollTarget = mapContainer.scrollTop + (nodeRect.top - containerRect.top) - (containerRect.height / 2) + (nodeRect.height / 2);
-            
-            mapContainer.scrollTo({ top: scrollTarget, behavior: 'smooth' });
-          } else {
-            // If all completed, scroll to top (last chapter is at top)
-            mapContainer.scrollTop = 0;
+  fetchDashboardData(): void {
+    const userId = this.authService.getUser()?.id || 1;
+    this.http.get<any>(`${environment.apiUrl}/student/dashboard`).subscribe({
+      next: (res) => {
+        if (res) {
+          if (res.streak_days !== undefined) {
+            this.streakDays.set(res.streak_days);
+            localStorage.setItem(`lang_app_streak_${userId}`, res.streak_days.toString());
+          }
+          if (res.xp_points !== undefined) {
+            this.xpPoints.set(res.xp_points);
+            localStorage.setItem(`lang_app_xp_${userId}`, res.xp_points.toString());
+          }
+          if (res.completion_percentage !== undefined) {
+            this.overallProgress.set(res.completion_percentage);
           }
         }
-      }
-    }, 120);
-  }
-
-  @HostListener('document:mousemove', ['$event'])
-  onMouseMove(e: MouseEvent) {
-    if (this.currentView !== 'map') return; // Only animate heavily if they are on the map
-
-    const x = (e.clientX / window.innerWidth - 0.5) * 2; // Range -1 to 1
-    const y = (e.clientY / window.innerHeight - 0.5) * 2; // Range -1 to 1
-
-    gsap.to('.hill-bg-1', { x: x * -10, y: y * -5, duration: 1, ease: 'power2.out' });
-    gsap.to('.hill-bg-2', { x: x * -20, y: y * -10, duration: 1, ease: 'power2.out' });
-    gsap.to('.hill-bg-3', { x: x * -35, y: y * -15, duration: 1, ease: 'power2.out' });
-    gsap.to('.cloud-1, .cloud-2, .cloud-3', { x: x * 40, y: y * 20, duration: 2, ease: 'power1.out' });
-    gsap.to('.sparkles-container', { x: x * -30, y: y * -30, duration: 1.5, ease: 'power1.out' });
-  }
-
-  selectedLevel() {
-    const struct = this.structure;
-    const levId = this.activeLevelId;
-    if (!struct || !levId) return null;
-    return struct.levels.find((l: any) => l.id === levId) || null;
-  }
-
-  levelIndex(): number {
-    const struct = this.structure;
-    const levId = this.activeLevelId;
-    if (!struct || !levId) return 0;
-    return struct.levels.findIndex((l: any) => l.id === levId);
-  }
-
-  levelThemeClass(): string {
-    if (this.currentView === 'levels') return 'theme-forest';
-    const idx = this.levelIndex();
-    if (idx % 3 === 0) return 'theme-forest';
-    if (idx % 3 === 1) return 'theme-desert';
-    return 'theme-space';
-  }
-
-  levelLeafParticles(): string[] {
-    const idx = this.levelIndex();
-    if (idx % 3 === 1) {
-      return ['🌸', '🍂', '🌸', '🍁', '🌸', '🍂', '🍁'];
-    } else if (idx % 3 === 2) {
-      return ['✨', '💎', '✨', '⭐', '✨', '💎', '⭐'];
-    }
-    return ['🍃', '🍁', '🍃', '🍂', '🍃', '🍁', '🍂'];
-  }
-
-  levelChaptersMap() {
-    const level = this.selectedLevel();
-    const map = new Map<number, { globalNumber: number; globalIndex: number; xOffset: number }>();
-    if (!level) return map;
-
-    const idx = this.levelIndex();
-    // Pattern for xOffset to make nodes snake left and right
-    let pattern = [0, -60, -90, -40, 20, 80, 50, 0];
-    if (idx % 3 === 1) {
-      // Desert Snake Pattern
-      pattern = [-90, 90, -90, 90, -90, 90];
-    } else if (idx % 3 === 2) {
-      // Space vertical wavy pattern
-      pattern = [-30, 30, -30, 30];
-    }
-
-    level.chapters.forEach((chapter: any, idx: number) => {
-      const xOffset = pattern[idx % pattern.length];
-      map.set(chapter.id, {
-        globalNumber: idx + 1,
-        globalIndex: idx,
-        xOffset
-      });
+      },
+      error: () => {}
     });
-
-    return map;
   }
 
-  // Dynamically generate the SVG path string connecting the nodes
-  // Based on a fixed vertical spacing of 160px between nodes
-  svgPathData() {
-    const level = this.selectedLevel();
-    if (!level || level.chapters.length === 0) return '';
-    
-    const map = this.levelChaptersMap();
-    const stepHeight = 160; 
-    let d = '';
-    
-    level.chapters.forEach((chapter: any, idx: number) => {
-      const info = map.get(chapter.id);
-      if (!info) return;
-      
-      const x = 200 + info.xOffset; // 200 is horizontal center of SVG
-      const y = (level.chapters.length - 1 - idx) * stepHeight + 80; // 80 is vertical offset
-      
-      if (idx === 0) {
-        d += `M ${x} ${y} `;
-      } else {
-        const prevInfo = map.get(level.chapters[idx - 1].id);
-        const prevX = 200 + (prevInfo ? prevInfo.xOffset : 0);
-        const prevY = (level.chapters.length - idx) * stepHeight + 80;
-        
-        // Control points for a smooth bezier curve
-        const cp1x = prevX;
-        const cp1y = prevY - (stepHeight / 2);
-        const cp2x = x;
-        const cp2y = y + (stepHeight / 2);
-        
-        d += `C ${cp1x} ${cp1y}, ${cp2x} ${cp2y}, ${x} ${y} `;
-      }
-    });
-    
-    return d;
+  continueLearning(): void {
+    this.router.navigate(['/tabs/learn']);
   }
 
-  // Mock function to generate 1-3 stars for completed chapters
-  getChapterStars(chapterId: number): number {
-    if (!this.isChapterCompleted(chapterId)) return 0;
-    // Generate a pseudo-random 1-3 stars based on chapterId so it's consistent
-    return (chapterId % 3) + 1; 
+  startNextLesson(): void {
+    const nextId = this.completedCount() + 1;
+    this.selectChapterNode.emit(nextId);
+    this.router.navigate(['/tabs/learn']);
   }
 
-  isLevelUnlocked(levelId: number): boolean {
-    return true;
+  startQuickQuiz(): void {
+    this.router.navigate(['/tabs/games']);
   }
 
-  // Calculate which chapter should be the glowing "active" one (the next to play)
-  currentPlayableChapterId() {
-    const level = this.selectedLevel();
-    if (!level) return null;
-    
-    // Find first uncompleted chapter
-    const uncompleted = level.chapters.find((c: any) => !this.isChapterCompleted(c.id));
-    if (uncompleted) return uncompleted.id;
-    
-    // If all completed, return the last chapter
-    return level.chapters.length > 0 ? level.chapters[level.chapters.length - 1].id : null;
+  openLeaderboard(): void {
+    this.router.navigate(['/tabs/progress']);
   }
 
-  isChapterUnlocked(chapterId: number): boolean {
-    return true;
-  }
-
-  isChapterCompleted(chapterId: number): boolean {
-    return this.completedChapters.includes(chapterId);
-  }
-
-  onLevelClick(id: number) {
-    if (this.isLevelUnlocked(id)) {
-      this.selectLevel.emit(id);
-    }
-  }
-
-  onChapterClick(id: number) {
-    if (this.isChapterUnlocked(id)) {
-      this.selectChapterNode.emit(id);
-    }
+  openModule(mod: DynamicModuleItem): void {
+    this.router.navigate(['/tabs/learn']);
   }
 }

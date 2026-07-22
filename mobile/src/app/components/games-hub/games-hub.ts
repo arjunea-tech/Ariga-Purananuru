@@ -1,0 +1,207 @@
+import { Component, signal, computed, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+
+export interface EducationalGame {
+  id: string;
+  moduleId: string;
+  moduleTa: string;
+  titleTa: string;
+  titleEn: string;
+  descriptionTa: string;
+  icon: string;
+  badgeBg: string;
+  xpReward: number;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  modeKey: string;
+}
+
+@Component({
+  selector: 'app-games-hub',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './games-hub.html',
+  styleUrls: ['./games-hub.css']
+})
+export class GamesHubComponent {
+  private router = inject(Router);
+
+  selectedModule = signal<string>('all');
+
+  modules = [
+    { id: 'all', label: 'அனைத்தும்' },
+    { id: 'ezhuthu', label: 'எழுத்து' },
+    { id: 'asai', label: 'அசை' },
+    { id: 'seer', label: 'சீர்' },
+    { id: 'thalai', label: 'தளை' },
+    { id: 'alagidhal', label: 'அளகிடுதல்' }
+  ];
+
+  allGames = signal<EducationalGame[]>([
+    // எழுத்து (Ezhuthu)
+    {
+      id: 'ezhuthu-1',
+      moduleId: 'ezhuthu',
+      moduleTa: 'எழுத்து',
+      titleTa: 'உயிர் & மெய் வினாடி-வினா',
+      titleEn: 'Vowels & Consonants Quiz',
+      descriptionTa: 'உயிர் (12) மற்றும் மெய் (18) எழுத்துக்களைக் கண்டறிந்து விடையளி!',
+      icon: 'bi-card-checklist',
+      badgeBg: '#6C5CE7',
+      xpReward: 50,
+      difficulty: 'Easy',
+      modeKey: 'mcq'
+    },
+    {
+      id: 'ezhuthu-2',
+      moduleId: 'ezhuthu',
+      moduleTa: 'எழுத்து',
+      titleTa: 'ஆய்த எழுத்து பொருத்துதல்',
+      titleEn: 'Aytham Letter Matching',
+      descriptionTa: 'சொற்களில் ஆய்த எழுத்து (ஃ) இருக்கும் இடத்தை பொருத்து!',
+      icon: 'bi-grid-3x3-gap-fill',
+      badgeBg: '#E17055',
+      xpReward: 50,
+      difficulty: 'Easy',
+      modeKey: 'match'
+    },
+    {
+      id: 'ezhuthu-3',
+      moduleId: 'ezhuthu',
+      moduleTa: 'எழுத்து',
+      titleTa: 'சார்பெழுத்து புதிர்',
+      titleEn: 'Compound Letter Puzzle',
+      descriptionTa: 'உயிர்மெய் மற்றும் சார்பெழுத்துக்களை உருவாக்கும் புதிர்!',
+      icon: 'bi-puzzle-fill',
+      badgeBg: '#00CEC9',
+      xpReward: 60,
+      difficulty: 'Medium',
+      modeKey: 'build'
+    },
+
+    // அசை (Asai)
+    {
+      id: 'asai-1',
+      moduleId: 'asai',
+      moduleTa: 'அசை',
+      titleTa: 'நேரசை - நிரையசை சவால்',
+      titleEn: 'Ner & Nirai Asai Quiz',
+      descriptionTa: 'சொற்களின் குறில், நெடில், மெய் அசை பிரித்து நேரசையா நிரையசையா என விடையளி!',
+      icon: 'bi-lightning-charge-fill',
+      badgeBg: '#00B894',
+      xpReward: 75,
+      difficulty: 'Medium',
+      modeKey: 'mcq'
+    },
+    {
+      id: 'asai-2',
+      moduleId: 'asai',
+      moduleTa: 'அசை',
+      titleTa: 'அசை பிரித்தல் மேட்ச்',
+      titleEn: 'Asai Syllabification Match',
+      descriptionTa: 'சொற்களை அவற்றின் சரியான அசை பிரிப்புடன் பொருத்து!',
+      icon: 'bi-grid-3x3-gap-fill',
+      badgeBg: '#FD79A8',
+      xpReward: 75,
+      difficulty: 'Medium',
+      modeKey: 'match'
+    },
+    {
+      id: 'asai-3',
+      moduleId: 'asai',
+      moduleTa: 'அசை',
+      titleTa: 'வேக அசை பந்தயம்',
+      titleEn: 'Speed Asai Challenge',
+      descriptionTa: 'குறிப்பிட்ட நேரத்தில் அதிக அசை சொற்களை சரியாக கண்டுபிடி!',
+      icon: 'bi-stopwatch-fill',
+      badgeBg: '#FF7675',
+      xpReward: 80,
+      difficulty: 'Hard',
+      modeKey: 'speed'
+    },
+
+    // சீர் (Seer)
+    {
+      id: 'seer-1',
+      moduleId: 'seer',
+      moduleTa: 'சீர்',
+      titleTa: 'ஓரசை & ஈரசைச்சீர் வினாடி-வினா',
+      titleEn: 'Metrical Feet Quiz',
+      descriptionTa: 'நாள், மலர், காசு, பிறப்பு வாய்ப்பாடுகளை சரியாக கண்டுபிடி!',
+      icon: 'bi-card-checklist',
+      badgeBg: '#0984E3',
+      xpReward: 100,
+      difficulty: 'Medium',
+      modeKey: 'mcq'
+    },
+    {
+      id: 'seer-2',
+      moduleId: 'seer',
+      moduleTa: 'சீர்',
+      titleTa: 'மூவசைச்சீர் பொருத்துதல்',
+      titleEn: 'Three Syllable Seer Match',
+      descriptionTa: 'தேமாங்காய், புளிமாங்காய் வாய்ப்பாடுகளை பொருத்து!',
+      icon: 'bi-puzzle-fill',
+      badgeBg: '#6C5CE7',
+      xpReward: 100,
+      difficulty: 'Hard',
+      modeKey: 'match'
+    },
+
+    // தளை (Thalai)
+    {
+      id: 'thalai-1',
+      moduleId: 'thalai',
+      moduleTa: 'தளை',
+      titleTa: '7 வகை தளைகள் சவால்',
+      titleEn: '7 Poetic Meter Links',
+      descriptionTa: 'நின்ற சீர் ஈற்றசையும் வரும் சீர் முதலசையும் பொருந்தும் தளை கண்டறி!',
+      icon: 'bi-trophy-fill',
+      badgeBg: '#FDCB6E',
+      xpReward: 120,
+      difficulty: 'Hard',
+      modeKey: 'mcq'
+    },
+
+    // அளகிடுதல் (Alagidhal)
+    {
+      id: 'alagidhal-1',
+      moduleId: 'alagidhal',
+      moduleTa: 'அளகிடுதல்',
+      titleTa: 'திருக்குறள் அலகிடுதல் மாஸ்டர்',
+      titleEn: 'Kural Metrical Master',
+      descriptionTa: 'திருக்குறள் மற்றும் புறநானூற்று அடிகளை முழுமையாக அலகிட்டு சாதி!',
+      icon: 'bi-award-fill',
+      badgeBg: '#E84393',
+      xpReward: 150,
+      difficulty: 'Hard',
+      modeKey: 'mcq'
+    }
+  ]);
+
+  filteredGames = computed(() => {
+    const mod = this.selectedModule();
+    if (mod === 'all') return this.allGames();
+    return this.allGames().filter(g => g.moduleId === mod);
+  });
+
+  selectModule(moduleId: string) {
+    this.selectedModule.set(moduleId);
+  }
+
+  launchGame(game: EducationalGame) {
+    this.router.navigate(['/learn/practice'], {
+      queryParams: {
+        module: game.moduleId
+      }
+    });
+  }
+
+  launchPracticeEngine(moduleId: string) {
+    this.router.navigate(['/learn/practice'], {
+      queryParams: {
+        module: moduleId
+      }
+    });
+  }
+}
