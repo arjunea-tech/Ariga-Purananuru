@@ -371,8 +371,28 @@ class DashboardController extends Controller
             ->pluck('chapter_id')
             ->toArray();
 
-        $totalQuestionsAnswered = ($assessmentAttempts * 5) + ($quizActivityCompletions * 5);
-        $correctAnswers = ($totalQuestionsAnswered > 0 && $averageScore > 0) ? (int) round(($totalQuestionsAnswered * $averageScore) / 100) : 0;
+        // questions_answered: sum all individual activity answers (each row = 1 question)
+        // Each activity row in user_course_progress (status=activity_completed) has score = 100 (correct) or 0 (wrong)
+        $activityRows = DB::table('user_course_progress')
+            ->where('user_id', $userId)
+            ->where('status', 'activity_completed')
+            ->select('score')
+            ->get();
+
+        // Assessment questions: each attempt = 5 questions avg
+        $assessmentQuestions = $assessmentAttempts * 5;
+
+        // Activity questions: each row = 1 question answered
+        $activityQuestions = $activityRows->count();
+        $activityCorrect = $activityRows->filter(fn($r) => (int)($r->score ?? 0) >= 100)->count();
+
+        $totalQuestionsAnswered = $assessmentQuestions + $activityQuestions;
+
+        $assessmentCorrect = ($assessmentAttempts > 0 && $avgAssessmentScore > 0)
+            ? (int) round(($assessmentQuestions * $avgAssessmentScore) / 100)
+            : 0;
+
+        $correctAnswers = $assessmentCorrect + $activityCorrect;
         $wrongAnswers = max(0, $totalQuestionsAnswered - $correctAnswers);
 
         return response()->json([
@@ -655,8 +675,9 @@ class DashboardController extends Controller
     {
         $validated = $request->validate([
             'content_id' => 'nullable|integer',
-            'activity_type' => 'required|string|in:mcq,match,flashcard,assessment',
-            'score' => 'required|integer|min:0',
+            'course_id' => 'nullable|integer',
+            'activity_type' => 'required|string|in:mcq,match,flashcard,assessment,activity',
+            'score' => 'required|numeric|min:0',
             'total' => 'required|integer|min:1',
         ]);
 
@@ -675,6 +696,10 @@ class DashboardController extends Controller
             case 'flashcard':
                 $xpEarned = 30; // flat 30 XP for reviewing flashcards
                 break;
+            case 'activity':
+                // Single question activity: 10 XP if correct (score=1), 0 if wrong (score=0)
+                $xpEarned = $validated['score'] > 0 ? 10 : 0;
+                break;
             case 'assessment':
                 $xpEarned = (int) round(($validated['score'] / max($validated['total'], 1)) * 200);
                 break;
@@ -682,10 +707,20 @@ class DashboardController extends Controller
 
         $pctScore = $validated['total'] > 0 ? round(($validated['score'] / $validated['total']) * 100) : 0;
 
+        $courseId = $validated['course_id'] ?? null;
+        if (!$courseId && !empty($validated['content_id'])) {
+            $mapping = DB::table('course_package_levels')
+                ->join('level_chapter', 'course_package_levels.level_id', '=', 'level_chapter.level_id')
+                ->where('level_chapter.chapter_id', $validated['content_id'])
+                ->first();
+            $courseId = $mapping ? $mapping->course_id : null;
+        }
+
         // Record the activity in user_course_progress as a general activity log entry
         // This feeds into the streak calculation (calculateStreak uses completed_at dates)
         DB::table('user_course_progress')->insert([
             'user_id' => $userId,
+            'course_id' => $courseId,
             'chapter_id' => $validated['content_id'] ?? null,
             'status' => 'activity_completed',
             'score' => $pctScore,

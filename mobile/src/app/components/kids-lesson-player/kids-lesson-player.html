@@ -340,14 +340,14 @@
           <div class="w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-start mx-auto p-0"
             style="max-width: 100%; width: 100%; min-height: 0;">
             <app-activity-renderer [activity]="step.data.data" [showFeedback]="true"
-              (answered)="onActivityAnswered($event)" class="w-100 h-100"></app-activity-renderer>
+              (answered)="activityAnswered.emit($event)" class="w-100 h-100"></app-activity-renderer>
           </div>
         } @else {
           <div class="w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-center mx-auto p-2"
             style="max-width: 1000px; width: 100%;">
             <div class="premium-card w-100 p-3 p-md-4 rounded-4 shadow-lg overflow-y-auto animate-pop-in" style="max-height: 72vh;">
               <app-activity-renderer [activity]="step.data.data" [showFeedback]="true"
-                (answered)="onActivityAnswered($event)" class="w-100 h-100"></app-activity-renderer>
+                (answered)="activityAnswered.emit($event)" class="w-100 h-100"></app-activity-renderer>
             </div>
           </div>
         }
@@ -364,7 +364,7 @@
             [practiceContent]="step.data?.word || 'தமிழ்'"
             [isGameMode]="true"
             [isEmbeddedInLesson]="true"
-            (practiceCompleted)="onPracticeCompleted()" 
+            (practiceCompleted)="activityAnswered.emit({isCorrect: true})" 
             class="w-100 h-100"></app-practice-engine>
         </div>
       </div>

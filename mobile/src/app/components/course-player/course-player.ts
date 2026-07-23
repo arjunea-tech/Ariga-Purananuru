@@ -1048,9 +1048,18 @@ export class CoursePlayer implements OnInit, OnDestroy {
 
 
 
+  // Track answered questions per session (to batch per activity step)
+  private activitySessionCorrect = 0;
+  private activitySessionTotal = 0;
+
   onActivityAnswered(event: any) {
     if (event && event.isCorrect !== undefined) {
       this.activityFeedbackState.set(event.isCorrect ? 'correct' : 'incorrect');
+
+      // Track stats for backend sync
+      this.activitySessionTotal++;
+      if (event.isCorrect) this.activitySessionCorrect++;
+
       if (event.isCorrect) {
         this.audioService.playSuccess();
         confetti({
@@ -1101,6 +1110,23 @@ export class CoursePlayer implements OnInit, OnDestroy {
             }
           }, 1000);
         }
+      }
+
+      // Record this individual activity answer to backend (fire-and-forget)
+      const token = this.authService.getToken();
+      if (token) {
+        this.http.post<any>(`${environment.apiUrl}/student/record-activity`, {
+          activity_type: 'activity',
+          course_id: this.courseId() ?? null,
+          content_id: this.activeChapterId() ?? null,
+          score: event.isCorrect ? 1 : 0,
+          total: 1,
+        }, { headers: { Authorization: `Bearer ${token}` } }).subscribe({
+          next: (res) => console.log('[record-activity] OK:', res),
+          error: (err) => console.error('[record-activity] FAILED:', err.status, err.error)
+        });
+      } else {
+        console.warn('[record-activity] No token — activity not recorded');
       }
     }
   }
