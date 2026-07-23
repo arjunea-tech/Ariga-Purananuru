@@ -83,17 +83,32 @@ class LearningProgressController extends Controller
         }
         $passedAssessmentSet = array_flip($passedAssessmentIds);
 
+        // 3. Fetch chapters marked completed in user_course_progress
+        $userProgressCompleted = \DB::table('user_course_progress')
+            ->where('user_id', $userId)
+            ->whereIn('chapter_id', $chapterIds)
+            ->whereIn('status', ['completed', 'activity_completed'])
+            ->pluck('chapter_id')
+            ->toArray();
+        $userProgressSet = array_flip($userProgressCompleted);
+
         // Calculate which chapters are completed
         $completedChapterIds = [];
         foreach ($chapterIds as $cId) {
             $chapterAssessments = $mandatoryAssessments->where('chapter_id', $cId);
-            $isCompleted = true;
-            foreach ($chapterAssessments as $assessment) {
-                if (!isset($passedAssessmentSet[$assessment->id])) {
-                    $isCompleted = false;
-                    break;
+            if ($chapterAssessments->count() > 0) {
+                $isCompleted = true;
+                foreach ($chapterAssessments as $assessment) {
+                    if (!isset($passedAssessmentSet[$assessment->id])) {
+                        $isCompleted = false;
+                        break;
+                    }
                 }
+            } else {
+                // If no mandatory assessment exists, check direct chapter progress completion
+                $isCompleted = isset($userProgressSet[$cId]);
             }
+
             if ($isCompleted) {
                 $completedChapterIds[$cId] = true;
             }

@@ -304,20 +304,16 @@ class DashboardController extends Controller
         $monthlyStudyHours = [];
         $sixMonthsAgo = date('Y-m-01 00:00:00', strtotime("-5 months"));
 
-        $monthlyCompletions = DB::table('user_course_progress')
+        $monthlyCompletionsRaw = DB::table('user_course_progress')
             ->where('user_id', $userId)
             ->where('status', 'completed')
             ->where('completed_at', '>=', $sixMonthsAgo)
-            ->select(DB::raw('YEAR(completed_at) as year, MONTH(completed_at) as month, count(id) as count'))
-            ->groupBy('year', 'month')
-            ->get();
+            ->get(['completed_at']);
 
-        $monthlyAttempts = DB::table('user_assessment_attempts')
+        $monthlyAttemptsRaw = DB::table('user_assessment_attempts')
             ->where('user_id', $userId)
             ->where('attempted_at', '>=', $sixMonthsAgo)
-            ->select(DB::raw('YEAR(attempted_at) as year, MONTH(attempted_at) as month, count(id) as count'))
-            ->groupBy('year', 'month')
-            ->get();
+            ->get(['attempted_at']);
 
         for ($i = 5; $i >= 0; $i--) {
             $time = strtotime("-$i months");
@@ -325,11 +321,25 @@ class DashboardController extends Controller
             $m = (int)date('m', $time);
             $monthLabel = date('M', $time);
             
-            $compRow = $monthlyCompletions->first(fn($r) => $r->year == $y && $r->month == $m);
-            $completionsCount = $compRow ? $compRow->count : 0;
+            $completionsCount = 0;
+            foreach ($monthlyCompletionsRaw as $row) {
+                if ($row->completed_at) {
+                    $rowTime = strtotime($row->completed_at);
+                    if ((int)date('Y', $rowTime) === $y && (int)date('m', $rowTime) === $m) {
+                        $completionsCount++;
+                    }
+                }
+            }
             
-            $attRow = $monthlyAttempts->first(fn($r) => $r->year == $y && $r->month == $m);
-            $attemptsCount = $attRow ? $attRow->count : 0;
+            $attemptsCount = 0;
+            foreach ($monthlyAttemptsRaw as $row) {
+                if ($row->attempted_at) {
+                    $rowTime = strtotime($row->attempted_at);
+                    if ((int)date('Y', $rowTime) === $y && (int)date('m', $rowTime) === $m) {
+                        $attemptsCount++;
+                    }
+                }
+            }
                 
             $hours = ($completionsCount * 0.5) + ($attemptsCount * 0.3);
             if ($hours == 0) {
