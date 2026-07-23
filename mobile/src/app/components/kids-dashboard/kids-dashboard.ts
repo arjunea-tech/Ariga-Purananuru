@@ -62,7 +62,8 @@ export class KidsDashboard implements OnInit {
   loadUserData(): void {
     const user = this.authService.getUser();
     if (user && user.name) {
-      this.userName.set(user.name);
+      const firstName = user.name.split(' ')[0];
+      this.userName.set(firstName);
     }
     const userId = user?.id || 1;
 
@@ -85,9 +86,28 @@ export class KidsDashboard implements OnInit {
     const percent = Math.min(Math.round((doneCount / 15) * 100), 100);
     this.overallProgress.set(percent);
 
+    const currentModuleIndex = Math.min(Math.floor(doneCount / 3), 4);
+    const moduleNames = ['எழுத்து இலக்கணம்', 'அசை இலக்கணம்', 'சீர் இலக்கணம்', 'தளை இலக்கணம்', 'அளகிடுதல்'];
+    const currentModuleName = moduleNames[currentModuleIndex] || 'தொடர் பயிற்சி';
+
+    // Try to get the real course title from cached courses list
+    let courseTitle = 'அழகுத் தமிழ் யாப்பிலக்கணம்';
+    try {
+      const cachedCourses = localStorage.getItem('lang_app_courses_list');
+      const lastCourseId = localStorage.getItem('lang_app_last_course_id');
+      if (cachedCourses) {
+        const courses = JSON.parse(cachedCourses);
+        const matched = lastCourseId ? courses.find((c: any) => c.id.toString() === lastCourseId) : null;
+        const course = matched || courses[0];
+        if (course && (course.title || course.name)) {
+          courseTitle = course.title || course.name;
+        }
+      }
+    } catch (e) {}
+
     this.activeCourse.set({
-      title: 'அழகுத் தமிழ் யாப்பிலக்கணம்',
-      chapterName: doneCount > 0 ? `பாடம் ${doneCount + 1}: தொடர் பயிற்சி` : 'பாடம் 1: எழுத்து இலக்கணம்',
+      title: courseTitle,
+      chapterName: doneCount > 0 ? `பாடம் ${doneCount + 1}: ${currentModuleName}` : 'பாடம் 1: எழுத்து இலக்கணம்',
       progress: percent,
       chapterId: doneCount + 1
     });
@@ -149,5 +169,27 @@ export class KidsDashboard implements OnInit {
 
   openModule(mod: DynamicModuleItem): void {
     this.router.navigate(['/tabs/learn']);
+  }
+
+  getCategoryBg(id: string): string {
+    const bgs: Record<string, string> = {
+      'ezhuthu': '#FFF3C7', // pastel yellow
+      'asai': '#E0F4FF', // pastel blue
+      'seer': '#E2FBE8', // pastel green
+      'thalai': '#FDE2EC', // pastel pink
+      'alagidhal': '#F3E8FF' // pastel purple
+    };
+    return bgs[id] || '#F3F4F6';
+  }
+
+  getCategoryIcon(id: string): string {
+    const icons: Record<string, string> = {
+      'ezhuthu': '🔤', // ABC equivalent
+      'asai': '🔢',  // Numbers equivalent
+      'seer': '🦁',  // Animals
+      'thalai': '🟢', // Shapes
+      'alagidhal': '🌟'
+    };
+    return icons[id] || '📚';
   }
 }

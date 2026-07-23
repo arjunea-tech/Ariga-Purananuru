@@ -66,7 +66,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             TamilYappuSeeder::class,
         ]);
-
+        $this->call([
+            Generate_Seeder::class,
+        ]);
 
     }
 }

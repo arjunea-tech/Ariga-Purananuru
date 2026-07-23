@@ -1,6 +1,6 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 
 export interface EducationalGame {
   id: string;
@@ -23,8 +23,14 @@ export interface EducationalGame {
   templateUrl: './games-hub.html',
   styleUrls: ['./games-hub.css']
 })
-export class GamesHubComponent {
+export class GamesHubComponent implements OnInit {
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
+  viewState = signal<'courses' | 'categories'>('courses');
+  availableCourses = signal<any[]>([
+    { id: '1', title: 'அழகுத் தமிழ் யாப்பிலக்கணம்', description: 'தமிழ் இலக்கணம் விளையாட்டு வழியில்' }
+  ]);
 
   selectedModule = signal<string>('all');
 
@@ -179,6 +185,16 @@ export class GamesHubComponent {
     }
   ]);
 
+  ngOnInit() {
+    this.route.queryParams.subscribe(params => {
+      if (params['view'] === 'categories') {
+        this.viewState.set('categories');
+      } else {
+        this.viewState.set('courses');
+      }
+    });
+  }
+
   filteredGames = computed(() => {
     const mod = this.selectedModule();
     if (mod === 'all') return this.allGames();
@@ -195,6 +211,14 @@ export class GamesHubComponent {
         module: game.moduleId
       }
     });
+  }
+
+  openCourse(course: any) {
+    this.router.navigate([], { relativeTo: this.route, queryParams: { view: 'categories' }, queryParamsHandling: 'merge' });
+  }
+  
+  goBackToCourses() {
+    this.router.navigate([], { relativeTo: this.route, queryParams: { view: null }, queryParamsHandling: 'merge' });
   }
 
   launchPracticeEngine(moduleId: string) {

@@ -8,8 +8,9 @@
   align-items: center;
   min-height: 100vh;
   width: 100%;
-  /* Vibrant, premium mesh gradient background */
-  background: linear-gradient(135deg, #4f46e5 0%, #9333ea 50%, #db2777 100%);
+  /* Vibrant, premium image background */
+  background: url('/assets/images/login_hero.png') no-repeat center center;
+  background-size: cover;
   padding: 20px;
   box-sizing: border-box;
   font-family: 'Inter', sans-serif;
@@ -17,54 +18,34 @@
   overflow: hidden;
 }
 
-/* Animated background shapes for dynamic feel */
-.login-container::before,
-.login-container::after {
+/* Overlay to make content pop against the image */
+.login-container::before {
   content: '';
   position: absolute;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  filter: blur(100px);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(180deg, rgba(79, 70, 229, 0.4) 0%, rgba(219, 39, 119, 0.7) 100%);
   z-index: 0;
-  animation: floatBlobs 20s infinite alternate ease-in-out;
-  pointer-events: none;
 }
 
-.login-container::before {
-  background: rgba(56, 189, 248, 0.6); /* Vibrant Sky Blue */
-  top: -150px;
-  left: -150px;
-}
 
-.login-container::after {
-  background: rgba(251, 146, 60, 0.5); /* Vibrant Orange/Peach */
-  bottom: -150px;
-  right: -150px;
-  animation-delay: -10s;
-}
 
-@keyframes floatBlobs {
-  0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(100px, -80px) scale(1.1); }
-  100% { transform: translate(-80px, 100px) scale(0.9); }
-}
-
-/* Elegant Glass Login Card - Brighter & More Prominent */
+/* Glassmorphism Card styling */
 .login-glass-card {
   position: relative;
-  z-index: 1;
   width: 100%;
-  max-width: 440px;
-  background: rgba(255, 255, 255, 0.15); /* Brighter glass */
-  backdrop-filter: blur(30px);
-  -webkit-backdrop-filter: blur(30px);
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 32px;
-  padding: 48px 40px;
-  box-sizing: border-box;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
-  animation: cardFadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  border-radius: 28px;
+  padding: 40px 30px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  animation: cardEntry 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes cardFadeIn {

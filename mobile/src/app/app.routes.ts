@@ -27,6 +27,7 @@ import { LearnModulesComponent } from './components/learn-modules/learn-modules'
 import { GamesHubComponent } from './components/games-hub/games-hub';
 import { StudentProfileComponent } from './components/student-profile/student-profile';
 import { KidsDashboard } from './components/kids-dashboard/kids-dashboard';
+import { WelcomeScreen } from './components/welcome-screen/welcome-screen';
 
 export const routes: Routes = [
   // Public Login route
@@ -47,8 +48,8 @@ export const routes: Routes = [
     ]
   },
   
-  // Safe Fallback redirect
-  { path: '', redirectTo: 'tabs/home', pathMatch: 'full' },
+  // Welcome Screen (App open)
+  { path: '', component: WelcomeScreen, canActivate: [guestGuard] },
 
 
   /*

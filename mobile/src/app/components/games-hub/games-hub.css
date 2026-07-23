@@ -6,11 +6,11 @@
 
 /* Header */
 .page-header.orange-theme {
-  background: linear-gradient(135deg, #E17055 0%, #D63031 100%);
+  background: linear-gradient(135deg, #34D399 0%, #10B981 100%);
   color: #FFFFFF;
-  padding: max(76px, calc(env(safe-area-inset-top, 40px) + 36px)) 20px 20px 20px;
+  padding: calc(env(safe-area-inset-top, 20px) + 20px) 18px 22px 18px;
   border-radius: 0 0 24px 24px;
-  box-shadow: 0 4px 15px rgba(225, 112, 85, 0.25);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.2);
 }
 
 .header-content {
@@ -41,6 +41,7 @@
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+
 .module-chips-scroll::-webkit-scrollbar {
   display: none;
 }

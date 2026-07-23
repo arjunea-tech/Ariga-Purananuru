@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { environment } from '../../../environments/environment';
 
 import { AuthService } from '../../services/auth';
@@ -26,6 +26,17 @@ export interface LearningModule {
   chapters?: any[];
 }
 
+export interface DynamicModuleItem {
+  id: string;
+  nameTa: string;
+  nameEn: string;
+  totalChapters: number;
+  completedChapters: number;
+  progress: number;
+  status: 'completed' | 'in-progress' | 'locked';
+  color: string;
+}
+
 @Component({
   selector: 'app-learn-modules',
   standalone: true,
@@ -36,6 +47,7 @@ export interface LearningModule {
 export class LearnModulesComponent implements OnInit {
   protected http = inject(HttpClient);
   protected router = inject(Router);
+  protected route = inject(ActivatedRoute);
   protected authService = inject(AuthService);
 
   activeModule = signal<LearningModule | null>(null);
@@ -46,14 +58,87 @@ export class LearnModulesComponent implements OnInit {
 
   // Accordion & Stats Signals for Image 1 Layout
   expandedModuleId = signal<string | null>(null);
+  expandedCategoryId = signal<string | null>(null);
   doneCount = signal<number>(0);
   leftCount = signal<number>(0);
 
   modules = signal<LearningModule[]>([]);
+  dynamicModules = signal<DynamicModuleItem[]>([]);
+  availableCourses = signal<any[]>([]);
+  viewState = signal<'courses' | 'modules'>('courses');
 
   ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['view'] === 'modules') {
+        this.viewState.set('modules');
+      } else {
+        this.viewState.set('courses');
+      }
+    });
+
     this.loadUserProgressFromStorage();
+    // Load cached courses instantly
+    const cachedCourses = localStorage.getItem('lang_app_courses_list');
+    if (cachedCourses) {
+      try {
+        const parsed = JSON.parse(cachedCourses);
+        if (parsed && parsed.length > 0) {
+          this.availableCourses.set(parsed);
+        }
+      } catch (e) {}
+    }
+    // Load modules only if we have a cached structure (for speed)
     this.loadFromCacheThenFetch();
+  }
+
+  getCategoryBg(id: string): string {
+    // Generate a background based on id string (so it's consistent for dynamic IDs)
+    const bgs = ['#FEF3C7', '#E0F2FE', '#DCFCE7', '#FCE7F3', '#F3E8FF', '#FFEDD5', '#E0E7FF'];
+    const hash = id.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0);
+    return bgs[Math.abs(hash) % bgs.length];
+  }
+
+  getCategoryIcon(id: string): string {
+    // Use some generic education emojis for dynamic content
+    const icons = ['📚', '🌟', '🚀', '🧠', '💡', '🏆', '🎯', '🧩'];
+    const hash = id.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0);
+    return icons[Math.abs(hash) % icons.length];
+  }
+
+  openCourse(course: any) {
+    // Save selected course id to restore later
+    localStorage.setItem('lang_app_last_course_id', course.id.toString());
+    this.router.navigate([], { relativeTo: this.route, queryParams: { view: 'modules' }, queryParamsHandling: 'merge' });
+    // Fetch fresh structure for this course
+    this.fetchCourseModules(course.id);
+  }
+  
+  goBackToCourses() {
+    this.router.navigate([], { relativeTo: this.route, queryParams: { view: null }, queryParamsHandling: 'merge' });
+  }
+
+  openCategoryModule(mod: any) {
+    const current = this.expandedCategoryId();
+    this.expandedCategoryId.set(current === mod.id ? null : mod.id);
+  }
+
+  getCategoryChapters(categoryId: string): any[] {
+    const mod = this.modules().find(m => m.id === categoryId);
+    if (mod && mod.chapters && mod.chapters.length > 0) {
+      return mod.chapters;
+    }
+    // Return dummy chapters if backend didn't provide any
+    return [
+      { id: 1, name: 'அத்தியாயம் 1: அறிமுகம்', description: 'அடிப்படை பற்றி அறிவோம்' },
+      { id: 2, name: 'அத்தியாயம் 2: பயிற்சி', description: 'தொடர் பயிற்சி' }
+    ];
+  }
+
+  startCategoryLesson(chap: any) {
+    if (chap && chap.id) {
+      localStorage.setItem('lang_app_last_chapter_id', chap.id.toString());
+      this.router.navigate(['/learn/play/1'], { queryParams: { chapterId: chap.id, view: 'content' } });
+    }
   }
 
   // ===== CACHE-FIRST LOADING: Show instantly from cache, refresh in background =====
@@ -231,7 +316,12 @@ export class LearnModulesComponent implements OnInit {
     this.http.get<any[]>(`${environment.apiUrl}/courses`).subscribe({
       next: (courses) => {
         if (courses && courses.length > 0) {
-          const targetCourseId = courses[0].id;
+          this.availableCourses.set(courses);
+          // Cache courses list for instant display next time
+          localStorage.setItem('lang_app_courses_list', JSON.stringify(courses));
+          const savedCourseId = localStorage.getItem('lang_app_last_course_id');
+          const targetCourse = savedCourseId ? courses.find((c: any) => c.id.toString() === savedCourseId) : null;
+          const targetCourseId = (targetCourse || courses[0]).id;
           const courseMode = (courses[0].mode || courses[0].learning_mode || '').toLowerCase();
           const savedMode = localStorage.getItem('course_learning_mode');
           if (savedMode === 'freestyle' || savedMode === 'strict') {
@@ -257,6 +347,43 @@ export class LearnModulesComponent implements OnInit {
         }
       },
       error: () => { if (!silent) this.useDefaultModulesFallback(); }
+    });
+  }
+
+  fetchCourseModules(courseId: any): void {
+    const cacheKey = `lang_app_course_structure_${courseId}`;
+    const cachedRaw = localStorage.getItem(cacheKey);
+    if (cachedRaw) {
+      try {
+        const cached = JSON.parse(cachedRaw);
+        if (cached.levels && cached.levels.length > 0) {
+          this.syncModulesWithBackendStructure(cached.levels, cached);
+          // Refresh silently in background
+          this.http.get<any>(`${environment.apiUrl}/courses/${courseId}/player-structure`).subscribe({
+            next: (structure) => {
+              if (structure && structure.levels && structure.levels.length > 0) {
+                localStorage.setItem(cacheKey, JSON.stringify(structure));
+                this.syncModulesWithBackendStructure(structure.levels, structure);
+              }
+            },
+            error: () => {}
+          });
+          return;
+        }
+      } catch (e) {}
+    }
+    // No cache - show loader
+    this.isLoadingChapters.set(true);
+    this.http.get<any>(`${environment.apiUrl}/courses/${courseId}/player-structure`).subscribe({
+      next: (structure) => {
+        if (structure && structure.levels && structure.levels.length > 0) {
+          localStorage.setItem(cacheKey, JSON.stringify(structure));
+          this.syncModulesWithBackendStructure(structure.levels, structure);
+        } else {
+          this.useDefaultModulesFallback();
+        }
+      },
+      error: () => { this.useDefaultModulesFallback(); }
     });
   }
 

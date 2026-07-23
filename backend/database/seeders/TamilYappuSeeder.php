@@ -17,30 +17,15 @@ class TamilYappuSeeder extends Seeder
      */
     public function run(): void
     {
-        $package = \App\Models\Package::firstOrCreate(
-            ['code' => 'PKG-001'],
-            [
-                'name' => 'Default Tamil Package',
-                'description' => 'A default package for Tamil courses',
-                'is_active' => true,
-            ]
-        );
-
         $course = Course::where('name', 'LIKE', '%அழகுத் தமிழ் யாப்பு%')->first();
         
         if (!$course) {
-            $course = Course::create([
-                'name' => 'அழகுத் தமிழ் யாப்பு (யாப்பிலக்கணம்)',
-                'code' => 'YAPPU-101',
-                'description' => 'தமிழ் யாப்பிலக்கணம் கற்பதற்கான பாடத்திட்டம்.',
-                'no_of_levels' => 3,
-                'is_active' => true,
-            ]);
+            echo "Course 'அழகுத் தமிழ் யாப்பு (யாப்பிலக்கணம்)' not found!\n";
+            return;
         }
 
         $this->deleteCourseContents($course);
         $uniqueSuffix = time();
-        $packageId = $package->id;
 
         $levelsData = [
   0 => 
@@ -264,19 +249,6 @@ class TamilYappuSeeder extends Seeder
               3 => 'கால் மாத்திரை',
             ],
             'ans' => 'அரை மாத்திரை',
-          ],
-          7 => 
-          [
-            'type' => 'word_builder',
-            'q' => 'சரியான அசை வாய்பாடுகளுக்கு ஏற்ப வார்த்தைகளை உருவாக்கவும்:',
-            'text' => 'கல்வி, வாழ்க, தமிழ், அம்மா'
-          ],
-          8 => 
-          [
-            'type' => 'yappu_flashcard',
-            'q' => '30 வினாடிகளில் சரியான அசை வாய்பாட்டைத் தேர்ந்தெடுக்கவும் (Speed Race):',
-            'syllableCount' => 2,
-            'text' => 'கல்வி, வாழ்க, தமிழ், அம்மா'
           ]
         ],
         'practice_word' => 'கல்வி',
@@ -437,14 +409,6 @@ class TamilYappuSeeder extends Seeder
             ],
             'ans' => 'ஓர் எழுத்து',
           ],
-          3 => 
-          [
-            'type' => 'balloon_pop',
-            'q' => 'நேர் அசைகளை மட்டும் தட்டுக! (Pop only Ner balloons!)',
-            'level' => 1,
-            'target' => 'ner',
-            'timer' => 30
-          ],
         ],
         'practice_word' => 'பல்',
       ],
@@ -490,14 +454,6 @@ class TamilYappuSeeder extends Seeder
             ],
             'ans' => 'நிரையசை',
           ],
-          3 => 
-          [
-            'type' => 'balloon_pop',
-            'q' => 'நிரை அசைகளை மட்டும் தட்டுக! (Pop only Nirai balloons!)',
-            'level' => 1,
-            'target' => 'nirai',
-            'timer' => 30
-          ],
         ],
         'practice_word' => 'அணில்',
       ],
@@ -530,22 +486,6 @@ class TamilYappuSeeder extends Seeder
               3 => 'நிரைபு',
             ],
             'ans' => 'நேரசை',
-          ],
-          2 => 
-          [
-            'type' => 'balloon_pop',
-            'q' => 'நேர் அசைகளை மட்டும் தட்டுக! (Pop only Ner balloons!)',
-            'level' => 2,
-            'target' => 'ner',
-            'timer' => 30
-          ],
-          3 => 
-          [
-            'type' => 'balloon_pop',
-            'q' => 'நிரை அசைகளை மட்டும் தட்டுக! (Pop only Nirai balloons!)',
-            'level' => 2,
-            'target' => 'nirai',
-            'timer' => 30
           ],
         ],
         'practice_word' => 'அகழ்வாரைத்',
@@ -646,14 +586,6 @@ class TamilYappuSeeder extends Seeder
             ],
             'ans' => '2',
           ],
-          3 => 
-          [
-            'type' => 'balloon_pop',
-            'q' => 'நேர் அசைகளை மட்டும் தட்டுக! (Pop only Ner balloons!)',
-            'level' => 2,
-            'target' => 'ner',
-            'timer' => 30
-          ],
         ],
         'practice_word' => 'தேமா',
       ],
@@ -686,14 +618,6 @@ class TamilYappuSeeder extends Seeder
               3 => 'நிழல்சீர்',
             ],
             'ans' => 'காய்ச்சீர்',
-          ],
-          2 => 
-          [
-            'type' => 'balloon_pop',
-            'q' => 'நிரை அசைகளை மட்டும் தட்டுக! (Pop only Nirai balloons!)',
-            'level' => 3,
-            'target' => 'nirai',
-            'timer' => 30
           ],
         ],
         'practice_word' => 'தேமாங்காய்',
@@ -966,7 +890,7 @@ class TamilYappuSeeder extends Seeder
 
             DB::table('course_package_levels')->insert([
                 'course_id' => $course->id,
-                'package_id' => $packageId, 
+                'package_id' => 1, 
                 'level_id' => $level->id,
                 'is_active' => true,
             ]);
@@ -1057,20 +981,6 @@ class TamilYappuSeeder extends Seeder
                         $dataJson = [
                             'question' => $act['q'],
                             'items' => $act['items']
-                        ];
-                    } else if ($type === 'balloon_pop') {
-                        $dataJson = [
-                            'question' => $act['q'],
-                            'level' => $act['level'] ?? 1,
-                            'target' => $act['target'] ?? 'ner',
-                            'timer' => $act['timer'] ?? 30,
-                            'nerWords' => $act['nerWords'] ?? [],
-                            'niraiWords' => $act['niraiWords'] ?? [],
-                        ];
-                    } else if ($type === 'word_builder') {
-                        $dataJson = [
-                            'question' => $act['q'],
-                            'text' => $act['text']
                         ];
                     }
 
