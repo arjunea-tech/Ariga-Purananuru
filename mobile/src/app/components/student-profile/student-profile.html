@@ -11,35 +11,85 @@
     </div>
   </header>
 
+  <!-- Loading skeleton while fetching from API -->
+  @if (isLoading()) {
+    <div class="container-fluid px-3 py-4 text-center">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+      <p class="text-muted mt-2 small">Loading profile...</p>
+    </div>
+  }
+
+  @if (!isLoading()) {
   <div class="container-fluid px-3 py-3">
+
     <!-- User Avatar & Identity Card -->
     <div class="user-card card border-0 shadow-sm p-3 mb-3 text-center">
       <div class="avatar-wrapper mx-auto mb-2">
         <img src="assets/images/logo.png" alt="Avatar" class="avatar-img shadow-sm" />
       </div>
-      <h2 class="h5 fw-bold text-dark mb-1">{{ userName() }}</h2>
-      <p class="small text-muted mb-2">{{ title() }}</p>
-      
-      <div class="xp-badge bg-warning-subtle text-warning-emphasis d-inline-flex align-items-center gap-1 mx-auto px-3 py-1 rounded-pill fw-bold small">
-        <span>⭐ {{ xpPoints() | number }} XP</span>
-      </div>
+      <h2 class="h5 fw-bold text-dark mb-1">{{ userName() || 'மாணவர்' }}</h2>
+      <p class="small text-muted mb-2">{{ userRole() }}</p>
+
+      @if (xpPoints() > 0) {
+        <div class="xp-badge bg-warning-subtle text-warning-emphasis d-inline-flex align-items-center gap-1 mx-auto px-3 py-1 rounded-pill fw-bold small">
+          <span>⭐ {{ xpPoints() | number }} XP</span>
+        </div>
+      } @else {
+        <div class="xp-badge bg-light text-muted d-inline-flex align-items-center gap-1 mx-auto px-3 py-1 rounded-pill fw-semibold small">
+          <span>⭐ 0 XP — Start learning!</span>
+        </div>
+      }
     </div>
 
-    <!-- Achievements Section -->
+    <!-- Achievements Section — only earned badges -->
     <div class="card border-0 shadow-sm p-3 mb-3">
       <div class="d-flex align-items-center justify-content-between mb-3">
         <h3 class="h6 fw-bold text-dark mb-0">Achievements</h3>
-        <a class="small text-primary fw-bold text-decoration-none" style="cursor: pointer;">View All</a>
+        <span class="small text-muted">{{ earnedBadges().length }} Earned</span>
       </div>
 
-      <div class="achievements-row d-flex align-items-center gap-2 overflow-x-auto pb-1">
-        @for (ach of achievements(); track ach.name) {
-          <div class="achievement-chip d-flex flex-column align-items-center text-center p-2 rounded-3"
-               [style.background-color]="ach.bg + '15'">
-            <span class="fs-4 mb-1">{{ ach.icon }}</span>
-            <span class="chip-title fw-semibold text-dark">{{ ach.name }}</span>
+      @if (earnedBadges().length > 0) {
+        <div class="achievements-row d-flex align-items-center gap-2 overflow-x-auto pb-1">
+          @for (ach of earnedBadges(); track ach.name) {
+            <div class="achievement-chip d-flex flex-column align-items-center text-center p-2 rounded-3"
+                 [style.background-color]="ach.bg + '18'">
+              <span class="fs-4 mb-1">{{ ach.icon }}</span>
+              <span class="chip-title fw-semibold text-dark">{{ ach.name }}</span>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="text-center py-3">
+          <i class="bi bi-trophy text-muted" style="font-size: 2.5rem; opacity: 0.3;"></i>
+          <p class="small text-muted mt-2 mb-0">Complete chapters to earn badges!</p>
+        </div>
+      }
+    </div>
+
+    <!-- Quick Stats Row -->
+    <div class="card border-0 shadow-sm p-3 mb-3">
+      <h3 class="h6 fw-bold text-dark mb-3">Quick Stats</h3>
+      <div class="row g-2 text-center">
+        <div class="col-4">
+          <div class="bg-primary bg-opacity-10 rounded-3 p-2">
+            <div class="fw-bold text-primary fs-5">{{ streakDays() }}</div>
+            <div class="small text-muted" style="font-size: 0.7rem;">🔥 Streak</div>
           </div>
-        }
+        </div>
+        <div class="col-4">
+          <div class="bg-success bg-opacity-10 rounded-3 p-2">
+            <div class="fw-bold text-success fs-5">{{ completionPercentage() }}%</div>
+            <div class="small text-muted" style="font-size: 0.7rem;">📚 Done</div>
+          </div>
+        </div>
+        <div class="col-4">
+          <div class="bg-warning bg-opacity-10 rounded-3 p-2">
+            <div class="fw-bold text-warning fs-5">{{ accuracyPercentage() }}%</div>
+            <div class="small text-muted" style="font-size: 0.7rem;">🎯 Accuracy</div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -64,12 +114,16 @@
       <i class="bi bi-box-arrow-right"></i>
       <span>Log Out</span>
     </button>
+
+  </div>
+  }
+
 <!-- ============================================== -->
 <!-- MODALS OVERLAYS -->
 <!-- ============================================== -->
 <div *ngIf="activeModal() !== 'none'" class="modal-overlay d-flex align-items-end align-items-md-center justify-content-center" (click)="closeModal()">
   <div class="modal-content-card bg-white w-100 rounded-top-4 rounded-md-4 shadow-lg animate-slide-up" style="max-width: 500px; max-height: 90vh; overflow-y: auto;" (click)="$event.stopPropagation()">
-    
+
     <!-- Modal Header -->
     <div class="d-flex align-items-center justify-content-between p-3 border-bottom position-sticky top-0 bg-white z-3">
       <h5 class="fw-bold mb-0 text-dark">
@@ -86,53 +140,53 @@
 
     <!-- Modal Body -->
     <div class="p-4">
-      
+
       <!-- PERSONAL INFO MODAL -->
       <div *ngIf="activeModal() === 'personal_info'">
         <div class="text-center mb-4">
           <img src="assets/images/logo.png" alt="Avatar" class="rounded-circle shadow-sm border border-3 border-white bg-light" style="width: 100px; height: 100px; object-fit: contain;">
         </div>
-        
+
         <div class="mb-3">
           <label class="small text-muted fw-bold mb-1">Full Name</label>
-          <div class="p-3 bg-light rounded-3 fw-semibold text-dark border">{{ userName() }}</div>
+          <div class="p-3 bg-light rounded-3 fw-semibold text-dark border">{{ userName() || '—' }}</div>
         </div>
         <div class="mb-3">
           <label class="small text-muted fw-bold mb-1">Email Address</label>
-          <div class="p-3 bg-light rounded-3 fw-semibold text-dark border">{{ userEmail() || 'Not Provided' }}</div>
+          <div class="p-3 bg-light rounded-3 fw-semibold text-dark border">{{ userEmail() || '—' }}</div>
         </div>
-        <div class="mb-3">
-          <label class="small text-muted fw-bold mb-1">Phone Number</label>
-          <div class="p-3 bg-light rounded-3 fw-semibold text-dark border">{{ studentPhone() }}</div>
-        </div>
-        <div class="mb-4">
-          <label class="small text-muted fw-bold mb-1">Organization / School</label>
-          <div class="p-3 bg-light rounded-3 fw-semibold text-dark border">{{ studentSchool() }}</div>
-        </div>
+        @if (studentOrg()) {
+          <div class="mb-3">
+            <label class="small text-muted fw-bold mb-1">Organization / School</label>
+            <div class="p-3 bg-light rounded-3 fw-semibold text-dark border">{{ studentOrg() }}</div>
+          </div>
+        }
         <button class="btn btn-primary w-100 rounded-pill py-2 fw-bold" (click)="closeModal()">Close</button>
       </div>
 
       <!-- CERTIFICATES MODAL -->
       <div *ngIf="activeModal() === 'certificates'">
-        <div *ngIf="completionPercentage() >= 100" class="certificate-card p-4 rounded-4 text-center text-white shadow" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
-          <i class="bi bi-award-fill text-warning mb-2" style="font-size: 3rem; text-shadow: 0 4px 10px rgba(0,0,0,0.2);"></i>
-          <h3 class="fw-bold mb-1" style="font-family: 'Times New Roman', serif;">Certificate of Completion</h3>
-          <p class="mb-3 opacity-75 small">This certifies that</p>
-          <h2 class="fw-bold mb-3 text-warning" style="font-family: 'Great Vibes', cursive, 'Times New Roman'; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 10px; display: inline-block;">
-            {{ userName() }}
-          </h2>
-          <p class="mb-0 opacity-75 small">Has successfully completed the course</p>
-          <h5 class="fw-bold mb-0">யாப்பு இலக்கணம்</h5>
-        </div>
-        
-        <div *ngIf="completionPercentage() < 100" class="text-center py-5">
-          <i class="bi bi-lock-fill text-muted mb-3" style="font-size: 3rem;"></i>
-          <h5 class="fw-bold text-dark">Certificate Locked</h5>
-          <p class="text-secondary">You have completed {{ completionPercentage() }}% of the course. Reach 100% to unlock your certificate!</p>
-          <div class="progress mt-3 rounded-pill" style="height: 10px;">
-            <div class="progress-bar bg-primary" [style.width.%]="completionPercentage()"></div>
+        @if (completionPercentage() >= 100) {
+          <div class="certificate-card p-4 rounded-4 text-center text-white shadow" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6);">
+            <i class="bi bi-award-fill text-warning mb-2" style="font-size: 3rem; text-shadow: 0 4px 10px rgba(0,0,0,0.2);"></i>
+            <h3 class="fw-bold mb-1" style="font-family: 'Times New Roman', serif;">Certificate of Completion</h3>
+            <p class="mb-3 opacity-75 small">This certifies that</p>
+            <h2 class="fw-bold mb-3 text-warning" style="font-family: 'Great Vibes', cursive, 'Times New Roman'; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 10px; display: inline-block;">
+              {{ userName() }}
+            </h2>
+            <p class="mb-0 opacity-75 small">Has successfully completed the course</p>
+            <h5 class="fw-bold mb-0">யாப்பு இலக்கணம்</h5>
           </div>
-        </div>
+        } @else {
+          <div class="text-center py-5">
+            <i class="bi bi-lock-fill text-muted mb-3" style="font-size: 3rem;"></i>
+            <h5 class="fw-bold text-dark">Certificate Locked</h5>
+            <p class="text-secondary">You have completed <strong>{{ completionPercentage() }}%</strong> of the course. Reach 100% to unlock your certificate!</p>
+            <div class="progress mt-3 rounded-pill" style="height: 10px;">
+              <div class="progress-bar bg-primary" [style.width.%]="completionPercentage()"></div>
+            </div>
+          </div>
+        }
       </div>
 
       <!-- STATS MODAL -->
@@ -152,27 +206,52 @@
               <span class="small text-secondary fw-semibold">Current Streak</span>
             </div>
           </div>
-        </div>
-
-        <h6 class="fw-bold text-dark mb-3">Skill Mastery (திறன் அறிக்கை)</h6>
-        
-        <div class="skills-list">
-          <div *ngFor="let skill of skillMastery()" class="mb-3">
-            <div class="d-flex justify-content-between mb-1">
-              <span class="fw-semibold text-dark">{{ skill.topic }}</span>
-              <span class="fw-bold" [style.color]="skill.color">{{ skill.mastery }}%</span>
+          <div class="col-6">
+            <div class="bg-light border rounded-4 p-3 text-center h-100">
+              <i class="bi bi-check2-circle text-success fs-3 mb-1"></i>
+              <h3 class="fw-bold text-dark mb-0">{{ correctAnswers() }}</h3>
+              <span class="small text-secondary fw-semibold">✔️ Correct</span>
             </div>
-            <div class="progress rounded-pill bg-light border" style="height: 12px;">
-              <div class="progress-bar rounded-pill" [style.width.%]="skill.mastery" [style.background-color]="skill.color"></div>
+          </div>
+          <div class="col-6">
+            <div class="bg-light border rounded-4 p-3 text-center h-100">
+              <i class="bi bi-x-circle text-danger fs-3 mb-1"></i>
+              <h3 class="fw-bold text-dark mb-0">{{ wrongAnswers() }}</h3>
+              <span class="small text-secondary fw-semibold">❌ Wrong</span>
             </div>
           </div>
         </div>
 
-        <div class="mt-4 bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 p-3 rounded-4 text-center">
-          <i class="bi bi-check-circle-fill fs-4 mb-2"></i>
-          <h6 class="fw-bold mb-1">Questions Answered</h6>
-          <h2 class="fw-bold mb-0">{{ questionsAnswered() }}</h2>
-        </div>
+        @if (questionsAnswered() > 0) {
+          <div class="mb-4 bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 p-3 rounded-4 text-center">
+            <i class="bi bi-check-circle-fill fs-4 mb-2"></i>
+            <h6 class="fw-bold mb-1">Total Questions Answered</h6>
+            <h2 class="fw-bold mb-0">{{ questionsAnswered() }}</h2>
+            <small class="text-muted">{{ correctAnswers() }} Correct · {{ wrongAnswers() }} Wrong</small>
+          </div>
+        } @else {
+          <div class="mb-4 bg-light text-muted border rounded-4 p-3 text-center">
+            <i class="bi bi-journal-text fs-4 mb-2"></i>
+            <p class="fw-semibold mb-0">No quiz activity yet. Start a chapter to see stats!</p>
+          </div>
+        }
+
+        @if (skillMastery().length > 0) {
+          <h6 class="fw-bold text-dark mb-3">Skill Mastery (திறன் அறிக்கை)</h6>
+          <div class="skills-list">
+            @for (skill of skillMastery(); track skill.topic) {
+              <div class="mb-3">
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="fw-semibold text-dark">{{ skill.topic }}</span>
+                  <span class="fw-bold" [style.color]="skill.color">{{ skill.mastery }}%</span>
+                </div>
+                <div class="progress rounded-pill bg-light border" style="height: 12px;">
+                  <div class="progress-bar rounded-pill" [style.width.%]="skill.mastery" [style.background-color]="skill.color"></div>
+                </div>
+              </div>
+            }
+          </div>
+        }
       </div>
 
       <!-- HELP MODAL -->
@@ -190,4 +269,3 @@
 </div>
 
   </div>
-</div>

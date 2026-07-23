@@ -237,34 +237,14 @@ class DashboardController extends Controller
             $colorIdx++;
         }
 
-        // 6. Dynamic Skill Mastery
-        $skillMastery = [
-            ['name' => 'Literature', 'score' => 0],
-            ['name' => 'Ethics', 'score' => 0],
-            ['name' => 'Grammar', 'score' => 0],
-            ['name' => 'History', 'score' => 0],
-            ['name' => 'Vocabulary', 'score' => 0],
-            ['name' => 'Translation', 'score' => 0],
-        ];
-        
-        foreach ($courseProgressions as $prog) {
-            if (str_contains($prog['course_name'], 'Tamil') || str_contains($prog['course_name'], 'Purananuru')) {
-                $skillMastery[0]['score'] = max($skillMastery[0]['score'], $prog['percentage']);
-                $skillMastery[2]['score'] = max($skillMastery[2]['score'], round($prog['percentage'] * 0.85));
-                $skillMastery[3]['score'] = max($skillMastery[3]['score'], round($prog['percentage'] * 0.75));
-            }
-            if (str_contains($prog['course_name'], 'Kural') || str_contains($prog['course_name'], 'Thirukkural')) {
-                $skillMastery[1]['score'] = max($skillMastery[1]['score'], $prog['percentage']);
-                $skillMastery[4]['score'] = max($skillMastery[4]['score'], round($prog['percentage'] * 0.9));
-                $skillMastery[5]['score'] = max($skillMastery[5]['score'], round($prog['percentage'] * 0.8));
-            }
-        }
-        
-        foreach ($skillMastery as &$skill) {
-            if ($skill['score'] == 0) {
-                $skill['score'] = rand(15, 35); // simulated baseline
-            }
-        }
+        // 6. Skill Mastery — derived from real module progressions (no fake data)
+        $skillMastery = array_map(function($m) {
+            return [
+                'topic' => $m['name'],
+                'mastery' => $m['percentage'],
+                'color' => $m['color'],
+            ];
+        }, $moduleProgressions);
 
         // 7. Dynamic Weekly Activity
         $weeklyActivity = [0, 0, 0, 0, 0, 0, 0]; // Mon-Sun
