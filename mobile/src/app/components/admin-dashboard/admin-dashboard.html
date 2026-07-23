@@ -8,6 +8,21 @@
       </h2>
       <p class="text-secondary mb-0">Overview of your school's key performance indicators and statistics.</p>
     </div>
+    
+    <!-- Dashboard Tenant Filter Dropdown for Super Admins -->
+    @if (authService.getUserRole() === 'super_admin' && tenantsList().length > 0) {
+      <div class="d-flex align-items-center gap-2" style="max-width: 250px;">
+        <span class="text-secondary small fw-semibold text-nowrap"><i class="bi bi-funnel-fill text-primary"></i> Filter:</span>
+        <select class="form-select form-select-sm rounded-pill border-1 shadow-sm px-3" 
+                [value]="dashboardTenantId()" 
+                (change)="onDashboardTenantChange($event)">
+          <option value="all">All Tenants</option>
+          @for (t of tenantsList(); track t.id) {
+            <option [value]="t.id">{{ t.tenant_name }}</option>
+          }
+        </select>
+      </div>
+    }
   </div>
 
   @if (error()) {

@@ -29,6 +29,7 @@ export class AdminDashboardComponent implements OnInit {
   stats = signal<TenantStats | null>(null);
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
+  dashboardTenantId = signal<string>('all');
 
   // Branding Signals & Properties
   brandingForm!: FormGroup;
@@ -90,6 +91,12 @@ export class AdminDashboardComponent implements OnInit {
     if (selected) {
       this.selectTenant(selected);
     }
+  }
+
+  onDashboardTenantChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.dashboardTenantId.set(select.value);
+    this.loadStats();
   }
 
   onLogoSelected(event: Event): void {
@@ -164,7 +171,8 @@ export class AdminDashboardComponent implements OnInit {
     this.loading.set(true);
     this.error.set(null);
 
-    this.http.get<TenantStats>(`${environment.apiUrl}/dashboard/tenant-stats`).subscribe({
+    const url = `${environment.apiUrl}/dashboard/tenant-stats?tenant_id=${this.dashboardTenantId()}`;
+    this.http.get<TenantStats>(url).subscribe({
       next: (data) => {
         this.stats.set(data);
         this.loading.set(false);

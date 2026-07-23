@@ -14,6 +14,11 @@ interface User {
   username: string;
   role: string;
   is_active?: boolean;
+  tenant?: {
+    id: number;
+    tenant_name: string;
+    tenant_code: string;
+  };
 }
 
 interface StudentProgressStats {
@@ -86,6 +91,8 @@ export class StudentProgressComponent implements OnInit {
   students = signal<User[]>([]);
   searchQuery = signal<string>('');
   loadingStudents = signal<boolean>(true);
+  selectedTenantId = signal<string>('all');
+  tenantsList = signal<any[]>([]);
 
   showProgressModal = signal<boolean>(false);
   selectedStudentForProgress: User | null = null;
@@ -107,8 +114,26 @@ export class StudentProgressComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    const role = this.authService.getUserRole();
+    if (role === 'super_admin') {
+      this.loadTenants();
+    }
     this.loadProgressData();
     this.loadStudents();
+  }
+
+  loadTenants(): void {
+    const token = this.authService.getToken();
+    const headers = token ? new HttpHeaders({ 'Authorization': `Bearer ${token}` }) : undefined;
+    
+    this.http.get<any[]>(`${environment.apiUrl}/tenants`, { headers }).subscribe({
+      next: (tenants) => {
+        this.tenantsList.set(tenants || []);
+      },
+      error: (err) => {
+        console.error('Failed to load tenants in student progress', err);
+      }
+    });
   }
 
   loadProgressData(): void {
@@ -144,40 +169,48 @@ export class StudentProgressComponent implements OnInit {
         this.accuracyPercentage.set(Math.round(data.average_score));
       }
 
-      const completedChapterIds: number[] = data.completed_chapter_ids || [];
+      // 100% Dynamic module progress from backend DB levels
+      if (data.module_progressions && Array.isArray(data.module_progressions) && data.module_progressions.length > 0) {
+        const dynamicModules: ModuleProgressItem[] = data.module_progressions.map((m: any) => {
+          let nameEn = m.code || '';
+          // Hide raw database codes (e.g. YAP-L1-1784355643) from user view
+          if (nameEn.startsWith('YAP-') || /^[A-Z0-9_-]+$/i.test(nameEn) || nameEn === m.name) {
+            nameEn = '';
+          }
+          return {
+            id: m.id,
+            nameTa: m.name,
+            nameEn: nameEn,
+            percentage: m.percentage,
+            isUnlocked: m.is_unlocked,
+            color: m.color
+          };
+        });
+        this.moduleProgressList.set(dynamicModules);
+      } else {
+        const completedChapterIds: number[] = data.completed_chapter_ids || [];
+        const getModuleProgress = (chapterIds: number[]) => {
+          const completedCount = completedChapterIds.filter(id => chapterIds.includes(id)).length;
+          if (completedCount >= chapterIds.length) return 100;
+          if (completedCount > 0) return Math.round((completedCount / chapterIds.length) * 100);
+          return 0;
+        };
 
-      // Dynamic calculation per module based on real completed chapters
-      const getModuleProgress = (chapterIds: number[]) => {
-        const completedCount = completedChapterIds.filter(id => chapterIds.includes(id)).length;
-        if (completedCount >= chapterIds.length) return 100;
-        if (completedCount > 0) return Math.round((completedCount / chapterIds.length) * 100);
-        return 0;
-      };
+        const ezhuthuPct = getModuleProgress([1, 2, 1001]);
+        const asaiPct = getModuleProgress([3, 4, 1002]);
+        const seerPct = getModuleProgress([5, 6, 1003]);
+        const thalaiPct = getModuleProgress([7, 8, 1004]);
+        const alagidhalPct = getModuleProgress([9, 10, 1005]);
 
-      const ezhuthuPct = getModuleProgress([1, 2, 1001]);
-      const ezhuthuDone = ezhuthuPct > 0 || completedChapterIds.length > 0;
-      const calcEzhuthu = ezhuthuDone ? (ezhuthuPct > 0 ? ezhuthuPct : 100) : 0;
-
-      const asaiPct = getModuleProgress([3, 4, 1002]);
-      const calcAsai = asaiPct > 0 ? asaiPct : (completedChapterIds.length >= 2 ? 50 : 0);
-
-      const seerPct = getModuleProgress([5, 6, 1003]);
-      const calcSeer = seerPct > 0 ? seerPct : (completedChapterIds.length >= 3 ? 30 : 0);
-
-      const thalaiPct = getModuleProgress([7, 8, 1004]);
-      const calcThalai = thalaiPct > 0 ? thalaiPct : 0;
-
-      const alagidhalPct = getModuleProgress([9, 10, 1005]);
-      const calcAlagidhal = alagidhalPct > 0 ? alagidhalPct : 0;
-
-      const updatedModules: ModuleProgressItem[] = [
-        { id: 'ezhuthu', nameTa: 'எழுத்து', nameEn: 'Ezhuthu', percentage: calcEzhuthu, isUnlocked: true, color: '#22c55e' },
-        { id: 'asai', nameTa: 'அசை', nameEn: 'Asai', percentage: calcAsai, isUnlocked: calcEzhuthu > 0, color: '#00B894' },
-        { id: 'seer', nameTa: 'சீர்', nameEn: 'Seer', percentage: calcSeer, isUnlocked: calcAsai > 0, color: '#3b82f6' },
-        { id: 'thalai', nameTa: 'தளை', nameEn: 'Thalai', percentage: calcThalai, isUnlocked: calcSeer > 0, color: '#8b5cf6' },
-        { id: 'alagidhal', nameTa: 'அளகிடுதல்', nameEn: 'Alagidhal', percentage: calcAlagidhal, isUnlocked: calcThalai > 0, color: '#ec4899' }
-      ];
-      this.moduleProgressList.set(updatedModules);
+        const updatedModules: ModuleProgressItem[] = [
+          { id: 'ezhuthu', nameTa: 'எழுத்து', nameEn: 'Ezhuthu', percentage: ezhuthuPct, isUnlocked: true, color: '#22c55e' },
+          { id: 'asai', nameTa: 'அசை', nameEn: 'Asai', percentage: asaiPct, isUnlocked: ezhuthuPct > 0, color: '#00B894' },
+          { id: 'seer', nameTa: 'சீர்', nameEn: 'Seer', percentage: seerPct, isUnlocked: asaiPct > 0, color: '#3b82f6' },
+          { id: 'thalai', nameTa: 'தளை', nameEn: 'Thalai', percentage: thalaiPct, isUnlocked: seerPct > 0, color: '#8b5cf6' },
+          { id: 'alagidhal', nameTa: 'அளகிடுதல்', nameEn: 'Alagidhal', percentage: alagidhalPct, isUnlocked: thalaiPct > 0, color: '#ec4899' }
+        ];
+        this.moduleProgressList.set(updatedModules);
+      }
 
       // Studied today mins dynamically using weekly activity array
       const todayDayOfWeek = (new Date().getDay() || 7) - 1; // 0 for Mon, 6 for Sun
@@ -214,20 +247,33 @@ export class StudentProgressComponent implements OnInit {
 
   loadStudents(): void {
     const token = this.authService.getToken();
-    if (!token || !this.authService.hasRole(['admin', 'teacher'])) {
+    if (!token || !this.authService.hasRole(['super_admin', 'admin', 'staff'])) {
       this.loadingStudents.set(false);
       return;
     }
 
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     this.loadingStudents.set(true);
-    this.http.get<User[]>(`${environment.apiUrl}/users`, { headers }).pipe(
+
+    let url = `${environment.apiUrl}/users`;
+    const selectedTenant = this.selectedTenantId();
+    if (this.authService.getUserRole() === 'super_admin' && selectedTenant !== 'all') {
+      url += `?tenant_id=${selectedTenant}`;
+    }
+
+    this.http.get<User[]>(url, { headers }).pipe(
       catchError(() => of([]))
     ).subscribe((data) => {
       const studentsOnly = (data || []).filter(u => u.role === 'student');
       this.students.set(studentsOnly);
       this.loadingStudents.set(false);
     });
+  }
+
+  onTenantChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.selectedTenantId.set(select.value);
+    this.loadStudents();
   }
 
   onSearch(event: Event): void {

@@ -406,13 +406,17 @@ export class LearnModulesComponent implements OnInit {
       return;
     }
 
-    const savedMode = localStorage.getItem('course_learning_mode');
-    if (savedMode === 'freestyle' || savedMode === 'strict') {
-      this.learningMode.set(savedMode);
-    } else if (rawStructure) {
+    if (rawStructure && (rawStructure.mode || rawStructure.learning_mode || rawStructure.type)) {
       const modeStr = (rawStructure.mode || rawStructure.learning_mode || rawStructure.type || '').toLowerCase();
       if (modeStr.includes('free') || modeStr.includes('open')) {
         this.learningMode.set('freestyle');
+      } else {
+        this.learningMode.set('strict');
+      }
+    } else {
+      const savedMode = localStorage.getItem('course_learning_mode');
+      if (savedMode === 'freestyle' || savedMode === 'strict') {
+        this.learningMode.set(savedMode);
       }
     }
 

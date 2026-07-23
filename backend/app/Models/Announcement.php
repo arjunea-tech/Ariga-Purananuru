@@ -17,4 +17,9 @@ class Announcement extends Model
     protected $casts = [
         'target_roles' => 'array',
     ];
+
+    public function tenant()
+    {
+        return $this->belongsTo(Tenant::class);
+    }
 }

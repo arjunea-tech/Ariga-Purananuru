@@ -6,205 +6,6 @@
     [style.max-width]="isGameMode ? '100%' : '480px'" [style.margin]="isGameMode ? '0' : '0 auto'"
     [style.min-height]="isGameMode ? 'auto' : '94vh'">
 
-    <!-- Header (Only for standalone mode) -->
-    <div *ngIf="!isGameMode" class="bg-primary text-white p-4 text-center position-relative"
-      style="background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%) !important;">
-
-      <!-- Back Button -->
-      <button class="btn btn-light position-absolute top-0 start-0 m-3 rounded-circle shadow-sm hover-lift"
-        style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; opacity: 0.9;"
-        [routerLink]="['/learn']" title="Go Back">
-        <i class="bi bi-arrow-left fs-5 text-primary"></i>
-      </button>
-
-      <!-- Fullscreen Toggle Button -->
-      <button class="btn btn-light position-absolute top-0 end-0 m-3 rounded-circle shadow-sm hover-lift"
-        style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; opacity: 0.9;"
-        (click)="toggleFullscreen()" title="Toggle Fullscreen">
-        <i class="bi fs-5 text-primary" [ngClass]="isFullscreen ? 'bi-fullscreen-exit' : 'bi-arrows-fullscreen'"></i>
-      </button>
-
-      <h2 class="fw-bold mb-1" style="font-family: 'Fredoka', sans-serif;">
-        ✨ Practice Engine ✨
-      </h2>
-      <p class="mb-0 opacity-75">Master Tamil grammar interactively!</p>
-    </div>
-
-    <!-- MAIN MENU (dashboard_menu) -->
-    <div *ngIf="step === 'dashboard_menu'" class="w-100 p-3 p-md-4 animate-slide-up">
-      <div class="text-center mb-3">
-        <h2 class="text-dark fw-bold mb-1" style="font-size: 2.2rem; font-family: 'Fredoka', sans-serif;">பயிற்சிக் களம்
-        </h2>
-        <p class="text-secondary fs-5 mb-0">நீங்கள் எந்தப் பயிற்சியை மேற்கொள்ள விரும்புகிறீர்கள்?</p>
-      </div>
-
-      <div class="row g-3 justify-content-center" style="max-width: 1100px; margin: 0 auto;">
-        <!-- Eluthu -->
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift p-3 text-center cursor-pointer"
-            style="background: #f8fafc; border: 2px solid #e2e8f0 !important; transition: all 0.2s;"
-            (click)="selectPracticeArea('eluthu')">
-            <div class="mb-2"><i class="bi bi-fonts fs-2 text-primary"></i></div>
-            <h5 class="fw-bold mb-1">எழுத்து பயிற்சி</h5>
-            <p class="text-secondary mb-0" style="font-size: 0.85rem;">தமிழ் எழுத்துக்களின் வகைகளையும் மாத்திரைகளையும்
-              அறிந்துகொள்ளுங்கள்.</p>
-          </div>
-        </div>
-        <!-- Asai -->
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift p-3 text-center cursor-pointer"
-            style="background: #f8fafc; border: 2px solid #e2e8f0 !important; transition: all 0.2s;"
-            (click)="selectPracticeArea('asai')">
-            <div class="mb-2"><i class="bi bi-puzzle fs-2 text-success"></i></div>
-            <h5 class="fw-bold mb-1">அசை பயிற்சி</h5>
-            <p class="text-secondary mb-0" style="font-size: 0.85rem;">வார்த்தைகளை நேர், நிரை அசைகளாகப் பிரிக்கும்
-              பயிற்சி.</p>
-          </div>
-        </div>
-        <!-- Seer -->
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift p-3 text-center cursor-pointer"
-            style="background: #f8fafc; border: 2px solid #e2e8f0 !important; transition: all 0.2s;"
-            (click)="selectPracticeArea('seer')">
-            <div class="mb-2"><i class="bi bi-bar-chart-steps fs-2 text-warning"></i></div>
-            <h5 class="fw-bold mb-1">சீர் பயிற்சி</h5>
-            <p class="text-secondary mb-0" style="font-size: 0.85rem;">அசைகளைக் கொண்டு சீர்களை (மா, விளம், காய்)
-              கண்டறியும் பயிற்சி.</p>
-          </div>
-        </div>
-        <!-- Thalai → renamed to முழுமையான அலகிடுதல் -->
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="card h-100 border-0 shadow-sm rounded-4 hover-lift p-3 text-center cursor-pointer"
-            style="background: #f8fafc; border: 2px solid #e2e8f0 !important; transition: all 0.2s;"
-            (click)="selectPracticeArea('alahidu')">
-            <div class="mb-2"><i class="bi bi-journal-text fs-2 text-info"></i></div>
-            <h5 class="fw-bold mb-1">முழுமையான அலகிடுதல்</h5>
-            <p class="text-secondary mb-0" style="font-size: 0.85rem;">பாடல் வரிகளை எழுத்து, அசை, சீர், தளை என முழுமையாக
-              அலகிடுங்கள்.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- DEDICATED INPUT SCREEN (dashboard_input) -->
-    <div *ngIf="step === 'dashboard_input'" class="w-100">
-
-      <div class="border-bottom bg-light px-4 py-3 d-flex align-items-center gap-3">
-        <button class="btn btn-outline-secondary rounded-circle"
-          style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;"
-          (click)="goBackToDashboardMenu()">
-          <i class="bi bi-arrow-left fs-5"></i>
-        </button>
-        <h4 class="fw-bold mb-0 text-dark">
-          <span *ngIf="activeTab === 'eluthu'">எழுத்து பயிற்சி</span>
-          <span *ngIf="activeTab === 'asai'">அசை பயிற்சி</span>
-          <span *ngIf="activeTab === 'seer'">சீர் பயிற்சி</span>
-          <span *ngIf="activeTab === 'alahidu'">முழுமையான அலகிடுதல் பயிற்சி</span>
-        </h4>
-      </div>
-
-      <div class="p-4">
-        <!-- Input Section -->
-        <div class="mb-4">
-          <label class="form-label fw-bold text-dark fs-5 mb-3">
-            <i class="bi bi-pencil-square text-primary me-2"></i> Type or paste your Tamil text (Seiyul) here:
-          </label>
-          <textarea class="form-control bg-light border-2 rounded-4 p-3 fs-5 shadow-sm" rows="3" [(ngModel)]="userInput"
-            placeholder="Type here..." (input)="analyzeText()"></textarea>
-        </div>
-
-        <!-- Dashboard Actions -->
-        <div class="d-flex justify-content-center gap-3 mb-4 mt-2">
-          <button class="btn btn-primary fw-bold px-4 py-2 rounded-pill shadow-sm"
-            (click)="startPracticeFromDashboard()">
-            <i class="bi bi-controller me-2"></i> பயிற்சியைத் தொடங்கு
-          </button>
-        </div>
-
-
-        <!-- Results Section -->
-        <div *ngIf="analysisResult" class="animate-slide-up">
-
-          <div *ngIf="analysisResult.error" class="alert alert-danger rounded-4">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ analysisResult.error }}
-          </div>
-
-          <!-- Asai & Seer Analysis -->
-          <div *ngIf="activeTab === 'asai' || activeTab === 'seer' || activeTab === 'alahidu'" class="mb-5">
-            <h4 class="fw-bold text-dark border-bottom pb-2 mb-4"><i
-                class="bi bi-bar-chart-steps text-primary me-2"></i> Word Analysis (அசை & சீர்)</h4>
-
-            <div class="table-responsive">
-              <table class="table table-hover align-middle border shadow-sm rounded-4 overflow-hidden">
-                <thead class="bg-primary text-white">
-                  <tr>
-                    <th class="py-3 px-4">Word (சொல்)</th>
-                    <th class="py-3 px-4">Split (பிரிப்பு)</th>
-                    <th class="py-3 px-4">Asai (அசை)</th>
-                    <th *ngIf="activeTab !== 'asai'" class="py-3 px-4">Seer (சீர்)</th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white">
-                  <tr *ngFor="let word of analysisResult.word_analysis">
-                    <td class="py-3 px-4 fw-bold fs-5">{{ word.word }}</td>
-                    <td class="py-3 px-4"><span class="badge bg-light text-dark border fs-6 px-3 py-2 rounded-pill">{{
-                        word.asai_text }}</span></td>
-                    <td class="py-3 px-4 text-secondary">{{ word.asai_type_text }}</td>
-                    <td *ngIf="activeTab !== 'asai'" class="py-3 px-4">
-                      <span
-                        class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2"
-                        style="font-size: 0.9rem;">
-                        {{ word.seer_pattern }}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Thalai Analysis -->
-          <div *ngIf="activeTab === 'thalai' || activeTab === 'alahidu'" class="mb-4">
-            <h4 class="fw-bold text-dark border-bottom pb-2 mb-4"><i class="bi bi-link-45deg text-primary me-2"></i>
-              Linkage Analysis (தளை)</h4>
-
-            <div class="table-responsive">
-              <table class="table table-hover align-middle border shadow-sm rounded-4 overflow-hidden">
-                <thead class="bg-primary text-white"
-                  style="background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;">
-                  <tr>
-                    <th class="py-3 px-4">First Word (நின்ற சீர்)</th>
-                    <th class="py-3 px-4">Second Word (வரும் சீர்)</th>
-                    <th class="py-3 px-4">Combination (இணைப்பு)</th>
-                    <th class="py-3 px-4">Thalai (தளை)</th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white">
-                  <tr *ngFor="let thalai of analysisResult.thalai_analysis">
-                    <td class="py-3 px-4 fw-bold">{{ thalai.first_word }} <br> <small
-                        class="text-secondary fw-normal">({{ thalai.first_seer }})</small></td>
-                    <td class="py-3 px-4 fw-bold">{{ thalai.second_word }}</td>
-                    <td class="py-3 px-4 text-secondary">
-                      <span class="fw-bold text-dark">{{ thalai.first_seer_type }}</span> முன் <span
-                        class="fw-bold text-dark">{{ thalai.second_word_first_asai }}</span>
-                    </td>
-                    <td class="py-3 px-4">
-                      <span class="badge bg-warning text-dark border border-warning rounded-pill px-3 py-2"
-                        style="font-size: 0.9rem;">
-                        {{ thalai.thalai_type }}
-                      </span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- INTERACTIVE FLOW (When used inside Course Player or started from Practice Arena) -->
     <div *ngIf="step !== 'dashboard_menu' && step !== 'dashboard_input'" class="p-3 p-md-4 w-100">
 
       <!-- Top Mobile App Navigation Bar (Shown when opened from Games Hub) -->
@@ -267,7 +68,7 @@
       <div *ngIf="step === 'input_word'" class="animate-slide-up w-100 d-flex flex-column align-items-center mt-2">
         <div class="text-center mb-4">
           <h2 class="text-dark fw-bold mb-2" style="font-size: 2.5rem; font-family: 'Fredoka', sans-serif;">
-            {{ playMode === 'explain' || practiceType === 'eluthu' ? 'வார்த்தையை உள்ளிடுக' : '/ குறியிட்டுப்
+            {{ playMode === 'explain' || practiceType === 'eluthu' ? 'ஏதேனும் ஒரு வார்த்தையை உள்ளிடுக' : '/ குறியிட்டுப்
             பிரிக்கவும்' }}
           </h2>
           <p class="text-secondary fs-4">
@@ -281,7 +82,7 @@
           style="max-width: 900px;">
           <textarea class="form-control bg-white border-3 rounded-4 px-3 py-2 shadow-sm fw-bold text-dark flex-grow-1"
             style="border-color: #a78bfa !important; outline: none; font-size: clamp(1rem, 3vw, 1.3rem); font-family: 'Nunito', sans-serif; box-shadow: inset 0 2px 6px rgba(167, 139, 250, 0.15) !important; resize: vertical;"
-            rows="5" [(ngModel)]="interactiveWord" placeholder="Type here..."
+            rows="5" [(ngModel)]="interactiveWord" placeholder=""
             (keydown.enter)="$event.preventDefault(); submitUserWord()"></textarea>
 
           <button
