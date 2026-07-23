@@ -160,6 +160,7 @@ Route::middleware(['auth:sanctum', 'identify.tenant'])->group(function () {
 
     // Student Dashboard stats
     Route::get('student/dashboard', [DashboardController::class, 'getStudentStats']);
+    Route::post('student/reset-progress', [DashboardController::class, 'resetStudentProgress']);
 
     // Learning progress tracking
     Route::get('users/{userId}/courses/{courseId}/progress', [LearningProgressController::class, 'getUserProgress']);

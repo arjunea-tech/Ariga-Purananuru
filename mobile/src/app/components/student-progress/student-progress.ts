@@ -79,13 +79,7 @@ export class StudentProgressComponent implements OnInit {
   streakDays = signal<number>(0);
   totalXp = signal<number>(0);
 
-  moduleProgressList = signal<ModuleProgressItem[]>([
-    { id: 'ezhuthu', nameTa: 'எழுத்து', nameEn: 'Ezhuthu', percentage: 0, isUnlocked: true, color: '#22c55e' },
-    { id: 'asai', nameTa: 'அசை', nameEn: 'Asai', percentage: 0, isUnlocked: false, color: '#00B894' },
-    { id: 'seer', nameTa: 'சீர்', nameEn: 'Seer', percentage: 0, isUnlocked: false, color: '#3b82f6' },
-    { id: 'thalai', nameTa: 'தளை', nameEn: 'Thalai', percentage: 0, isUnlocked: false, color: '#64748b' },
-    { id: 'alagidhal', nameTa: 'அளகிடுதல்', nameEn: 'Alagidhal', percentage: 0, isUnlocked: false, color: '#64748b' }
-  ]);
+  moduleProgressList = signal<ModuleProgressItem[]>([]);
 
   earnedBadgesList = signal<BadgeItem[]>([]);
 
@@ -199,38 +193,15 @@ export class StudentProgressComponent implements OnInit {
             nameEn = '';
           }
           return {
-            id: m.id,
+            id: String(m.id),
             nameTa: m.name,
             nameEn: nameEn,
-            percentage: m.percentage,
-            isUnlocked: m.is_unlocked,
-            color: m.color
+            percentage: typeof m.percentage === 'number' ? m.percentage : 0,
+            isUnlocked: !!m.is_unlocked,
+            color: m.color || '#3b82f6'
           };
         });
         this.moduleProgressList.set(dynamicModules);
-      } else {
-        const completedChapterIds: number[] = data.completed_chapter_ids || [];
-        const getModuleProgress = (chapterIds: number[]) => {
-          const completedCount = completedChapterIds.filter(id => chapterIds.includes(id)).length;
-          if (completedCount >= chapterIds.length) return 100;
-          if (completedCount > 0) return Math.round((completedCount / chapterIds.length) * 100);
-          return 0;
-        };
-
-        const ezhuthuPct = getModuleProgress([1, 2, 1001]);
-        const asaiPct = getModuleProgress([3, 4, 1002]);
-        const seerPct = getModuleProgress([5, 6, 1003]);
-        const thalaiPct = getModuleProgress([7, 8, 1004]);
-        const alagidhalPct = getModuleProgress([9, 10, 1005]);
-
-        const updatedModules: ModuleProgressItem[] = [
-          { id: 'ezhuthu', nameTa: 'எழுத்து', nameEn: 'Ezhuthu', percentage: ezhuthuPct, isUnlocked: true, color: '#22c55e' },
-          { id: 'asai', nameTa: 'அசை', nameEn: 'Asai', percentage: asaiPct, isUnlocked: ezhuthuPct > 0, color: '#00B894' },
-          { id: 'seer', nameTa: 'சீர்', nameEn: 'Seer', percentage: seerPct, isUnlocked: asaiPct > 0, color: '#3b82f6' },
-          { id: 'thalai', nameTa: 'தளை', nameEn: 'Thalai', percentage: thalaiPct, isUnlocked: seerPct > 0, color: '#8b5cf6' },
-          { id: 'alagidhal', nameTa: 'அளகிடுதல்', nameEn: 'Alagidhal', percentage: alagidhalPct, isUnlocked: thalaiPct > 0, color: '#ec4899' }
-        ];
-        this.moduleProgressList.set(updatedModules);
       }
 
       // Studied today mins dynamically using active app StudyTimeService + weekly activity log
@@ -325,6 +296,27 @@ export class StudentProgressComponent implements OnInit {
     this.showProgressModal.set(false);
     this.selectedStudentForProgress = null;
     this.selectedStudentProgress.set(null);
+  }
+
+  resetProgress(): void {
+    if (!confirm('Are you sure you want to reset your progress back to 0%?')) return;
+
+    const token = this.authService.getToken();
+    if (!token) return;
+
+    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+    this.http.post<any>(`${environment.apiUrl}/student/reset-progress`, {}, { headers }).subscribe({
+      next: () => {
+        this.notificationService.show('success', 'Progress reset to 0%!');
+        const today = new Date().toISOString().split('T')[0];
+        localStorage.removeItem(`study_seconds_${today}`);
+        this.loadProgressData();
+      },
+      error: (err) => {
+        console.error('Failed to reset progress', err);
+        this.notificationService.show('error', 'Failed to reset progress');
+      }
+    });
   }
 
   private showFeedback(type: 'success' | 'error', text: string): void {

@@ -67,11 +67,17 @@ class DashboardController extends Controller
             ->where('user_id', $userId)
             ->count();
 
-        $activityCompletions = DB::table('user_course_progress')
+        $quizActivityCompletions = DB::table('user_course_progress')
             ->where('user_id', $userId)
-            ->whereIn('status', ['activity_completed', 'completed'])
+            ->where('status', 'activity_completed')
             ->count();
 
+        $readingChapterCompletions = DB::table('user_course_progress')
+            ->where('user_id', $userId)
+            ->where('status', 'completed')
+            ->count();
+
+        $activityCompletions = $quizActivityCompletions + $readingChapterCompletions;
         $totalAttempts = $assessmentAttempts + $activityCompletions;
 
         $passedAssessmentAttempts = DB::table('user_assessment_attempts')
@@ -98,7 +104,7 @@ class DashboardController extends Controller
         } else if ($avgProgressScore) {
             $averageScore = round($avgProgressScore, 1);
         } else {
-            $averageScore = $completedChapters > 0 ? min(100, round(($completedChapters / max(1, $totalChapters)) * 100, 1)) : 0;
+            $averageScore = 0;
         }
 
         // 3. Calculate streak dynamically
@@ -166,7 +172,7 @@ class DashboardController extends Controller
         // 5b. Dynamic Module / Level Progressions from DB
         $moduleProgressions = [];
         $levelsQuery = DB::table('levels')
-            ->join('course_package_levels', 'levels.id', '=', 'course_package_levels.level_id')
+            ->leftJoin('course_package_levels', 'levels.id', '=', 'course_package_levels.level_id')
             ->where('levels.is_active', true);
             
         if (!empty($allowedCourseIds)) {
@@ -179,6 +185,14 @@ class DashboardController extends Controller
             ->orderBy('levels.id', 'asc')
             ->get();
 
+        if ($levels->isEmpty()) {
+            $levels = DB::table('levels')
+                ->where('is_active', true)
+                ->select('id', 'name', 'code', 'sort_order')
+                ->orderBy('sort_order', 'asc')
+                ->get();
+        }
+
         $previousCompleted = true; // First module/level unlocked by default
         $moduleColors = ['#22c55e', '#00B894', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#06b6d4'];
         $colorIdx = 0;
@@ -190,16 +204,23 @@ class DashboardController extends Controller
 
             $completedLvlChapters = DB::table('user_course_progress')
                 ->where('user_id', $userId)
-                ->where('status', 'completed')
-                ->whereIn('chapter_id', function($q) use ($lvl) {
-                    $q->select('chapter_id')
-                      ->from('level_chapter')
-                      ->where('level_id', $lvl->id);
+                ->whereIn('status', ['completed', 'activity_completed'])
+                ->where(function($q) use ($lvl) {
+                    $q->whereIn('chapter_id', function($sub) use ($lvl) {
+                        $sub->select('chapter_id')->from('level_chapter')->where('level_id', $lvl->id);
+                    })->orWhere('level_id', $lvl->id);
                 })
                 ->distinct('chapter_id')
                 ->count('chapter_id');
 
-            $lvlPercentage = $totalLvlChapters > 0 ? round(($completedLvlChapters / $totalLvlChapters) * 100) : 0;
+            if ($totalLvlChapters == 0) {
+                $totalLvlChapters = max(1, DB::table('chapters')->count());
+                if ($colorIdx == 0 && $completedChapters > 0) {
+                    $completedLvlChapters = $completedChapters;
+                }
+            }
+
+            $lvlPercentage = min(100, round(($completedLvlChapters / max(1, $totalLvlChapters)) * 100));
             $isUnlocked = $previousCompleted || $lvlPercentage > 0;
             $previousCompleted = $lvlPercentage >= 100;
 
@@ -365,13 +386,13 @@ class DashboardController extends Controller
 
         $completedChapterIds = DB::table('user_course_progress')
             ->where('user_id', $userId)
-            ->where('status', 'completed')
+            ->whereIn('status', ['completed', 'activity_completed'])
             ->whereNotNull('chapter_id')
             ->pluck('chapter_id')
             ->toArray();
 
-        $totalQuestionsAnswered = ($assessmentAttempts + $activityCompletions) * 5;
-        $correctAnswers = $totalQuestionsAnswered > 0 ? (int) round(($totalQuestionsAnswered * $averageScore) / 100) : 0;
+        $totalQuestionsAnswered = ($assessmentAttempts * 5) + ($quizActivityCompletions * 5);
+        $correctAnswers = ($totalQuestionsAnswered > 0 && $averageScore > 0) ? (int) round(($totalQuestionsAnswered * $averageScore) / 100) : 0;
         $wrongAnswers = max(0, $totalQuestionsAnswered - $correctAnswers);
 
         return response()->json([
@@ -698,6 +719,22 @@ class DashboardController extends Controller
             'xp_earned' => $xpEarned,
             'activity_type' => $validated['activity_type'],
             'message' => "Activity recorded! You earned {$xpEarned} XP.",
+        ]);
+    }
+
+    /**
+     * Reset student progress and assessment attempts back to 0.
+     */
+    public function resetStudentProgress(Request $request)
+    {
+        $userId = $request->user()->id;
+
+        DB::table('user_course_progress')->where('user_id', $userId)->delete();
+        DB::table('user_assessment_attempts')->where('user_id', $userId)->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Progress reset successfully!'
         ]);
     }
 }

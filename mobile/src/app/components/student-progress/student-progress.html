@@ -206,12 +206,17 @@
   <div class="progress-page">
     <!-- Header Bar (Electric Blue Theme) -->
     <header class="page-header blue-theme">
-      <div class="header-content">
+      <div class="header-content d-flex align-items-center justify-content-between">
         <h1 class="page-title">
           <i class="bi bi-bar-chart-line-fill me-2"></i> My Progress
         </h1>
-        <div class="trophy-badge">
-          <i class="bi bi-graph-up-arrow text-primary"></i>
+        <div class="d-flex align-items-center gap-2">
+          <button class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold shadow-sm" (click)="resetProgress()" title="Reset Progress">
+            <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+          </button>
+          <div class="trophy-badge">
+            <i class="bi bi-graph-up-arrow text-primary"></i>
+          </div>
         </div>
       </div>
     </header>
