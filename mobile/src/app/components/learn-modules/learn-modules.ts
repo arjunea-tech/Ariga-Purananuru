@@ -729,6 +729,12 @@ export class LearnModulesComponent implements OnInit {
     return set.has(chapId);
   }
 
+  isModuleCompleted(moduleId: string): boolean {
+    const chapters = this.getCategoryChapters(moduleId);
+    if (!chapters || chapters.length === 0) return false;
+    return chapters.every(c => this.isChapterCompleted(c.id));
+  }
+
   openModule(module: LearningModule) {
     if (module.status !== 'locked') {
       this.activeModule.set(module);

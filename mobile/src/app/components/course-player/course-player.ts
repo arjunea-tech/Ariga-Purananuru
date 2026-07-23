@@ -752,18 +752,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
   generateLessonSequence(contents: Content[], chapterAssessments: any[], chapterInfo?: any) {
     const steps: LessonStep[] = [];
 
-    // Step 1: Chapter Intro
-    const firstContent = contents.length > 0 ? contents[0] : null;
-    const chapTitle = chapterInfo?.name || firstContent?.name || firstContent?.title || 'பாட அறிமுகம் (Lesson Intro)';
-    const introTa = chapterInfo?.description || 'இப்பாடத்தில் உள்ள கருத்துக்களை தெளிவாக கற்றுக்கொண்டு பயிற்சி செய்து தேர்ச்சி பெறுக!';
-    steps.push({
-      type: 'intro',
-      title: chapTitle,
-      data: {
-        introTextTa: introTa,
-        introTextEn: 'Master this chapter through interactive stories, fun practice games, and assessments!'
-      }
-    });
+    // Step 1: Chapter Intro (Skipped to go directly to content as requested)
 
     contents.forEach(content => {
       // if (content.id === 1) {
@@ -903,7 +892,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
           }
           */
 
-          if (activityBlocks.length > 0) {
+          if (this.currentView() !== 'content' && activityBlocks.length > 0) {
             activityBlocks.forEach((block: any, idx: number) => {
               let actName = 'Unknown';
               if (block.data && block.data.type) {
@@ -919,7 +908,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
             });
           }
 
-          if (assessmentBlocks.length > 0) {
+          if (this.currentView() !== 'content' && assessmentBlocks.length > 0) {
             assessmentBlocks.forEach((block: any, idx: number) => {
               steps.push({
                 type: 'assessment',
@@ -1036,7 +1025,25 @@ export class CoursePlayer implements OnInit, OnDestroy {
   }
 
   goToMap(): void {
-    this.router.navigate(['/tabs/learn']);
+    let modId: any = this.activeLevelId();
+    if (!modId) {
+      modId = localStorage.getItem('lang_app_last_expanded_module');
+    }
+    if (modId) {
+      this.router.navigate(['/tabs/learn'], {
+        queryParams: {
+          view: 'category-details',
+          moduleId: modId,
+          tab: 'lesson'
+        }
+      });
+    } else {
+      this.router.navigate(['/tabs/learn'], {
+        queryParams: {
+          view: 'modules'
+        }
+      });
+    }
   }
 
   goToActivity(): void {
@@ -1272,7 +1279,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
     }
 
     setTimeout(() => {
-      this.router.navigate(['/tabs/learn']);
+      this.goToMap();
     }, 2000);
   }
 

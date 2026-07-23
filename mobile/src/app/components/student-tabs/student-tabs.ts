@@ -36,7 +36,14 @@ export class StudentTabsComponent {
     });
   }
 
-  selectTab(tabId: string) {
-    this.activeTab.set(tabId);
+  selectTab(tabId: string, event?: Event) {
+    if (event) {
+      event.preventDefault();
+    }
+    const tab = this.tabs.find(t => t.id === tabId || t.id.toLowerCase() === tabId.toLowerCase());
+    if (tab) {
+      this.activeTab.set(tab.id);
+      this.router.navigateByUrl(tab.route, { replaceUrl: true });
+    }
   }
 }

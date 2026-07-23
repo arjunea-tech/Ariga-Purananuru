@@ -242,4 +242,35 @@
   </div>
   }
 </div>
+
+<!-- EXIT APP CONFIRMATION MODAL -->
+@if (showExitModal()) {
+  <div class="modal-backdrop fade show" style="z-index: 10500;"></div>
+  <div class="modal fade show d-block" tabindex="-1" style="z-index: 10501;">
+    <div class="modal-dialog modal-dialog-centered px-3" style="max-width: 360px; margin: auto;">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden text-center p-4" style="background: #ffffff;">
+        <div class="rounded-circle bg-danger-subtle text-danger d-inline-flex align-items-center justify-content-center mx-auto mb-3"
+             style="width: 64px; height: 64px;">
+          <i class="bi bi-box-arrow-right fs-1"></i>
+        </div>
+
+        <h3 class="fw-extrabold text-dark h5 mb-2">வெளியேற வேண்டுமா?</h3>
+        <p class="text-secondary small mb-4">செயலியிலிருந்து வெளியேற நிச்சயமாக விரும்புகிறீர்களா?</p>
+
+        <div class="d-flex align-items-center gap-3">
+          <button type="button" 
+                  class="btn btn-light w-50 py-2.5 rounded-pill fw-bold text-secondary border shadow-xs"
+                  (click)="cancelExitApp()">
+            ரத்து
+          </button>
+          <button type="button" 
+                  class="btn btn-danger w-50 py-2.5 rounded-pill fw-bold shadow-sm"
+                  (click)="confirmExitApp()">
+            வெளியேறு
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
 </ion-app>
