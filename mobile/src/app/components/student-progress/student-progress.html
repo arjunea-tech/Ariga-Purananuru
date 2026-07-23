@@ -206,15 +206,15 @@
   <div class="progress-page">
     <!-- Header Bar (Electric Blue Theme) -->
     <header class="page-header blue-theme">
-      <div class="header-content d-flex align-items-center justify-content-between">
-        <h1 class="page-title">
+      <div class="header-content d-flex align-items-center justify-content-between w-100">
+        <h1 class="page-title text-truncate me-2 mb-0" style="font-size: 1.15rem; flex: 1; min-width: 0;">
           <i class="bi bi-bar-chart-line-fill me-2"></i> My Progress
         </h1>
-        <div class="d-flex align-items-center gap-2">
-          <button class="btn btn-sm btn-outline-light rounded-pill px-3 fw-bold shadow-sm" (click)="resetProgress()" title="Reset Progress">
-            <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+          <button class="btn btn-sm rounded-pill px-2.5 py-1 fw-bold d-flex align-items-center gap-1" style="background: rgba(3, 105, 161, 0.12); color: #0C4A6E !important; border: 1px solid rgba(3, 105, 161, 0.2);" (click)="resetProgress()" title="Reset Progress">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset
           </button>
-          <div class="trophy-badge">
+          <div class="trophy-badge shadow-xs flex-shrink-0" style="width: 38px; height: 38px; font-size: 1rem;">
             <i class="bi bi-graph-up-arrow text-primary"></i>
           </div>
         </div>

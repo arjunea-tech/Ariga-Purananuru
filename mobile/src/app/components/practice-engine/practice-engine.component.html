@@ -6,22 +6,23 @@
     [style.max-width]="isGameMode ? '100%' : '480px'" [style.margin]="isGameMode ? '0' : '0 auto'"
     [style.min-height]="isGameMode ? 'auto' : '94vh'">
 
-    <div *ngIf="step !== 'dashboard_menu' && step !== 'dashboard_input'" class="p-3 p-md-4 w-100">
-
-      <!-- Top Mobile App Navigation Bar (Shown when opened from Games Hub) -->
-      <div *ngIf="!isEmbeddedInLesson"
-        class="w-100 d-flex align-items-center justify-content-between px-3 py-2 bg-white shadow-sm border-bottom position-sticky top-0 z-3"
-        style="border-bottom-left-radius: 16px; border-bottom-right-radius: 16px; padding-top: max(70px, calc(env(safe-area-inset-top, 40px) + 30px)) !important;">
+    <!-- Top Mobile App Navigation Bar (Shown when opened from Games Hub) -->
+    <header *ngIf="!isEmbeddedInLesson && step !== 'dashboard_menu' && step !== 'dashboard_input'"
+      class="page-header orange-theme w-100" style="margin-top: 0;">
+      <div class="w-100 d-flex align-items-center justify-content-between">
         <button
-          class="btn btn-light rounded-circle shadow-sm hover-lift d-flex align-items-center justify-content-center"
-          style="width: 42px; height: 42px; background: #f1f5f9; border: 1px solid #cbd5e1;" (click)="goBackToGames()">
-          <i class="bi bi-arrow-left fs-5 text-dark"></i>
+          class="btn btn-link p-0 border-0 flex-shrink-0"
+          style="color: #EA580C;" (click)="goBackToGames()">
+          <i class="bi bi-arrow-left fs-4"></i>
         </button>
-        <h5 class="fw-bold mb-0 text-dark" style="font-family: 'Fredoka', sans-serif;">
+        <h1 class="fw-extrabold mb-0 text-truncate text-center flex-grow-1 px-2" style="font-size: 1.15rem; color: #EA580C;">
           {{ getModuleTitle() }}
-        </h5>
-        <div style="width: 42px;"></div>
+        </h1>
+        <div style="width: 24px;" class="flex-shrink-0"></div>
       </div>
+    </header>
+
+    <div *ngIf="step !== 'dashboard_menu' && step !== 'dashboard_input'" class="p-3 p-md-4 w-100">
 
       <!-- Step: Select Mode -->
       <div *ngIf="step === 'select_mode'" class="animate-slide-up w-100 d-flex flex-column align-items-center mt-3 px-2"

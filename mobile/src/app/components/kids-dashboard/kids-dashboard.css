@@ -6,11 +6,9 @@
 
 /* Header */
 .home-header {
-  background: linear-gradient(135deg, #38BDF8 0%, #0EA5E9 100%);
-  padding: calc(env(safe-area-inset-top, 20px) + 20px) 18px 22px 18px;
-  border-radius: 0 0 24px 24px;
-  color: #FFFFFF;
-  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.2);
+  background: #EDE9FE !important; /* Flat soft lavender - no gradient */
+  color: #6D28D9 !important;
+  box-shadow: none;
 }
 
 .user-avatar {
@@ -24,29 +22,31 @@
 .greeting-title {
   font-size: 1.05rem;
   font-weight: 700;
-  color: #FFFFFF;
+  color: #6D28D9 !important;
   line-height: 1.25;
 }
 
 .stat-pill-badge {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.85) !important;
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(49, 46, 129, 0.15) !important;
   padding: 4px 10px;
   border-radius: 20px;
-  font-size: 0.75rem;
-  color: #FFFFFF;
+  font-size: 0.78rem;
+  color: #312E81 !important;
   white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
 }
 
 /* Hero Course Card */
 .active-course-card {
-  background: linear-gradient(135deg, #4ADE80 0%, #22C55E 100%);
-  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.25) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  background: #D1FAE5 !important; /* Flat soft mint green - no gradient */
+  box-shadow: none !important;
+  border: 2px solid #A7F3D0 !important;
+  color: #065F46 !important;
 }
 
 .action-hub-card {

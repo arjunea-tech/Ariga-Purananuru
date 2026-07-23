@@ -254,4 +254,32 @@ export class GamesHubComponent implements OnInit {
       }
     });
   }
+
+  private modulePalettes = [
+    { color: '#8B5CF6', bg: '#F3E8FF', badgeBg: '#EDE9FE', badgeText: '#7C3AED' },
+    { color: '#38BDF8', bg: '#E0F2FE', badgeBg: '#E0F2FE', badgeText: '#0284C7' },
+    { color: '#10B981', bg: '#D1FAE5', badgeBg: '#D1FAE5', badgeText: '#059669' },
+    { color: '#F59E0B', bg: '#FEF3C7', badgeBg: '#FEF3C7', badgeText: '#D97706' },
+    { color: '#EC4899', bg: '#FCE7F3', badgeBg: '#FCE7F3', badgeText: '#DB2777' },
+    { color: '#6366F1', bg: '#E0E7FF', badgeBg: '#E0E7FF', badgeText: '#4F46E5' },
+    { color: '#F97316', bg: '#FFEDD5', badgeBg: '#FFEDD5', badgeText: '#EA580C' }
+  ];
+
+  // First letter of the module label as icon
+  getModuleFirstLetter(label: string): string {
+    return (label || '').trim().charAt(0) || '•';
+  }
+
+  getModuleColor(modId: string, index: number): string {
+    return this.modulePalettes[index % this.modulePalettes.length].color;
+  }
+
+  getModuleBg(modId: string, index: number): string {
+    return this.modulePalettes[index % this.modulePalettes.length].bg;
+  }
+
+  getModuleBadgeStyle(modId: string, index: number) {
+    const p = this.modulePalettes[index % this.modulePalettes.length];
+    return { 'background-color': p.badgeBg, 'color': p.badgeText };
+  }
 }

@@ -55,16 +55,17 @@
       </div>
     } @else {
       <!-- Single Active Course Hero Card -->
-      <div class="card active-course-card border-0 shadow-sm p-3 mb-4 rounded-4 text-white position-relative overflow-hidden">
+      <div class="card active-course-card border-0 p-3 mb-4 rounded-4 position-relative overflow-hidden">
         <div class="mb-2 mt-1">
-          <h2 class="fw-bold text-white mb-1" style="font-size: 0.95rem; line-height: 1.3;">
+          <h2 class="fw-bold mb-1" style="font-size: 0.95rem; line-height: 1.3; color: #065F46;">
             {{ activeCourse().title }}
           </h2>
-          <span class="small text-white-50 d-block fw-semibold" style="font-size: 0.75rem;">{{ activeCourse().chapterName }}</span>
+          <span class="small fw-semibold d-block" style="font-size: 0.75rem; color: #059669;">{{ activeCourse().chapterName }}</span>
         </div>
 
-        <button class="btn btn-warning text-dark w-100 rounded-pill py-2 fw-extrabold shadow-sm d-flex align-items-center justify-content-center gap-2 hover-lift mt-2"
-                (click)="startNextLesson()" style="font-size: 0.9rem;">
+        <button class="btn w-100 rounded-pill py-2 fw-extrabold d-flex align-items-center justify-content-center gap-2 hover-lift mt-2"
+                style="background: #10B981; color: #FFFFFF; font-size: 0.9rem; border: none;"
+                (click)="startNextLesson()">
           <span>{{ overallProgress() > 0 ? 'தொடர்ந்து பயில்க' : 'பாடத்தைத் தொடங்கு' }}</span>
           <i class="bi bi-arrow-right fs-5"></i>
         </button>
@@ -79,24 +80,26 @@
 
     <div class="row g-3 mb-4">
       <div class="col-6">
-        <div class="card action-hub-card border-0 shadow-xs p-3 rounded-4 bg-white text-center cursor-pointer hover-lift h-100 d-flex flex-column align-items-center justify-content-center"
+        <div class="card border-0 rounded-4 p-3.5 text-center cursor-pointer hover-lift h-100 d-flex flex-column align-items-center justify-content-center transition-all"
+             style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%); box-shadow: 0 6px 16px rgba(245, 158, 11, 0.12);"
              (click)="startQuickQuiz()">
-          <div class="rounded-circle bg-warning-subtle text-warning p-2.5 mb-2 d-flex align-items-center justify-content-center" style="width: 46px; height: 46px;">
-            <i class="bi bi-controller fs-4"></i>
+          <div class="rounded-circle bg-white text-warning shadow-xs p-2.5 mb-2 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+            <i class="bi bi-controller fs-3" style="color: #D97706;"></i>
           </div>
-          <h3 class="fw-extrabold text-dark small mb-1">விளையாட்டுப் பயிற்சி</h3>
-          <span class="extra-small text-muted d-block">Games Hub</span>
+          <h3 class="fw-extrabold text-dark small mb-1" style="font-size: 0.92rem;">விளையாட்டுப் பயிற்சி</h3>
+          <span class="badge bg-white text-warning rounded-pill px-2.5 py-0.5 extra-small fw-bold border border-warning border-opacity-25">Games Hub</span>
         </div>
       </div>
 
       <div class="col-6">
-        <div class="card action-hub-card border-0 shadow-xs p-3 rounded-4 bg-white text-center cursor-pointer hover-lift h-100 d-flex flex-column align-items-center justify-content-center"
+        <div class="card border-0 rounded-4 p-3.5 text-center cursor-pointer hover-lift h-100 d-flex flex-column align-items-center justify-content-center transition-all"
+             style="background: linear-gradient(135deg, #EEF2FF 0%, #C7D2FE 100%); box-shadow: 0 6px 16px rgba(99, 102, 241, 0.12);"
              (click)="openLeaderboard()">
-          <div class="rounded-circle bg-primary-subtle text-primary p-2.5 mb-2 d-flex align-items-center justify-content-center" style="width: 46px; height: 46px;">
-            <i class="bi bi-trophy-fill fs-4"></i>
+          <div class="rounded-circle bg-white text-primary shadow-xs p-2.5 mb-2 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+            <i class="bi bi-trophy-fill fs-3" style="color: #4F46E5;"></i>
           </div>
-          <h3 class="fw-extrabold text-dark small mb-1">மாணவர் தரவரிசை</h3>
-          <span class="extra-small text-muted d-block">Leaderboard</span>
+          <h3 class="fw-extrabold text-dark small mb-1" style="font-size: 0.92rem;">மாணவர் தரவரிசை</h3>
+          <span class="badge bg-white text-primary rounded-pill px-2.5 py-0.5 extra-small fw-bold border border-primary border-opacity-25">Leaderboard</span>
         </div>
       </div>
     </div>

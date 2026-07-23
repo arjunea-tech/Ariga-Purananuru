@@ -319,7 +319,15 @@ ion-router-outlet>* {
   backface-visibility: hidden;
 }
 
-/* ── UNIFORM FIXED TOP HEADER FOR ALL MOBILE SCREENS ── */
+/* ── UNIFORM LIGHT FLAT TOP HEADERS (NO GRADIENTS, NO DARK COLOURS, BRIGHT & CLEAN) ── */
+
+/* Flat bright background per page - light & clean */
+.home-header     { background: #EDE9FE !important; } /* Soft Violet/Lavender - Home */
+.learn-header    { background: #DCFCE7 !important; } /* Soft Mint Green - Learn */
+.page-header.orange-theme { background: #FFEDD5 !important; } /* Soft Peach/Orange - Practice */
+.page-header.blue-theme   { background: #DBEAFE !important; } /* Soft Sky Blue - Progress */
+.page-header.pink-theme   { background: #FCE7F3 !important; } /* Soft Rose Pink - Profile */
+
 .home-header,
 .learn-header,
 .page-header.orange-theme,
@@ -331,20 +339,49 @@ ion-router-outlet>* {
   right: 0 !important;
   z-index: 1000 !important;
   width: 100% !important;
-  height: calc(env(safe-area-inset-top, 28px) + 78px) !important;
-  min-height: calc(env(safe-area-inset-top, 28px) + 78px) !important;
-  max-height: calc(env(safe-area-inset-top, 28px) + 78px) !important;
-  padding-top: calc(env(safe-area-inset-top, 28px) + 28px) !important;
+  height: calc(env(safe-area-inset-top, 28px) + 86px) !important;
+  min-height: calc(env(safe-area-inset-top, 28px) + 86px) !important;
+  max-height: calc(env(safe-area-inset-top, 28px) + 86px) !important;
+  padding-top: calc(env(safe-area-inset-top, 28px) + 36px) !important;
   padding-bottom: 14px !important;
   padding-left: 18px !important;
   padding-right: 18px !important;
-  border-radius: 0 0 22px 22px !important;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12) !important;
+  border-radius: 0 0 20px 20px !important;
+  box-shadow: none !important;
   display: flex !important;
   align-items: center !important;
 }
 
-/* Ensure inner titles across all headers have exact uniform font-size, height, line-height */
+/* Text colour — medium rich tones, NOT dark, NOT white, perfectly readable on light bg */
+.home-header .greeting-title,
+.home-header h1,
+.home-header i,
+.home-header .page-title { color: #6D28D9 !important; }
+
+.learn-header h1,
+.learn-header i,
+.learn-header .page-title { color: #16A34A !important; }
+
+.page-header.orange-theme .page-title,
+.page-header.orange-theme h1,
+.page-header.orange-theme i { color: #EA580C !important; }
+
+.page-header.blue-theme .page-title,
+.page-header.blue-theme h1,
+.page-header.blue-theme i { color: #2563EB !important; }
+
+.page-header.pink-theme .page-title,
+.page-header.pink-theme h1,
+.page-header.pink-theme i { color: #DB2777 !important; }
+
+/* Keep pill badges & spans dark enough to read */
+.home-header span:not(.badge):not(.stat-pill-badge)     { color: #7C3AED !important; }
+.learn-header span:not(.badge)    { color: #15803D !important; }
+.page-header.orange-theme span:not(.badge) { color: #C2410C !important; }
+.page-header.blue-theme span:not(.badge)   { color: #1D4ED8 !important; }
+.page-header.pink-theme span:not(.badge)   { color: #BE185D !important; }
+
+/* Uniform title sizing */
 .home-header .greeting-title,
 .learn-header h1,
 .page-header .page-title {
