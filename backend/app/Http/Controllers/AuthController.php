@@ -292,7 +292,12 @@ class AuthController extends Controller
         $user = $request->user();
         $query = User::with('tenant');
 
-        if ($user->role !== 'super_admin') {
+        if ($user->role === 'super_admin') {
+            $selectedTenantId = $request->query('tenant_id');
+            if ($selectedTenantId && $selectedTenantId !== 'all') {
+                $query->where('tenant_id', $selectedTenantId);
+            }
+        } else {
             $query->where('tenant_id', $user->tenant_id);
             
             if ($user->role === 'admin') {

@@ -145,6 +145,59 @@ class DashboardController extends Controller
             ];
         }
 
+        // 5b. Dynamic Module / Level Progressions from DB
+        $moduleProgressions = [];
+        $levelsQuery = DB::table('levels')
+            ->join('course_package_levels', 'levels.id', '=', 'course_package_levels.level_id')
+            ->where('levels.is_active', true);
+            
+        if (!empty($allowedCourseIds)) {
+            $levelsQuery->whereIn('course_package_levels.course_id', $allowedCourseIds);
+        }
+        
+        $levels = $levelsQuery->select('levels.id', 'levels.name', 'levels.code', 'levels.sort_order')
+            ->distinct()
+            ->orderBy('levels.sort_order', 'asc')
+            ->orderBy('levels.id', 'asc')
+            ->get();
+
+        $previousCompleted = true; // First module/level unlocked by default
+        $moduleColors = ['#22c55e', '#00B894', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#06b6d4'];
+        $colorIdx = 0;
+
+        foreach ($levels as $lvl) {
+            $totalLvlChapters = DB::table('level_chapter')
+                ->where('level_id', $lvl->id)
+                ->count();
+
+            $completedLvlChapters = DB::table('user_course_progress')
+                ->where('user_id', $userId)
+                ->where('status', 'completed')
+                ->whereIn('chapter_id', function($q) use ($lvl) {
+                    $q->select('chapter_id')
+                      ->from('level_chapter')
+                      ->where('level_id', $lvl->id);
+                })
+                ->distinct('chapter_id')
+                ->count('chapter_id');
+
+            $lvlPercentage = $totalLvlChapters > 0 ? round(($completedLvlChapters / $totalLvlChapters) * 100) : 0;
+            $isUnlocked = $previousCompleted || $lvlPercentage > 0;
+            $previousCompleted = $lvlPercentage >= 100;
+
+            $moduleProgressions[] = [
+                'id' => (string)$lvl->id,
+                'name' => $lvl->name,
+                'code' => $lvl->code,
+                'total_chapters' => $totalLvlChapters,
+                'completed_chapters' => $completedLvlChapters,
+                'percentage' => $lvlPercentage,
+                'is_unlocked' => $isUnlocked,
+                'color' => $moduleColors[$colorIdx % count($moduleColors)],
+            ];
+            $colorIdx++;
+        }
+
         // 6. Dynamic Skill Mastery
         $skillMastery = [
             ['name' => 'Literature', 'score' => 0],
@@ -309,6 +362,7 @@ class DashboardController extends Controller
             'xp_points' => $xpPoints,
             'streak_days' => $streak,
             'course_progressions' => $courseProgressions,
+            'module_progressions' => $moduleProgressions,
             'skill_mastery' => $skillMastery,
             'weekly_activity' => $weeklyActivity,
             'monthly_study_hours' => $monthlyStudyHours,
@@ -376,17 +430,50 @@ class DashboardController extends Controller
     public function getStudentStatsForStaff(Request $request, $userId)
     {
         $currentUser = $request->user();
+        $targetUser = User::findOrFail($userId);
         
         // Security check: Must be staff, and if not super_admin, must match tenant_id
         if ($currentUser->role !== 'super_admin') {
-            $targetUser = User::find($userId);
-            if (!$targetUser || $targetUser->tenant_id !== $currentUser->tenant_id) {
-                return response()->json(['error' => 'Unauthorized or User not found.'], 403);
+            if ($targetUser->tenant_id !== $currentUser->tenant_id) {
+                return response()->json(['error' => 'Unauthorized.'], 403);
             }
         }
 
-        // Overall Completion Progress
-        $totalChapters = DB::table('chapters')->count();
+        $tenantId = $targetUser->tenant_id;
+
+        // Fetch courses mapped to target user's tenant
+        $today = now()->toDateString();
+        $allowedCourseIds = DB::table('property_packages')
+            ->join('properties', 'property_packages.property_id', '=', 'properties.id')
+            ->where('properties.tenant_id', $tenantId)
+            ->where('property_packages.is_active', true)
+            ->whereNotNull('property_packages.course_id')
+            ->where(function ($q) use ($today) {
+                $q->whereNull('property_packages.start_date')
+                  ->orWhere('property_packages.start_date', '<=', $today);
+            })
+            ->where(function ($q) use ($today) {
+                $q->whereNull('property_packages.end_date')
+                  ->orWhere('property_packages.end_date', '>=', $today);
+            })
+            ->distinct('property_packages.course_id')
+            ->pluck('property_packages.course_id')
+            ->toArray();
+
+        // Overall Completion Progress restricted to allowed courses
+        $totalChaptersQuery = DB::table('chapters');
+        if (!empty($allowedCourseIds)) {
+            $totalChaptersQuery->whereIn('chapters.id', function ($query) use ($allowedCourseIds) {
+                $query->select('level_chapter.chapter_id')
+                    ->from('level_chapter')
+                    ->join('levels', 'level_chapter.level_id', '=', 'levels.id')
+                    ->join('course_package_levels', 'levels.id', '=', 'course_package_levels.level_id')
+                    ->whereIn('course_package_levels.course_id', $allowedCourseIds);
+            });
+        } else {
+            $totalChaptersQuery->whereRaw('1 = 0');
+        }
+        $totalChapters = $totalChaptersQuery->count();
         
         $completedChapters = DB::table('user_course_progress')
             ->where('user_id', $userId)
@@ -410,9 +497,11 @@ class DashboardController extends Controller
             ->avg('score');
         $averageScore = $averageScore ? round($averageScore, 1) : 0;
 
-        // Course breakdown (Show all courses in system and calculate student progress)
+        // Course breakdown (Show only courses mapped to this user's tenant)
         $coursesProgress = [];
-        $courses = \App\Models\Course::where('is_active', true)->get();
+        $courses = \App\Models\Course::where('is_active', true)
+            ->whereIn('id', $allowedCourseIds)
+            ->get();
         
         foreach ($courses as $course) {
             $totalCourseChapters = DB::table('chapters')
@@ -463,20 +552,27 @@ class DashboardController extends Controller
     public function getTenantStats(Request $request)
     {
         $currentUser = $request->user();
-        $tenantId = $currentUser->tenant_id;
 
         // Base user query based on role
         $usersQuery = User::query();
-        if ($currentUser->role !== 'super_admin') {
+        $tenantId = null;
+
+        if ($currentUser->role === 'super_admin') {
+            $selectedTenantId = $request->query('tenant_id');
+            if ($selectedTenantId && $selectedTenantId !== 'all') {
+                $usersQuery->where('tenant_id', $selectedTenantId);
+                $tenantId = $selectedTenantId;
+            }
+        } else {
+            $tenantId = $currentUser->tenant_id;
             $usersQuery->where('tenant_id', $tenantId);
         }
 
         $totalStudents = (clone $usersQuery)->where('role', 'student')->count();
         $totalStaff = (clone $usersQuery)->where('role', 'staff')->count();
 
-        // Count active courses (for simplicity, we count all active courses in the system, or we could filter by tenant's packages)
-        // Here we just count all active courses if they use a global catalog, or filter by tenant if they use mapping
-        if ($currentUser->role === 'super_admin') {
+        // Count active courses
+        if ($currentUser->role === 'super_admin' && !$tenantId) {
             $activeCourses = \App\Models\Course::where('is_active', true)->count();
         } else {
             // A tenant only has access to courses mapped to its properties
@@ -499,7 +595,7 @@ class DashboardController extends Controller
         }
 
         // Overall completion rate for the school
-        // Calculate average completion of all students in the tenant
+        // Calculate average completion of all students in the tenant/all tenants
         $studentIds = (clone $usersQuery)->where('role', 'student')->pluck('id');
         
         $totalChapters = DB::table('chapters')->count();

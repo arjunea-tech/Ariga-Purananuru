@@ -1,8 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { AuthService } from '../../services/auth';
+import { environment } from '../../../environments/environment';
 
 export interface Announcement {
   id: number;
@@ -10,6 +11,10 @@ export interface Announcement {
   message: string;
   target_roles: string[];
   created_at: string;
+  tenant_id: number | null;
+  tenant?: {
+    tenant_name: string;
+  };
 }
 
 @Component({
@@ -28,6 +33,9 @@ export class Announcements implements OnInit {
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
 
+  selectedTenantId = signal<string>('all');
+  tenantsList = signal<any[]>([]);
+
   announcementForm: FormGroup;
   isSubmitting = signal<boolean>(false);
   showForm = signal<boolean>(false);
@@ -36,17 +44,45 @@ export class Announcements implements OnInit {
     this.announcementForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(255)]],
       message: ['', [Validators.required]],
-      target_roles: [[]]
+      target_roles: [[]],
+      tenant_id: ['global']
     });
   }
 
   ngOnInit(): void {
+    const role = this.authService.getUserRole();
+    if (role === 'super_admin') {
+      this.loadTenants();
+    }
     this.loadAnnouncements();
+  }
+
+  loadTenants(): void {
+    const token = this.authService.getToken();
+    const headers = token ? new HttpHeaders({ 'Authorization': `Bearer ${token}` }) : undefined;
+    
+    this.http.get<any[]>(`${environment.apiUrl}/tenants`, { headers }).subscribe({
+      next: (tenants) => {
+        this.tenantsList.set(tenants || []);
+      },
+      error: (err) => {
+        console.error('Failed to load tenants in announcements', err);
+      }
+    });
   }
 
   loadAnnouncements(): void {
     this.loading.set(true);
-    this.http.get<Announcement[]>('http://127.0.0.1:8000/api/announcements').subscribe({
+    const token = this.authService.getToken();
+    const headers = token ? new HttpHeaders({ 'Authorization': `Bearer ${token}` }) : undefined;
+
+    let url = `${environment.apiUrl}/announcements`;
+    const selectedTenant = this.selectedTenantId();
+    if (this.authService.getUserRole() === 'super_admin' && selectedTenant) {
+      url += `?tenant_id=${selectedTenant}`;
+    }
+
+    this.http.get<Announcement[]>(url, { headers }).subscribe({
       next: (data) => {
         this.announcements.set(data);
         this.loading.set(false);
@@ -58,14 +94,30 @@ export class Announcements implements OnInit {
     });
   }
 
+  onTenantChange(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    this.selectedTenantId.set(select.value);
+    this.loadAnnouncements();
+  }
+
   submitAnnouncement(): void {
     if (this.announcementForm.invalid) return;
 
     this.isSubmitting.set(true);
-    this.http.post<Announcement>('http://127.0.0.1:8000/api/announcements', this.announcementForm.value).subscribe({
+    const token = this.authService.getToken();
+    const headers = token ? new HttpHeaders({ 'Authorization': `Bearer ${token}` }) : undefined;
+
+    const payload = { ...this.announcementForm.value };
+    if (payload.tenant_id === 'global') {
+      payload.tenant_id = null;
+    } else if (payload.tenant_id) {
+      payload.tenant_id = Number(payload.tenant_id);
+    }
+
+    this.http.post<Announcement>(`${environment.apiUrl}/announcements`, payload, { headers }).subscribe({
       next: (newAnnouncement) => {
         this.announcements.update(list => [newAnnouncement, ...list]);
-        this.announcementForm.reset({ target_roles: [] });
+        this.announcementForm.reset({ target_roles: [], tenant_id: 'global' });
         this.showForm.set(false);
         this.isSubmitting.set(false);
       },
@@ -79,7 +131,10 @@ export class Announcements implements OnInit {
   deleteAnnouncement(id: number): void {
     if (!confirm('Are you sure you want to delete this announcement?')) return;
     
-    this.http.delete(`http://127.0.0.1:8000/api/announcements/${id}`).subscribe({
+    const token = this.authService.getToken();
+    const headers = token ? new HttpHeaders({ 'Authorization': `Bearer ${token}` }) : undefined;
+
+    this.http.delete(`${environment.apiUrl}/announcements/${id}`, { headers }).subscribe({
       next: () => {
         this.announcements.update(list => list.filter(a => a.id !== id));
       },

@@ -10,10 +10,22 @@ class AnnouncementController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $query = Announcement::query();
+        $query = Announcement::with('tenant');
 
-        if ($user->role !== 'super_admin') {
-            $query->where('tenant_id', $user->tenant_id);
+        if ($user->role === 'super_admin') {
+            $selectedTenantId = $request->query('tenant_id');
+            if ($selectedTenantId) {
+                if ($selectedTenantId === 'global') {
+                    $query->whereNull('tenant_id');
+                } else if ($selectedTenantId !== 'all') {
+                    $query->where('tenant_id', $selectedTenantId);
+                }
+            }
+        } else {
+            $query->where(function($q) use ($user) {
+                $q->where('tenant_id', $user->tenant_id)
+                  ->orWhereNull('tenant_id');
+            });
             
             // If not admin, only show announcements targeted to their role or global (null/empty)
             if ($user->role !== 'admin') {
@@ -32,13 +44,21 @@ class AnnouncementController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'message' => 'required|string',
-            'target_roles' => 'nullable|array'
+            'target_roles' => 'nullable|array',
+            'tenant_id' => 'nullable'
         ]);
 
         $user = $request->user();
 
+        $tenantId = null;
+        if ($user->role === 'super_admin') {
+            $tenantId = $validated['tenant_id'] && $validated['tenant_id'] !== 'global' ? $validated['tenant_id'] : null;
+        } else {
+            $tenantId = $user->tenant_id;
+        }
+
         $announcement = Announcement::create([
-            'tenant_id' => $user->role === 'super_admin' ? null : $user->tenant_id,
+            'tenant_id' => $tenantId,
             'title' => $validated['title'],
             'message' => $validated['message'],
             'target_roles' => $validated['target_roles'] ?? [],
