@@ -15,6 +15,7 @@ use App\Http\Controllers\ContentController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AITutorController;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\SupportTicketController;
 
 /*
 |--------------------------------------------------------------------------
@@ -180,4 +181,15 @@ Route::middleware(['auth:sanctum', 'identify.tenant'])->group(function () {
 
     // Record student activity for XP & streak tracking
     Route::post('student/record-activity', [DashboardController::class, 'recordActivity']);
+
+    // ── Support Tickets ────────────────────────────────────────────────────
+    // Student: submit a ticket & view own tickets
+    Route::post('support/tickets', [SupportTicketController::class, 'store']);
+    Route::get('support/my-tickets', [SupportTicketController::class, 'myTickets']);
+
+    // Admin/Staff/Super Admin: list all tickets & reply
+    Route::middleware(['role:super_admin,admin,staff,tenant_admin'])->group(function () {
+        Route::get('support/tickets', [SupportTicketController::class, 'index']);
+        Route::post('support/tickets/{id}/reply', [SupportTicketController::class, 'reply']);
+    });
 });

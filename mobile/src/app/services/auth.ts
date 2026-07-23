@@ -11,6 +11,7 @@ export interface UserData {
   role: string;
   tenant_id?: number;
   dob?: string | null;
+  avatar?: string | null;
 }
 
 export interface AuthResponse {
@@ -91,7 +92,7 @@ export class AuthService {
     return role ? allowedRoles.includes(role) : false;
   }
 
-  updateProfile(data: { name: string; email: string }): Observable<any> {
+  updateProfile(data: { name: string; email?: string; avatar?: string }): Observable<any> {
     const token = this.getToken();
     const headers = { 'Authorization': `Bearer ${token || ''}` };
     return this.http.put<any>(`${this.apiUrl}/profile`, data, { headers }).pipe(

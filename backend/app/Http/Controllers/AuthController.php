@@ -345,6 +345,7 @@ class AuthController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:users,email,' . $user->id,
+            'avatar' => 'nullable|string',
         ]);
         
         $user->update($validated);
