@@ -59,17 +59,33 @@ export class LearnModulesComponent implements OnInit {
   // Accordion & Stats Signals for Image 1 Layout
   expandedModuleId = signal<string | null>(null);
   expandedCategoryId = signal<string | null>(null);
+  selectedTabForModule = signal<'lesson' | 'game' | null>(null);
+  chapterCacheUpdated = signal<number>(0);
   doneCount = signal<number>(0);
   leftCount = signal<number>(0);
 
   modules = signal<LearningModule[]>([]);
   dynamicModules = signal<DynamicModuleItem[]>([]);
   availableCourses = signal<any[]>([]);
-  viewState = signal<'courses' | 'modules'>('courses');
+  viewState = signal<'courses' | 'modules' | 'category-details'>('courses');
+  selectedModuleForDetails = signal<any | null>(null);
+
+  pendingModuleId: string | null = null;
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
-      if (params['view'] === 'modules') {
+      if (params['view'] === 'category-details') {
+        this.viewState.set('category-details');
+        if (params['moduleId']) {
+          this.pendingModuleId = params['moduleId'];
+          this.resolvePendingModule();
+        }
+        if (params['tab']) {
+          this.selectedTabForModule.set(params['tab'] as 'lesson' | 'game');
+        } else {
+          this.selectedTabForModule.set(null);
+        }
+      } else if (params['view'] === 'modules') {
         this.viewState.set('modules');
       } else {
         this.viewState.set('courses');
@@ -118,8 +134,45 @@ export class LearnModulesComponent implements OnInit {
   }
 
   openCategoryModule(mod: any) {
-    const current = this.expandedCategoryId();
-    this.expandedCategoryId.set(current === mod.id ? null : mod.id);
+    this.router.navigate([], { relativeTo: this.route, queryParams: { view: 'category-details', moduleId: mod.id }, queryParamsHandling: 'merge' });
+    this.selectedModuleForDetails.set(mod);
+    this.selectedTabForModule.set(null);
+    localStorage.setItem('lang_app_last_expanded_module', mod.id);
+    
+    if (!this.backendChapters().some(c => c.moduleId === mod.id)) {
+      this.prefetchModuleChapters(mod.id);
+    }
+  }
+
+  goBackToModules() {
+    this.router.navigate([], { relativeTo: this.route, queryParams: { view: 'modules', moduleId: null }, queryParamsHandling: 'merge' });
+    this.selectedModuleForDetails.set(null);
+  }
+
+  private resolvePendingModule() {
+    if (this.pendingModuleId && this.modules().length > 0) {
+      const mod = this.modules().find(m => m.id === this.pendingModuleId);
+      if (mod) {
+        this.selectedModuleForDetails.set(mod);
+        this.pendingModuleId = null;
+        if (!this.backendChapters().some(c => c.moduleId === mod.id)) {
+          this.prefetchModuleChapters(mod.id);
+        }
+      }
+    }
+  }
+
+  selectTab(tab: 'lesson' | 'game') {
+    this.router.navigate([], { relativeTo: this.route, queryParams: { tab }, queryParamsHandling: 'merge' });
+    this.selectedTabForModule.set(tab);
+  }
+
+  clearTab(event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.router.navigate([], { relativeTo: this.route, queryParams: { tab: null }, queryParamsHandling: 'merge' });
+    this.selectedTabForModule.set(null);
   }
 
   getCategoryChapters(categoryId: string): any[] {
@@ -139,6 +192,102 @@ export class LearnModulesComponent implements OnInit {
       localStorage.setItem('lang_app_last_chapter_id', chap.id.toString());
       this.router.navigate(['/learn/play/1'], { queryParams: { chapterId: chap.id, view: 'content' } });
     }
+  }
+
+  getCategoryActivities(categoryId: string): any[] {
+    this.chapterCacheUpdated(); // Create dependency to trigger re-evaluation
+    const mod = this.modules().find(m => m.id === categoryId);
+    if (!mod || !mod.chapters) return [];
+    
+    const activities: any[] = [];
+    mod.chapters.forEach(chap => {
+      const cacheKey = `lang_app_resolved_chapter_${chap.id}`;
+      const cachedRaw = localStorage.getItem(cacheKey);
+      if (cachedRaw) {
+        try {
+          const cached = JSON.parse(cachedRaw);
+          if (cached.contents) {
+            cached.contents.forEach((content: any) => {
+              if (content.text_content) {
+                const parsed = JSON.parse(content.text_content);
+                if (parsed.blocks) {
+                  parsed.blocks.forEach((block: any, idx: number) => {
+                    if (block.type === 'activity' && block.data) {
+                      const actId = block.data.activityId || block.data.activityReferenceId || block.id || `act_${chap.id}_${idx}`;
+                      
+                      if (!activities.find(a => a.id === actId)) {
+                         let title = block.data.title || block.data.question;
+                         if (!title) {
+                            switch(block.data.type) {
+                               case 'mcq': title = 'சரியான விடையைத் தேர்ந்தெடு'; break;
+                               case 'word_hunt': title = 'வார்த்தை தேடல்'; break;
+                               case 'letter_basket': title = 'எழுத்து கூடை'; break;
+                               case 'balloon_pop': title = 'பலூன் விளையாட்டு'; break;
+                               case 'word_builder': title = 'வார்த்தை உருவாக்கு'; break;
+                               case 'match': title = 'பொருத்துக'; break;
+                               case 'fill_blanks': title = 'கோடிட்ட இடத்தை நிரப்புக'; break;
+                               case 'true_false': title = 'சரி அல்லது தவறு'; break;
+                               default: title = 'பயிற்சி விளையாட்டு'; break;
+                            }
+                         }
+
+                         activities.push({
+                           id: actId,
+                           title: title,
+                           type: block.data.type || 'activity',
+                           data: block.data,
+                           chapterId: chap.id
+                         });
+                      }
+                    }
+                  });
+                }
+              }
+            });
+          }
+        } catch(e) {}
+      }
+    });
+    return activities;
+  }
+
+  getGroupedCategoryActivities(categoryId: string) {
+     const activities = this.getCategoryActivities(categoryId);
+     const groupsMap = new Map<string, { type: string, typeLabel: string, icon: string, color: string, activities: any[] }>();
+     
+     activities.forEach(act => {
+        let label = 'பயிற்சி';
+        let icon = 'bi-controller';
+        let color = '#F59E0B'; // default warning/orange
+        
+        switch(act.type) {
+           case 'mcq': label = 'சரியான விடையைத் தேர்ந்தெடு'; icon = 'bi-ui-radios'; color = '#3B82F6'; break; // blue
+           case 'word_hunt': label = 'வார்த்தை தேடல்'; icon = 'bi-search'; color = '#10B981'; break; // emerald
+           case 'letter_basket': label = 'எழுத்து கூடை'; icon = 'bi-basket2-fill'; color = '#8B5CF6'; break; // purple
+           case 'balloon_pop': label = 'பலூன் விளையாட்டு'; icon = 'bi-balloon-fill'; color = '#EC4899'; break; // pink
+           case 'word_builder': label = 'வார்த்தை உருவாக்கு'; icon = 'bi-puzzle-fill'; color = '#F59E0B'; break; // amber
+           case 'match': label = 'பொருத்துக'; icon = 'bi-arrow-left-right'; color = '#6366F1'; break; // indigo
+           case 'fill_blanks': label = 'கோடிட்ட இடத்தை நிரப்புக'; icon = 'bi-input-cursor-text'; color = '#14B8A6'; break; // teal
+           case 'true_false': label = 'சரி அல்லது தவறு'; icon = 'bi-check-circle-fill'; color = '#F43F5E'; break; // rose
+        }
+
+        if (!groupsMap.has(act.type)) {
+           groupsMap.set(act.type, { type: act.type, typeLabel: label, icon, color, activities: [] });
+        }
+        groupsMap.get(act.type)!.activities.push(act);
+     });
+
+     return Array.from(groupsMap.values());
+  }
+
+  playGameGroup(moduleId: string, gameType: string) {
+    this.router.navigate(['/learn/play/1'], { 
+      queryParams: { 
+        view: 'game-mode', 
+        moduleId: moduleId, 
+        gameType: gameType 
+      } 
+    });
   }
 
   // ===== CACHE-FIRST LOADING: Show instantly from cache, refresh in background =====
@@ -188,32 +337,33 @@ export class LearnModulesComponent implements OnInit {
       const chapterId = chap.id;
       const cacheKey = `lang_app_resolved_chapter_${chapterId}`;
       
-      // Fetch silently if not already cached
-      if (!localStorage.getItem(cacheKey)) {
-        this.http.get<any>(`${environment.apiUrl}/chapters/${chapterId}`).subscribe({
-          next: (chapterData) => {
-            const contents: any[] = (chapterData.contents || [])
-              .filter((c: any) => c.is_active !== false)
-              .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
+      // Always fetch in background to keep cache fresh
+      this.http.get<any>(`${environment.apiUrl}/chapters/${chapterId}`).subscribe({
+        next: (chapterData) => {
+          const contents: any[] = (chapterData.contents || [])
+            .filter((c: any) => c.is_active !== false)
+            .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
 
-            const uniqueIds = new Set<number>();
-            const referencePositions: Array<{ contentIdx: number; blockIdx: number; refId: number }> = [];
+          const uniqueIds = new Set<number>();
+          const referencePositions: Array<{ contentIdx: number; blockIdx: number; refId: number }> = [];
 
-            contents.forEach((content, contentIdx) => {
-              if (!content.text_content) return;
-              try {
-                const parsed = JSON.parse(content.text_content);
-                if (parsed.blocks && Array.isArray(parsed.blocks)) {
-                  parsed.blocks.forEach((block: any, blockIdx: number) => {
-                    if (block.type === 'activity' && block.data && block.data.activityId) {
-                      const refId = +block.data.activityId;
-                      uniqueIds.add(refId);
-                      referencePositions.push({ contentIdx, blockIdx, refId });
+          contents.forEach((content, contentIdx) => {
+            if (!content.text_content) return;
+            try {
+              const parsed = JSON.parse(content.text_content);
+              if (parsed.blocks && Array.isArray(parsed.blocks)) {
+                parsed.blocks.forEach((block: any, blockIdx: number) => {
+                  if (block.type === 'activity' && block.data) {
+                    const refId = block.data.activityId || block.data.activityReferenceId;
+                    if (refId) {
+                      uniqueIds.add(+refId);
+                      referencePositions.push({ contentIdx, blockIdx, refId: +refId });
                     }
-                  });
-                }
-              } catch (e) {}
-            });
+                  }
+                });
+              }
+            } catch (e) {}
+          });
 
             if (uniqueIds.size === 0) {
               const result = {
@@ -222,6 +372,7 @@ export class LearnModulesComponent implements OnInit {
                 assessments: chapterData.assessments || []
               };
               localStorage.setItem(cacheKey, JSON.stringify(result));
+              this.chapterCacheUpdated.set(Date.now());
               return;
             }
 
@@ -258,13 +409,13 @@ export class LearnModulesComponent implements OnInit {
                   assessments: chapterData.assessments || []
                 };
                 localStorage.setItem(cacheKey, JSON.stringify(result));
+                this.chapterCacheUpdated.set(Date.now());
               },
               error: () => {}
             });
           },
           error: () => {}
         });
-      }
     });
   }
 
@@ -272,8 +423,8 @@ export class LearnModulesComponent implements OnInit {
     const userId = this.authService.getUser()?.id || 1;
     const legacyChaptersRaw = localStorage.getItem('completed_chapters');
     const scopedChaptersRaw = localStorage.getItem(`lang_app_completed_chapters_${userId}_1`);
-    const legacyIds: number[] = legacyChaptersRaw ? JSON.parse(legacyChaptersRaw) : [];
-    const scopedIds: number[] = scopedChaptersRaw ? JSON.parse(scopedChaptersRaw) : [];
+    const legacyIds: number[] = legacyChaptersRaw ? JSON.parse(legacyChaptersRaw!) : [];
+    const scopedIds: number[] = scopedChaptersRaw ? JSON.parse(scopedChaptersRaw!) : [];
     const completedChapterIds = Array.from(new Set([...legacyIds, ...scopedIds]));
 
     const currentModules = this.modules();
@@ -491,6 +642,7 @@ export class LearnModulesComponent implements OnInit {
     this.leftCount.set(Math.max(0, totalChaps - doneChaps));
 
     this.modules.set(dynamicModules);
+    this.resolvePendingModule();
 
     // Prefetch all unlocked modules' chapters silently in the background
     dynamicModules.forEach(mod => {
@@ -559,6 +711,7 @@ export class LearnModulesComponent implements OnInit {
       }
     ];
     this.modules.set(defaultMods);
+    this.resolvePendingModule();
     this.expandedModuleId.set('ezhuthu');
     this.isLoadingChapters.set(false);
   }
@@ -571,8 +724,8 @@ export class LearnModulesComponent implements OnInit {
     const userId = this.authService.getUser()?.id || 1;
     const legacyChaptersRaw = localStorage.getItem('completed_chapters');
     const scopedChaptersRaw = localStorage.getItem(`lang_app_completed_chapters_${userId}_1`);
-    const legacyIds: number[] = legacyChaptersRaw ? JSON.parse(legacyChaptersRaw) : [];
-    const scopedIds: number[] = scopedChaptersRaw ? JSON.parse(scopedChaptersRaw) : [];
+    const legacyIds: number[] = legacyChaptersRaw ? JSON.parse(legacyChaptersRaw!) : [];
+    const scopedIds: number[] = scopedChaptersRaw ? JSON.parse(scopedChaptersRaw!) : [];
     const set = new Set([...legacyIds, ...scopedIds]);
     return set.has(chapId);
   }
@@ -648,8 +801,8 @@ export class LearnModulesComponent implements OnInit {
     const userId = this.authService.getUser()?.id || 1;
     const legacyChaptersRaw = localStorage.getItem('completed_chapters');
     const scopedChaptersRaw = localStorage.getItem(`lang_app_completed_chapters_${userId}_1`);
-    const legacyIds: number[] = legacyChaptersRaw ? JSON.parse(legacyChaptersRaw) : [];
-    const scopedIds: number[] = scopedChaptersRaw ? JSON.parse(scopedChaptersRaw) : [];
+    const legacyIds: number[] = legacyChaptersRaw ? JSON.parse(legacyChaptersRaw!) : [];
+    const scopedIds: number[] = scopedChaptersRaw ? JSON.parse(scopedChaptersRaw!) : [];
     const allCompleted = new Set([...legacyIds, ...scopedIds]);
 
     if (allCompleted.has(chapId)) {

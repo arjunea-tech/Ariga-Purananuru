@@ -78,7 +78,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
   activeContentId = signal<number | null>(null);
   fullContent = signal<Content | null>(null);
   isFullscreen = signal(false);
-  currentView = signal<'levels' | 'map' | 'content' | 'activity'>('levels');
+  currentView = signal<'levels' | 'map' | 'content' | 'activity' | 'game-mode'>('levels');
   theme = signal<'kids' | 'student'>('kids'); // New theme signal
   currentActivityIndex = signal<number>(0);
   activeLevelId = signal<number | null>(null);
@@ -217,10 +217,12 @@ export class CoursePlayer implements OnInit, OnDestroy {
       }
 
       const rawView = params['view'];
-      const view: 'levels' | 'map' | 'content' | 'activity' =
-        (rawView === 'map' || rawView === 'content' || rawView === 'activity') ? rawView : 'levels';
+      const view: 'levels' | 'map' | 'content' | 'activity' | 'game-mode' =
+        (rawView === 'map' || rawView === 'content' || rawView === 'activity' || rawView === 'game-mode') ? rawView : 'levels';
       const levelId = params['levelId'] ? +params['levelId'] : null;
       const chapterId = params['chapterId'] ? +params['chapterId'] : null;
+      const gameType = params['gameType'];
+      const moduleId = params['moduleId'];
 
       // If navigating BACK to levels, immediately cancel any pending map loader
       if (view === 'levels' && this.isLoadingMap()) {
@@ -236,7 +238,11 @@ export class CoursePlayer implements OnInit, OnDestroy {
         this.currentView.set(view);
       }
 
-      if (chapterId && chapterId !== this.activeChapterId()) {
+      if (view === 'game-mode' && gameType && moduleId) {
+         if (this.courseStructure()) {
+           this.loadGameModeSequence(moduleId, gameType);
+         }
+      } else if (chapterId && chapterId !== this.activeChapterId()) {
         this.activeChapterId.set(chapterId);
         if (this.courseStructure()) {
           this.loadLessonSequence(chapterId);
@@ -388,7 +394,12 @@ export class CoursePlayer implements OnInit, OnDestroy {
     // Check if there is a pending chapterId in the query parameters to load
     const params = this.route.snapshot.queryParams;
     const chapterId = params['chapterId'] ? +params['chapterId'] : null;
-    if (chapterId) {
+    const gameType = params['gameType'];
+    const moduleId = params['moduleId'];
+    
+    if (params['view'] === 'game-mode' && gameType && moduleId) {
+       this.loadGameModeSequence(moduleId, gameType);
+    } else if (chapterId) {
       this.loadLessonSequence(chapterId);
     }
   }
@@ -598,10 +609,70 @@ export class CoursePlayer implements OnInit, OnDestroy {
         return contents;
       }),
       catchError(err => {
-        console.error('Failed to resolve activity references', err);
         return of(contents);
       })
     );
+  }
+
+  loadGameModeSequence(moduleId: string, gameType: string) {
+    this.isLoadingLesson.set(true);
+    const structure = this.courseStructure();
+    if (!structure) {
+       this.isLoadingLesson.set(false);
+       return;
+    }
+
+    const level = structure.levels.find(l => l.id.toString() === moduleId || l.name === moduleId || l.id.toString() === '101'); // fallback to first if not found
+    if (!level) {
+      this.isLoadingLesson.set(false);
+      return;
+    }
+
+    let steps: any[] = [];
+    let actIndex = 0;
+
+    level.chapters.forEach(chap => {
+      const cacheKey = `lang_app_resolved_chapter_${chap.id}`;
+      const cachedRaw = localStorage.getItem(cacheKey);
+      if (cachedRaw) {
+        try {
+          const cached = JSON.parse(cachedRaw);
+          if (cached.contents) {
+            cached.contents.forEach((content: any) => {
+              if (content.text_content) {
+                const parsed = JSON.parse(content.text_content);
+                if (parsed.blocks) {
+                  parsed.blocks.forEach((block: any) => {
+                    if (block.type === 'activity' && block.data && block.data.type === gameType) {
+                      let actName = gameType.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                      if (gameType === 'mcq') actName = 'Multiple Choice';
+
+                      steps.push({
+                        type: 'activity',
+                        title: `${actName} - ${++actIndex}`,
+                        data: block
+                      });
+                    }
+                  });
+                }
+              }
+            });
+          }
+        } catch(e) {}
+      }
+    });
+
+    if (steps.length === 0) {
+      steps.push({
+         type: 'reading',
+         title: 'விளையாட்டுகள் ஏதுமில்லை',
+         data: { isJson: true, blocks: [{ type: 'paragraph', data: { text: '<div class="text-center p-5 fw-bold text-muted">இந்த பிரிவில் விளையாட்டுகள் ஏதுமில்லை.</div>' } }] }
+      });
+    }
+
+    this.lessonSequence.set(steps);
+    this.currentStepIndex.set(0);
+    this.isLoadingLesson.set(false);
   }
 
   loadLessonSequence(chapterId: number) {

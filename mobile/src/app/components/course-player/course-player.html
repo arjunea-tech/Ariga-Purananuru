@@ -49,7 +49,7 @@
     }
 
     <!-- LESSON PLAYER OVERLAY -->
-    @if (currentView() === 'content') {
+    @if (currentView() === 'content' || currentView() === 'game-mode') {
     @if (theme() === 'kids') {
     <app-kids-lesson-player
       [levelThemeClass]="levelThemeClass()"
@@ -58,6 +58,7 @@
       [currentStepIndex]="currentStepIndex()"
       [lessonFinished]="lessonFinished()"
       [showGameOver]="showGameOver()"
+      [isGameMode]="currentView() === 'game-mode'"
       [hearts]="hearts()"
       [xp]="xp()"
       [coins]="coins()"
@@ -82,7 +83,7 @@
 
     <!-- Top HUD (Floating widgets for Dashboard) -->
     <header class="position-absolute top-0 start-0 w-100 h-100 pe-none" style="z-index: 1050;"
-      [class.d-none]="currentView() === 'levels' || currentView() === 'content' || isLoadingMap()">
+      [class.d-none]="currentView() === 'levels' || currentView() === 'content' || currentView() === 'game-mode' || isLoadingMap()">
       <!-- Left Navigation Actions (Floating Top Left) -->
       <div class="position-absolute pe-auto" style="top: calc(12px + max(25px, env(safe-area-inset-top))); left: max(24px, env(safe-area-inset-left));">
         <button

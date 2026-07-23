@@ -27,6 +27,7 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
   currentStepIndex = input<number>(0);
   lessonFinished = input<boolean>(false);
   showGameOver = input<boolean>(false);
+  isGameMode = input<boolean>(false);
   hearts = input<number>(5);
   xp = input<number>(0);
   coins = input<number>(0);
