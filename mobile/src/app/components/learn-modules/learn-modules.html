@@ -1,18 +1,36 @@
 <div class="learn-page bg-white">
   
   <header class="learn-header shadow-sm text-white">
-    <div class="d-flex align-items-center gap-2">
+    <div class="d-flex align-items-center gap-2 w-100">
       @if (viewState() === 'modules') {
         <button class="btn btn-link text-white p-0 border-0" (click)="goBackToCourses()">
           <i class="bi bi-arrow-left fs-4"></i>
         </button>
       } @else if (viewState() === 'category-details') {
-        <button class="btn btn-link text-white p-0 border-0" (click)="goBackToModules()">
-          <i class="bi bi-arrow-left fs-4"></i>
-        </button>
+        @if (selectedTabForModule()) {
+          <button class="btn btn-link text-white p-0 border-0" (click)="clearTab($event)">
+            <i class="bi bi-arrow-left fs-4"></i>
+          </button>
+        } @else {
+          <button class="btn btn-link text-white p-0 border-0" (click)="goBackToModules()">
+            <i class="bi bi-arrow-left fs-4"></i>
+          </button>
+        }
       }
       <div>
-        <h1 class="h4 fw-extrabold text-white mb-0">கற்றல் வழிமுறை</h1>
+        <h1 class="h4 fw-extrabold text-white mb-0">
+          @if (viewState() === 'category-details' && selectedModuleForDetails(); as mod) {
+            @if (selectedTabForModule() === 'lesson') {
+              {{ mod.titleTa || mod.id }} பாடங்கள்
+            } @else if (selectedTabForModule() === 'game') {
+              {{ mod.titleTa || mod.id }} விளையாட்டுகள்
+            } @else {
+              {{ mod.titleTa || mod.id }}
+            }
+          } @else {
+            கற்றல் வழிமுறை
+          }
+        </h1>
       </div>
     </div>
   </header>
@@ -44,104 +62,149 @@
       <div class="row g-3 mb-5">
       @for (mod of modules(); track mod.id) {
         <div class="col-6">
-          <div class="card border-0 rounded-4 p-3 text-center cursor-pointer hover-lift h-100 d-flex flex-column align-items-center justify-content-center transition-all"
+          <div class="card border-0 rounded-4 p-3 text-center cursor-pointer hover-lift h-100 d-flex flex-column align-items-center justify-content-center transition-all position-relative"
                [ngStyle]="{'background-color': getCategoryBg(mod.id)}"
                style="box-shadow: 0 4px 12px rgba(0,0,0,0.05); min-height: 160px;"
-               [class.border]="expandedCategoryId() === mod.id"
-               [style.border-color]="expandedCategoryId() === mod.id ? '#0EA5E9 !important' : 'transparent'"
-               [style.border-width]="expandedCategoryId() === mod.id ? '2px !important' : '0px'"
                (click)="openCategoryModule(mod)">
             
+            @if (mod.status === 'completed' || isModuleCompleted(mod.id)) {
+              <span class="position-absolute top-0 end-0 m-2.5 badge bg-success text-white rounded-pill px-2.5 py-1 small fw-bold shadow-xs">
+                <i class="bi bi-check-circle-fill me-1"></i>முடிந்தது
+              </span>
+            }
+
             <div class="mb-3 d-flex align-items-center justify-content-center" style="font-size: 3.5rem; line-height: 1; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
               {{ getCategoryIcon(mod.id) }}
             </div>
             <h3 class="fw-extrabold text-dark mb-0 mt-2" style="font-size: 1.05rem;">{{ mod.titleTa || mod.id }}</h3>
           </div>
         </div>
-
       }
       </div>
     } @else if (viewState() === 'category-details') {
       @if (selectedModuleForDetails(); as mod) {
-        <div class="col-12 mt-2 mb-2 animate-fade-in">
-          <div class="card border-0 rounded-4 p-3 shadow-sm" style="background-color: #F8FAFC;">
-            
-            @if (!selectedTabForModule()) {
-              <div class="row g-3 mt-1 mb-2">
-                 <div class="col-6">
-                    <div class="card border-0 rounded-4 p-3 text-center cursor-pointer hover-lift h-100" style="background: #E0F2FE; box-shadow: 0 4px 10px rgba(0,0,0,0.05);" (click)="selectTab('lesson')">
-                       <div class="fs-1 mb-2">📚</div>
-                       <h5 class="fw-bold text-dark mb-0" style="font-size: 1.1rem;">பாடம்</h5>
-                    </div>
-                 </div>
-                 <div class="col-6">
-                    <div class="card border-0 rounded-4 p-3 text-center cursor-pointer hover-lift h-100" style="background: #FEF3C7; box-shadow: 0 4px 10px rgba(0,0,0,0.05);" (click)="selectTab('game')">
-                       <div class="fs-1 mb-2">🎮</div>
-                       <h5 class="fw-bold text-dark mb-0" style="font-size: 1.1rem;">விளையாட்டு</h5>
-                    </div>
-                 </div>
-              </div>
-            } @else {
-               <div class="d-flex align-items-center mb-4">
-                 <button class="btn btn-sm btn-white shadow-sm me-3 rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; background: white;" (click)="clearTab($event)">
-                   <i class="bi bi-arrow-left fw-bold text-dark"></i>
-                 </button>
-                 <h4 class="fw-bold text-dark mb-0" style="font-size: 1.1rem;">
-                   {{ selectedTabForModule() === 'lesson' ? (mod.titleTa || mod.id) + ' பாடங்கள்' : (mod.titleTa || mod.id) + ' விளையாட்டுகள்' }}
-                 </h4>
-               </div>
+        <div class="col-12 mt-2 mb-4 animate-fade-in">
+          
+          <!-- Module Hero Banner -->
+          <div class="card border-0 rounded-4 p-4 text-center mb-4 shadow-sm position-relative overflow-hidden"
+               [ngStyle]="{'background-color': getCategoryBg(mod.id)}">
+            @if (mod.status === 'completed' || isModuleCompleted(mod.id)) {
+              <span class="position-absolute top-0 end-0 m-3 badge bg-success text-white rounded-pill px-3 py-1.5 small fw-bold shadow-sm">
+                <i class="bi bi-check-circle-fill me-1"></i>முழுமையாக முடிந்தது
+              </span>
+            }
+            <div class="mb-2 d-flex align-items-center justify-content-center" style="font-size: 3.5rem; line-height: 1; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));">
+              {{ getCategoryIcon(mod.id) }}
+            </div>
+            <h2 class="fw-extrabold text-dark mb-1" style="font-size: 1.4rem;">{{ mod.titleTa || mod.id }}</h2>
+            <p class="text-secondary small mb-0">{{ mod.description || 'பாடங்கள் மற்றும் விளையாட்டுகள்' }}</p>
+          </div>
 
-               @if (selectedTabForModule() === 'lesson') {
-                 <div class="d-flex flex-column gap-3">
-                   @for (chap of getCategoryChapters(mod.id); track chap.id) {
-                     <div class="card border-0 shadow-sm p-3 rounded-4 bg-white hover-lift cursor-pointer" (click)="startCategoryLesson(chap)">
-                       <div class="d-flex align-items-center justify-content-between">
-                         <div class="d-flex align-items-center gap-3">
-                           <div class="rounded-circle d-flex align-items-center justify-content-center shadow-xs" style="width: 42px; height: 42px; background-color: #38BDF8; color: white;">
-                             <i class="bi bi-play-fill fs-3 ms-1"></i>
+          @if (!selectedTabForModule()) {
+            <!-- Paadam & Vilayattu Choice Cards -->
+            <div class="row g-3 mb-4">
+               <div class="col-6">
+                  <div class="card border-0 rounded-4 p-4 text-center cursor-pointer hover-lift h-100 transition-all" 
+                       style="background: #E0F2FE; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.12);" 
+                       (click)="selectTab('lesson')">
+                     <div class="fs-1 mb-2">📚</div>
+                     <h4 class="fw-extrabold text-dark mb-1" style="font-size: 1.15rem;">பாடம்</h4>
+                     <span class="text-muted small">கற்றல் பாடங்கள்</span>
+                  </div>
+               </div>
+               <div class="col-6">
+                  <div class="card border-0 rounded-4 p-4 text-center cursor-pointer hover-lift h-100 transition-all" 
+                       style="background: #FEF3C7; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.12);" 
+                       (click)="selectTab('game')">
+                     <div class="fs-1 mb-2">🎮</div>
+                     <h4 class="fw-extrabold text-dark mb-1" style="font-size: 1.15rem;">விளையாட்டு</h4>
+                     <span class="text-muted small">பயிற்சி விளையாட்டுகள்</span>
+                  </div>
+               </div>
+            </div>
+          } @else {
+             <!-- Active Tab Content -->
+             @if (selectedTabForModule() === 'lesson') {
+               <div class="d-flex flex-column gap-3 mb-4">
+                 @for (chap of getCategoryChapters(mod.id); track chap.id; let idx = $index) {
+                   <div class="card border-0 rounded-4 p-3.5 hover-lift cursor-pointer transition-all position-relative overflow-hidden"
+                        style="box-shadow: 0 8px 22px rgba(0,0,0,0.07); border-left: 6px solid #0EA5E9 !important;"
+                        [ngStyle]="{'background': isChapterCompleted(chap.id) ? '#ECFDF5' : '#FFFFFF'}"
+                        (click)="startCategoryLesson(chap)">
+                     <div class="d-flex align-items-center justify-content-between">
+                       <div class="d-flex align-items-center gap-3">
+                         @if (isChapterCompleted(chap.id)) {
+                           <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-white shadow-sm" 
+                                style="width: 50px; height: 50px; background: linear-gradient(135deg, #10B981, #059669);">
+                             <i class="bi bi-check-lg fs-2"></i>
                            </div>
-                           <div>
-                             <h5 class="fw-bold text-dark mb-1" style="font-size: 1rem;">{{ chap.name }}</h5>
-                             <span class="text-muted small" style="font-size: 0.85rem;">{{ chap.description || chap.desc || '' }}</span>
+                         } @else {
+                           <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-white shadow-sm" 
+                                style="width: 50px; height: 50px; background: linear-gradient(135deg, #38BDF8, #0284C7);">
+                             <i class="bi bi-play-fill fs-2 ms-0.5"></i>
                            </div>
+                         }
+                         <div>
+                           <div class="d-flex align-items-center gap-2 mb-1">
+                             <h5 class="fw-extrabold text-dark mb-0" style="font-size: 1.08rem; line-height: 1.3;">{{ chap.name }}</h5>
+                             @if (isChapterCompleted(chap.id)) {
+                               <span class="badge bg-success text-white rounded-pill px-2.5 py-1 small fw-bold shadow-xs">
+                                 <i class="bi bi-check-circle-fill me-1"></i>முடிந்தது
+                               </span>
+                             }
+                           </div>
+                           <span class="text-secondary small fw-medium" style="font-size: 0.85rem;">{{ chap.description || chap.desc || 'பாடத்தைத் தொடங்க கிளிக் செய்க' }}</span>
                          </div>
-                         <i class="bi bi-chevron-right text-primary opacity-50 fs-5"></i>
+                       </div>
+                       <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 ms-2"
+                            [style.background]="isChapterCompleted(chap.id) ? '#D1FAE5' : '#E0F2FE'"
+                            [style.color]="isChapterCompleted(chap.id) ? '#059669' : '#0284C7'"
+                            style="width: 38px; height: 38px;">
+                         <i class="bi bi-chevron-right fs-6 fw-bold"></i>
                        </div>
                      </div>
-                   }
-                 </div>
-               } @else if (selectedTabForModule() === 'game') {
-                 <div class="d-flex flex-column gap-3">
-                   @for (group of getGroupedCategoryActivities(mod.id); track group.type) {
-                       <div class="card border-0 shadow-sm p-4 rounded-4 bg-white hover-lift cursor-pointer game-group-card" 
-                            [style.border-left]="'6px solid ' + group.color" 
-                            (click)="playGameGroup(mod.id, group.type)">
-                         <div class="d-flex align-items-center justify-content-between">
-                           <div class="d-flex align-items-center gap-4">
-                             <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm" [style.background-color]="group.color" style="width: 56px; height: 56px; color: white;">
-                               <i class="bi {{group.icon}} fs-3"></i>
-                             </div>
-                             <div>
-                               <h5 class="fw-bold text-dark mb-1" style="font-size: 1.2rem;">{{ group.typeLabel }}</h5>
-                               <span class="text-muted small fw-medium">{{ group.activities.length }} பயிற்சிகள்</span>
-                             </div>
+                   </div>
+                 }
+               </div>
+             } @else if (selectedTabForModule() === 'game') {
+               <div class="d-flex flex-column gap-3 mb-4">
+                 @for (group of getGroupedCategoryActivities(mod.id); track group.type) {
+                     <div class="card border-0 rounded-4 p-4 hover-lift cursor-pointer transition-all position-relative overflow-hidden" 
+                          style="box-shadow: 0 8px 22px rgba(0,0,0,0.07); background: #FFFFFF;"
+                          [style.border-left]="'6px solid ' + group.color + ' !important'"
+                          (click)="playGameGroup(mod.id, group.type)">
+                       <div class="d-flex align-items-center justify-content-between">
+                         <div class="d-flex align-items-center gap-4">
+                           <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0 text-white" 
+                                [style.background]="group.color" 
+                                style="width: 54px; height: 54px;">
+                             <i class="bi {{group.icon}} fs-3"></i>
                            </div>
-                           <div class="rounded-circle d-flex align-items-center justify-content-center" [style.background-color]="group.color + '1A'" [style.color]="group.color" style="width: 48px; height: 48px;">
-                             <i class="bi bi-play-fill fs-2" style="margin-left: 3px;"></i>
+                           <div>
+                             <h5 class="fw-extrabold text-dark mb-1" style="font-size: 1.15rem;">{{ group.typeLabel }}</h5>
+                             <span class="badge rounded-pill px-2.5 py-1 small fw-semibold" [style.background-color]="group.color + '20'" [style.color]="group.color">
+                               {{ group.activities.length }} பயிற்சிகள்
+                             </span>
                            </div>
                          </div>
+                         <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0" 
+                              [style.background-color]="group.color + '1F'" 
+                              [style.color]="group.color" 
+                              style="width: 42px; height: 42px;">
+                           <i class="bi bi-play-fill fs-2" style="margin-left: 2px;"></i>
+                         </div>
                        </div>
-                   }
-                   @if (getGroupedCategoryActivities(mod.id).length === 0) {
-                      <div class="text-center py-4">
-                         <i class="bi bi-emoji-frown text-muted fs-1 mb-2 d-block"></i>
-                         <p class="text-muted mb-0">விளையாட்டுகள் ஏதுமில்லை</p>
-                      </div>
-                   }
-                 </div>
-               }
-            }
-          </div>
+                     </div>
+                 }
+                 @if (getGroupedCategoryActivities(mod.id).length === 0) {
+                    <div class="card border-0 rounded-4 p-4 text-center bg-white shadow-sm">
+                       <i class="bi bi-emoji-frown text-muted fs-1 mb-2 d-block"></i>
+                       <p class="text-muted mb-0">விளையாட்டுகள் ஏதுமில்லை</p>
+                    </div>
+                 }
+               </div>
+             }
+          }
         </div>
       }
     }

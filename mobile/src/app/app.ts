@@ -58,10 +58,11 @@ export class App implements OnInit {
     });
   }
 
+  showExitModal = signal<boolean>(false);
+
   ngOnInit() {
     // Only configure native plugins on physical/emulated mobile platforms
     if (Capacitor.isNativePlatform()) {
-      // Disable StatusBar overlaying webview on mobile & enforce light theme (dark status bar icons)
       try {
         StatusBar.setOverlaysWebView({ overlay: false }).catch(() => {});
         StatusBar.setStyle({ style: Style.Light }).catch(() => {});
@@ -70,16 +71,9 @@ export class App implements OnInit {
         console.warn('StatusBar plugin error:', e);
       }
 
-      // Handle Capacitor system back button / back swipe
       try {
-        CapApp.addListener('backButton', ({ canGoBack }) => {
-          const currentUrl = this.router.url;
-          // If we are on login, dashboard, or there is no history to navigate back to, exit app
-          if (currentUrl === '/login' || currentUrl === '/learn/dashboard' || !canGoBack) {
-            CapApp.exitApp();
-          } else {
-            this.location.back();
-          }
+        CapApp.addListener('backButton', () => {
+          this.handleBackAction();
         });
       } catch (e) {
         console.warn('CapApp backButton listener not active:', e);
@@ -172,5 +166,49 @@ export class App implements OnInit {
     this.translate.use(lang);
     localStorage.setItem('userLang', lang);
     this.currentLang.set(lang);
+  }
+
+  handleBackAction() {
+    const rawUrl = this.router.url;
+    const path = rawUrl.split('?')[0];
+
+    // If modal is open, close modal
+    if (this.showExitModal()) {
+      this.showExitModal.set(false);
+      return;
+    }
+
+    // 1. If on Home tab or Login -> Open Exit Modal
+    if (path === '/tabs/home' || path === '/login' || path === '/') {
+      this.showExitModal.set(true);
+      return;
+    }
+
+    // 2. If at root of any non-home tab (Learn, Games/Practice, Progress, Profile) -> Navigate to Home Tab
+    const rootTabs = ['/tabs/learn', '/tabs/games', '/tabs/progress', '/tabs/profile'];
+    if (rootTabs.includes(path)) {
+      if (path === '/tabs/learn' && (rawUrl.includes('view=category-details') || rawUrl.includes('view=modules'))) {
+        this.location.back();
+      } else {
+        this.router.navigateByUrl('/tabs/home', { replaceUrl: true });
+      }
+      return;
+    }
+
+    // 3. Sub-pages (e.g. inside course player) -> Go back in history
+    this.location.back();
+  }
+
+  confirmExitApp() {
+    this.showExitModal.set(false);
+    if (Capacitor.isNativePlatform()) {
+      CapApp.exitApp();
+    } else {
+      window.close();
+    }
+  }
+
+  cancelExitApp() {
+    this.showExitModal.set(false);
   }
 }

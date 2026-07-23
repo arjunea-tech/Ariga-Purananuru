@@ -8,8 +8,9 @@
   <nav class="bottom-nav-bar">
     @for (tab of tabs; track tab.id) {
       <a [routerLink]="tab.route"
+         [replaceUrl]="true"
          routerLinkActive="active"
-         (click)="selectTab(tab.id)"
+         (click)="selectTab(tab.id, $event)"
          class="nav-tab-item"
          [class.is-active]="activeTab() === tab.id"
          [style.--tab-theme-color]="tab.color">

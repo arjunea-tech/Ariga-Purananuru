@@ -169,6 +169,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -210,6 +211,7 @@ body {
 .alert .btn-close:hover {
   opacity: 1 !important;
 }
+
 /* Hide scrollbar for Chrome, Safari and Opera */
 .hide-scrollbar::-webkit-scrollbar {
   display: none;
@@ -217,22 +219,30 @@ body {
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .hide-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 /* Fix scrolling for standard Angular components inside Ionic Router Outlet */
-ion-router-outlet > * {
-  overflow-y: auto !important; 
-  width: 100% !important; 
+ion-router-outlet>* {
+  overflow-y: auto !important;
+  width: 100% !important;
   overflow-x: hidden !important;
   height: 100% !important;
   display: block !important;
   -webkit-overflow-scrolling: touch;
 }
 
-::-webkit-scrollbar { display: none !important; }
-* { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+::-webkit-scrollbar {
+  display: none !important;
+}
+
+* {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
 
 /* ── GLOBAL MASCOT LOADING SCREEN ── */
 .mascot-loading-wrapper {
@@ -245,12 +255,16 @@ ion-router-outlet > * {
 }
 
 @keyframes mascotBounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0) scaleY(1);
   }
+
   50% {
     transform: translateY(-20px) scaleY(1.05);
   }
+
   55% {
     transform: translateY(-20px) scaleY(1.05);
   }
@@ -261,9 +275,12 @@ ion-router-outlet > * {
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
   }
+
   50% {
     opacity: .5;
   }
@@ -273,15 +290,19 @@ ion-router-outlet > * {
 .modal {
   z-index: 1300 !important;
 }
+
 .modal-backdrop {
   z-index: 1290 !important;
 }
+
 .global-loader {
   z-index: 1400 !important;
 }
 
 /* ── UNIVERSAL MOBILE RESPONSIVENESS & ZERO-LAG GPU PERFORMANCE ── */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
 }
@@ -298,20 +319,40 @@ ion-router-outlet > * {
   backface-visibility: hidden;
 }
 
-/* Responsive adjustment for extra small / budget mobile screens (e.g. 320px - 360px) */
-@media (max-width: 360px) {
-  .page-title {
-    font-size: 1.25rem !important;
-  }
-  .greeting-text {
-    font-size: 1.1rem !important;
-  }
-  .nav-tab-label {
-    font-size: 0.65rem !important;
-  }
-  .px-3 {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
-  }
+/* ── UNIFORM FIXED TOP HEADER FOR ALL MOBILE SCREENS ── */
+.home-header,
+.learn-header,
+.page-header.orange-theme,
+.page-header.blue-theme,
+.page-header.pink-theme {
+  position: sticky !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 1000 !important;
+  width: 100% !important;
+  height: calc(env(safe-area-inset-top, 28px) + 78px) !important;
+  min-height: calc(env(safe-area-inset-top, 28px) + 78px) !important;
+  max-height: calc(env(safe-area-inset-top, 28px) + 78px) !important;
+  padding-top: calc(env(safe-area-inset-top, 28px) + 28px) !important;
+  padding-bottom: 14px !important;
+  padding-left: 18px !important;
+  padding-right: 18px !important;
+  border-radius: 0 0 22px 22px !important;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.12) !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
+/* Ensure inner titles across all headers have exact uniform font-size, height, line-height */
+.home-header .greeting-title,
+.learn-header h1,
+.page-header .page-title {
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
