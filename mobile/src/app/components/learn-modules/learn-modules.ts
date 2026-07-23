@@ -108,17 +108,22 @@ export class LearnModulesComponent implements OnInit {
   }
 
   getCategoryBg(id: string): string {
-    // Generate a background based on id string (so it's consistent for dynamic IDs)
     const bgs = ['#FEF3C7', '#E0F2FE', '#DCFCE7', '#FCE7F3', '#F3E8FF', '#FFEDD5', '#E0E7FF'];
     const hash = id.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0);
     return bgs[Math.abs(hash) % bgs.length];
   }
 
-  getCategoryIcon(id: string): string {
-    // Use some generic education emojis for dynamic content
-    const icons = ['📚', '🌟', '🚀', '🧠', '💡', '🏆', '🎯', '🧩'];
+  // Returns first Tamil/English letter of the module name or id as icon
+  getCategoryIcon(id: string, title?: string): string {
+    const src = title || id || '';
+    return src.trim().charAt(0).toUpperCase() || '•';
+  }
+
+  // Returns text color matching the background
+  getLetterIconColor(id: string): string {
+    const colors = ['#B45309', '#0369A1', '#15803D', '#BE185D', '#6D28D9', '#C2410C', '#4338CA'];
     const hash = id.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0);
-    return icons[Math.abs(hash) % icons.length];
+    return colors[Math.abs(hash) % colors.length];
   }
 
   openCourse(course: any) {

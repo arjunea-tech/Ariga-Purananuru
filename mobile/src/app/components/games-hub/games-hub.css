@@ -4,13 +4,10 @@
   padding-bottom: 80px;
 }
 
-/* Header */
 .page-header.orange-theme {
-  background: linear-gradient(135deg, #34D399 0%, #10B981 100%);
-  color: #FFFFFF;
-  padding: calc(env(safe-area-inset-top, 20px) + 20px) 18px 22px 18px;
-  border-radius: 0 0 24px 24px;
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.2);
+  background: #FFEDD5 !important; /* Flat soft peach - no gradient */
+  color: #EA580C !important;
+  box-shadow: none;
 }
 
 .header-content {
