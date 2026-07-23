@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { catchError, of } from 'rxjs';
 import { AuthService } from '../../services/auth';
 import { NotificationService } from '../../services/notification.service';
+import { StudyTimeService } from '../../services/study-time';
 
 interface User {
   id: number;
@@ -64,29 +65,29 @@ export class StudentProgressComponent implements OnInit {
   private http = inject(HttpClient);
   protected authService = inject(AuthService);
   private notificationService = inject(NotificationService);
+  protected studyTimeService = inject(StudyTimeService);
+
+  loadingMyProgress = signal<boolean>(true);
 
   // Dynamic Progress Signals
-  overallProgressPercentage = signal<number>(65);
-  studiedTodayMins = signal<number>(35);
-  questionsAnswered = signal<number>(128);
-  accuracyPercentage = signal<number>(92);
-  streakDays = signal<number>(7);
-  totalXp = signal<number>(1850);
+  overallProgressPercentage = signal<number>(0);
+  studiedTodayMins = signal<number>(0);
+  questionsAnswered = signal<number>(0);
+  correctAnswers = signal<number>(0);
+  wrongAnswers = signal<number>(0);
+  accuracyPercentage = signal<number>(0);
+  streakDays = signal<number>(0);
+  totalXp = signal<number>(0);
 
   moduleProgressList = signal<ModuleProgressItem[]>([
-    { id: 'ezhuthu', nameTa: 'எழுத்து', nameEn: 'Ezhuthu', percentage: 100, isUnlocked: true, color: '#22c55e' },
-    { id: 'asai', nameTa: 'அசை', nameEn: 'Asai', percentage: 75, isUnlocked: true, color: '#00B894' },
-    { id: 'seer', nameTa: 'சீர்', nameEn: 'Seer', percentage: 40, isUnlocked: true, color: '#3b82f6' },
+    { id: 'ezhuthu', nameTa: 'எழுத்து', nameEn: 'Ezhuthu', percentage: 0, isUnlocked: true, color: '#22c55e' },
+    { id: 'asai', nameTa: 'அசை', nameEn: 'Asai', percentage: 0, isUnlocked: false, color: '#00B894' },
+    { id: 'seer', nameTa: 'சீர்', nameEn: 'Seer', percentage: 0, isUnlocked: false, color: '#3b82f6' },
     { id: 'thalai', nameTa: 'தளை', nameEn: 'Thalai', percentage: 0, isUnlocked: false, color: '#64748b' },
     { id: 'alagidhal', nameTa: 'அளகிடுதல்', nameEn: 'Alagidhal', percentage: 0, isUnlocked: false, color: '#64748b' }
   ]);
 
-  earnedBadgesList = signal<BadgeItem[]>([
-    { id: '1', title: 'Beginner', icon: 'bi-shield-check', bgClass: 'bg-primary-subtle', textClass: 'text-primary' },
-    { id: '2', title: 'Asai Master', icon: 'bi-award-fill', bgClass: 'bg-purple-subtle', textClass: 'text-purple' },
-    { id: '3', title: 'Fast Learner', icon: 'bi-lightning-fill', bgClass: 'bg-warning-subtle', textClass: 'text-warning' },
-    { id: '4', title: 'Consistent', icon: 'bi-fire', bgClass: 'bg-success-subtle', textClass: 'text-success' }
-  ]);
+  earnedBadgesList = signal<BadgeItem[]>([]);
 
   students = signal<User[]>([]);
   searchQuery = signal<string>('');
@@ -138,15 +139,21 @@ export class StudentProgressComponent implements OnInit {
 
   loadProgressData(): void {
     const token = this.authService.getToken();
-    if (!token) return;
+    if (!token) {
+      this.loadingMyProgress.set(false);
+      return;
+    }
 
+    this.loadingMyProgress.set(true);
     const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
     this.http.get<any>(`${environment.apiUrl}/student/dashboard`, { headers }).pipe(
       catchError((e) => {
         console.error('Failed to load dynamic progress:', e);
+        this.loadingMyProgress.set(false);
         return of(null);
       })
     ).subscribe((data) => {
+      this.loadingMyProgress.set(false);
       if (!data) return;
 
       if (typeof data.completion_percentage === 'number') {
@@ -161,11 +168,25 @@ export class StudentProgressComponent implements OnInit {
         this.streakDays.set(data.streak_days);
       }
       
-      if (typeof data.passed_attempts === 'number') {
-        this.questionsAnswered.set(data.passed_attempts * 15 + 40);
+      if (typeof data.questions_answered === 'number') {
+        this.questionsAnswered.set(data.questions_answered);
+      } else if (typeof data.total_attempts === 'number') {
+        this.questionsAnswered.set(data.total_attempts > 0 ? data.total_attempts * 5 : 0);
+      } else if (typeof data.passed_attempts === 'number') {
+        this.questionsAnswered.set(data.passed_attempts > 0 ? data.passed_attempts * 5 : 0);
       }
-      
-      if (typeof data.average_score === 'number') {
+
+      if (typeof data.correct_answers === 'number') {
+        this.correctAnswers.set(data.correct_answers);
+      }
+
+      if (typeof data.wrong_answers === 'number') {
+        this.wrongAnswers.set(data.wrong_answers);
+      }
+
+      if (typeof data.accuracy_percentage === 'number') {
+        this.accuracyPercentage.set(Math.round(data.accuracy_percentage));
+      } else if (typeof data.average_score === 'number') {
         this.accuracyPercentage.set(Math.round(data.average_score));
       }
 
@@ -212,11 +233,13 @@ export class StudentProgressComponent implements OnInit {
         this.moduleProgressList.set(updatedModules);
       }
 
-      // Studied today mins dynamically using weekly activity array
+      // Studied today mins dynamically using active app StudyTimeService + weekly activity log
+      const trackedMins = this.studyTimeService.getTodayStudyMinutes();
       const todayDayOfWeek = (new Date().getDay() || 7) - 1; // 0 for Mon, 6 for Sun
       const activitiesToday = data.weekly_activity && data.weekly_activity[todayDayOfWeek] ? data.weekly_activity[todayDayOfWeek] : 0;
-      const dynamicMins = Math.max(15, (activitiesToday * 12) + 15);
-      this.studiedTodayMins.set(dynamicMins);
+      const activityMins = activitiesToday * 5;
+      const totalMinsToday = Math.max(trackedMins, activityMins);
+      this.studiedTodayMins.set(totalMinsToday);
 
       // Map dynamic badges
       if (data.badges && Array.isArray(data.badges)) {
@@ -238,9 +261,7 @@ export class StudentProgressComponent implements OnInit {
             textClass: `text-${c}`
           };
         });
-        if (earnedBadges.length > 0) {
-          this.earnedBadgesList.set(earnedBadges);
-        }
+        this.earnedBadgesList.set(earnedBadges);
       }
     });
   }

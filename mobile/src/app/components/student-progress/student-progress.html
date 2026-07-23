@@ -217,93 +217,112 @@
     </header>
 
     <div class="container-fluid px-3 py-3">
-      <!-- Overall Progress Card -->
-      <div class="overall-card card border-0 shadow-sm p-3 mb-3">
-        <div class="d-flex align-items-center justify-content-between mb-2">
-          <span class="fw-bold text-dark fs-6">Overall Progress</span>
-          <span class="fw-extrabold text-primary fs-5">{{ overallProgressPercentage() }}%</span>
-        </div>
-        <div class="progress" style="height: 10px;">
-          <div class="progress-bar bg-primary rounded-pill transition-all" [style.width.%]="overallProgressPercentage()"></div>
-        </div>
-      </div>
-
-      <!-- Modules Progress Breakdown -->
-      <div class="card border-0 shadow-sm p-3 mb-3">
-        <h2 class="h6 fw-bold text-dark mb-3">Modules Progress</h2>
-        
-        <div class="d-flex flex-column gap-3">
-          @for (mod of moduleProgressList(); track mod.id) {
-            <div [class.opacity-50]="!mod.isUnlocked">
-              <div class="d-flex align-items-center justify-content-between mb-1">
-                <span class="small fw-bold text-dark d-flex align-items-center gap-2">
-                  <span class="module-mini-dot" [style.background]="mod.color"></span>
-                  {{ mod.nameTa }} @if (mod.nameEn) { ({{ mod.nameEn }}) }
-                </span>
-                <span class="small fw-bold" [style.color]="mod.isUnlocked ? mod.color : '#64748b'">
-                  {{ mod.isUnlocked ? (mod.percentage + '%') : 'Locked' }}
-                </span>
-              </div>
-              <div class="progress" style="height: 6px;">
-                <div class="progress-bar rounded-pill transition-all"
-                     [style.width.%]="mod.percentage"
-                     [style.background]="mod.isUnlocked ? mod.color : '#cbd5e1'"></div>
-              </div>
-            </div>
-          }
-        </div>
-      </div>
-
-      <!-- Metrics Cards Grid -->
-      <div class="metrics-grid mb-3">
-        <div class="metric-card card border-0 shadow-sm p-3">
-          <span class="metric-label text-muted small">Studied Today</span>
-          <span class="metric-value fw-extrabold text-primary">{{ studiedTodayMins() }} <small class="fs-6">mins</small></span>
-        </div>
-
-        <div class="metric-card card border-0 shadow-sm p-3">
-          <span class="metric-label text-muted small">Questions Answered</span>
-          <span class="metric-value fw-extrabold text-dark">{{ questionsAnswered() }}</span>
-        </div>
-
-        <div class="metric-card card border-0 shadow-sm p-3">
-          <span class="metric-label text-muted small">Accuracy</span>
-          <span class="metric-value fw-extrabold text-success">{{ accuracyPercentage() }}%</span>
-        </div>
-      </div>
-
-      <!-- Streak & XP Banner Card -->
-      <div class="streak-xp-card card border-0 shadow-sm p-3 mb-3">
-        <div class="row g-2 align-items-center text-center">
-          <div class="col-6 border-end">
-            <span class="text-muted small d-block">Current Streak</span>
-            <span class="fw-extrabold fs-5 text-danger">🔥 {{ streakDays() }} Days</span>
+      @if (loadingMyProgress()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary mb-3" role="status" style="width: 2.5rem; height: 2.5rem;">
+            <span class="visually-hidden">Loading progress...</span>
           </div>
-          <div class="col-6">
-            <span class="text-muted small d-block">Total XP</span>
-            <span class="fw-extrabold fs-5 text-warning">⭐ {{ totalXp() | number }}</span>
+          <p class="text-muted fw-semibold small mb-0">Syncing live module progress...</p>
+        </div>
+      } @else {
+        <!-- Overall Progress Card -->
+        <div class="overall-card card border-0 shadow-sm p-3 mb-3">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="fw-bold text-dark fs-6">Overall Progress</span>
+            <span class="fw-extrabold text-primary fs-5">{{ overallProgressPercentage() }}%</span>
+          </div>
+          <div class="progress" style="height: 10px;">
+            <div class="progress-bar bg-primary rounded-pill transition-all" [style.width.%]="overallProgressPercentage()"></div>
           </div>
         </div>
-      </div>
 
-      <!-- Badges Earned Section -->
-      <div class="card border-0 shadow-sm p-3">
-        <div class="d-flex align-items-center justify-content-between mb-3">
-          <h2 class="h6 fw-bold text-dark mb-0">Badges Earned</h2>
-          <span class="badge bg-primary rounded-pill">{{ earnedBadgesList().length }} Badges</span>
-        </div>
-
-        <div class="badges-grid">
-          @for (badge of earnedBadgesList(); track badge.id) {
-            <div class="badge-item">
-              <div class="badge-icon-box" [ngClass]="[badge.bgClass, badge.textClass]">
-                <i class="bi fs-4" [ngClass]="badge.icon"></i>
+        <!-- Modules Progress Breakdown -->
+        <div class="card border-0 shadow-sm p-3 mb-3">
+          <h2 class="h6 fw-bold text-dark mb-3">Modules Progress</h2>
+          
+          <div class="d-flex flex-column gap-3">
+            @for (mod of moduleProgressList(); track mod.id) {
+              <div [class.opacity-50]="!mod.isUnlocked">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                  <span class="small fw-bold text-dark d-flex align-items-center gap-2">
+                    <span class="module-mini-dot" [style.background]="mod.color"></span>
+                    {{ mod.nameTa }} @if (mod.nameEn) { ({{ mod.nameEn }}) }
+                  </span>
+                  <span class="small fw-bold" [style.color]="mod.isUnlocked ? mod.color : '#64748b'">
+                    {{ mod.isUnlocked ? (mod.percentage + '%') : 'Locked' }}
+                  </span>
+                </div>
+                <div class="progress" style="height: 6px;">
+                  <div class="progress-bar rounded-pill transition-all"
+                       [style.width.%]="mod.percentage"
+                       [style.background]="mod.isUnlocked ? mod.color : '#cbd5e1'"></div>
+                </div>
               </div>
-              <span class="badge-title">{{ badge.title }}</span>
-            </div>
-          }
+            }
+          </div>
         </div>
-      </div>
+
+        <!-- Metrics Cards Grid -->
+        <div class="metrics-grid mb-3">
+          <div class="metric-card card border-0 shadow-sm p-3">
+            <span class="metric-label text-muted small">Studied Today</span>
+            <span class="metric-value fw-extrabold text-primary">{{ studiedTodayMins() }} <small class="fs-6">mins</small></span>
+          </div>
+
+          <div class="metric-card card border-0 shadow-sm p-3">
+            <span class="metric-label text-muted small">Questions Answered</span>
+            <span class="metric-value fw-extrabold text-dark">{{ questionsAnswered() }}</span>
+            <span class="small text-muted mt-1" style="font-size: 0.72rem;">
+              <span class="text-success fw-bold">{{ correctAnswers() }} ✔️</span> · <span class="text-danger fw-bold">{{ wrongAnswers() }} ❌</span>
+            </span>
+          </div>
+
+          <div class="metric-card card border-0 shadow-sm p-3">
+            <span class="metric-label text-muted small">Accuracy</span>
+            <span class="metric-value fw-extrabold" [ngClass]="accuracyPercentage() >= 80 ? 'text-success' : accuracyPercentage() >= 50 ? 'text-warning' : 'text-danger'">
+              {{ accuracyPercentage() }}%
+            </span>
+            <span class="small text-muted mt-1" style="font-size: 0.72rem;">
+              {{ correctAnswers() }}/{{ questionsAnswered() }} Correct
+            </span>
+          </div>
+        </div>
+
+        <!-- Streak & XP Banner Card -->
+        <div class="streak-xp-card card border-0 shadow-sm p-3 mb-3">
+          <div class="row g-2 align-items-center text-center">
+            <div class="col-6 border-end">
+              <span class="text-muted small d-block">Current Streak</span>
+              <span class="fw-extrabold fs-5 text-danger">🔥 {{ streakDays() }} Days</span>
+            </div>
+            <div class="col-6">
+              <span class="text-muted small d-block">Total XP</span>
+              <span class="fw-extrabold fs-5 text-warning">⭐ {{ totalXp() | number }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Badges Earned Section -->
+        <div class="card border-0 shadow-sm p-3">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <h2 class="h6 fw-bold text-dark mb-0">Badges Earned</h2>
+            <span class="badge bg-primary rounded-pill">{{ earnedBadgesList().length }} Badges</span>
+          </div>
+
+          <div class="badges-grid">
+            @for (badge of earnedBadgesList(); track badge.id) {
+              <div class="badge-item">
+                <div class="badge-icon-box" [ngClass]="[badge.bgClass, badge.textClass]">
+                  <i class="bi fs-4" [ngClass]="badge.icon"></i>
+                </div>
+                <span class="badge-title">{{ badge.title }}</span>
+              </div>
+            } @empty {
+              <div class="text-muted small py-2">No badges earned yet. Complete chapters to unlock badges!</div>
+            }
+          </div>
+        </div>
+      }
     </div>
   </div>
 }

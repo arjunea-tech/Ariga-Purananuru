@@ -62,31 +62,49 @@ class DashboardController extends Controller
             ? round(($completedChapters / $totalChapters) * 100, 1) 
             : 0;
 
-        // 2. Assessment stats
-        $totalAttempts = DB::table('user_assessment_attempts')
+        // 2. Assessment & Practice stats (combining assessment attempts and course progress activities)
+        $assessmentAttempts = DB::table('user_assessment_attempts')
             ->where('user_id', $userId)
             ->count();
 
-        $passedAttempts = DB::table('user_assessment_attempts')
+        $activityCompletions = DB::table('user_course_progress')
+            ->where('user_id', $userId)
+            ->whereIn('status', ['activity_completed', 'completed'])
+            ->count();
+
+        $totalAttempts = $assessmentAttempts + $activityCompletions;
+
+        $passedAssessmentAttempts = DB::table('user_assessment_attempts')
             ->where('user_id', $userId)
             ->where('passed', true)
             ->count();
 
-        $averageScore = DB::table('user_assessment_attempts')
+        $passedAttempts = $passedAssessmentAttempts + $activityCompletions;
+
+        $avgAssessmentScore = DB::table('user_assessment_attempts')
             ->where('user_id', $userId)
             ->avg('score');
 
-        $averageScore = $averageScore ? round($averageScore, 1) : 0;
+        $avgProgressScore = DB::table('user_course_progress')
+            ->where('user_id', $userId)
+            ->whereNotNull('score')
+            ->where('score', '>', 0)
+            ->avg('score');
+
+        if ($avgAssessmentScore && $avgProgressScore) {
+            $averageScore = round(($avgAssessmentScore + $avgProgressScore) / 2, 1);
+        } else if ($avgAssessmentScore) {
+            $averageScore = round($avgAssessmentScore, 1);
+        } else if ($avgProgressScore) {
+            $averageScore = round($avgProgressScore, 1);
+        } else {
+            $averageScore = $completedChapters > 0 ? min(100, round(($completedChapters / max(1, $totalChapters)) * 100, 1)) : 0;
+        }
 
         // 3. Calculate streak dynamically
         $streak = $this->calculateStreak($userId);
 
         // 4. Calculate XP Points dynamically
-        $activityCompletions = DB::table('user_course_progress')
-            ->where('user_id', $userId)
-            ->where('status', 'activity_completed')
-            ->count();
-        
         $xpPoints = ($completedChapters * 100) + ($passedAttempts * 200) + ($totalAttempts * 50) + ($streak * 25) + ($activityCompletions * 75);
 
         // 5. Course-by-course progressions
@@ -352,13 +370,21 @@ class DashboardController extends Controller
             ->pluck('chapter_id')
             ->toArray();
 
+        $totalQuestionsAnswered = ($assessmentAttempts + $activityCompletions) * 5;
+        $correctAnswers = $totalQuestionsAnswered > 0 ? (int) round(($totalQuestionsAnswered * $averageScore) / 100) : 0;
+        $wrongAnswers = max(0, $totalQuestionsAnswered - $correctAnswers);
+
         return response()->json([
             'completion_percentage' => $completionPercentage,
             'completed_chapters' => $completedChapters,
             'total_chapters' => $totalChapters,
             'total_attempts' => $totalAttempts,
             'passed_attempts' => $passedAttempts,
+            'questions_answered' => $totalQuestionsAnswered,
+            'correct_answers' => $correctAnswers,
+            'wrong_answers' => $wrongAnswers,
             'average_score' => $averageScore,
+            'accuracy_percentage' => $averageScore,
             'xp_points' => $xpPoints,
             'streak_days' => $streak,
             'course_progressions' => $courseProgressions,
@@ -653,12 +679,15 @@ class DashboardController extends Controller
                 break;
         }
 
+        $pctScore = $validated['total'] > 0 ? round(($validated['score'] / $validated['total']) * 100) : 0;
+
         // Record the activity in user_course_progress as a general activity log entry
         // This feeds into the streak calculation (calculateStreak uses completed_at dates)
         DB::table('user_course_progress')->insert([
             'user_id' => $userId,
-            'chapter_id' => null,
+            'chapter_id' => $validated['content_id'] ?? null,
             'status' => 'activity_completed',
+            'score' => $pctScore,
             'completed_at' => now(),
             'created_at' => now(),
             'updated_at' => now(),
