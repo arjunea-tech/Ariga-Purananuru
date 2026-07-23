@@ -12,13 +12,13 @@ import { filter } from 'rxjs';
 })
 export class StudentTabsComponent {
   private router = inject(Router);
-  
+
   activeTab = signal<string>('home');
 
   tabs = [
     { id: 'home', label: 'Home', icon: 'bi-house-door-fill', route: '/tabs/home', color: '#6C5CE7' },
     { id: 'learn', label: 'Learn', icon: 'bi-book-half', route: '/tabs/learn', color: '#00B894' },
-    { id: 'games', label: 'Games', icon: 'bi-controller', route: '/tabs/games', color: '#E17055' },
+    { id: 'Practice', label: 'Practice', icon: 'bi-controller', route: '/tabs/games', color: '#E17055' },
     { id: 'progress', label: 'Progress', icon: 'bi-bar-chart-line-fill', route: '/tabs/progress', color: '#0984E3' },
     { id: 'profile', label: 'Profile', icon: 'bi-person-circle', route: '/tabs/profile', color: '#FD79A8' }
   ];
