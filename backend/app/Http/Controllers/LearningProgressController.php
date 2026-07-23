@@ -60,14 +60,65 @@ class LearningProgressController extends Controller
             ->orderBy('level_chapter.sort_order')
             ->get();
 
+        if ($chapters->isEmpty()) {
+            return response()->json(['chapters' => []]);
+        }
+
+        $chapterIds = $chapters->pluck('id')->toArray();
+
+        // 1. Fetch all mandatory assessments for these chapters
+        $mandatoryAssessments = \App\Models\Assessment::whereIn('chapter_id', $chapterIds)
+            ->where('is_mandatory', true)
+            ->get();
+            
+        // 2. Fetch all passed assessment attempts for the user in these chapters
+        $mandatoryAssessmentIds = $mandatoryAssessments->pluck('id')->toArray();
+        $passedAssessmentIds = [];
+        if (!empty($mandatoryAssessmentIds)) {
+            $passedAssessmentIds = \App\Models\UserAssessmentAttempt::where('user_id', $userId)
+                ->whereIn('assessment_id', $mandatoryAssessmentIds)
+                ->where('passed', true)
+                ->pluck('assessment_id')
+                ->toArray();
+        }
+        $passedAssessmentSet = array_flip($passedAssessmentIds);
+
+        // Calculate which chapters are completed
+        $completedChapterIds = [];
+        foreach ($chapterIds as $cId) {
+            $chapterAssessments = $mandatoryAssessments->where('chapter_id', $cId);
+            $isCompleted = true;
+            foreach ($chapterAssessments as $assessment) {
+                if (!isset($passedAssessmentSet[$assessment->id])) {
+                    $isCompleted = false;
+                    break;
+                }
+            }
+            if ($isCompleted) {
+                $completedChapterIds[$cId] = true;
+            }
+        }
+
+        // Learning Mode Check (from Service)
+        $learningMode = $this->progressService->getUserLearningMode($userId);
+        $isFreeStyle = ($learningMode === 'FREE_STYLE');
+
         $data = [];
+        $previousCompleted = true;
+
         foreach ($chapters as $chapter) {
+            $isCompleted = isset($completedChapterIds[$chapter->id]);
+            $isUnlocked = $isFreeStyle || $previousCompleted;
+
             $data[] = [
                 'chapter_id' => $chapter->id,
                 'name' => $chapter->name,
-                'is_unlocked' => $this->progressService->canAccessChapter($userId, $chapter->id, $levelId),
-                'is_completed' => $this->progressService->isChapterCompleted($userId, $chapter->id),
+                'is_unlocked' => $isUnlocked,
+                'is_completed' => $isCompleted,
             ];
+
+            // Strict mode logic: next chapter is unlocked only if this one is completed
+            $previousCompleted = $isCompleted;
         }
 
         return response()->json(['chapters' => $data]);

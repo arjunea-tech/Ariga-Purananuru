@@ -136,37 +136,53 @@ class DashboardController extends Controller
             });
         }
         $courses = $coursesQuery->get();
-        foreach ($courses as $course) {
-            $totalCourseChapters = DB::table('chapters')
+
+        // Optimize: Fetch all completed chapter IDs globally to avoid N+1 queries
+        $allCompletedChapterIds = DB::table('user_course_progress')
+            ->where('user_id', $userId)
+            ->whereIn('status', ['completed', 'activity_completed'])
+            ->whereNotNull('chapter_id')
+            ->distinct('chapter_id')
+            ->pluck('chapter_id')
+            ->toArray();
+
+        $courseIds = $courses->pluck('id')->toArray();
+        if (!empty($courseIds)) {
+            $totalCourseChapsList = DB::table('chapters')
                 ->join('level_chapter', 'chapters.id', '=', 'level_chapter.chapter_id')
                 ->join('levels', 'level_chapter.level_id', '=', 'levels.id')
                 ->join('course_package_levels', 'levels.id', '=', 'course_package_levels.level_id')
-                ->where('course_package_levels.course_id', $course->id)
-                ->count('chapters.id');
-                
-            $completedCourseChapters = DB::table('user_course_progress')
-                ->where('user_id', $userId)
-                ->where('status', 'completed')
-                ->whereIn('chapter_id', function ($query) use ($course) {
-                    $query->select('chapters.id')
-                        ->from('chapters')
-                        ->join('level_chapter', 'chapters.id', '=', 'level_chapter.chapter_id')
-                        ->join('levels', 'level_chapter.level_id', '=', 'levels.id')
-                        ->join('course_package_levels', 'levels.id', '=', 'course_package_levels.level_id')
-                        ->where('course_package_levels.course_id', $course->id);
-                })
-                ->distinct('chapter_id')
-                ->count('chapter_id');
-                
-            $percentage = $totalCourseChapters > 0 ? round(($completedCourseChapters / $totalCourseChapters) * 100, 1) : 0;
-            
-            $courseProgressions[] = [
-                'course_id' => $course->id,
-                'course_name' => $course->name,
-                'total_chapters' => $totalCourseChapters,
-                'completed_chapters' => $completedCourseChapters,
-                'percentage' => $percentage,
-            ];
+                ->whereIn('course_package_levels.course_id', $courseIds)
+                ->select('course_package_levels.course_id', DB::raw('count(distinct chapters.id) as total'))
+                ->groupBy('course_package_levels.course_id')
+                ->pluck('total', 'course_id')->toArray();
+
+            $compCourseChapsList = [];
+            if (!empty($allCompletedChapterIds)) {
+                $compCourseChapsList = DB::table('chapters')
+                    ->join('level_chapter', 'chapters.id', '=', 'level_chapter.chapter_id')
+                    ->join('levels', 'level_chapter.level_id', '=', 'levels.id')
+                    ->join('course_package_levels', 'levels.id', '=', 'course_package_levels.level_id')
+                    ->whereIn('course_package_levels.course_id', $courseIds)
+                    ->whereIn('chapters.id', $allCompletedChapterIds)
+                    ->select('course_package_levels.course_id', DB::raw('count(distinct chapters.id) as comp'))
+                    ->groupBy('course_package_levels.course_id')
+                    ->pluck('comp', 'course_id')->toArray();
+            }
+
+            foreach ($courses as $course) {
+                $totalC = $totalCourseChapsList[$course->id] ?? 0;
+                $compC = $compCourseChapsList[$course->id] ?? 0;
+                $percentage = $totalC > 0 ? round(($compC / $totalC) * 100, 1) : 0;
+
+                $courseProgressions[] = [
+                    'course_id' => $course->id,
+                    'course_name' => $course->name,
+                    'total_chapters' => $totalC,
+                    'completed_chapters' => $compC,
+                    'percentage' => $percentage,
+                ];
+            }
         }
 
         // 5b. Dynamic Module / Level Progressions from DB
@@ -193,25 +209,34 @@ class DashboardController extends Controller
                 ->get();
         }
 
+        $levelIds = $levels->pluck('id')->toArray();
+        $totalLvlChapsList = [];
+        $compLvlChapsList = [];
+
+        if (!empty($levelIds)) {
+            $totalLvlChapsList = DB::table('level_chapter')
+                ->whereIn('level_id', $levelIds)
+                ->select('level_id', DB::raw('count(chapter_id) as total'))
+                ->groupBy('level_id')
+                ->pluck('total', 'level_id')->toArray();
+
+            if (!empty($allCompletedChapterIds)) {
+                $compLvlChapsList = DB::table('level_chapter')
+                    ->whereIn('level_id', $levelIds)
+                    ->whereIn('chapter_id', $allCompletedChapterIds)
+                    ->select('level_id', DB::raw('count(chapter_id) as comp'))
+                    ->groupBy('level_id')
+                    ->pluck('comp', 'level_id')->toArray();
+            }
+        }
+
         $previousCompleted = true; // First module/level unlocked by default
         $moduleColors = ['#22c55e', '#00B894', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#06b6d4'];
         $colorIdx = 0;
 
         foreach ($levels as $lvl) {
-            $totalLvlChapters = DB::table('level_chapter')
-                ->where('level_id', $lvl->id)
-                ->count();
-
-            $completedLvlChapters = DB::table('user_course_progress')
-                ->where('user_id', $userId)
-                ->whereIn('status', ['completed', 'activity_completed'])
-                ->where(function($q) use ($lvl) {
-                    $q->whereIn('chapter_id', function($sub) use ($lvl) {
-                        $sub->select('chapter_id')->from('level_chapter')->where('level_id', $lvl->id);
-                    })->orWhere('level_id', $lvl->id);
-                })
-                ->distinct('chapter_id')
-                ->count('chapter_id');
+            $totalLvlChapters = $totalLvlChapsList[$lvl->id] ?? 0;
+            $completedLvlChapters = $compLvlChapsList[$lvl->id] ?? 0;
 
             if ($totalLvlChapters == 0) {
                 $totalLvlChapters = max(1, DB::table('chapters')->count());
@@ -277,21 +302,34 @@ class DashboardController extends Controller
 
         // 8. Dynamic Monthly Study Hours
         $monthlyStudyHours = [];
+        $sixMonthsAgo = date('Y-m-01 00:00:00', strtotime("-5 months"));
+
+        $monthlyCompletions = DB::table('user_course_progress')
+            ->where('user_id', $userId)
+            ->where('status', 'completed')
+            ->where('completed_at', '>=', $sixMonthsAgo)
+            ->select(DB::raw('YEAR(completed_at) as year, MONTH(completed_at) as month, count(id) as count'))
+            ->groupBy('year', 'month')
+            ->get();
+
+        $monthlyAttempts = DB::table('user_assessment_attempts')
+            ->where('user_id', $userId)
+            ->where('attempted_at', '>=', $sixMonthsAgo)
+            ->select(DB::raw('YEAR(attempted_at) as year, MONTH(attempted_at) as month, count(id) as count'))
+            ->groupBy('year', 'month')
+            ->get();
+
         for ($i = 5; $i >= 0; $i--) {
-            $monthStart = date('Y-m-01 00:00:00', strtotime("-$i months"));
-            $monthEnd = date('Y-m-t 23:59:59', strtotime("-$i months"));
-            $monthLabel = date('M', strtotime("-$i months"));
+            $time = strtotime("-$i months");
+            $y = (int)date('Y', $time);
+            $m = (int)date('m', $time);
+            $monthLabel = date('M', $time);
             
-            $completionsCount = DB::table('user_course_progress')
-                ->where('user_id', $userId)
-                ->where('status', 'completed')
-                ->whereBetween('completed_at', [$monthStart, $monthEnd])
-                ->count();
-                
-            $attemptsCount = DB::table('user_assessment_attempts')
-                ->where('user_id', $userId)
-                ->whereBetween('attempted_at', [$monthStart, $monthEnd])
-                ->count();
+            $compRow = $monthlyCompletions->first(fn($r) => $r->year == $y && $r->month == $m);
+            $completionsCount = $compRow ? $compRow->count : 0;
+            
+            $attRow = $monthlyAttempts->first(fn($r) => $r->year == $y && $r->month == $m);
+            $attemptsCount = $attRow ? $attRow->count : 0;
                 
             $hours = ($completionsCount * 0.5) + ($attemptsCount * 0.3);
             if ($hours == 0) {
