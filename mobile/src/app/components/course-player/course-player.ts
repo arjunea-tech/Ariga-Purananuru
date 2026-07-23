@@ -437,11 +437,12 @@ export class CoursePlayer implements OnInit, OnDestroy {
       localStorage.setItem('completed_chapters', JSON.stringify(mergedChapters));
 
       if (mergedChapters.length > 0) {
-        localStorage.setItem('ezhuthu_completed', 'true');
+        const activeLevel = this.activeLevelId() ? String(this.activeLevelId()) : 'level_1';
+        localStorage.setItem(`${activeLevel}_completed`, 'true');
         const completedModsRaw = localStorage.getItem('completed_modules');
         const completedMods: string[] = completedModsRaw ? JSON.parse(completedModsRaw) : [];
-        if (!completedMods.includes('ezhuthu')) {
-          completedMods.push('ezhuthu');
+        if (!completedMods.includes(activeLevel)) {
+          completedMods.push(activeLevel);
           localStorage.setItem('completed_modules', JSON.stringify(completedMods));
           localStorage.setItem(`lang_app_completed_modules_${uid}`, JSON.stringify(completedMods));
         }

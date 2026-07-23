@@ -28,20 +28,13 @@ export class GamesHubComponent implements OnInit {
   private route = inject(ActivatedRoute);
 
   viewState = signal<'courses' | 'categories'>('courses');
-  availableCourses = signal<any[]>([
-    { id: '1', title: 'அழகுத் தமிழ் யாப்பிலக்கணம்', description: 'தமிழ் இலக்கணம் விளையாட்டு வழியில்' }
-  ]);
+  availableCourses = signal<any[]>([]);
 
   selectedModule = signal<string>('all');
 
-  modules = [
-    { id: 'all', label: 'அனைத்தும்' },
-    { id: 'ezhuthu', label: 'எழுத்து' },
-    { id: 'asai', label: 'அசை' },
-    { id: 'seer', label: 'சீர்' },
-    { id: 'thalai', label: 'தளை' },
-    { id: 'alagidhal', label: 'அளகிடுதல்' }
-  ];
+  modules = signal<{ id: string; label: string }[]>([
+    { id: 'all', label: 'அனைத்தும்' }
+  ]);
 
   allGames = signal<EducationalGame[]>([
     // எழுத்து (Ezhuthu)
@@ -193,6 +186,39 @@ export class GamesHubComponent implements OnInit {
         this.viewState.set('courses');
       }
     });
+
+    this.loadDynamicCoursesAndModules();
+  }
+
+  private loadDynamicCoursesAndModules() {
+    // Load cached courses dynamically
+    const cachedCourses = localStorage.getItem('lang_app_courses_list');
+    if (cachedCourses) {
+      try {
+        const parsed = JSON.parse(cachedCourses);
+        if (parsed && parsed.length > 0) {
+          this.availableCourses.set(parsed);
+        }
+      } catch (e) {}
+    }
+
+    // Load dynamic levels/modules from active course structure
+    const cachedStructure = localStorage.getItem('lang_app_course_structure');
+    if (cachedStructure) {
+      try {
+        const struct = JSON.parse(cachedStructure);
+        if (struct.levels && Array.isArray(struct.levels) && struct.levels.length > 0) {
+          const dynamicMods = [
+            { id: 'all', label: 'அனைத்தும்' },
+            ...struct.levels.map((lvl: any, index: number) => ({
+              id: lvl.id ? lvl.id.toString() : `level_${index + 1}`,
+              label: lvl.name || `நிலை ${index + 1}`
+            }))
+          ];
+          this.modules.set(dynamicMods);
+        }
+      } catch (e) {}
+    }
   }
 
   filteredGames = computed(() => {

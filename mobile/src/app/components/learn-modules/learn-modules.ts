@@ -688,31 +688,30 @@ export class LearnModulesComponent implements OnInit {
     const bgColors = ['#00B894', '#E67E22', '#6C5CE7', '#FD79A8', '#00CEC9'];
     const defaultMods: LearningModule[] = [
       {
-        id: 'ezhuthu',
-        titleTa: 'எழுத்து',
-        titleEn: 'Letters',
+        id: 'level_1',
+        titleTa: 'பாடப் பிரிவு 1',
+        titleEn: 'Level 1',
         status: 'in-progress',
         progress: 50,
-        description: 'Learn Tamil vowels, consonants & special letters',
+        description: 'பாடங்கள் மற்றும் பயிற்சிகள்',
         icon: 'bi-play-circle-fill',
         badgeBg: '#00B894',
         badgeText: 'In Progress',
-        introTextTa: 'தமிழ் எழுத்துக்கள் பற்றிய அடிப்படை பாடங்கள்.',
-        introTextEn: 'Basic lessons about Tamil letters.',
-        lessonTitle: 'அடிப்படை எழுத்துக்கள்',
+        introTextTa: 'பாடப்பிரிவு பற்றிய அடிப்படை பாடங்கள்.',
+        introTextEn: 'Basic lessons.',
+        lessonTitle: 'அடிப்படை பாடங்கள்',
         lessonSubtitle: '2 chapters',
         assessmentQuestions: 10,
         assessmentMinutes: 10,
         assessmentPassingScore: 70,
         chapters: [
-          { id: 1, name: 'அத்தியாயம் 1: அடிப்படை எழுத்துக்கள்', description: 'அடிப்படை எழுத்துக்கள் பற்றி அறிவோம்' },
-          { id: 2, name: 'அத்தியாயம் 2: சிறப்பு எழுத்துக்கள்', description: 'சிறப்பு எழுத்துக்கள் பற்றி அறிவோம்' }
+          { id: 1, name: 'அத்தியாயம் 1: அறிமுகம்', description: 'அடிப்படை பற்றி அறிவோம்' },
+          { id: 2, name: 'அத்தியாயம் 2: பயிற்சி', description: 'தொடர் பயிற்சி' }
         ]
       }
     ];
     this.modules.set(defaultMods);
     this.resolvePendingModule();
-    this.expandedModuleId.set('ezhuthu');
     this.isLoadingChapters.set(false);
   }
 
@@ -788,7 +787,7 @@ export class LearnModulesComponent implements OnInit {
     this.router.navigate(['/learn/practice'], {
       queryParams: {
         mode: modeKey,
-        module: mod ? mod.id : 'ezhuthu'
+        module: mod ? mod.id : 'level_1'
       }
     });
   }
@@ -808,8 +807,7 @@ export class LearnModulesComponent implements OnInit {
     if (allCompleted.has(chapId)) {
       return 3;
     }
-    const mod = this.activeModule();
-    if (mod && (mod.id === 'ezhuthu' || mod.id === 'asai') && idx === 0) {
+    if (idx === 0) {
       return 2;
     }
     return 0;

@@ -27,26 +27,49 @@
 
     <!-- Active Course Heading -->
     <div class="section-heading mb-2">
-      <h2 class="fw-bold text-dark mb-0" style="font-size: 1.1rem;">பாடம் (Course)</h2>
+      <h2 class="fw-bold text-dark mb-0" style="font-size: 1.1rem;">எனது பாடநெறிகள் (My Courses)</h2>
     </div>
 
-    <!-- Active Course Hero Card (Super Clean, NO Line Running Across) -->
-    <div class="card active-course-card border-0 shadow-sm p-3 mb-4 rounded-4 text-white position-relative overflow-hidden">
-      <!-- Course Title & Chapter Subtitle -->
-      <div class="mb-2 mt-1">
-        <h2 class="fw-bold text-white mb-1" style="font-size: 0.95rem; line-height: 1.3;">
-          {{ activeCourse().title }}
-        </h2>
-        <span class="small text-white-50 d-block fw-semibold" style="font-size: 0.75rem;">{{ activeCourse().chapterName }}</span>
+    @if (assignedCourses().length > 1) {
+      <!-- Multiple Assigned Courses List -->
+      <div class="d-flex flex-column gap-3 mb-4">
+        @for (course of assignedCourses(); track course.id) {
+          <div class="card border-0 shadow-sm p-3 rounded-4 text-dark position-relative overflow-hidden cursor-pointer hover-lift"
+               style="background: #FFF0F3; border-left: 5px solid #F472B6;"
+               (click)="openCourse(course)">
+            <div class="d-flex align-items-center justify-content-between">
+              <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                     style="width: 44px; height: 44px; background: #F9A8D4;">
+                  <i class="bi bi-book-fill" style="color: #BE185D; font-size: 1.2rem;"></i>
+                </div>
+                <div>
+                  <h3 class="fw-bold mb-0 text-dark" style="font-size: 0.95rem;">{{ course.title || course.name }}</h3>
+                  <span class="text-muted small" style="font-size: 0.78rem;">{{ course.description || 'தமிழைக் கற்போம்' }}</span>
+                </div>
+              </div>
+              <i class="bi bi-chevron-right text-danger fs-5"></i>
+            </div>
+          </div>
+        }
       </div>
+    } @else {
+      <!-- Single Active Course Hero Card -->
+      <div class="card active-course-card border-0 shadow-sm p-3 mb-4 rounded-4 text-white position-relative overflow-hidden">
+        <div class="mb-2 mt-1">
+          <h2 class="fw-bold text-white mb-1" style="font-size: 0.95rem; line-height: 1.3;">
+            {{ activeCourse().title }}
+          </h2>
+          <span class="small text-white-50 d-block fw-semibold" style="font-size: 0.75rem;">{{ activeCourse().chapterName }}</span>
+        </div>
 
-      <!-- Clean Yellow Action Button (No progress line above!) -->
-      <button class="btn btn-warning text-dark w-100 rounded-pill py-2 fw-extrabold shadow-sm d-flex align-items-center justify-content-center gap-2 hover-lift mt-2"
-              (click)="startNextLesson()" style="font-size: 0.9rem;">
-        <span>{{ overallProgress() > 0 ? 'தொடர்ந்து பயில்க' : 'பாடத்தைத் தொடங்கு' }}</span>
-        <i class="bi bi-arrow-right fs-5"></i>
-      </button>
-    </div>
+        <button class="btn btn-warning text-dark w-100 rounded-pill py-2 fw-extrabold shadow-sm d-flex align-items-center justify-content-center gap-2 hover-lift mt-2"
+                (click)="startNextLesson()" style="font-size: 0.9rem;">
+          <span>{{ overallProgress() > 0 ? 'தொடர்ந்து பயில்க' : 'பாடத்தைத் தொடங்கு' }}</span>
+          <i class="bi bi-arrow-right fs-5"></i>
+        </button>
+      </div>
+    }
 
     <!-- Quick Practice Hub Section -->
     <div class="section-heading mb-3">

@@ -45,9 +45,11 @@ export class KidsDashboard implements OnInit {
   totalCount = signal<number>(15);
   overallProgress = signal<number>(0);
 
+  assignedCourses = signal<any[]>([]);
+
   activeCourse = signal({
-    title: 'அழகுத் தமிழ் யாப்பிலக்கணம்',
-    chapterName: 'பாடம் 1: எழுத்து இலக்கணம்',
+    title: 'கற்றல் பாடநெறி',
+    chapterName: 'பாட அத்தியாயம்',
     progress: 0,
     chapterId: 1
   });
@@ -87,27 +89,44 @@ export class KidsDashboard implements OnInit {
     this.overallProgress.set(percent);
 
     const currentModuleIndex = Math.min(Math.floor(doneCount / 3), 4);
-    const moduleNames = ['எழுத்து இலக்கணம்', 'அசை இலக்கணம்', 'சீர் இலக்கணம்', 'தளை இலக்கணம்', 'அளகிடுதல்'];
-    const currentModuleName = moduleNames[currentModuleIndex] || 'தொடர் பயிற்சி';
-
-    // Try to get the real course title from cached courses list
-    let courseTitle = 'அழகுத் தமிழ் யாப்பிலக்கணம்';
+    // Try to get real course title and chapter name dynamically
+    let courseTitle = 'கற்றல் பாடநெறி';
+    let currentModuleName = 'பாட அத்தியாயம்';
     try {
       const cachedCourses = localStorage.getItem('lang_app_courses_list');
       const lastCourseId = localStorage.getItem('lang_app_last_course_id');
       if (cachedCourses) {
         const courses = JSON.parse(cachedCourses);
+        if (courses && courses.length > 0) {
+          this.assignedCourses.set(courses);
+        }
         const matched = lastCourseId ? courses.find((c: any) => c.id.toString() === lastCourseId) : null;
         const course = matched || courses[0];
         if (course && (course.title || course.name)) {
           courseTitle = course.title || course.name;
         }
       }
+
+      // Also try to get real structure to get the current chapter name
+      const cachedStructureRaw = localStorage.getItem('lang_app_course_structure');
+      if (cachedStructureRaw) {
+        const struct = JSON.parse(cachedStructureRaw);
+        if (struct.levels && struct.levels.length > 0) {
+          const allChapters: any[] = [];
+          struct.levels.forEach((lvl: any) => {
+            if (lvl.chapters) allChapters.push(...lvl.chapters);
+          });
+          const currChap = allChapters[doneCount] || allChapters[0];
+          if (currChap) {
+            currentModuleName = currChap.name || currChap.title || 'பாட அத்தியாயம்';
+          }
+        }
+      }
     } catch (e) {}
 
     this.activeCourse.set({
       title: courseTitle,
-      chapterName: doneCount > 0 ? `பாடம் ${doneCount + 1}: ${currentModuleName}` : 'பாடம் 1: எழுத்து இலக்கணம்',
+      chapterName: `பாடம் ${doneCount + 1}: ${currentModuleName}`,
       progress: percent,
       chapterId: doneCount + 1
     });
@@ -116,13 +135,35 @@ export class KidsDashboard implements OnInit {
   }
 
   initializeModules(completedIds: number[]): void {
-    // Standard Tamil Grammar 5 Modules with dynamic calculation
+    const cachedStructureRaw = localStorage.getItem('lang_app_course_structure');
+    if (cachedStructureRaw) {
+      try {
+        const struct = JSON.parse(cachedStructureRaw);
+        if (struct.levels && Array.isArray(struct.levels) && struct.levels.length > 0) {
+          const bgColors = ['#10B981', '#6366F1', '#F59E0B', '#EC4899', '#8B5CF6'];
+          const dynamicList: DynamicModuleItem[] = struct.levels.map((lvl: any, idx: number) => {
+            const chaps = lvl.chapters || [];
+            const doneInLevel = chaps.filter((c: any) => completedIds.includes(c.id)).length;
+            const isDone = chaps.length > 0 && doneInLevel === chaps.length;
+            return {
+              id: lvl.id ? String(lvl.id) : `level_${idx + 1}`,
+              nameTa: lvl.name || `நிலை ${idx + 1}`,
+              nameEn: lvl.code || `Level ${idx + 1}`,
+              totalChapters: chaps.length,
+              completedChapters: doneInLevel,
+              progress: chaps.length > 0 ? Math.round((doneInLevel / chaps.length) * 100) : 0,
+              status: isDone ? 'completed' : 'in-progress',
+              color: bgColors[idx % bgColors.length]
+            };
+          });
+          this.dynamicModules.set(dynamicList);
+          return;
+        }
+      } catch (e) {}
+    }
+
     const defaultMods: DynamicModuleItem[] = [
-      { id: 'ezhuthu', nameTa: 'எழுத்து', nameEn: 'Ezhuthu', totalChapters: 3, completedChapters: Math.min(completedIds.length, 3), progress: Math.min(Math.round((Math.min(completedIds.length, 3) / 3) * 100), 100), status: completedIds.length >= 3 ? 'completed' : 'in-progress', color: '#10B981' },
-      { id: 'asai', nameTa: 'அசை', nameEn: 'Asai', totalChapters: 3, completedChapters: Math.max(0, Math.min(completedIds.length - 3, 3)), progress: completedIds.length <= 3 ? 0 : Math.min(Math.round((Math.max(0, completedIds.length - 3) / 3) * 100), 100), status: completedIds.length >= 6 ? 'completed' : (completedIds.length >= 3 ? 'in-progress' : 'locked'), color: '#6366F1' },
-      { id: 'seer', nameTa: 'சீர்', nameEn: 'Seer', totalChapters: 3, completedChapters: Math.max(0, Math.min(completedIds.length - 6, 3)), progress: completedIds.length <= 6 ? 0 : Math.min(Math.round((Math.max(0, completedIds.length - 6) / 3) * 100), 100), status: completedIds.length >= 9 ? 'completed' : (completedIds.length >= 6 ? 'in-progress' : 'locked'), color: '#F59E0B' },
-      { id: 'thalai', nameTa: 'தளை', nameEn: 'Thalai', totalChapters: 3, completedChapters: Math.max(0, Math.min(completedIds.length - 9, 3)), progress: completedIds.length <= 9 ? 0 : Math.min(Math.round((Math.max(0, completedIds.length - 9) / 3) * 100), 100), status: completedIds.length >= 12 ? 'completed' : (completedIds.length >= 9 ? 'in-progress' : 'locked'), color: '#EC4899' },
-      { id: 'alagidhal', nameTa: 'அளகிடுதல்', nameEn: 'Alagidhal', totalChapters: 3, completedChapters: Math.max(0, Math.min(completedIds.length - 12, 3)), progress: completedIds.length <= 12 ? 0 : Math.min(Math.round((Math.max(0, completedIds.length - 12) / 3) * 100), 100), status: completedIds.length >= 15 ? 'completed' : (completedIds.length >= 12 ? 'in-progress' : 'locked'), color: '#8B5CF6' }
+      { id: 'level_1', nameTa: 'பாடப் பிரிவு 1', nameEn: 'Level 1', totalChapters: 3, completedChapters: Math.min(completedIds.length, 3), progress: Math.min(Math.round((Math.min(completedIds.length, 3) / 3) * 100), 100), status: completedIds.length >= 3 ? 'completed' : 'in-progress', color: '#10B981' }
     ];
     this.dynamicModules.set(defaultMods);
   }
@@ -165,6 +206,11 @@ export class KidsDashboard implements OnInit {
 
   openLeaderboard(): void {
     this.router.navigate(['/tabs/progress']);
+  }
+
+  openCourse(course: any): void {
+    localStorage.setItem('lang_app_last_course_id', course.id.toString());
+    this.router.navigate(['/tabs/learn'], { queryParams: { view: 'modules' } });
   }
 
   openModule(mod: DynamicModuleItem): void {

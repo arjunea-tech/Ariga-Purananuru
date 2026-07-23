@@ -54,15 +54,15 @@ export class StudentProfileComponent implements OnInit {
   loadUserProfile(): void {
     const user = this.authService.getUser();
     if (user) {
-      this.userName.set(user.name || 'VaniViji');
+      this.userName.set(user.name || 'மாணவர்');
       this.userEmail.set(user.email || '');
+      this.studentSchool.set((user as any).tenant?.tenant_name || 'தமிழ் கற்றல் மையம்');
+      this.title.set(user.role === 'student' ? 'மாணவர்' : 'பயனர்');
     }
     const userId = user?.id || 1;
     const storedXp = localStorage.getItem(`lang_app_xp_${userId}`);
     if (storedXp) {
       this.xpPoints.set(+storedXp);
-    } else {
-      this.xpPoints.set(1850);
     }
   }
 
@@ -81,13 +81,30 @@ export class StudentProfileComponent implements OnInit {
 
           if (res.skill_mastery && Array.isArray(res.skill_mastery)) {
             this.skillMastery.set(res.skill_mastery);
+          } else if (res.module_progressions && Array.isArray(res.module_progressions)) {
+            const colors = ['#22c55e', '#00B894', '#3b82f6', '#8b5cf6', '#ec4899'];
+            const mappedMastery = res.module_progressions.map((m: any, idx: number) => ({
+              topic: m.name,
+              mastery: typeof m.percentage === 'number' ? m.percentage : 0,
+              color: colors[idx % colors.length]
+            }));
+            this.skillMastery.set(mappedMastery);
           } else {
-            // Mock skill mastery for presentation if not present
-            this.skillMastery.set([
-              { topic: 'எழுத்து', mastery: 85, color: '#22c55e' },
-              { topic: 'அசை', mastery: 65, color: '#00B894' },
-              { topic: 'சீர்', mastery: 40, color: '#3b82f6' }
-            ]);
+            // Read dynamic modules from local storage course structure
+            const cachedStructure = localStorage.getItem('lang_app_course_structure');
+            if (cachedStructure) {
+              try {
+                const struct = JSON.parse(cachedStructure);
+                if (struct.levels) {
+                  const mapped = struct.levels.map((l: any, idx: number) => ({
+                    topic: l.name,
+                    mastery: 0,
+                    color: ['#22c55e', '#00B894', '#3b82f6', '#8b5cf6'][idx % 4]
+                  }));
+                  this.skillMastery.set(mapped);
+                }
+              } catch(e) {}
+            }
           }
 
           if (res.badges && res.badges.length > 0) {
@@ -98,34 +115,28 @@ export class StudentProfileComponent implements OnInit {
             }));
             this.achievements.set(mappedBadges);
           } else {
-            // Generate dynamic achievements based on progress
             const newAchievements = [];
             if (this.streakDays() >= 3) {
-              newAchievements.push({ name: `${this.streakDays()} Day Streak`, icon: '🔥', bg: '#FF7675' });
+              newAchievements.push({ name: `${this.streakDays()} நாள் தொடர்ச்சி`, icon: '🔥', bg: '#FF7675' });
             }
             if (this.completionPercentage() > 0) {
-              newAchievements.push({ name: 'First Step', icon: '🚀', bg: '#0984E3' });
+              newAchievements.push({ name: 'முதல் முயற்சி', icon: '🚀', bg: '#0984E3' });
             }
             if (this.completionPercentage() >= 50) {
-              newAchievements.push({ name: 'Halfway There', icon: '🎯', bg: '#6C5CE7' });
+              newAchievements.push({ name: 'பாதி வழி', icon: '🎯', bg: '#6C5CE7' });
             }
             if (this.accuracyPercentage() >= 80) {
-              newAchievements.push({ name: 'Accuracy Master', icon: '💎', bg: '#00B894' });
+              newAchievements.push({ name: 'துல்லிய மாஸ்டர்', icon: '💎', bg: '#00B894' });
             }
             if (newAchievements.length === 0) {
-              newAchievements.push({ name: 'Welcome', icon: '👋', bg: '#B2BEC3' });
+              newAchievements.push({ name: 'நல்வரவு', icon: '👋', bg: '#B2BEC3' });
             }
             this.achievements.set(newAchievements);
           }
         }
       },
       error: () => {
-        // Fallback
-        this.achievements.set([{ name: 'Welcome', icon: '👋', bg: '#B2BEC3' }]);
-        this.skillMastery.set([
-          { topic: 'எழுத்து', mastery: 85, color: '#22c55e' },
-          { topic: 'அசை', mastery: 65, color: '#00B894' }
-        ]);
+        this.achievements.set([{ name: 'நல்வரவு', icon: '👋', bg: '#B2BEC3' }]);
       }
     });
   }

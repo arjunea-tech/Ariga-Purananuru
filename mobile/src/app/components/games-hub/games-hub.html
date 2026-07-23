@@ -47,102 +47,29 @@
         <h2 class="h6 fw-extrabold text-dark mb-1">பகுதி தேர்வு</h2>
       </div>
 
-      <!-- 5 Clean Module Cards -->
+      <!-- Dynamic Module Cards -->
       <div class="d-flex flex-column gap-3">
-      <!-- 1. எழுத்து -->
-      <div class="card border-0 shadow-sm rounded-4 p-3 hover-lift bg-white cursor-pointer"
-           style="border-left: 6px solid #6C5CE7 !important;"
-           (click)="launchPracticeEngine('ezhuthu')">
-        <div class="d-flex align-items-center gap-3">
-          <div class="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0"
-               style="width: 52px; height: 52px; background: #6C5CE7;">
-            <i class="bi bi-fonts fs-3"></i>
-          </div>
-          <div class="flex-grow-1">
-            <div class="d-flex align-items-center justify-content-between">
-              <h3 class="h6 fw-bold mb-0 text-dark">எழுத்து</h3>
-              <span class="badge bg-primary-subtle text-primary rounded-pill small" style="font-size: 0.72rem;">பயிற்சி</span>
+        @for (mod of modules(); track mod.id) {
+          @if (mod.id !== 'all') {
+            <div class="card border-0 shadow-sm rounded-4 p-3 hover-lift bg-white cursor-pointer"
+                 style="border-left: 6px solid #6C5CE7 !important;"
+                 (click)="launchPracticeEngine(mod.id)">
+              <div class="d-flex align-items-center gap-3">
+                <div class="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0"
+                     style="width: 52px; height: 52px; background: #6C5CE7;">
+                  <i class="bi bi-controller fs-3"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <div class="d-flex align-items-center justify-content-between">
+                    <h3 class="h6 fw-bold mb-0 text-dark">{{ mod.label }}</h3>
+                    <span class="badge bg-primary-subtle text-primary rounded-pill small" style="font-size: 0.72rem;">பயிற்சி</span>
+                  </div>
+                </div>
+                <i class="bi bi-chevron-right text-muted fs-5"></i>
+              </div>
             </div>
-          </div>
-          <i class="bi bi-chevron-right text-muted fs-5"></i>
-        </div>
-      </div>
-
-      <!-- 2. அசை -->
-      <div class="card border-0 shadow-sm rounded-4 p-3 hover-lift bg-white cursor-pointer"
-           style="border-left: 6px solid #00B894 !important;"
-           (click)="launchPracticeEngine('asai')">
-        <div class="d-flex align-items-center gap-3">
-          <div class="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0"
-               style="width: 52px; height: 52px; background: #00B894;">
-            <i class="bi bi-scissors fs-3"></i>
-          </div>
-          <div class="flex-grow-1">
-            <div class="d-flex align-items-center justify-content-between">
-              <h3 class="h6 fw-bold mb-0 text-dark">அசை</h3>
-              <span class="badge bg-success-subtle text-success rounded-pill small" style="font-size: 0.72rem;">பயிற்சி</span>
-            </div>
-          </div>
-          <i class="bi bi-chevron-right text-muted fs-5"></i>
-        </div>
-      </div>
-
-      <!-- 3. சீர் -->
-      <div class="card border-0 shadow-sm rounded-4 p-3 hover-lift bg-white cursor-pointer"
-           style="border-left: 6px solid #0984E3 !important;"
-           (click)="launchPracticeEngine('seer')">
-        <div class="d-flex align-items-center gap-3">
-          <div class="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0"
-               style="width: 52px; height: 52px; background: #0984E3;">
-            <i class="bi bi-grid-3x3-gap-fill fs-3"></i>
-          </div>
-          <div class="flex-grow-1">
-            <div class="d-flex align-items-center justify-content-between">
-              <h3 class="h6 fw-bold mb-0 text-dark">சீர்</h3>
-              <span class="badge bg-info-subtle text-info rounded-pill small" style="font-size: 0.72rem;">பயிற்சி</span>
-            </div>
-          </div>
-          <i class="bi bi-chevron-right text-muted fs-5"></i>
-        </div>
-      </div>
-
-      <!-- 4. தளை -->
-      <div class="card border-0 shadow-sm rounded-4 p-3 hover-lift bg-white cursor-pointer"
-           style="border-left: 6px solid #FDCB6E !important;"
-           (click)="launchPracticeEngine('thalai')">
-        <div class="d-flex align-items-center gap-3">
-          <div class="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0"
-               style="width: 52px; height: 52px; background: #FDCB6E;">
-            <i class="bi bi-link-45deg fs-3"></i>
-          </div>
-          <div class="flex-grow-1">
-            <div class="d-flex align-items-center justify-content-between">
-              <h3 class="h6 fw-bold mb-0 text-dark">தளை</h3>
-              <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill small" style="font-size: 0.72rem;">பயிற்சி</span>
-            </div>
-          </div>
-          <i class="bi bi-chevron-right text-muted fs-5"></i>
-        </div>
-      </div>
-
-      <!-- 5. அளகிடுதல் -->
-      <div class="card border-0 shadow-sm rounded-4 p-3 hover-lift bg-white cursor-pointer"
-           style="border-left: 6px solid #E84393 !important;"
-           (click)="launchPracticeEngine('alagidhal')">
-        <div class="d-flex align-items-center gap-3">
-          <div class="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm flex-shrink-0"
-               style="width: 52px; height: 52px; background: #E84393;">
-            <i class="bi bi-award-fill fs-3"></i>
-          </div>
-          <div class="flex-grow-1">
-            <div class="d-flex align-items-center justify-content-between">
-              <h3 class="h6 fw-bold mb-0 text-dark">அலகிடுதல்</h3>
-              <span class="badge bg-danger-subtle text-danger rounded-pill small" style="font-size: 0.72rem;">பயிற்சி</span>
-            </div>
-          </div>
-          <i class="bi bi-chevron-right text-muted fs-5"></i>
-        </div>
-      </div>
+          }
+        }
       </div>
     }
   </div>
