@@ -137,14 +137,13 @@ export class KidsDashboard implements OnInit, OnDestroy {
     const scopedChaptersRaw = localStorage.getItem(`lang_app_completed_chapters_${userId}_1`);
     const legacyIds: number[] = legacyChaptersRaw ? JSON.parse(legacyChaptersRaw) : [];
     const scopedIds: number[] = scopedChaptersRaw ? JSON.parse(scopedChaptersRaw) : [];
-    const allCompleted = Array.from(new Set([...legacyIds, ...scopedIds]));
-
+    const allCompleted = scopedIds.length > 0 ? scopedIds : legacyIds;
     const doneCount = allCompleted.length;
     this.completedCount.set(doneCount);
-    const percent = Math.min(Math.round((doneCount / 15) * 100), 100);
+    
+    const percent = this.overallProgress() || Math.min(Math.round((doneCount / 15) * 100), 100);
     this.overallProgress.set(percent);
 
-    const currentModuleIndex = Math.min(Math.floor(doneCount / 3), 4);
     let courseTitle = 'கற்றல் பாடநெறி';
     let currentModuleName = 'பாட அத்தியாயம்';
     try {
@@ -178,10 +177,11 @@ export class KidsDashboard implements OnInit, OnDestroy {
       }
     } catch (e) {}
 
+    const displayProgress = this.overallProgress();
     this.activeCourse.set({
       title: courseTitle,
       chapterName: `பாடம் ${doneCount + 1}: ${currentModuleName}`,
-      progress: percent,
+      progress: displayProgress,
       chapterId: doneCount + 1
     });
     
@@ -191,7 +191,7 @@ export class KidsDashboard implements OnInit, OnDestroy {
       this.activeCourse.set({
         title: firstCourse.title || firstCourse.name || courseTitle,
         chapterName: firstCourse.description || `பாடம் ${doneCount + 1}: ${currentModuleName}`,
-        progress: percent,
+        progress: displayProgress,
         chapterId: firstCourse.id || doneCount + 1
       });
       this.activeCourseIndex.set(0);
@@ -249,6 +249,8 @@ export class KidsDashboard implements OnInit, OnDestroy {
           }
           if (res.completion_percentage !== undefined) {
             this.overallProgress.set(res.completion_percentage);
+            // Sync active course card progress with exact server progress
+            this.activeCourse.update(ac => ({ ...ac, progress: res.completion_percentage }));
           }
         }
       },
