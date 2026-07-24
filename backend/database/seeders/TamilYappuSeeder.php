@@ -20,9 +20,21 @@ class TamilYappuSeeder extends Seeder
         $course = Course::where('name', 'LIKE', '%அழகுத் தமிழ் யாப்பு%')->first();
         
         if (!$course) {
-            echo "Course 'அழகுத் தமிழ் யாப்பு (யாப்பிலக்கணம்)' not found!\n";
-            return;
+            $course = Course::create([
+                'name' => 'அழகுத் தமிழ் யாப்பு (யாப்பிலக்கணம்)',
+                'description' => 'தமிழ் செய்யுள் இயற்றுவதற்கான யாப்பிலக்கணப் பாடநெறி',
+                'is_active' => true,
+            ]);
         }
+
+        $package = \App\Models\Package::firstOrCreate(
+            ['code' => 'PKG-001'],
+            [
+                'name' => 'Standard Package',
+                'description' => 'Default Tamil Learning Package',
+                'is_active' => true,
+            ]
+        );
 
         $this->deleteCourseContents($course);
         $uniqueSuffix = time();
@@ -890,7 +902,7 @@ class TamilYappuSeeder extends Seeder
 
             DB::table('course_package_levels')->insert([
                 'course_id' => $course->id,
-                'package_id' => 1, 
+                'package_id' => $package->id, 
                 'level_id' => $level->id,
                 'is_active' => true,
             ]);

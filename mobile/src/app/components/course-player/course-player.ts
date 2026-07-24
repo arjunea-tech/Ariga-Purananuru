@@ -203,8 +203,13 @@ export class CoursePlayer implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       const cid = params['courseId'] ? +params['courseId'] : null;
-      if (cid && cid !== this.courseId()) {
-        this.courseId.set(cid);
+      if (cid) {
+        if (cid !== this.courseId()) {
+          this.courseId.set(cid);
+        }
+        // Always refresh structure from API on init to prevent stale cache
+        this.loadStructure();
+      } else if (this.courseId()) {
         this.loadStructure();
       }
     });
@@ -255,128 +260,43 @@ export class CoursePlayer implements OnInit, OnDestroy {
   }
 
   loadStructure(): void {
-    if (!this.courseId()) return;
-
-    if (this.courseService.cachedStructure && this.courseService.cachedStructure.id === this.courseId()) {
-      const structure = this.courseService.cachedStructure;
-      this.courseService.cachedStructure = null; // Clear from cache
-      this.initializeStructure(structure);
+    const currentCid = this.courseId();
+    if (!currentCid) {
+      this.http.get<any[]>(`${environment.apiUrl}/courses`).subscribe({
+        next: (courses) => {
+          if (courses && courses.length > 0) {
+            this.courseId.set(courses[0].id);
+            this.loadStructure();
+          }
+        },
+        error: () => {}
+      });
       return;
     }
 
-    // Try loading from localStorage first (Instant / Cache-First)
-    const cachedRaw = localStorage.getItem('lang_app_course_structure');
-    if (cachedRaw) {
-      try {
-        const cached = JSON.parse(cachedRaw);
-        if (cached && (cached.id === this.courseId() || !this.courseId())) {
-          this.initializeStructure(cached);
-          
-          // Silently refresh in background
-          const url = `${environment.apiUrl}/courses/${this.courseId()}/player-structure`;
-          this.http.get<CourseStructure>(url).subscribe({
-            next: (structure) => {
-              localStorage.setItem('lang_app_course_structure', JSON.stringify(structure));
-              this.courseStructure.set(structure);
-            },
-            error: () => {}
-          });
-          return;
-        }
-      } catch (e) {}
-    }
-
-    const url = `${environment.apiUrl}/courses/${this.courseId()}/player-structure`;
+    const url = `${environment.apiUrl}/courses/${currentCid}/player-structure`;
     this.http.get<CourseStructure>(url).subscribe({
       next: (structure) => {
         localStorage.setItem('lang_app_course_structure', JSON.stringify(structure));
+        localStorage.setItem('lang_app_last_course_id', String(structure.id));
         this.initializeStructure(structure);
       },
-      error: (err) => {
-        console.warn('Backend course 404/error, serving fallback Tamil Yaappu structure:', err);
-        const fallbackStructure: CourseStructure = {
-          id: this.courseId() || 1,
-          name: 'தமிழ் யாப்பிலக்கணம் (Tamil Yaappu)',
-          description: 'Master Tamil grammar with 5 core modules',
-          levels: [
-            {
-              id: 101,
-              name: 'எழுத்து (Ezhuthu)',
-              chapters: [
-                { 
-                  id: 1001, 
-                  name: 'அடிப்படை & சிறப்பு எழுத்துக்கள்', 
-                  contents: [{ 
-                    id: 10001, 
-                    name: 'Basic & Special Letters', 
-                    text_content: '{"blocks":[{"type":"header","data":{"text":"தமிழ் எழுத்துக்கள்"}},{"type":"paragraph","data":{"text":"தமிழ் எழுத்துக்கள் மொத்தம் 247. உயிர் எழுத்துக்கள் 12, மெய் எழுத்துக்கள் 18, உயிர்மெய் 216, ஆய்த எழுத்து 1."}}]}' 
-                  }] 
-                }
-              ]
-            },
-            {
-              id: 102,
-              name: 'அசை (Asai)',
-              chapters: [
-                { 
-                  id: 1002, 
-                  name: 'நேரசை & நிரையசை', 
-                  contents: [{ 
-                    id: 10002, 
-                    name: 'Syllabification', 
-                    text_content: '{"blocks":[{"type":"header","data":{"text":"அசை இலக்கணம்"}},{"type":"paragraph","data":{"text":"அசை என்பது செய்யுளின் ஓர் உறுப்பு. இது நேரசை (Ner Asai) மற்றும் நிரையசை (Nirai Asai) என இரு வகைப்படும்."}}]}' 
-                  }] 
-                }
-              ]
-            },
-            {
-              id: 103,
-              name: 'சீர் (Seer)',
-              chapters: [
-                { 
-                  id: 103, 
-                  name: 'ஈரசை & மூவசை சீர்', 
-                  contents: [{ 
-                    id: 10003, 
-                    name: 'Metrical Feet', 
-                    text_content: '{"blocks":[{"type":"header","data":{"text":"சீர் இலக்கணம்"}},{"type":"paragraph","data":{"text":"ஒன்றிற்கு மேற்பட்ட அசைகள் சேர்ந்து அமைவது சீர் ஆகும்."}}]}' 
-                  }] 
-                }
-              ]
-            },
-            {
-              id: 104,
-              name: 'தளை (Thalai)',
-              chapters: [
-                { 
-                  id: 104, 
-                  name: 'ஏழு வகை தளைகள்', 
-                  contents: [{ 
-                    id: 10004, 
-                    name: 'Poetic Meter', 
-                    text_content: '{"blocks":[{"type":"header","data":{"text":"தளை இலக்கணம்"}},{"type":"paragraph","data":{"text":"நின்ற சீரின் ஈற்றசையும் வரும் சீரின் முதலசையும் பொருந்துவது தளை ஆகும்."}}]}' 
-                  }] 
-                }
-              ]
-            },
-            {
-              id: 105,
-              name: 'அளகிடுதல் (Alagidhal)',
-              chapters: [
-                { 
-                  id: 105, 
-                  name: 'திருக்குறள் அலகிடுதல்', 
-                  contents: [{ 
-                    id: 10005, 
-                    name: 'Verse Analysis', 
-                    text_content: '{"blocks":[{"type":"header","data":{"text":"அளகிடுதல்"}},{"type":"paragraph","data":{"text":"செய்யுள் அடிகளை அசை பிரித்து வாய்ப்பாடு காண்பதே அலகிடுதல் ஆகும்."}}]}' 
-                  }] 
-                }
-              ]
+      error: () => {
+        // Clear stale local storage cache for this broken course
+        localStorage.removeItem('lang_app_course_structure');
+        localStorage.removeItem('lang_app_last_course_id');
+        this.courseStructure.set(null);
+
+        // If specific courseId failed (e.g. 404 for deleted ID), fetch real active course from API
+        this.http.get<any[]>(`${environment.apiUrl}/courses`).subscribe({
+          next: (courses) => {
+            if (courses && courses.length > 0 && courses[0].id !== currentCid) {
+              this.courseId.set(courses[0].id);
+              this.loadStructure();
             }
-          ]
-        };
-        this.initializeStructure(fallbackStructure);
+          },
+          error: () => {}
+        });
       }
     });
   }
@@ -697,16 +617,31 @@ export class CoursePlayer implements OnInit, OnDestroy {
       }
     }
 
-    // Try cache first (Instant Load)
+    // 1. Instant Load from LocalStorage Cache
     const cacheKey = `lang_app_resolved_chapter_${chapterId}`;
     const cachedRaw = localStorage.getItem(cacheKey);
+    let loadedFromLocal = false;
+
     if (cachedRaw) {
       try {
         const cached = JSON.parse(cachedRaw);
         if (cached && cached.contents) {
           this.generateLessonSequence(cached.contents, cached.assessments, cached.chapterInfo);
+          loadedFromLocal = true;
         }
       } catch (e) {}
+    }
+
+    // 2. Instant Load Fallback from active courseStructure in memory (0ms delay)
+    if (!loadedFromLocal && structure) {
+      for (const level of structure.levels) {
+        const chap = level.chapters.find(c => c.id === chapterId);
+        if (chap && chap.contents && chap.contents.length > 0) {
+          this.generateLessonSequence(chap.contents, chap.assessments || [], chap);
+          loadedFromLocal = true;
+          break;
+        }
+      }
     }
 
     // Fetch the full chapter details including contents and assessments in a single request
@@ -727,13 +662,24 @@ export class CoursePlayer implements OnInit, OnDestroy {
     ).subscribe({
       next: (result) => {
         localStorage.setItem(cacheKey, JSON.stringify(result));
-        // Only update signals if we haven't started playing or if it wasn't loaded from cache
-        if (!cachedRaw || this.currentStepIndex() === 0) {
+        // Only update signals if we haven't started playing or if it wasn't loaded from local memory/cache
+        if (!loadedFromLocal || this.currentStepIndex() === 0) {
           this.generateLessonSequence(result.contents, result.assessments, result.chapterInfo);
         }
       },
       error: (err) => {
         console.warn('Failed to load chapter contents from backend, generating fallback sequence:', err);
+        
+        // If it's a 404, the chapter likely was deleted from the backend. 
+        // We must clear the stale caches and force a reload of the course structure.
+        if (err.status === 404) {
+          localStorage.removeItem(cacheKey);
+          localStorage.removeItem('lang_app_course_structure');
+          this.activeChapterId.set(null);
+          this.loadStructure(); // Re-fetch structure which will correct the state
+          return;
+        }
+
         // Only fallback if we don't even have cached content
         if (!localStorage.getItem(cacheKey)) {
           const fallbackContents: Content[] = [

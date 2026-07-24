@@ -195,7 +195,8 @@ export class LearnModulesComponent implements OnInit {
   startCategoryLesson(chap: any) {
     if (chap && chap.id) {
       localStorage.setItem('lang_app_last_chapter_id', chap.id.toString());
-      this.router.navigate(['/learn/play/1'], { queryParams: { chapterId: chap.id, view: 'content' } });
+      const courseId = localStorage.getItem('lang_app_last_course_id') || '2';
+      this.router.navigate([`/learn/play/${courseId}`], { queryParams: { chapterId: chap.id, view: 'content' } });
     }
   }
 
@@ -286,7 +287,8 @@ export class LearnModulesComponent implements OnInit {
   }
 
   playGameGroup(moduleId: string, gameType: string) {
-    this.router.navigate(['/learn/play/1'], { 
+    const courseId = localStorage.getItem('lang_app_last_course_id') || '2';
+    this.router.navigate([`/learn/play/${courseId}`], { 
       queryParams: { 
         view: 'game-mode', 
         moduleId: moduleId, 
@@ -330,98 +332,12 @@ export class LearnModulesComponent implements OnInit {
     // Persist last open module so returning from lesson restores it
     if (next) {
       localStorage.setItem('lang_app_last_expanded_module', next);
-      this.prefetchModuleChapters(next);
     }
   }
 
   prefetchModuleChapters(moduleId: string): void {
-    const targetMod = this.modules().find(m => m.id === moduleId);
-    if (!targetMod || !targetMod.chapters) return;
-
-    targetMod.chapters.forEach((chap: any) => {
-      const chapterId = chap.id;
-      const cacheKey = `lang_app_resolved_chapter_${chapterId}`;
-      
-      // Always fetch in background to keep cache fresh
-      this.http.get<any>(`${environment.apiUrl}/chapters/${chapterId}`).subscribe({
-        next: (chapterData) => {
-          const contents: any[] = (chapterData.contents || [])
-            .filter((c: any) => c.is_active !== false)
-            .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
-
-          const uniqueIds = new Set<number>();
-          const referencePositions: Array<{ contentIdx: number; blockIdx: number; refId: number }> = [];
-
-          contents.forEach((content, contentIdx) => {
-            if (!content.text_content) return;
-            try {
-              const parsed = JSON.parse(content.text_content);
-              if (parsed.blocks && Array.isArray(parsed.blocks)) {
-                parsed.blocks.forEach((block: any, blockIdx: number) => {
-                  if (block.type === 'activity' && block.data) {
-                    const refId = block.data.activityId || block.data.activityReferenceId;
-                    if (refId) {
-                      uniqueIds.add(+refId);
-                      referencePositions.push({ contentIdx, blockIdx, refId: +refId });
-                    }
-                  }
-                });
-              }
-            } catch (e) {}
-          });
-
-            if (uniqueIds.size === 0) {
-              const result = {
-                chapterInfo: chapterData,
-                contents: contents,
-                assessments: chapterData.assessments || []
-              };
-              localStorage.setItem(cacheKey, JSON.stringify(result));
-              this.chapterCacheUpdated.set(Date.now());
-              return;
-            }
-
-            const idsArray = Array.from(uniqueIds);
-            this.http.get<any[]>(`${environment.apiUrl}/activities`, { params: { ids: idsArray.join(',') } }).subscribe({
-              next: (activities) => {
-                const activityMap = new Map<number, any>();
-                activities.forEach(act => {
-                  activityMap.set(act.id, act);
-                });
-
-                referencePositions.forEach(pos => {
-                  const act = activityMap.get(pos.refId);
-                  if (!act) return;
-                  const content = contents[pos.contentIdx];
-                  if (!content.text_content) return;
-                  try {
-                    const parsed = JSON.parse(content.text_content);
-                    const block = parsed.blocks[pos.blockIdx];
-                    const realData = typeof act.data_json === 'string' ? JSON.parse(act.data_json) : act.data_json;
-                    
-                    block.data = {
-                      ...realData,
-                      type: act.type,
-                      title: act.title
-                    };
-                    content.text_content = JSON.stringify(parsed);
-                  } catch (e) {}
-                });
-
-                const result = {
-                  chapterInfo: chapterData,
-                  contents: contents,
-                  assessments: chapterData.assessments || []
-                };
-                localStorage.setItem(cacheKey, JSON.stringify(result));
-                this.chapterCacheUpdated.set(Date.now());
-              },
-              error: () => {}
-            });
-          },
-          error: () => {}
-        });
-    });
+    // Disabled: Chapters are fetched on-demand when the user opens a chapter in the player.
+    return;
   }
 
   loadUserProgressFromStorage(): void {
@@ -649,12 +565,8 @@ export class LearnModulesComponent implements OnInit {
     this.modules.set(dynamicModules);
     this.resolvePendingModule();
 
-    // Prefetch all unlocked modules' chapters silently in the background
-    dynamicModules.forEach(mod => {
-      if (mod.status !== 'locked') {
-        this.prefetchModuleChapters(mod.id);
-      }
-    });
+    // Lazy loading enabled: Chapters are fetched on-demand when the user opens a chapter in the player.
+    // This makes module load instant without firing 15+ background requests.
 
     // Restore last open module; if none saved, auto-expand the first in-progress module
     const savedExpanded = localStorage.getItem('lang_app_last_expanded_module');
@@ -779,16 +691,17 @@ export class LearnModulesComponent implements OnInit {
       localStorage.setItem('lang_app_last_chapter_id', chapterId.toString());
     }
 
+    const courseId = localStorage.getItem('lang_app_last_course_id') || '2';
     if (chapterId) {
-      this.router.navigate(['/learn/play/1'], { queryParams: { chapterId: chapterId, view: 'content' } });
+      this.router.navigate([`/learn/play/${courseId}`], { queryParams: { chapterId: chapterId, view: 'content' } });
     } else {
       const filtered = this.getFilteredChapters();
       const firstChap = filtered.length > 0 ? filtered[0].id : null;
       if (firstChap) {
         localStorage.setItem('lang_app_last_chapter_id', firstChap.toString());
-        this.router.navigate(['/learn/play/1'], { queryParams: { chapterId: firstChap, view: 'content' } });
+        this.router.navigate([`/learn/play/${courseId}`], { queryParams: { chapterId: firstChap, view: 'content' } });
       } else {
-        this.router.navigate(['/learn/play/1']);
+        this.router.navigate([`/learn/play/${courseId}`]);
       }
     }
   }
