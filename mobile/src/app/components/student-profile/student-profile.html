@@ -165,21 +165,16 @@
           <i class="bi bi-exclamation-triangle-fill me-1 fs-6"></i> {{ profileErrorMsg() }}
         </div>
 
-        <!-- Avatar Image -->
-        <div class="text-center mb-4 position-relative">
-          <div class="d-inline-block position-relative">
-            <img src="assets/images/logo.png" alt="Avatar" class="rounded-circle shadow-sm border border-4 border-white bg-light" style="width: 90px; height: 90px; object-fit: contain;">
-            <button class="btn btn-primary rounded-circle position-absolute bottom-0 end-0 p-1 shadow-sm d-flex align-items-center justify-content-center"
-                    style="width: 30px; height: 30px; border: 2px solid white;" (click)="toggleEditMode()" title="Toggle Edit Profile">
-              <i class="bi" [ngClass]="isEditingProfile() ? 'bi-x-lg' : 'bi-pencil-fill'" style="font-size: 0.75rem;"></i>
-            </button>
-          </div>
-        </div>
-
         <!-- READ-ONLY VIEW -->
         <div *ngIf="!isEditingProfile()">
           <div class="text-center mb-4">
-            <img [src]="userAvatar() || 'assets/images/mascot.png'" alt="Avatar" class="rounded-circle shadow-sm border border-4 border-white bg-light" style="width: 95px; height: 95px; object-fit: contain;">
+            <div class="d-inline-block position-relative">
+              <img [src]="userAvatar() || 'assets/images/mascot.png'" alt="Student Avatar" class="rounded-circle shadow-sm border border-4 border-white bg-light" style="width: 95px; height: 95px; object-fit: contain;">
+              <button class="btn btn-primary rounded-circle position-absolute bottom-0 end-0 p-1 shadow-sm d-flex align-items-center justify-content-center"
+                      style="width: 30px; height: 30px; border: 2px solid white;" (click)="toggleEditMode()" title="Edit Profile">
+                <i class="bi bi-pencil-fill" style="font-size: 0.75rem;"></i>
+              </button>
+            </div>
           </div>
 
           <div class="mb-3">
