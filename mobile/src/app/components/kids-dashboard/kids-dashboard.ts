@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, inject, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -23,7 +23,7 @@ export interface DynamicModuleItem {
   templateUrl: './kids-dashboard.html',
   styleUrls: ['./kids-dashboard.css']
 })
-export class KidsDashboard implements OnInit {
+export class KidsDashboard implements OnInit, OnDestroy {
   @Input() structure: any = null;
   @Input() currentView: string = 'levels';
   @Input() activeLevelId: any = null;
@@ -55,10 +55,55 @@ export class KidsDashboard implements OnInit {
   });
 
   dynamicModules = signal<DynamicModuleItem[]>([]);
+  
+  private carouselInterval: any;
+  activeCourseIndex = signal<number>(0);
+  carouselAnimation = signal<string>(''); // Used for triggering css transitions
 
   ngOnInit(): void {
     this.loadUserData();
     this.fetchDashboardData();
+    this.startCourseCarousel();
+  }
+
+  ngOnDestroy(): void {
+    if (this.carouselInterval) {
+      clearInterval(this.carouselInterval);
+    }
+  }
+
+  startCourseCarousel(): void {
+    // If we only have 1 or 0 assigned courses, there's nothing to rotate through 
+    // unless we just want to keep the single item.
+    // The user requested: "next antha green color box irukula course atha 3sec ku oruku slide aagitae irukur amathiri vaikalam 3sec ku aprm nan vera course vacha athu varanum"
+    
+    this.carouselInterval = setInterval(() => {
+      const courses = this.assignedCourses();
+      if (courses && courses.length > 1) {
+        // Trigger fade out
+        this.carouselAnimation.set('fade-out');
+        
+        setTimeout(() => {
+          // Update data
+          let nextIndex = this.activeCourseIndex() + 1;
+          if (nextIndex >= courses.length) {
+            nextIndex = 0;
+          }
+          this.activeCourseIndex.set(nextIndex);
+          
+          const nextCourse = courses[nextIndex];
+          this.activeCourse.set({
+            title: nextCourse.title || nextCourse.name || 'கற்றல் பாடநெறி',
+            chapterName: nextCourse.description || 'பாட அத்தியாயம்',
+            progress: 0, // This could be updated if progress is available per course
+            chapterId: nextCourse.id
+          });
+          
+          // Trigger fade in
+          this.carouselAnimation.set('fade-in');
+        }, 300); // 300ms for fade out transition
+      }
+    }, 3000);
   }
 
   loadUserData(): void {
@@ -130,6 +175,19 @@ export class KidsDashboard implements OnInit {
       progress: percent,
       chapterId: doneCount + 1
     });
+    
+    // If assigned courses are loaded, make sure the active course reflects the first one accurately
+    const courses = this.assignedCourses();
+    if (courses && courses.length > 0) {
+      const firstCourse = courses[0];
+      this.activeCourse.set({
+        title: firstCourse.title || firstCourse.name || courseTitle,
+        chapterName: firstCourse.description || `பாடம் ${doneCount + 1}: ${currentModuleName}`,
+        progress: percent,
+        chapterId: firstCourse.id || doneCount + 1
+      });
+      this.activeCourseIndex.set(0);
+    }
 
     this.initializeModules(allCompleted);
   }
