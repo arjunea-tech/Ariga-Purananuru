@@ -139,9 +139,8 @@ export class KidsDashboard implements OnInit, OnDestroy {
     const scopedIds: number[] = scopedChaptersRaw ? JSON.parse(scopedChaptersRaw) : [];
     const allCompleted = scopedIds.length > 0 ? scopedIds : legacyIds;
     const doneCount = allCompleted.length;
-    this.completedCount.set(doneCount);
-    
-    const percent = this.overallProgress() || Math.min(Math.round((doneCount / 15) * 100), 100);
+    const storedProgress = localStorage.getItem(`lang_app_overall_progress_${userId}`);
+    const percent = storedProgress !== null ? parseFloat(storedProgress) : 0;
     this.overallProgress.set(percent);
 
     let courseTitle = 'கற்றல் பாடநெறி';
@@ -249,6 +248,7 @@ export class KidsDashboard implements OnInit, OnDestroy {
           }
           if (res.completion_percentage !== undefined) {
             this.overallProgress.set(res.completion_percentage);
+            localStorage.setItem(`lang_app_overall_progress_${userId}`, res.completion_percentage.toString());
             // Sync active course card progress with exact server progress
             this.activeCourse.update(ac => ({ ...ac, progress: res.completion_percentage }));
           }
