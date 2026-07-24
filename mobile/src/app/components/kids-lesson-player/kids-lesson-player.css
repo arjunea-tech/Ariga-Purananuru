@@ -276,7 +276,7 @@
 
 @media (max-width: 480px) {
   .reading-content {
-    font-size: 1rem !important;
+    font-size: 0.9rem !important;
   }
   
   .progress-bar {

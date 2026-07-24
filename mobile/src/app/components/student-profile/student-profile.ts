@@ -137,6 +137,10 @@ export class StudentProfileComponent implements OnInit {
     this.fetchMyTickets();
   }
 
+  goBackToHome(): void {
+    this.router.navigate(['/tabs/home']);
+  }
+
   loadUserFromAuth(): void {
     const user = this.authService.getUser();
     if (user) {

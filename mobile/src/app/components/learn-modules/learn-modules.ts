@@ -103,6 +103,9 @@ export class LearnModulesComponent implements OnInit {
         }
       } catch (e) {}
     }
+    // Clear old generic cache to avoid stale data conflicts
+    localStorage.removeItem('lang_app_course_structure');
+
     // Load modules only if we have a cached structure (for speed)
     this.loadFromCacheThenFetch();
   }
@@ -138,6 +141,10 @@ export class LearnModulesComponent implements OnInit {
     this.router.navigate([], { relativeTo: this.route, queryParams: { view: null }, queryParamsHandling: 'merge' });
   }
 
+  goBackToHome() {
+    this.router.navigate(['/tabs/home']);
+  }
+
   openCategoryModule(mod: any) {
     this.router.navigate([], { relativeTo: this.route, queryParams: { view: 'category-details', moduleId: mod.id }, queryParamsHandling: 'merge' });
     this.selectedModuleForDetails.set(mod);
@@ -156,13 +163,16 @@ export class LearnModulesComponent implements OnInit {
 
   private resolvePendingModule() {
     if (this.pendingModuleId && this.modules().length > 0) {
-      const mod = this.modules().find(m => m.id === this.pendingModuleId);
+      const mod = this.modules().find(m => m.id.toString() === this.pendingModuleId!.toString());
       if (mod) {
         this.selectedModuleForDetails.set(mod);
         this.pendingModuleId = null;
         if (!this.backendChapters().some(c => c.moduleId === mod.id)) {
           this.prefetchModuleChapters(mod.id);
         }
+      } else {
+        // Fallback: If module not found in the current course's modules, go back to modules list
+        this.goBackToModules();
       }
     }
   }
@@ -195,8 +205,12 @@ export class LearnModulesComponent implements OnInit {
   startCategoryLesson(chap: any) {
     if (chap && chap.id) {
       localStorage.setItem('lang_app_last_chapter_id', chap.id.toString());
-      const courseId = localStorage.getItem('lang_app_last_course_id') || '2';
-      this.router.navigate([`/learn/play/${courseId}`], { queryParams: { chapterId: chap.id, view: 'content' } });
+      let currentCourseId = localStorage.getItem('lang_app_last_course_id');
+      if (!currentCourseId && this.availableCourses().length > 0) {
+        currentCourseId = this.availableCourses()[0].id.toString();
+      }
+      const courseIdToUse = currentCourseId || 1;
+      this.router.navigate([`/learn/play/${courseIdToUse}`], { queryParams: { chapterId: chap.id, view: 'content' } });
     }
   }
 
@@ -299,7 +313,15 @@ export class LearnModulesComponent implements OnInit {
 
   // ===== CACHE-FIRST LOADING: Show instantly from cache, refresh in background =====
   loadFromCacheThenFetch(): void {
-    const cachedRaw = localStorage.getItem('lang_app_course_structure');
+    let currentCourseId = localStorage.getItem('lang_app_last_course_id');
+    if (!currentCourseId && this.availableCourses().length > 0) {
+      currentCourseId = this.availableCourses()[0].id.toString();
+    }
+    const targetCourseId = currentCourseId || '1';
+    const cacheKey = `lang_app_course_structure_${targetCourseId}`;
+    localStorage.removeItem('lang_app_course_structure'); // Clean up old generic cache
+    const cachedRaw = localStorage.getItem(cacheKey);
+
     if (cachedRaw) {
       try {
         const cached = JSON.parse(cachedRaw);
@@ -406,7 +428,7 @@ export class LearnModulesComponent implements OnInit {
             next: (structure) => {
               if (structure && structure.levels && structure.levels.length > 0) {
                 // Cache the fresh structure for next time
-                localStorage.setItem('lang_app_course_structure', JSON.stringify(structure));
+                localStorage.setItem(`lang_app_course_structure_${targetCourseId}`, JSON.stringify(structure));
                 this.syncModulesWithBackendStructure(structure.levels, structure);
               } else {
                 if (!silent) this.useDefaultModulesFallback();
@@ -691,17 +713,22 @@ export class LearnModulesComponent implements OnInit {
       localStorage.setItem('lang_app_last_chapter_id', chapterId.toString());
     }
 
-    const courseId = localStorage.getItem('lang_app_last_course_id') || '2';
+    let currentCourseId = localStorage.getItem('lang_app_last_course_id');
+    if (!currentCourseId && this.availableCourses().length > 0) {
+      currentCourseId = this.availableCourses()[0].id.toString();
+    }
+    const courseIdToUse = currentCourseId || 1;
+
     if (chapterId) {
-      this.router.navigate([`/learn/play/${courseId}`], { queryParams: { chapterId: chapterId, view: 'content' } });
+      this.router.navigate([`/learn/play/${courseIdToUse}`], { queryParams: { chapterId: chapterId, view: 'content' } });
     } else {
       const filtered = this.getFilteredChapters();
       const firstChap = filtered.length > 0 ? filtered[0].id : null;
       if (firstChap) {
         localStorage.setItem('lang_app_last_chapter_id', firstChap.toString());
-        this.router.navigate([`/learn/play/${courseId}`], { queryParams: { chapterId: firstChap, view: 'content' } });
+        this.router.navigate([`/learn/play/${courseIdToUse}`], { queryParams: { chapterId: firstChap, view: 'content' } });
       } else {
-        this.router.navigate([`/learn/play/${courseId}`]);
+        this.router.navigate([`/learn/play/${courseIdToUse}`]);
       }
     }
   }

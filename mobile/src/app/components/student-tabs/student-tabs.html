@@ -1,6 +1,8 @@
-<div class="mobile-tabs-shell">
+<div class="mobile-tabs-shell"
+     (touchstart)="onTouchStart($event)"
+     (touchend)="onTouchEnd($event)">
   <!-- Dynamic Screen View Container -->
-  <main class="tab-content-area">
+  <main class="tab-content-area" [ngClass]="animationClass()">
     <router-outlet></router-outlet>
   </main>
 

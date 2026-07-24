@@ -247,6 +247,10 @@ export class GamesHubComponent implements OnInit {
     this.router.navigate([], { relativeTo: this.route, queryParams: { view: null }, queryParamsHandling: 'merge' });
   }
 
+  goBackToHome() {
+    this.router.navigate(['/tabs/home']);
+  }
+
   launchPracticeEngine(moduleId: string) {
     this.router.navigate(['/learn/practice'], {
       queryParams: {

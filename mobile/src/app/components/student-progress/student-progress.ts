@@ -1,3 +1,4 @@
+import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -66,6 +67,11 @@ export class StudentProgressComponent implements OnInit {
   protected authService = inject(AuthService);
   private notificationService = inject(NotificationService);
   protected studyTimeService = inject(StudyTimeService);
+  private router = inject(Router);
+
+  goBackToHome(): void {
+    this.router.navigate(['/tabs/home']);
+  }
 
   loadingMyProgress = signal<boolean>(true);
 

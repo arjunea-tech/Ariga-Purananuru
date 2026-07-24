@@ -1,24 +1,46 @@
-<div class="learn-page bg-white">
+<div class="learn-page" style="background: linear-gradient(180deg, #E0F2FE 0%, #F8FAFC 25%); min-height: 100vh; position: relative;">
   
-  <header class="learn-header shadow-sm text-white">
-    <div class="d-flex align-items-center gap-2 w-100">
-      @if (viewState() === 'modules') {
-        <button class="btn btn-link text-white p-0 border-0" (click)="goBackToCourses()">
-          <i class="bi bi-arrow-left fs-4"></i>
+  <!-- Floating Bubbles Background (Unified App Theme) -->
+  <div class="bg-animation-wrapper">
+    <div class="floating-bubble bubble-1"></div>
+    <div class="floating-bubble bubble-2"></div>
+    <div class="floating-bubble bubble-3"></div>
+    <div class="floating-bubble bubble-4"></div>
+    <div class="floating-bubble bubble-5"></div>
+    <div class="floating-bubble bubble-6"></div>
+  </div>
+
+  <header class="learn-header shadow-sm">
+    <div class="d-flex align-items-center gap-2 w-100 position-relative" style="z-index: 10;">
+      @if (viewState() === 'courses') {
+        <button class="btn p-0 border-0 flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center shadow-sm bg-white text-primary" 
+                style="width: 38px; height: 38px;" 
+                (click)="goBackToHome()">
+          <i class="bi bi-chevron-left" style="font-size: 1.2rem; stroke-width: 2px;"></i>
+        </button>
+      } @else if (viewState() === 'modules') {
+        <button class="btn p-0 border-0 flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center shadow-sm bg-white text-primary" 
+                style="width: 38px; height: 38px;" 
+                (click)="goBackToCourses()">
+          <i class="bi bi-chevron-left" style="font-size: 1.2rem; stroke-width: 2px;"></i>
         </button>
       } @else if (viewState() === 'category-details') {
         @if (selectedTabForModule()) {
-          <button class="btn btn-link text-white p-0 border-0" (click)="clearTab($event)">
-            <i class="bi bi-arrow-left fs-4"></i>
+          <button class="btn p-0 border-0 flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center shadow-sm bg-white text-primary" 
+                  style="width: 38px; height: 38px;" 
+                  (click)="clearTab($event)">
+            <i class="bi bi-chevron-left" style="font-size: 1.2rem; stroke-width: 2px;"></i>
           </button>
         } @else {
-          <button class="btn btn-link text-white p-0 border-0" (click)="goBackToModules()">
-            <i class="bi bi-arrow-left fs-4"></i>
+          <button class="btn p-0 border-0 flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center shadow-sm bg-white text-primary" 
+                  style="width: 38px; height: 38px;" 
+                  (click)="goBackToModules()">
+            <i class="bi bi-chevron-left" style="font-size: 1.2rem; stroke-width: 2px;"></i>
           </button>
         }
       }
       <div>
-        <h1 class="h4 fw-extrabold text-white mb-0">
+        <h1 class="h4 fw-extrabold mb-0" style="color: #0EA5E9;">
           @if (viewState() === 'category-details' && selectedModuleForDetails(); as mod) {
             @if (selectedTabForModule() === 'lesson') {
               {{ mod.titleTa || mod.id }} பாடங்கள்
@@ -134,7 +156,7 @@
                   <div class="card border-0 rounded-4 p-4 text-center cursor-pointer hover-lift h-100 transition-all" 
                        style="background: #E0F2FE; box-shadow: 0 4px 14px rgba(14, 165, 233, 0.12);" 
                        (click)="selectTab('lesson')">
-                     <div class="fs-1 mb-2">📚</div>
+                     <i class="bi bi-book-half fs-1 mb-2 d-block" style="color: #0EA5E9;"></i>
                      <h4 class="fw-extrabold text-dark mb-1" style="font-size: 1.15rem;">பாடம்</h4>
                      <span class="text-muted small">கற்றல் பாடங்கள்</span>
                   </div>
@@ -143,7 +165,7 @@
                   <div class="card border-0 rounded-4 p-4 text-center cursor-pointer hover-lift h-100 transition-all" 
                        style="background: #FEF3C7; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.12);" 
                        (click)="selectTab('game')">
-                     <div class="fs-1 mb-2">🎮</div>
+                     <i class="bi bi-controller fs-1 mb-2 d-block" style="color: #F59E0B;"></i>
                      <h4 class="fw-extrabold text-dark mb-1" style="font-size: 1.15rem;">விளையாட்டு</h4>
                      <span class="text-muted small">பயிற்சி விளையாட்டுகள்</span>
                   </div>

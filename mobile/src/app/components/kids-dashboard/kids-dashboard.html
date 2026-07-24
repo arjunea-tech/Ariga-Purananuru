@@ -1,105 +1,98 @@
-<div class="mobile-home-page bg-light min-vh-100 position-relative" style="padding-bottom: 120px;">
-  
-  <!-- Animated Background Shapes -->
-  <div class="bg-animation-wrapper">
-    <div class="bg-shape shape-1"></div>
-    <div class="bg-shape shape-2"></div>
-    <div class="bg-shape shape-3"></div>
-  </div>
-
-  <div class="content-wrapper">
-    <!-- Premium Header (76px Safe Area Notch Clearance) -->
-    <header class="home-header">
-      <div class="d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center gap-2">
-          <div>
-            <h1 class="greeting-title mb-0">{{ userName() }} 👋</h1>
-          </div>
-        </div>
-
-        <!-- Live Dynamic Streak & XP Badges -->
-        <div class="d-flex align-items-center gap-2">
-          <div class="stat-pill-badge streak-badge">
-            <span>🔥</span>
-            <span class="fw-bold">{{ streakDays() }} நாள்</span>
-          </div>
-          <div class="stat-pill-badge xp-badge">
-            <span>⭐</span>
-            <span class="fw-bold">{{ xpPoints() | number }} XP</span>
-          </div>
-        </div>
+<div class="mobile-home-page">
+  <!-- Clean & Professional Top Header -->
+  <header class="top-bar">
+    <div class="d-flex align-items-center gap-3">
+      <div class="avatar-emoji">
+        👦🏽
       </div>
-    </header>
-
-    <div class="container-fluid px-3 py-3">
-
-      <!-- Active Course Heading -->
-      <div class="section-heading mb-3">
-        <h2 class="fw-bold text-dark mb-0">எனது பாடநெறிகள் (My Courses)</h2>
+      <div>
+        <div class="greeting-subtitle">{{ timeGreeting() }},</div>
+        <div class="greeting-name">{{ userName() }}!</div>
       </div>
+    </div>
+    
+    <div class="d-flex align-items-center gap-2">
+      <div class="streak-pill shadow-sm">
+        <i class="bi bi-fire"></i> {{ streakDays() }}
+      </div>
+    </div>
+  </header>
 
-      <!-- Single Active Course Hero Card (Carousel) -->
-      <div class="card active-course-card p-4 mb-4 carousel-slide" [ngClass]="carouselAnimation()">
-        <div class="mb-3 mt-1">
-          <h2 class="fw-extrabold mb-1" style="font-size: 1.25rem; line-height: 1.3;">
-            {{ activeCourse().title }}
-          </h2>
-          <span class="fw-semibold d-block mt-2" style="font-size: 0.9rem; opacity: 0.9;">{{ activeCourse().chapterName }}</span>
+  <div class="content-wrapper container-fluid px-3 pt-3">
+    
+    <!-- Continue Learning Section -->
+    <div class="section-title mb-3 d-flex align-items-center justify-content-between animate-fade-in">
+      <h2 class="mb-0">தொடர்ந்து படிக்க</h2>
+    </div>
+
+    <!-- Professional Course Card -->
+    <div class="continue-learning-card p-4 mb-4 animate-slide-up-1" (click)="startNextLesson()">
+      <div class="carousel-slide" [ngClass]="carouselAnimation()">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <span class="course-badge">பயிற்சியில் உள்ளது</span>
         </div>
-
-        <button class="btn w-100 rounded-pill py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2 hover-lift mt-3"
-                (click)="startNextLesson()">
-          <span>{{ overallProgress() > 0 ? 'தொடர்ந்து பயில்க' : 'பாடத்தைத் தொடங்கு' }}</span>
-          <i class="bi bi-arrow-right fs-5"></i>
-        </button>
         
-        <!-- Carousel Indicators (Dots) if multiple courses exist -->
-        @if (assignedCourses().length > 1) {
-          <div class="d-flex justify-content-center gap-1 mt-3">
-            @for (course of assignedCourses(); track course.id; let i = $index) {
-              <div class="rounded-pill" 
-                   [style.width]="i === activeCourseIndex() ? '16px' : '6px'" 
-                   [style.height]="'6px'"
-                   [style.background]="i === activeCourseIndex() ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)'"
-                   style="transition: all 0.3s ease;">
-              </div>
-            }
+        <h3 class="course-title mb-3">{{ activeCourse().title }}</h3>
+        
+        <div class="d-flex justify-content-between align-items-end">
+          <div class="flex-grow-1 me-3">
+            <div class="d-flex justify-content-between mb-2">
+              <span class="small fw-bold text-secondary">Progress</span>
+              <span class="small fw-bold text-success">{{ activeCourse().progress }}%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" [style.width.%]="activeCourse().progress"></div>
+            </div>
           </div>
-        }
+          
+          <button class="btn btn-play shadow-sm d-flex align-items-center gap-2">
+            தொடர்க <i class="bi bi-play-fill fs-5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Access Section -->
+    <div class="section-title mb-3 animate-slide-up-2">
+      <h2 class="mb-0">விரைவு பயிற்சிகள்</h2>
+    </div>
+
+    <!-- Professional Grid System -->
+    <div class="quick-access-grid mb-5 pb-4 animate-slide-up-2">
+      
+      <div class="grid-card cursor-pointer" (click)="openCourse(assignedCourses()[0])">
+        <div class="grid-icon-wrapper icon-blue">
+          <i class="bi bi-book"></i>
+        </div>
+        <h3 class="grid-title">என் பாடங்கள்</h3>
+        <span class="grid-subtitle">Courses</span>
       </div>
 
-      <!-- Quick Practice Hub Section -->
-      <div class="section-heading mb-3 mt-4">
-        <h2 class="fw-bold text-dark mb-1">பயிற்சிகள் & விளையாட்டுகள் (Quick Hub)</h2>
-        <p class="extra-small text-muted mb-0">உடனடிப் பயிற்சிகளைத் தொடங்க கிளிக் செய்யவும்</p>
+      <div class="grid-card cursor-pointer" (click)="startQuickQuiz()">
+        <div class="grid-icon-wrapper icon-amber">
+          <i class="bi bi-controller"></i>
+        </div>
+        <h3 class="grid-title">பயிற்சிகள்</h3>
+        <span class="grid-subtitle">Practice Hub</span>
       </div>
 
-      <div class="row g-3 mb-4">
-        <div class="col-6">
-          <div class="card action-hub-card p-3 text-center cursor-pointer d-flex flex-column align-items-center justify-content-center"
-               style="background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);"
-               (click)="startQuickQuiz()">
-            <div class="rounded-circle bg-white text-warning shadow-sm p-2 mb-2 d-flex align-items-center justify-content-center hover-lift" style="width: 54px; height: 54px;">
-              <i class="bi bi-controller fs-2" style="color: #D97706;"></i>
-            </div>
-            <h3 class="fw-extrabold text-dark small mb-1" style="font-size: 0.95rem;">விளையாட்டுப் பயிற்சி</h3>
-            <span class="badge bg-white text-warning rounded-pill px-3 py-1 extra-small fw-bold border border-warning border-opacity-25 mt-1">Games Hub</span>
-          </div>
+      <div class="grid-card cursor-pointer" (click)="openLeaderboard()">
+        <div class="grid-icon-wrapper icon-purple">
+          <i class="bi bi-trophy"></i>
         </div>
-
-        <div class="col-6">
-          <div class="card action-hub-card p-3 text-center cursor-pointer d-flex flex-column align-items-center justify-content-center"
-               style="background: linear-gradient(135deg, #EEF2FF 0%, #C7D2FE 100%);"
-               (click)="openLeaderboard()">
-            <div class="rounded-circle bg-white text-primary shadow-sm p-2 mb-2 d-flex align-items-center justify-content-center hover-lift" style="width: 54px; height: 54px;">
-              <i class="bi bi-trophy-fill fs-2" style="color: #4F46E5;"></i>
-            </div>
-            <h3 class="fw-extrabold text-dark small mb-1" style="font-size: 0.95rem;">மாணவர் தரவரிசை</h3>
-            <span class="badge bg-white text-primary rounded-pill px-3 py-1 extra-small fw-bold border border-primary border-opacity-25 mt-1">Leaderboard</span>
-          </div>
+        <h3 class="grid-title">லீடர்போர்டு</h3>
+        <span class="grid-subtitle">Rankings</span>
+      </div>
+      
+      <div class="grid-card cursor-pointer">
+        <div class="grid-icon-wrapper icon-emerald">
+          <i class="bi bi-star"></i>
         </div>
+        <h3 class="grid-title">சாதனைகள்</h3>
+        <span class="grid-subtitle">Achievements</span>
       </div>
 
     </div>
+
   </div>
 </div>
