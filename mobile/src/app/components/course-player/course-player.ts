@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed, effect } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { forkJoin, Observable, of } from 'rxjs';
 import { map, switchMap, catchError } from 'rxjs/operators';
@@ -70,6 +70,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
   private courseService = inject(CourseService);
   private audioService = inject(AudioService);
   private authService = inject(AuthService);
+  private location = inject(Location);
 
   courseId = signal<number | null>(null);
   userId = signal<number>(1);
@@ -264,8 +265,9 @@ export class CoursePlayer implements OnInit, OnDestroy {
       return;
     }
 
-    // Try loading from localStorage first (Instant / Cache-First)
-    const cachedRaw = localStorage.getItem('lang_app_course_structure');
+    const cacheKey = `lang_app_course_structure_${this.courseId() || 1}`;
+    localStorage.removeItem('lang_app_course_structure'); // Clean up old generic cache
+    const cachedRaw = localStorage.getItem(cacheKey);
     if (cachedRaw) {
       try {
         const cached = JSON.parse(cachedRaw);
@@ -276,7 +278,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
           const url = `${environment.apiUrl}/courses/${this.courseId()}/player-structure`;
           this.http.get<CourseStructure>(url).subscribe({
             next: (structure) => {
-              localStorage.setItem('lang_app_course_structure', JSON.stringify(structure));
+              localStorage.setItem(cacheKey, JSON.stringify(structure));
               this.courseStructure.set(structure);
             },
             error: () => {}
@@ -289,7 +291,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
     const url = `${environment.apiUrl}/courses/${this.courseId()}/player-structure`;
     this.http.get<CourseStructure>(url).subscribe({
       next: (structure) => {
-        localStorage.setItem('lang_app_course_structure', JSON.stringify(structure));
+        localStorage.setItem(`lang_app_course_structure_${this.courseId() || 1}`, JSON.stringify(structure));
         this.initializeStructure(structure);
       },
       error: (err) => {
@@ -1025,25 +1027,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
   }
 
   goToMap(): void {
-    let modId: any = this.activeLevelId();
-    if (!modId) {
-      modId = localStorage.getItem('lang_app_last_expanded_module');
-    }
-    if (modId) {
-      this.router.navigate(['/tabs/learn'], {
-        queryParams: {
-          view: 'category-details',
-          moduleId: modId,
-          tab: 'lesson'
-        }
-      });
-    } else {
-      this.router.navigate(['/tabs/learn'], {
-        queryParams: {
-          view: 'modules'
-        }
-      });
-    }
+    this.location.back();
   }
 
   goToActivity(): void {

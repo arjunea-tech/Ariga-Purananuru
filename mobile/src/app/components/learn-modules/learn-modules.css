@@ -4,9 +4,8 @@
 }
 
 .learn-header {
-  background: #DCFCE7 !important; /* Flat soft mint - no gradient */
-  color: #16A34A !important;
-  box-shadow: none;
+  /* No hardcoded colors - it will inherit the glassy look from global styles.css */
+  border-bottom: 1px solid rgba(14, 165, 233, 0.15) !important;
 }
 
 .hover-lift {

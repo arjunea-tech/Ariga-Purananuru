@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { environment } from '../../../environments/environment';
+import confetti from 'canvas-confetti';
 
 export interface DynamicModuleItem {
   id: string;
@@ -39,11 +40,18 @@ export class KidsDashboard implements OnInit, OnDestroy {
   private router = inject(Router);
 
   userName = signal<string>('Student');
+  timeGreeting = signal<string>('வணக்கம்'); // Time based greeting
+  
   streakDays = signal<number>(1);
   xpPoints = signal<number>(150);
   completedCount = signal<number>(0);
   totalCount = signal<number>(15);
   overallProgress = signal<number>(0);
+
+  // Daily Goal (e.g. 15 mins a day)
+  dailyGoalMins = signal<number>(15);
+  dailyCompletedMins = signal<number>(12); // Simulated value
+  dailyGoalProgress = signal<number>(80);
 
   assignedCourses = signal<any[]>([]);
 
@@ -61,6 +69,7 @@ export class KidsDashboard implements OnInit, OnDestroy {
   carouselAnimation = signal<string>(''); // Used for triggering css transitions
 
   ngOnInit(): void {
+    this.updateTimeGreeting();
     this.loadUserData();
     this.fetchDashboardData();
     this.startCourseCarousel();
@@ -72,19 +81,24 @@ export class KidsDashboard implements OnInit, OnDestroy {
     }
   }
 
+  updateTimeGreeting(): void {
+    const hour = new Date().getHours();
+    if (hour < 12) {
+      this.timeGreeting.set('காலை வணக்கம்');
+    } else if (hour < 17) {
+      this.timeGreeting.set('மதிய வணக்கம்');
+    } else {
+      this.timeGreeting.set('மாலை வணக்கம்');
+    }
+  }
+
   startCourseCarousel(): void {
-    // If we only have 1 or 0 assigned courses, there's nothing to rotate through 
-    // unless we just want to keep the single item.
-    // The user requested: "next antha green color box irukula course atha 3sec ku oruku slide aagitae irukur amathiri vaikalam 3sec ku aprm nan vera course vacha athu varanum"
-    
     this.carouselInterval = setInterval(() => {
       const courses = this.assignedCourses();
       if (courses && courses.length > 1) {
-        // Trigger fade out
         this.carouselAnimation.set('fade-out');
         
         setTimeout(() => {
-          // Update data
           let nextIndex = this.activeCourseIndex() + 1;
           if (nextIndex >= courses.length) {
             nextIndex = 0;
@@ -95,13 +109,12 @@ export class KidsDashboard implements OnInit, OnDestroy {
           this.activeCourse.set({
             title: nextCourse.title || nextCourse.name || 'கற்றல் பாடநெறி',
             chapterName: nextCourse.description || 'பாட அத்தியாயம்',
-            progress: 0, // This could be updated if progress is available per course
+            progress: 0, 
             chapterId: nextCourse.id
           });
           
-          // Trigger fade in
           this.carouselAnimation.set('fade-in');
-        }, 300); // 300ms for fade out transition
+        }, 300);
       }
     }, 3000);
   }
@@ -114,14 +127,12 @@ export class KidsDashboard implements OnInit, OnDestroy {
     }
     const userId = user?.id || 1;
 
-    // Load streak & XP dynamically from storage
     const storedStreak = localStorage.getItem(`lang_app_streak_${userId}`);
     if (storedStreak) this.streakDays.set(+storedStreak);
 
     const storedXp = localStorage.getItem(`lang_app_xp_${userId}`);
     if (storedXp) this.xpPoints.set(+storedXp);
 
-    // Calculate completed chapter IDs
     const legacyChaptersRaw = localStorage.getItem('completed_chapters');
     const scopedChaptersRaw = localStorage.getItem(`lang_app_completed_chapters_${userId}_1`);
     const legacyIds: number[] = legacyChaptersRaw ? JSON.parse(legacyChaptersRaw) : [];
@@ -134,7 +145,6 @@ export class KidsDashboard implements OnInit, OnDestroy {
     this.overallProgress.set(percent);
 
     const currentModuleIndex = Math.min(Math.floor(doneCount / 3), 4);
-    // Try to get real course title and chapter name dynamically
     let courseTitle = 'கற்றல் பாடநெறி';
     let currentModuleName = 'பாட அத்தியாயம்';
     try {
@@ -152,7 +162,6 @@ export class KidsDashboard implements OnInit, OnDestroy {
         }
       }
 
-      // Also try to get real structure to get the current chapter name
       const cachedStructureRaw = localStorage.getItem('lang_app_course_structure');
       if (cachedStructureRaw) {
         const struct = JSON.parse(cachedStructureRaw);
@@ -176,7 +185,6 @@ export class KidsDashboard implements OnInit, OnDestroy {
       chapterId: doneCount + 1
     });
     
-    // If assigned courses are loaded, make sure the active course reflects the first one accurately
     const courses = this.assignedCourses();
     if (courses && courses.length > 0) {
       const firstCourse = courses[0];
@@ -248,18 +256,39 @@ export class KidsDashboard implements OnInit, OnDestroy {
     });
   }
 
+  triggerConfetti(): void {
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#4F46E5', '#10B981', '#F59E0B', '#EC4899']
+    });
+  }
+
   continueLearning(): void {
     this.router.navigate(['/tabs/learn']);
   }
 
   startNextLesson(): void {
-    const nextId = this.completedCount() + 1;
-    this.selectChapterNode.emit(nextId);
-    this.router.navigate(['/tabs/learn']);
+    this.triggerConfetti();
+    setTimeout(() => {
+      const courses = this.assignedCourses();
+      const activeIdx = this.activeCourseIndex();
+      if (courses && courses[activeIdx]) {
+        this.openCourse(courses[activeIdx]);
+      } else {
+        const nextId = this.completedCount() + 1;
+        this.selectChapterNode.emit(nextId);
+        this.router.navigate(['/tabs/learn']);
+      }
+    }, 600); // Wait for confetti before navigating
   }
 
   startQuickQuiz(): void {
-    this.router.navigate(['/tabs/games']);
+    this.triggerConfetti();
+    setTimeout(() => {
+      this.router.navigate(['/tabs/games']);
+    }, 400);
   }
 
   openLeaderboard(): void {
@@ -277,21 +306,21 @@ export class KidsDashboard implements OnInit, OnDestroy {
 
   getCategoryBg(id: string): string {
     const bgs: Record<string, string> = {
-      'ezhuthu': '#FFF3C7', // pastel yellow
-      'asai': '#E0F4FF', // pastel blue
-      'seer': '#E2FBE8', // pastel green
-      'thalai': '#FDE2EC', // pastel pink
-      'alagidhal': '#F3E8FF' // pastel purple
+      'ezhuthu': '#FFF3C7',
+      'asai': '#E0F4FF',
+      'seer': '#E2FBE8',
+      'thalai': '#FDE2EC',
+      'alagidhal': '#F3E8FF'
     };
     return bgs[id] || '#F3F4F6';
   }
 
   getCategoryIcon(id: string): string {
     const icons: Record<string, string> = {
-      'ezhuthu': '🔤', // ABC equivalent
-      'asai': '🔢',  // Numbers equivalent
-      'seer': '🦁',  // Animals
-      'thalai': '🟢', // Shapes
+      'ezhuthu': '🔤',
+      'asai': '🔢',
+      'seer': '🦁',
+      'thalai': '🟢',
       'alagidhal': '🌟'
     };
     return icons[id] || '📚';

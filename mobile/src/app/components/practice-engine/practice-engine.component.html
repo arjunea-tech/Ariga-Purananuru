@@ -10,10 +10,10 @@
     <header *ngIf="!isEmbeddedInLesson && step !== 'dashboard_menu' && step !== 'dashboard_input'"
       class="page-header orange-theme w-100" style="margin-top: 0;">
       <div class="w-100 d-flex align-items-center justify-content-between">
-        <button
-          class="btn btn-link p-0 border-0 flex-shrink-0"
-          style="color: #EA580C;" (click)="goBackToGames()">
-          <i class="bi bi-arrow-left fs-4"></i>
+        <button class="btn p-0 border-0 flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
+                style="width: 38px; height: 38px; background: #FFFFFF; color: #EA580C;" 
+                (click)="goBackToGames()">
+          <i class="bi bi-chevron-left" style="font-size: 1.2rem; stroke-width: 2px;"></i>
         </button>
         <h1 class="fw-extrabold mb-0 text-truncate text-center flex-grow-1 px-2" style="font-size: 1.15rem; color: #EA580C;">
           {{ getModuleTitle() }}
