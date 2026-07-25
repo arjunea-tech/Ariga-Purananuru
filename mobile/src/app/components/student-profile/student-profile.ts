@@ -2,7 +2,7 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { environment } from '../../../environments/environment';
 import confetti from 'canvas-confetti';
@@ -52,6 +52,7 @@ export class StudentProfileComponent implements OnInit {
   protected authService = inject(AuthService);
   private http = inject(HttpClient);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
 
   // User identity — from auth service (real login data)
   userName = signal<string>('');
@@ -135,6 +136,18 @@ export class StudentProfileComponent implements OnInit {
     this.loadUserFromAuth();
     this.fetchProfileStats();
     this.fetchMyTickets();
+
+    this.route.queryParams.subscribe(params => {
+      const modal = params['modal'];
+      if (modal && ['personal_info', 'certificates', 'stats', 'help'].includes(modal)) {
+        this.activeModal.set(modal as any);
+      } else {
+        this.activeModal.set('none');
+        this.isEditingProfile.set(false);
+        this.showCertPreview.set(false);
+        this.profileErrorMsg.set('');
+      }
+    });
   }
 
   goBackToHome(): void {
@@ -324,7 +337,7 @@ export class StudentProfileComponent implements OnInit {
       if (item.id === 'personal_info') {
         this.startEditProfile();
       }
-      this.activeModal.set(item.id);
+      this.router.navigate([], { relativeTo: this.route, queryParams: { modal: item.id }, queryParamsHandling: 'merge' });
     }
   }
 
@@ -587,10 +600,7 @@ export class StudentProfileComponent implements OnInit {
   }
 
   closeModal() {
-    this.activeModal.set('none');
-    this.isEditingProfile.set(false);
-    this.showCertPreview.set(false);
-    this.profileErrorMsg.set('');
+    this.router.navigate([], { relativeTo: this.route, queryParams: { modal: null }, queryParamsHandling: 'merge' });
   }
 
   logout() {
