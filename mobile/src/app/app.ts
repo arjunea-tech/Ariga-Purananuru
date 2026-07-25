@@ -189,6 +189,10 @@ export class App implements OnInit {
     if (rootTabs.includes(path)) {
       if (path === '/tabs/learn' && (rawUrl.includes('view=category-details') || rawUrl.includes('view=modules'))) {
         this.location.back();
+      } else if (path === '/tabs/profile' && rawUrl.includes('modal=')) {
+        this.location.back();
+      } else if (path === '/tabs/games' && rawUrl.includes('view=')) {
+        this.location.back();
       } else {
         this.router.navigateByUrl('/tabs/home', { replaceUrl: true });
       }

@@ -264,10 +264,11 @@ export class GamesHubComponent implements OnInit {
     this.router.navigate(['/tabs/home']);
   }
 
-  launchPracticeEngine(moduleId: string) {
+  launchPracticeEngine(moduleId: string, moduleLabel?: string) {
     this.router.navigate(['/learn/practice'], {
       queryParams: {
-        module: moduleId
+        module: moduleId,
+        moduleName: moduleLabel
       }
     });
   }

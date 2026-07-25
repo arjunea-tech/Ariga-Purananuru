@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, Output, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { TamilNLPService, SeiyulAnalysis } from '../../services/tamil-nlp.service';
@@ -84,7 +84,8 @@ export class PracticeEngineComponent implements OnInit {
     private tamilNLP: TamilNLPService,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private location: Location
   ) { }
 
   getRandomTamilLetter(): string {
@@ -114,13 +115,24 @@ export class PracticeEngineComponent implements OnInit {
     this.route.queryParams.subscribe(params => {
       const mode = params['mode'];
       const mod = params['module'];
+      const modName = params['moduleName'] || '';
+      const stepParam = params['step'];
 
       if (mod && mod !== 'all') {
-        if (mod === 'ezhuthu') this.activeTab = 'eluthu';
-        else if (mod === 'asai') this.activeTab = 'asai';
-        else if (mod === 'seer') this.activeTab = 'seer';
-        else if (mod === 'thalai') this.activeTab = 'thalai';
-        else if (mod === 'alagidhal') this.activeTab = 'alahidu';
+        let detectedMod = mod;
+        if (modName) {
+           if (modName.includes('எழுத்து')) detectedMod = 'ezhuthu';
+           else if (modName.includes('அசை')) detectedMod = 'asai';
+           else if (modName.includes('சீர்')) detectedMod = 'seer';
+           else if (modName.includes('தளை')) detectedMod = 'thalai';
+           else if (modName.includes('அலகிடு') || modName.includes('யாப்பு')) detectedMod = 'alagidhal';
+        }
+
+        if (detectedMod === 'ezhuthu') this.activeTab = 'eluthu';
+        else if (detectedMod === 'asai') this.activeTab = 'asai';
+        else if (detectedMod === 'seer') this.activeTab = 'seer';
+        else if (detectedMod === 'thalai') this.activeTab = 'thalai';
+        else if (detectedMod === 'alagidhal') this.activeTab = 'alahidu';
         this.practiceType = this.activeTab;
       } else {
         // When All Modules is selected, pick activeTab dynamically based on game type
@@ -139,15 +151,15 @@ export class PracticeEngineComponent implements OnInit {
       if (mode) {
         this.isGameMode = true;
         this.playMode = 'practice';
-        this.step = 'input_word';
-        if (this.practiceType === 'eluthu') {
+        this.step = stepParam || 'input_word';
+        if (this.practiceType === 'eluthu' && !stepParam) {
           this.interactiveWord = this.getRandomTamilLetter();
-        } else {
+        } else if (!stepParam) {
           this.interactiveWord = this.getRandomAsaiWord();
         }
       } else if (mod) {
         this.isGameMode = true;
-        this.step = 'select_mode';
+        this.step = stepParam || 'select_mode';
       }
     });
 
@@ -186,7 +198,7 @@ export class PracticeEngineComponent implements OnInit {
   // --- INTERACTIVE FLOW METHODS --- //
 
   goBackToGames() {
-    this.router.navigate(['/tabs/games']);
+    this.location.back();
   }
 
   getModuleTitle(): string {
@@ -201,8 +213,13 @@ export class PracticeEngineComponent implements OnInit {
   selectPlayMode(mode: 'explain' | 'practice') {
     this.playMode = mode;
     this.feedbackMessage = null;
-    this.step = 'input_word';
     this.interactiveWord = '';
+    
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { step: 'input_word' },
+      queryParamsHandling: 'merge'
+    });
   }
 
   toggleFullscreen() {
@@ -222,11 +239,11 @@ export class PracticeEngineComponent implements OnInit {
   }
 
   goBackToInput() {
-    if (!this.isGameMode) {
-      this.step = 'dashboard_input';
-    } else {
-      this.step = 'select_mode';
+    let nextStep = 'dashboard_input';
+    if (this.isGameMode) {
+      nextStep = 'select_mode';
     }
+    
     this.interactiveWord = '';
     this.interactiveAnalysis = null;
     this.interactiveParts = [];
@@ -242,6 +259,12 @@ export class PracticeEngineComponent implements OnInit {
     this.interactiveCurrentThalaiIndex = 0;
     this.interactiveThalaiValidationResults = [];
     this.feedbackMessage = null;
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { step: nextStep },
+      queryParamsHandling: 'merge'
+    });
   }
 
   submitUserWord() {
