@@ -276,42 +276,13 @@ export class CoursePlayer implements OnInit, OnDestroy {
     }
 
     const cid = currentCid || this.courseId() || 1;
-    const cacheKey = `lang_app_course_structure_${cid}`;
-    const cachedRaw = localStorage.getItem(cacheKey) || localStorage.getItem('lang_app_course_structure');
-    if (cachedRaw) {
-      try {
-        const cached = JSON.parse(cachedRaw);
-        if (cached) {
-          this.initializeStructure(cached);
-          
-          // Silently refresh in background
-          const url = `${environment.apiUrl}/courses/${cid}/player-structure`;
-          this.http.get<CourseStructure>(url).subscribe({
-            next: (structure) => {
-              localStorage.setItem(cacheKey, JSON.stringify(structure));
-              this.courseStructure.set(structure);
-            },
-            error: () => {}
-          });
-          return;
-        }
-      } catch (e) {}
-    }
-
     const url = `${environment.apiUrl}/courses/${cid}/player-structure`;
     this.http.get<CourseStructure>(url).subscribe({
       next: (structure) => {
-        localStorage.setItem(cacheKey, JSON.stringify(structure));
-        localStorage.setItem('lang_app_last_course_id', String(structure.id));
         this.initializeStructure(structure);
       },
       error: () => {
-        // Clear stale local storage cache for this broken course
-        localStorage.removeItem('lang_app_course_structure');
-        localStorage.removeItem('lang_app_last_course_id');
         this.courseStructure.set(null);
-
-        // If specific courseId failed (e.g. 404 for deleted ID), fetch real active course from API
         this.http.get<any[]>(`${environment.apiUrl}/courses`).subscribe({
           next: (courses) => {
             if (courses && courses.length > 0 && courses[0].id !== currentCid) {
@@ -333,9 +304,8 @@ export class CoursePlayer implements OnInit, OnDestroy {
       });
     });
     this.courseStructure.set(structure);
-    this.loadLocalProgress();
+    this.loadDatabaseProgress();
 
-    // Check if there is a pending chapterId in the query parameters to load
     const params = this.route.snapshot.queryParams;
     const chapterId = params['chapterId'] ? +params['chapterId'] : null;
     const gameType = params['gameType'];
@@ -348,20 +318,18 @@ export class CoursePlayer implements OnInit, OnDestroy {
     }
   }
 
-  loadLocalProgress(): void {
+  loadDatabaseProgress(): void {
     const cid = this.courseId();
     if (!cid) return;
-    const uid = this.userId();
-    try {
-      const levelsKey = `lang_app_completed_levels_${uid}_${cid}`;
-      const chaptersKey = `lang_app_completed_chapters_${uid}_${cid}`;
-      const storedLevels = localStorage.getItem(levelsKey);
-      const storedChapters = localStorage.getItem(chaptersKey);
-      this.completedLevelIds.set(storedLevels ? JSON.parse(storedLevels) : []);
-      this.completedChapterIds.set(storedChapters ? JSON.parse(storedChapters) : []);
-    } catch (e) {
-      console.error('Failed to load local progress:', e);
-    }
+    // Always fetch direct from database API
+    this.http.get<any>(`${environment.apiUrl}/student/dashboard`).subscribe({
+      next: (res) => {
+        if (res && res.completed_chapter_ids && Array.isArray(res.completed_chapter_ids)) {
+          this.completedChapterIds.set(res.completed_chapter_ids);
+        }
+      },
+      error: () => {}
+    });
   }
 
   saveLocalProgress(): void {

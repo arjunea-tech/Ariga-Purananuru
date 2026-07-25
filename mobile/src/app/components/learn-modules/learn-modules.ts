@@ -103,11 +103,8 @@ export class LearnModulesComponent implements OnInit {
         }
       } catch (e) {}
     }
-    // Clear old generic cache to avoid stale data conflicts
-    localStorage.removeItem('lang_app_course_structure');
-
-    // Load modules only if we have a cached structure (for speed)
-    this.loadFromCacheThenFetch();
+    // Load modules direct from backend DB
+    this.loadModules();
   }
 
   getCategoryBg(id: string): string {
@@ -301,8 +298,7 @@ export class LearnModulesComponent implements OnInit {
   }
 
   playGameGroup(moduleId: string, gameType: string) {
-    const courseId = localStorage.getItem('lang_app_last_course_id') || '2';
-    this.router.navigate([`/learn/play/${courseId}`], { 
+    this.router.navigate([`/learn/play/1`], { 
       queryParams: { 
         view: 'game-mode', 
         moduleId: moduleId, 
@@ -311,36 +307,12 @@ export class LearnModulesComponent implements OnInit {
     });
   }
 
-  // ===== CACHE-FIRST LOADING: Show instantly from cache, refresh in background =====
-  loadFromCacheThenFetch(): void {
-    let currentCourseId = localStorage.getItem('lang_app_last_course_id');
-    if (!currentCourseId && this.availableCourses().length > 0) {
-      currentCourseId = this.availableCourses()[0].id.toString();
-    }
-    const targetCourseId = currentCourseId || '1';
-    const cacheKey = `lang_app_course_structure_${targetCourseId}`;
-    localStorage.removeItem('lang_app_course_structure'); // Clean up old generic cache
-    const cachedRaw = localStorage.getItem(cacheKey);
-
-    if (cachedRaw) {
-      try {
-        const cached = JSON.parse(cachedRaw);
-        if (cached.levels && cached.levels.length > 0) {
-          // Render instantly from cache (no loader)
-          this.syncModulesWithBackendStructure(cached.levels, cached);
-          // Then refresh in background silently
-          this.fetchBackendChapters(true);
-          return;
-        }
-      } catch (e) {}
-    }
-    // No cache → show loader and fetch
+  loadModules(): void {
     this.fetchBackendChapters(false);
   }
 
   setMode(mode: 'freestyle' | 'strict'): void {
     this.learningMode.set(mode);
-    localStorage.setItem('course_learning_mode', mode);
     this.fetchBackendChapters();
   }
 
@@ -351,57 +323,37 @@ export class LearnModulesComponent implements OnInit {
     const current = this.expandedModuleId();
     const next = current === moduleId ? null : moduleId;
     this.expandedModuleId.set(next);
-    // Persist last open module so returning from lesson restores it
-    if (next) {
-      localStorage.setItem('lang_app_last_expanded_module', next);
-    }
   }
 
   prefetchModuleChapters(moduleId: string): void {
-    // Disabled: Chapters are fetched on-demand when the user opens a chapter in the player.
     return;
   }
 
   loadUserProgressFromStorage(): void {
-    const userId = this.authService.getUser()?.id || 1;
-    const legacyChaptersRaw = localStorage.getItem('completed_chapters');
-    const scopedChaptersRaw = localStorage.getItem(`lang_app_completed_chapters_${userId}_1`);
-    const legacyIds: number[] = legacyChaptersRaw ? JSON.parse(legacyChaptersRaw!) : [];
-    const scopedIds: number[] = scopedChaptersRaw ? JSON.parse(scopedChaptersRaw!) : [];
-    const completedChapterIds = Array.from(new Set([...legacyIds, ...scopedIds]));
+    this.http.get<any>(`${environment.apiUrl}/student/dashboard`).subscribe({
+      next: (res) => {
+        if (res && res.completed_chapter_ids && Array.isArray(res.completed_chapter_ids)) {
+          const currentModules = this.modules();
+          if (currentModules.length > 0) {
+            let totalChapCount = 0;
+            let completedCountTotal = 0;
 
-    const currentModules = this.modules();
-    if (currentModules.length > 0) {
-      let totalChapCount = 0;
-      let completedCountTotal = 0;
+            currentModules.forEach(mod => {
+              (mod.chapters || []).forEach(chap => {
+                totalChapCount++;
+                if (res.completed_chapter_ids.includes(chap.id)) {
+                  completedCountTotal++;
+                }
+              });
+            });
 
-      currentModules.forEach(mod => {
-        (mod.chapters || []).forEach(chap => {
-          totalChapCount++;
-          if (completedChapterIds.includes(chap.id)) {
-            completedCountTotal++;
+            this.doneCount.set(completedCountTotal);
+            this.leftCount.set(Math.max(0, totalChapCount - completedCountTotal));
           }
-        });
-      });
-
-      this.doneCount.set(completedCountTotal);
-      this.leftCount.set(Math.max(0, totalChapCount - completedCountTotal));
-    }
-  }
-
-  markModuleComplete(moduleId: string): void {
-    const userId = this.authService.getUser()?.id || 1;
-    localStorage.setItem(`${moduleId}_completed`, 'true');
-
-    const completedModsRaw = localStorage.getItem('completed_modules');
-    const completedMods: string[] = completedModsRaw ? JSON.parse(completedModsRaw) : [];
-    if (!completedMods.includes(moduleId)) {
-      completedMods.push(moduleId);
-      localStorage.setItem('completed_modules', JSON.stringify(completedMods));
-      localStorage.setItem(`lang_app_completed_modules_${userId}`, JSON.stringify(completedMods));
-    }
-
-    this.loadUserProgressFromStorage();
+        }
+      },
+      error: () => {}
+    });
   }
 
   fetchBackendChapters(silent: boolean = false): void {
@@ -411,24 +363,15 @@ export class LearnModulesComponent implements OnInit {
       next: (courses) => {
         if (courses && courses.length > 0) {
           this.availableCourses.set(courses);
-          // Cache courses list for instant display next time
-          localStorage.setItem('lang_app_courses_list', JSON.stringify(courses));
-          const savedCourseId = localStorage.getItem('lang_app_last_course_id');
-          const targetCourse = savedCourseId ? courses.find((c: any) => c.id.toString() === savedCourseId) : null;
-          const targetCourseId = (targetCourse || courses[0]).id;
+          const targetCourseId = courses[0].id;
           const courseMode = (courses[0].mode || courses[0].learning_mode || '').toLowerCase();
-          const savedMode = localStorage.getItem('course_learning_mode');
-          if (savedMode === 'freestyle' || savedMode === 'strict') {
-            this.learningMode.set(savedMode);
-          } else if (courseMode.includes('free') || courseMode.includes('open')) {
+          if (courseMode.includes('free') || courseMode.includes('open')) {
             this.learningMode.set('freestyle');
           }
 
           this.http.get<any>(`${environment.apiUrl}/courses/${targetCourseId}/player-structure`).subscribe({
             next: (structure) => {
               if (structure && structure.levels && structure.levels.length > 0) {
-                // Cache the fresh structure for next time
-                localStorage.setItem(`lang_app_course_structure_${targetCourseId}`, JSON.stringify(structure));
                 this.syncModulesWithBackendStructure(structure.levels, structure);
               } else {
                 if (!silent) this.useDefaultModulesFallback();
@@ -445,33 +388,10 @@ export class LearnModulesComponent implements OnInit {
   }
 
   fetchCourseModules(courseId: any): void {
-    const cacheKey = `lang_app_course_structure_${courseId}`;
-    const cachedRaw = localStorage.getItem(cacheKey);
-    if (cachedRaw) {
-      try {
-        const cached = JSON.parse(cachedRaw);
-        if (cached.levels && cached.levels.length > 0) {
-          this.syncModulesWithBackendStructure(cached.levels, cached);
-          // Refresh silently in background
-          this.http.get<any>(`${environment.apiUrl}/courses/${courseId}/player-structure`).subscribe({
-            next: (structure) => {
-              if (structure && structure.levels && structure.levels.length > 0) {
-                localStorage.setItem(cacheKey, JSON.stringify(structure));
-                this.syncModulesWithBackendStructure(structure.levels, structure);
-              }
-            },
-            error: () => {}
-          });
-          return;
-        }
-      } catch (e) {}
-    }
-    // No cache - show loader
     this.isLoadingChapters.set(true);
     this.http.get<any>(`${environment.apiUrl}/courses/${courseId}/player-structure`).subscribe({
       next: (structure) => {
         if (structure && structure.levels && structure.levels.length > 0) {
-          localStorage.setItem(cacheKey, JSON.stringify(structure));
           this.syncModulesWithBackendStructure(structure.levels, structure);
         } else {
           this.useDefaultModulesFallback();

@@ -125,108 +125,10 @@ export class KidsDashboard implements OnInit, OnDestroy {
       const firstName = user.name.split(' ')[0];
       this.userName.set(firstName);
     }
-    const userId = user?.id || 1;
-
-    const storedStreak = localStorage.getItem(`lang_app_streak_${userId}`);
-    if (storedStreak) this.streakDays.set(+storedStreak);
-
-    const storedXp = localStorage.getItem(`lang_app_xp_${userId}`);
-    if (storedXp) this.xpPoints.set(+storedXp);
-
-    const legacyChaptersRaw = localStorage.getItem('completed_chapters');
-    const scopedChaptersRaw = localStorage.getItem(`lang_app_completed_chapters_${userId}_1`);
-    const legacyIds: number[] = legacyChaptersRaw ? JSON.parse(legacyChaptersRaw) : [];
-    const scopedIds: number[] = scopedChaptersRaw ? JSON.parse(scopedChaptersRaw) : [];
-    const allCompleted = scopedIds.length > 0 ? scopedIds : legacyIds;
-    const doneCount = allCompleted.length;
-    const storedProgress = localStorage.getItem(`lang_app_overall_progress_${userId}`);
-    const percent = storedProgress !== null ? parseFloat(storedProgress) : 0;
-    this.overallProgress.set(percent);
-
-    let courseTitle = 'கற்றல் பாடநெறி';
-    let currentModuleName = 'பாட அத்தியாயம்';
-    try {
-      const cachedCourses = localStorage.getItem('lang_app_courses_list');
-      const lastCourseId = localStorage.getItem('lang_app_last_course_id');
-      if (cachedCourses) {
-        const courses = JSON.parse(cachedCourses);
-        if (courses && courses.length > 0) {
-          this.assignedCourses.set(courses);
-        }
-        const matched = lastCourseId ? courses.find((c: any) => c.id.toString() === lastCourseId) : null;
-        const course = matched || courses[0];
-        if (course && (course.title || course.name)) {
-          courseTitle = course.title || course.name;
-        }
-      }
-
-      const cachedStructureRaw = localStorage.getItem('lang_app_course_structure');
-      if (cachedStructureRaw) {
-        const struct = JSON.parse(cachedStructureRaw);
-        if (struct.levels && struct.levels.length > 0) {
-          const allChapters: any[] = [];
-          struct.levels.forEach((lvl: any) => {
-            if (lvl.chapters) allChapters.push(...lvl.chapters);
-          });
-          const currChap = allChapters[doneCount] || allChapters[0];
-          if (currChap) {
-            currentModuleName = currChap.name || currChap.title || 'பாட அத்தியாயம்';
-          }
-        }
-      }
-    } catch (e) {}
-
-    const displayProgress = this.overallProgress();
-    this.activeCourse.set({
-      title: courseTitle,
-      chapterName: `பாடம் ${doneCount + 1}: ${currentModuleName}`,
-      progress: displayProgress,
-      chapterId: doneCount + 1
-    });
-    
-    const courses = this.assignedCourses();
-    if (courses && courses.length > 0) {
-      const firstCourse = courses[0];
-      this.activeCourse.set({
-        title: firstCourse.title || firstCourse.name || courseTitle,
-        chapterName: firstCourse.description || `பாடம் ${doneCount + 1}: ${currentModuleName}`,
-        progress: displayProgress,
-        chapterId: firstCourse.id || doneCount + 1
-      });
-      this.activeCourseIndex.set(0);
-    }
-
-    this.initializeModules(allCompleted);
   }
 
   initializeModules(completedIds: number[]): void {
-    const cachedStructureRaw = localStorage.getItem('lang_app_course_structure');
-    if (cachedStructureRaw) {
-      try {
-        const struct = JSON.parse(cachedStructureRaw);
-        if (struct.levels && Array.isArray(struct.levels) && struct.levels.length > 0) {
-          const bgColors = ['#10B981', '#6366F1', '#F59E0B', '#EC4899', '#8B5CF6'];
-          const dynamicList: DynamicModuleItem[] = struct.levels.map((lvl: any, idx: number) => {
-            const chaps = lvl.chapters || [];
-            const doneInLevel = chaps.filter((c: any) => completedIds.includes(c.id)).length;
-            const isDone = chaps.length > 0 && doneInLevel === chaps.length;
-            return {
-              id: lvl.id ? String(lvl.id) : `level_${idx + 1}`,
-              nameTa: lvl.name || `நிலை ${idx + 1}`,
-              nameEn: lvl.code || `Level ${idx + 1}`,
-              totalChapters: chaps.length,
-              completedChapters: doneInLevel,
-              progress: chaps.length > 0 ? Math.round((doneInLevel / chaps.length) * 100) : 0,
-              status: isDone ? 'completed' : 'in-progress',
-              color: bgColors[idx % bgColors.length]
-            };
-          });
-          this.dynamicModules.set(dynamicList);
-          return;
-        }
-      } catch (e) {}
-    }
-
+    const bgColors = ['#10B981', '#6366F1', '#F59E0B', '#EC4899', '#8B5CF6'];
     const defaultMods: DynamicModuleItem[] = [
       { id: 'level_1', nameTa: 'பாடப் பிரிவு 1', nameEn: 'Level 1', totalChapters: 3, completedChapters: Math.min(completedIds.length, 3), progress: Math.min(Math.round((Math.min(completedIds.length, 3) / 3) * 100), 100), status: completedIds.length >= 3 ? 'completed' : 'in-progress', color: '#10B981' }
     ];
@@ -234,23 +136,34 @@ export class KidsDashboard implements OnInit, OnDestroy {
   }
 
   fetchDashboardData(): void {
-    const userId = this.authService.getUser()?.id || 1;
     this.http.get<any>(`${environment.apiUrl}/student/dashboard`).subscribe({
       next: (res) => {
         if (res) {
           if (res.streak_days !== undefined) {
             this.streakDays.set(res.streak_days);
-            localStorage.setItem(`lang_app_streak_${userId}`, res.streak_days.toString());
           }
           if (res.xp_points !== undefined) {
             this.xpPoints.set(res.xp_points);
-            localStorage.setItem(`lang_app_xp_${userId}`, res.xp_points.toString());
           }
           if (res.completion_percentage !== undefined) {
             this.overallProgress.set(res.completion_percentage);
-            localStorage.setItem(`lang_app_overall_progress_${userId}`, res.completion_percentage.toString());
-            // Sync active course card progress with exact server progress
             this.activeCourse.update(ac => ({ ...ac, progress: res.completion_percentage }));
+          }
+          if (res.module_progressions && Array.isArray(res.module_progressions) && res.module_progressions.length > 0) {
+            const bgColors = ['#10B981', '#6366F1', '#F59E0B', '#EC4899', '#8B5CF6'];
+            const dynamicList: DynamicModuleItem[] = res.module_progressions.map((m: any, idx: number) => ({
+              id: m.id || `level_${idx + 1}`,
+              nameTa: m.name || `நிலை ${idx + 1}`,
+              nameEn: m.code || `Level ${idx + 1}`,
+              totalChapters: m.total_chapters || 0,
+              completedChapters: m.completed_chapters || 0,
+              progress: m.percentage || 0,
+              status: (m.percentage >= 100) ? 'completed' : 'in-progress',
+              color: m.color || bgColors[idx % bgColors.length]
+            }));
+            this.dynamicModules.set(dynamicList);
+          } else if (res.completed_chapter_ids && Array.isArray(res.completed_chapter_ids)) {
+            this.initializeModules(res.completed_chapter_ids);
           }
         }
       },
