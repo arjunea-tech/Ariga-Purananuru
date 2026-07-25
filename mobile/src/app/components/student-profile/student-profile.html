@@ -34,7 +34,7 @@
     <!-- User Avatar & Identity Card -->
     <div class="user-card card border-0 shadow-sm p-3 mb-3 text-center">
       <div class="mx-auto mb-2 position-relative d-inline-block">
-        <div class="avatar-emoji shadow-sm" style="width: 85px; height: 85px; font-size: 3rem; background: #F0F9FF; border: 2px solid #E0F2FE; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">👦🏽</div>
+        <img [src]="userAvatar() || 'assets/images/mascot.png'" alt="User Avatar" class="rounded-circle shadow-sm border border-3 border-light bg-light" style="width: 85px; height: 85px; object-fit: contain;">
         <button class="btn btn-primary rounded-circle position-absolute bottom-0 end-0 p-1 shadow-sm d-flex align-items-center justify-content-center"
                 style="width: 28px; height: 28px; border: 2px solid white;" (click)="onMenuClick({id: 'personal_info'})" title="Edit Profile">
           <i class="bi bi-pencil-fill" style="font-size: 0.7rem;"></i>
@@ -247,11 +247,11 @@
 
           <div class="mb-3">
             <label class="small text-muted fw-bold mb-1 ms-1">Full Name <span class="text-danger">*</span></label>
-            <input type="text" [(ngModel)]="editName" class="form-control p-3 rounded-3 fw-semibold text-dark border" placeholder="Enter full name" />
+            <input type="text" [ngModel]="editName()" (ngModelChange)="editName.set($event)" class="form-control p-3 rounded-3 fw-semibold text-dark border" placeholder="Enter full name" />
           </div>
           <div class="mb-3">
             <label class="small text-muted fw-bold mb-1 ms-1">Email Address</label>
-            <input type="email" [(ngModel)]="editEmail" class="form-control p-3 rounded-3 fw-semibold text-dark border" placeholder="Enter email address" />
+            <input type="email" [ngModel]="editEmail()" (ngModelChange)="editEmail.set($event)" class="form-control p-3 rounded-3 fw-semibold text-dark border" placeholder="Enter email address" />
           </div>
           <div class="mb-4">
             <label class="small text-muted fw-bold mb-1 ms-1">Organization / School</label>

@@ -345,7 +345,7 @@ export class StudentProfileComponent implements OnInit {
     this.editName.set(this.userName());
     this.editEmail.set(this.userEmail());
     this.editAvatar.set(this.userAvatar());
-    this.isEditingProfile.set(false);
+    this.isEditingProfile.set(true);
     this.profileSuccessMsg.set('');
     this.profileErrorMsg.set('');
   }

@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>தமிழ் யாப்பிலக்கணம் பயிற்சி - Tamil Prosody Quiz</title>
+    <style>
+        :root {
+            --primary: #5c2e91;
+            --primary-light: #e9e1f7;
+            --secondary: #0072c6;
+            --accent: #ff8c00;
+            --success: #28a745;
+            --error: #dc3545;
+            --text: #333;
+            --bg-light: #f9f7f5;
+            --border: #ddd;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans Tamil', sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-light);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        h1, h2, h3 {
+            margin-bottom: 15px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* Rules section */
+        .rules-section {
+            margin-bottom: 30px;
+        }
+        
+        .rule-item {
+            background-color: var(--primary-light);
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid var(--primary);
+            border-radius: 0 4px 4px 0;
+        }
+        
+        /* Quiz section */
+        #quiz-container {
+            display: none;
+        }
+        
+        .word-display {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        
+        .word-box {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            font-size: 20px;
+            min-width: 120px;
+            text-align: center;
+        }
+        
+        /* Asai analysis */
+        .asai-container {
+            margin: 20px 0;
+        }
+        
+        .asai-title {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        
+        .asai-word {
+            margin-bottom: 20px;
+        }
+        
+        .asai-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 5px;
+        }
+        
+        .asai-box {
+            display: inline-block;
+            padding: 5px 10px;
+            margin: 0 5px;
+            text-align: center;
+            min-width: 40px;
+        }
+        
+        .asai-type {
+            background-color: var(--primary-light);
+            border-radius: 4px 4px 0 0;
+        }
+        
+        .asai-text {
+            background-color: white;
+            border: 1px solid var(--border);
+            border-radius: 0 0 4px 4px;
+        }
+        
+        .ner {
+            border-bottom: 3px solid var(--primary);
+        }
+        
+        .nirai {
+            border-bottom: 3px solid var(--secondary);
+        }
+        
+        /* Seer analysis */
+        .seer-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .seer-table th, .seer-table td {
+            border: 1px solid var(--border);
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .seer-table th {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .seer-name {
+            font-weight: bold;
+            background-color: var(--primary-light);
+        }
+        
+        /* Quiz options */
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 600px) {
+            .quiz-options {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .option-btn {
+            background-color: white;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        .option-btn:hover {
+            border-color: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .selected {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+        }
+        
+        .correct {
+            border-color: var(--success);
+            background-color: rgba(40, 167, 69, 0.1);
+        }
+        
+        .incorrect {
+            border-color: var(--error);
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+        
+        /* Feedback */
+        #feedback {
+            display: none;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .feedback-correct {
+            background-color: rgba(40, 167, 69, 0.1);
+            border: 1px solid var(--success);
+        }
+        
+        .feedback-incorrect {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid var(--error);
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #4a2575;
+        }
+        
+        .btn-accent {
+            background-color: var(--accent);
+        }
+        
+        .btn-accent:hover {
+            background-color: #e67e00;
+        }
+        
+        .center {
+            text-align: center;
+        }
+        
+        /* Stats */
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        
+        .stat-box {
+            text-align: center;
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            width: 30%;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+        
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            background-color: var(--primary);
+            color: white;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Tamil:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <h1>அழகுத் தமிழ் யாப்பு</h1>
+        <p>தளை அறிதல் (Thalai Identification Quiz)</p>
+    </header>
+    
+    <div class="container">
+        <!-- Info Section -->
+        <div class="card" id="info-section">
+            <h2>தளை (Thalai) Rules</h2>
+            <p>The junction between two சீர் (Seer) units. It is formed by the last அசை of the first சீர் and the first அசை of the second சீர்.</p>
+            
+            <div class="rules-section">
+                {% for rule in thalai_rules %}
+                <div class="rule-item">{{ rule }}</div>
+                {% endfor %}
+            </div>
+            
+            <div class="center">
+                <button class="btn btn-accent" id="start-quiz">Start Thalai Quiz</button>
+            </div>
+        </div>
+        
+        <!-- Quiz Section -->
+        <div id="quiz-container">
+            <div class="stats">
+                <div class="stat-box">
+                    <div>Questions</div>
+                    <div class="stat-value" id="question-count">0</div>
+                </div>
+                <div class="stat-box">
+                    <div>Correct</div>
+                    <div class="stat-value" id="correct-count">0</div>
+                </div>
+                <div class="stat-box">
+                    <div>Score</div>
+                    <div class="stat-value" id="score-percent">0%</div>
+                </div>
+            </div>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Loading question...</p>
+            </div>
+            
+            <div class="card" id="question-card">
+                <h2 class="center">Identify the தளை (Thalai)</h2>
+                
+                <div class="word-display">
+                    <div class="word-box" id="first-word"></div>
+                    <div class="word-box" id="second-word"></div>
+                </div>
+                
+                <div class="asai-container">
+                    <h3 class="asai-title">அசை (Asai) Analysis</h3>
+                    
+                    <div class="asai-word" id="first-word-asai">
+                        <div class="asai-row" id="first-word-asai-types"></div>
+                        <div class="asai-row" id="first-word-asai-texts"></div>
+                    </div>
+                    
+                    <div class="asai-word" id="second-word-asai">
+                        <div class="asai-row" id="second-word-asai-types"></div>
+                        <div class="asai-row" id="second-word-asai-texts"></div>
+                    </div>
+                </div>
+                
+                <table class="seer-table">
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>சீர் Name</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="table-first-word"></td>
+                            <td class="seer-name" id="first-seer-name"></td>
+                            <td id="first-seer-type"></td>
+                        </tr>
+                        <tr>
+                            <td id="table-second-word"></td>
+                            <td class="seer-name" id="second-seer-name"></td>
+                            <td id="second-seer-type"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3 class="center">Which தளை (Thalai) is formed?</h3>
+                
+                <div class="quiz-options" id="options-container">
+                    {% for option in thalai_options %}
+                    <div class="option-btn" data-value="{{ option }}">{{ option }}</div>
+                    {% endfor %}
+                </div>
+                
+                <div id="feedback"></div>
+                
+                <div class="center">
+                    <button class="btn" id="check-answer">Check Answer</button>
+                    <button class="btn" id="next-question" style="display:none;">Next Question</button>
+                </div>
+            </div>
+
+            <div class="card" id="quiz-summary" style="display:none;">
+                <h2 class="center">Quiz Complete!</h2>
+                <div class="stats">
+                    <div class="stat-box">
+                        <div>Questions</div>
+                        <div class="stat-value">5</div>
+                    </div>
+                    <div class="stat-box">
+                        <div>Correct</div>
+                        <div class="stat-value" id="summary-correct">0</div>
+                    </div>
+                    <div class="stat-box">
+                        <div>Score</div>
+                        <div class="stat-value" id="summary-percent">0%</div>
+                    </div>
+                </div>
+                <div class="center" id="summary-message"></div>
+                <div class="center">
+                    <button class="btn btn-accent" id="restart-quiz">Try Again</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>© 2025 Tamil Prosody Quiz - தமிழ் யாப்பிலக்கணம் பயிற்சி</p>
+    </footer>
+    
+    // The issue is that there are duplicate quizState declarations and conflicting fetchQuestion functions.
+// Here's the fixed JavaScript section for the Start Quiz button:
+
+<script>
+    // Quiz state (only define once)
+    const quizState = {
+        currentQuestion: null,
+        answered: false,
+        selectedOption: null,
+        correctCount: 0,
+        totalCount: 0,
+        maxQuestions: 5,
+        quizComplete: false
+    };
+    
+    // DOM elements
+    const startQuizBtn = document.getElementById('start-quiz');
+    const infoSection = document.getElementById('info-section');
+    const quizContainer = document.getElementById('quiz-container');
+    const loadingElement = document.getElementById('loading');
+    const questionCard = document.getElementById('question-card');
+    const firstWordElement = document.getElementById('first-word');
+    const secondWordElement = document.getElementById('second-word');
+    const tableFirstWordElement = document.getElementById('table-first-word');
+    const tableSecondWordElement = document.getElementById('table-second-word');
+    const firstSeerNameElement = document.getElementById('first-seer-name');
+    const secondSeerNameElement = document.getElementById('second-seer-name');
+    const firstSeerTypeElement = document.getElementById('first-seer-type');
+    const secondSeerTypeElement = document.getElementById('second-seer-type');
+    const firstWordAsaiTypes = document.getElementById('first-word-asai-types');
+    const firstWordAsaiTexts = document.getElementById('first-word-asai-texts');
+    const secondWordAsaiTypes = document.getElementById('second-word-asai-types');
+    const secondWordAsaiTexts = document.getElementById('second-word-asai-texts');
+    const optionsContainer = document.getElementById('options-container');
+    const feedbackElement = document.getElementById('feedback');
+    const checkAnswerBtn = document.getElementById('check-answer');
+    const nextQuestionBtn = document.getElementById('next-question');
+    const questionCountElement = document.getElementById('question-count');
+    const correctCountElement = document.getElementById('correct-count');
+    const scorePercentElement = document.getElementById('score-percent');
+    
+    // Start quiz
+    startQuizBtn.addEventListener('click', function() {
+        infoSection.style.display = 'none';
+        quizContainer.style.display = 'block';
+        fetchQuestion();
+    });
+    
+    // Fetch a question
+    async function fetchQuestion() {
+        try {
+            resetQuizUI();
+            loadingElement.style.display = 'block';
+            questionCard.style.display = 'none';
+            
+            // Hide quiz summary if showing
+            document.getElementById('quiz-summary').style.display = 'none';
+            
+            const response = await fetch('/get-question');
+            const data = await response.json();
+            
+            // Check if quiz is complete
+            if (data.quiz_complete) {
+                showQuizSummary(data);
+                loadingElement.style.display = 'none';
+                return;
+            }
+            
+            quizState.currentQuestion = data;
+            quizState.answered = false;
+            quizState.selectedOption = null;
+            
+            // Update progress if available
+            if (data.quiz_progress) {
+                quizState.totalCount = data.quiz_progress.current;
+                quizState.correctCount = data.quiz_progress.correct;
+                updateStats();
+            }
+            
+            displayQuestion(data);
+            
+            loadingElement.style.display = 'none';
+            questionCard.style.display = 'block';
+        } catch (error) {
+            console.error('Error fetching question:', error);
+            alert('Error loading question. Please try again.');
+            loadingElement.style.display = 'none';
+        }
+    }
+    
+    // Display question
+    function displayQuestion(question) {
+        // Display words
+        firstWordElement.textContent = question.words[0];
+        secondWordElement.textContent = question.words[1];
+        tableFirstWordElement.textContent = question.words[0];
+        tableSecondWordElement.textContent = question.words[1];
+        
+        // Display seer info
+        firstSeerNameElement.textContent = question.seer_names[0] || 'Unknown';
+        secondSeerNameElement.textContent = question.seer_names[1] || 'Unknown';
+        firstSeerTypeElement.textContent = question.seer_types[0] || 'Unknown';
+        secondSeerTypeElement.textContent = question.seer_types[1] || 'Unknown';
+        
+        // Clear previous asai elements
+        firstWordAsaiTypes.innerHTML = '';
+        firstWordAsaiTexts.innerHTML = '';
+        secondWordAsaiTypes.innerHTML = '';
+        secondWordAsaiTexts.innerHTML = '';
+        
+        // Display asai analysis for first word
+        displayAsaiAnalysis(question.asai_analysis[0], firstWordAsaiTypes, firstWordAsaiTexts);
+        
+        // Display asai analysis for second word
+        displayAsaiAnalysis(question.asai_analysis[1], secondWordAsaiTypes, secondWordAsaiTexts);
+    }
+    
+    // Display asai analysis
+    function displayAsaiAnalysis(asaiGroups, typesContainer, textsContainer) {
+        asaiGroups.forEach(asai => {
+            const asaiText = asai[0];
+            const asaiType = asai[1];
+            
+            // Create type element
+            const typeElement = document.createElement('div');
+            typeElement.className = 'asai-box asai-type';
+            typeElement.textContent = asaiType;
+            typesContainer.appendChild(typeElement);
+            
+            // Create text element
+            const textElement = document.createElement('div');
+            textElement.className = `asai-box asai-text ${asaiType === 'நேர்' ? 'ner' : 'nirai'}`;
+            textElement.textContent = asaiText;
+            textsContainer.appendChild(textElement);
+        });
+    }
+    
+    // Reset the quiz UI
+    function resetQuizUI() {
+        // Reset option selection
+        const options = document.querySelectorAll('.option-btn');
+        options.forEach(option => {
+            option.classList.remove('selected', 'correct', 'incorrect');
+        });
+        
+        // Reset feedback
+        feedbackElement.style.display = 'none';
+        feedbackElement.innerHTML = '';
+        feedbackElement.className = '';
+        
+        // Show check answer button, hide next question button
+        checkAnswerBtn.style.display = 'inline-block';
+        nextQuestionBtn.style.display = 'none';
+        nextQuestionBtn.textContent = 'Next Question'; // Reset text
+    }
+    
+    // Option selection
+    optionsContainer.addEventListener('click', function(event) {
+        if (quizState.answered) return;
+        
+        const option = event.target.closest('.option-btn');
+        if (option) {
+            // Remove selection from other options
+            document.querySelectorAll('.option-btn').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+            
+            // Select this option
+            option.classList.add('selected');
+            quizState.selectedOption = option.dataset.value;
+        }
+    });
+    
+    // Check answer
+    checkAnswerBtn.addEventListener('click', async function() {
+        if (!quizState.selectedOption || quizState.answered) return;
+        
+        try {
+            const response = await fetch('/check-answer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    answer: quizState.selectedOption
+                })
+            });
+            
+            const result = await response.json();
+            
+            quizState.answered = true;
+            
+            // Update quiz progress if available
+            if (result.quiz_progress) {
+                quizState.totalCount = result.quiz_progress.current;
+                quizState.correctCount = result.quiz_progress.correct;
+                updateStats();
+            }
+            
+            showFeedback(result);
+            
+            // Update UI
+            document.querySelectorAll('.option-btn').forEach(option => {
+                if (option.dataset.value === result.correctAnswer) {
+                    option.classList.add('correct');
+                } else if (option.dataset.value === quizState.selectedOption && !result.isCorrect) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            // If quiz is complete after this question
+            if (result.quiz_progress && result.quiz_progress.complete) {
+                checkAnswerBtn.style.display = 'none';
+                // Change next question text to "See Results"
+                nextQuestionBtn.textContent = 'See Results';
+                nextQuestionBtn.style.display = 'inline-block';
+            } else {
+                // Show next question button, hide check answer button
+                checkAnswerBtn.style.display = 'none';
+                nextQuestionBtn.style.display = 'inline-block';
+            }
+            
+        } catch (error) {
+            console.error('Error checking answer:', error);
+            alert('Error checking answer. Please try again.');
+        }
+    });
+    
+    // Next question
+    nextQuestionBtn.addEventListener('click', fetchQuestion);
+    
+    // Show feedback
+    function showFeedback(result) {
+        feedbackElement.style.display = 'block';
+        
+        if (result.isCorrect) {
+            feedbackElement.className = 'feedback-correct';
+            feedbackElement.innerHTML = '<strong>Correct!</strong> Well done!';
+            
+            if (result.explanation) {
+                feedbackElement.innerHTML += '<p>' + result.explanation + '</p>';
+            }
+        } else {
+            feedbackElement.className = 'feedback-incorrect';
+            feedbackElement.innerHTML = `<strong>Incorrect.</strong> The correct answer is: ${result.correctAnswer}`;
+            
+            if (result.explanation) {
+                feedbackElement.innerHTML += '<p>' + result.explanation + '</p>';
+            }
+        }
+    }
+    
+    // Update stats
+    function updateStats() {
+        questionCountElement.textContent = quizState.totalCount;
+        correctCountElement.textContent = quizState.correctCount;
+        
+        const percentage = quizState.totalCount > 0 
+            ? Math.round((quizState.correctCount / quizState.totalCount) * 100) 
+            : 0;
+        
+        scorePercentElement.textContent = percentage + '%';
+    }
+    
+    // Add a function to show quiz summary
+    function showQuizSummary(data) {
+        const summaryElement = document.getElementById('quiz-summary');
+        const correctElement = document.getElementById('summary-correct');
+        const percentElement = document.getElementById('summary-percent');
+        const messageElement = document.getElementById('summary-message');
+        
+        correctElement.textContent = data.correct_answers;
+        percentElement.textContent = Math.round(data.percentage) + '%';
+        
+        // Add a message based on the score
+        let message = '';
+        if (data.percentage >= 80) {
+            message = '<p class="feedback-correct">Great job! You have a good understanding of Tamil prosody!</p>';
+        } else if (data.percentage >= 60) {
+            message = '<p class="feedback-correct">Good effort! Keep practicing to improve your knowledge.</p>';
+        } else {
+            message = '<p class="feedback-incorrect">Keep learning! Tamil prosody takes practice to master.</p>';
+        }
+        
+        messageElement.innerHTML = message;
+        summaryElement.style.display = 'block';
+        
+        // Mark quiz as complete
+        quizState.quizComplete = true;
+    }
+    
+    // Restart quiz
+    document.getElementById('restart-quiz').addEventListener('click', async function() {
+        try {
+            // Reset the quiz on the server
+            await fetch('/reset-quiz');
+            
+            // Reset local state
+            quizState.currentQuestion = null;
+            quizState.answered = false;
+            quizState.selectedOption = null;
+            quizState.correctCount = 0;
+            quizState.totalCount = 0;
+            quizState.quizComplete = false;
+            
+            // Update UI
+            updateStats();
+            
+            // Fetch a new question
+            fetchQuestion();
+        } catch (error) {
+            console.error('Error restarting quiz:', error);
+            alert('Error restarting quiz. Please try again.');
+        }
+    });
+</script>
+</body>
+</html>
