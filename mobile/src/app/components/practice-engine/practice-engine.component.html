@@ -24,8 +24,155 @@
 
     <div *ngIf="step !== 'dashboard_menu' && step !== 'dashboard_input'" class="p-3 p-md-4 w-100">
 
+      <!-- Yaappu Intro Interactive Flashcards & Beginner Quiz Mode -->
+      <div *ngIf="practiceType === 'yaappu_intro'" class="animate-slide-up w-100 mt-2 px-1" style="max-width: 600px; margin: 0 auto;">
+        
+        <!-- Header Banner -->
+        <div class="card border-0 rounded-4 p-4 text-center mb-4 text-white shadow-sm"
+             style="background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%);">
+          <div class="rounded-circle bg-white text-primary mx-auto mb-2 d-flex align-items-center justify-content-center shadow-sm"
+               style="width: 56px; height: 56px;">
+            <i class="bi bi-book-half fs-2" style="color: #6D28D9;"></i>
+          </div>
+          <h2 class="fw-extrabold mb-1 text-white" style="font-size: 1.35rem;">யாப்பிலக்கணம் - அறிமுகம்</h2>
+          <p class="small mb-0 opacity-90 text-white">செய்யுள் இயற்றுவதற்கான இலக்கணம் 'யாப்பிலக்கணம்'. இதன் 6 முக்கிய உறுப்புகளைக் கற்போம்!</p>
+        </div>
+
+        <!-- 6 Limbs Horizontal Selector Pills -->
+        <div class="d-flex align-items-center gap-2 overflow-auto mb-4 pb-2 px-1 no-scrollbar">
+          <button *ngFor="let limb of yaappuLimbs; let idx = index"
+                  class="btn rounded-pill px-3 py-2 text-nowrap fw-bold transition-all shadow-xs"
+                  [ngStyle]="{
+                    'background': activeLimbIndex === idx ? limb.color : '#FFFFFF',
+                    'color': activeLimbIndex === idx ? '#FFFFFF' : '#475569',
+                    'border': activeLimbIndex === idx ? 'none' : '1px solid #E2E8F0'
+                  }"
+                  (click)="selectLimb(idx)">
+            {{ limb.title.split(' ')[1] }}
+          </button>
+        </div>
+
+        <!-- Active Flashcard Display -->
+        <div class="card border-0 rounded-4 p-4 shadow-sm mb-4 position-relative overflow-hidden transition-all"
+             [style.background]="yaappuLimbs[activeLimbIndex].bg"
+             [style.border-left]="'6px solid ' + yaappuLimbs[activeLimbIndex].color + ' !important'">
+          
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <div class="d-flex align-items-center gap-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center text-white shadow-sm"
+                   [style.background]="yaappuLimbs[activeLimbIndex].color"
+                   style="width: 46px; height: 46px;">
+                <i class="bi {{ yaappuLimbs[activeLimbIndex].icon }} fs-4"></i>
+              </div>
+              <div>
+                <h3 class="fw-extrabold text-dark mb-0" style="font-size: 1.15rem;">{{ yaappuLimbs[activeLimbIndex].title }}</h3>
+                <span class="text-secondary small fw-bold">{{ yaappuLimbs[activeLimbIndex].sub }}</span>
+              </div>
+            </div>
+            <span class="badge rounded-pill px-2.5 py-1 text-white fw-bold shadow-xs" [style.background]="yaappuLimbs[activeLimbIndex].color">
+              {{ activeLimbIndex + 1 }} / 6
+            </span>
+          </div>
+
+          <p class="text-dark fw-medium mb-3" style="font-size: 1.02rem; line-height: 1.5;">
+            {{ yaappuLimbs[activeLimbIndex].desc }}
+          </p>
+
+          <div class="bg-white rounded-3 p-3 border border-light">
+            <h4 class="small fw-bold text-secondary mb-2">உதாரணங்கள் (Examples):</h4>
+            <div class="d-flex flex-wrap gap-2">
+              <span *ngFor="let ex of yaappuLimbs[activeLimbIndex].examples"
+                    class="badge rounded-pill px-3 py-1.5 fw-bold"
+                    [style.background-color]="yaappuLimbs[activeLimbIndex].color + '20'"
+                    [style.color]="yaappuLimbs[activeLimbIndex].color"
+                    style="font-size: 0.85rem;">
+                {{ ex }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Card Navigation Footer -->
+          <div class="d-flex align-items-center justify-content-between mt-4">
+            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-bold"
+                    [disabled]="activeLimbIndex === 0"
+                    (click)="prevLimb()">
+              <i class="bi bi-chevron-left me-1"></i>முந்தையது
+            </button>
+            <button class="btn btn-sm text-white rounded-pill px-4 fw-bold shadow-xs"
+                    [style.background]="yaappuLimbs[activeLimbIndex].color"
+                    [disabled]="activeLimbIndex === yaappuLimbs.length - 1"
+                    (click)="nextLimb()">
+              அடுத்தது <i class="bi bi-chevron-right ms-1"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Section: Beginner Quiz -->
+        <div class="card border-0 rounded-4 p-4 shadow-sm bg-white mb-5">
+          <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-patch-question-fill fs-3" style="color: #8B5CF6;"></i>
+              <h3 class="fw-extrabold text-dark mb-0" style="font-size: 1.15rem;">பயிற்சி வினாடி-வினா</h3>
+            </div>
+            <span class="badge rounded-pill px-3 py-1 fw-bold" style="background: #F3E8FF; color: #6D28D9;">
+              4 வினாக்கள்
+            </span>
+          </div>
+
+          <!-- Questions List -->
+          <div class="d-flex flex-column gap-4">
+            <div *ngFor="let q of introQuestions; let qIdx = index" class="p-3 rounded-3 bg-light">
+              <h4 class="fw-bold text-dark mb-3" style="font-size: 1rem;">{{ q.question }}</h4>
+              
+              <div class="row g-2">
+                <div *ngFor="let opt of q.options; let oIdx = index" class="col-6">
+                  <button class="btn w-100 p-2.5 rounded-3 fw-bold text-start transition-all border"
+                          [ngClass]="{
+                            'btn-primary text-white': introQuizAnswers[qIdx] === oIdx && !introQuizSubmitted,
+                            'btn-success text-white': introQuizSubmitted && oIdx === q.correct,
+                            'btn-danger text-white': introQuizSubmitted && introQuizAnswers[qIdx] === oIdx && oIdx !== q.correct,
+                            'btn-white text-dark border-light': introQuizAnswers[qIdx] !== oIdx && (!introQuizSubmitted || oIdx !== q.correct)
+                          }"
+                          style="font-size: 0.9rem;"
+                          (click)="selectIntroAnswer(qIdx, oIdx)">
+                    {{ opt }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Explanation when submitted -->
+              <div *ngIf="introQuizSubmitted" class="mt-2.5 p-2.5 rounded-3 small fw-semibold"
+                   [ngClass]="introQuizAnswers[qIdx] === q.correct ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-dark'">
+                <i class="bi bi-info-circle-fill me-1"></i>{{ q.explanation }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Submit / Result Button -->
+          <div class="mt-4 text-center">
+            <div *ngIf="introQuizSubmitted" class="alert alert-success rounded-4 p-3 mb-3 fw-bold">
+              🎉 வினாடி வினா நிறைவடைந்தது! உங்கள் மதிப்பெண்: {{ introQuizScore }} / 4
+            </div>
+
+            <button *ngIf="!introQuizSubmitted"
+                    class="btn rounded-pill px-5 py-3 fw-extrabold text-white shadow-md hover-lift"
+                    style="background: linear-gradient(135deg, #8B5CF6 0%, #6D28D9 100%); font-size: 1.1rem;"
+                    (click)="submitIntroQuiz()">
+              <i class="bi bi-check-circle-fill me-2"></i>விடைகளைச் சரிபார்
+            </button>
+
+            <button *ngIf="introQuizSubmitted"
+                    class="btn rounded-pill px-4 py-2.5 fw-bold btn-outline-primary"
+                    (click)="resetIntroQuiz()">
+              <i class="bi bi-arrow-counterclockwise me-1"></i>மீண்டும் முயற்சி செய்
+            </button>
+          </div>
+        </div>
+
+      </div>
+
       <!-- Step: Select Mode -->
-      <div *ngIf="step === 'select_mode'" class="animate-slide-up w-100 d-flex flex-column align-items-center mt-3 px-2"
+      <div *ngIf="step === 'select_mode' && practiceType !== 'yaappu_intro'" class="animate-slide-up w-100 d-flex flex-column align-items-center mt-3 px-2"
         style="max-width: 480px; margin: 0 auto;">
         <div class="text-center mb-4">
           <h2 class="text-dark fw-bold mb-1" style="font-size: 2rem; font-family: 'Fredoka', sans-serif;">எப்படிப் பயில
@@ -66,7 +213,7 @@
       </div>
 
       <!-- Step: Input Word -->
-      <div *ngIf="step === 'input_word'" class="animate-slide-up w-100 d-flex flex-column align-items-center mt-2">
+      <div *ngIf="step === 'input_word' && practiceType !== 'yaappu_intro'" class="animate-slide-up w-100 d-flex flex-column align-items-center mt-2">
         <div class="text-center mb-4">
           <h2 class="text-dark fw-bold mb-2" style="font-size: 2.5rem; font-family: 'Fredoka', sans-serif;">
             {{ playMode === 'explain' || practiceType === 'eluthu' ? 'ஏதேனும் ஒரு வார்த்தையை உள்ளிடுக' : '/ குறியிட்டுப்

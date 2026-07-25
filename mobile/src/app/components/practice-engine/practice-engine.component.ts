@@ -2,7 +2,9 @@ import { Component, EventEmitter, Input, Output, OnInit, ChangeDetectorRef } fro
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { TamilNLPService, SeiyulAnalysis } from '../../services/tamil-nlp.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-practice-engine',
@@ -80,13 +82,201 @@ export class PracticeEngineComponent implements OnInit {
   nerAsaiWords = ['கல்', 'கால்', 'மா', 'பொன்', 'பூ', 'தீ', 'மெய்', 'நெய்', 'கை', 'கண்', 'நாள்'];
   niraiAsaiWords = ['பல', 'பலா', 'நிலம்', 'கனா', 'விழா', 'மலர்', 'குயில்', 'தமிழ்', 'உயிர்', 'புலி'];
 
+  // Yaappu Intro: 6 Limbs (ஆறு உறுப்புகள்) & Beginner Quiz
+  yaappuLimbs = [
+    {
+      id: 1,
+      title: '1. எழுத்து (Letter)',
+      sub: 'அடிப்படை ஒலி வடிவம்',
+      desc: 'செய்யுளுக்குரிய அடிப்படையான உறுப்பு. குறில், நெடில், மெய், ஆய்தம் என வகைப்படும்.',
+      examples: ['குறில்: அ, இ', 'நெடில்: ஆ, ஈ', 'மெய்: க், ங்', 'ஆய்தம்: ஃ'],
+      icon: 'bi-fonts',
+      color: '#8B5CF6',
+      bg: '#F3E8FF'
+    },
+    {
+      id: 2,
+      title: '2. அசை (Syllable)',
+      sub: 'எழுத்துக்களின் சேர்க்கை',
+      desc: 'எழுத்துக்கள் ஒன்றோ பலவோ சேர்ந்து அமைவது அசை. இது நேரசை, நிரையசை என இரு வகைப்படும்.',
+      examples: ['நேரசை: கல், மா', 'நிரையசை: பல, மலர்'],
+      icon: 'bi-grid-3x3-gap-fill',
+      color: '#38BDF8',
+      bg: '#E0F2FE'
+    },
+    {
+      id: 3,
+      title: '3. சீர் (Foot)',
+      sub: 'அசைகளின் சேர்க்கை',
+      desc: 'ஒன்றோ பலவோ அசைகள் இணைந்து அமைவது சீர். ஓரசைச் சீர், ஈரசைச் சீர், மூவசைச் சீர், நாலசைச் சீர்.',
+      examples: ['ஓரசை: நாள், மலர்', 'ஈரசை: தேமா, புளிமா', 'மூவசை: தேமாங்காய்'],
+      icon: 'bi-segmented-nav',
+      color: '#10B981',
+      bg: '#D1FAE5'
+    },
+    {
+      id: 4,
+      title: '4. தளை (Metrical Connection)',
+      sub: 'சீர்களின் பிணைப்பு',
+      desc: 'நின்ற சீரின் ஈற்றசையும் வரும் சீரின் முதலசையும் பொருந்துவது தளை எனப்படும்.',
+      examples: ['இயற்சீர்தளை', 'வெண்டளை', 'ஆசிரியத்தளை'],
+      icon: 'bi-link-45deg',
+      color: '#F59E0B',
+      bg: '#FEF3C7'
+    },
+    {
+      id: 5,
+      title: '5. அடி (Line)',
+      sub: 'சீர்களின் வரிசை',
+      desc: 'இரண்டு அல்லது அதற்கு மேற்பட்ட சீர்கள் தொடர்ந்து அமைவது அடி எனப்படும்.',
+      examples: ['குரலடி (2 சீர்)', 'சிந்தடி (3 சீர்)', 'அளவடி (4 சீர்)'],
+      icon: 'bi-text-paragraph',
+      color: '#EC4899',
+      bg: '#FCE7F3'
+    },
+    {
+      id: 6,
+      title: '6. தொடை (Rhyme & Melody)',
+      sub: 'ஓசை & நயம்',
+      desc: 'செய்யுளில் ஓசை இன்பமும் பொருள் இன்பமும் பெற அமைவது தொடை. தொடை அற்ற பாட்டு நடை அற்றுப் போகும்.',
+      examples: ['மோனை (முதல் எழுத்து)', 'எதுகை (இரண்டாம் எழுத்து)', 'இயைபு (இறுதி ஒலி)'],
+      icon: 'bi-music-note-beamed',
+      color: '#6366F1',
+      bg: '#E0E7FF'
+    }
+  ];
+
+  introQuestions = [
+    {
+      question: '1. யாப்பிலக்கணத்தின் உறுப்புகள் எத்தனை?',
+      options: ['4 உறுப்புகள்', '6 உறுப்புகள்', '8 உறுப்புகள்', '12 உறுப்புகள்'],
+      correct: 1,
+      explanation: 'யாப்பிலக்கணத்தின் உறுப்புகள் 6 ஆகும் (எழுத்து, அசை, சீர், தளை, அடி, தொடை).'
+    },
+    {
+      question: '2. எழுத்துக்கள் ஒன்றோ பலவோ சேர்ந்து அமைவது எது?',
+      options: ['அசை', 'சீர்', 'தளை', 'தொடை'],
+      correct: 0,
+      explanation: 'எழுத்துக்கள் ஒன்று அல்லது அதற்கு மேல் இணைந்து அசை உருவாகிறது (நேரசை, நிரையசை).'
+    },
+    {
+      question: '3. அசைகள் சேர்ந்து அமைவது எது?',
+      options: ['எழுத்து', 'சீர்', 'அடி', 'தொடை'],
+      correct: 1,
+      explanation: 'ஒன்றோ பலவோ அசைகள் இணைந்து சீர் அமைக்கும் (ஓரசைச் சீர், ஈரசைச் சீர், மூவசைச் சீர்).'
+    },
+    {
+      question: '4. செய்யுளில் மோனை, எதுகை போன்றவை எந்த உறுப்பில் அடங்கும்?',
+      options: ['தளை', 'அடி', 'தொடை', 'எழுத்து'],
+      correct: 2,
+      explanation: 'செய்யுளுக்கு ஓசை இன்பத்தையும் நயத்தையும் தரும் மோனை, எதுகை போன்றவை தொடை உறுப்பில் அடங்கும்.'
+    }
+  ];
+
+  activeLimbIndex: number = 0;
+  introQuizAnswers: (number | null)[] = [null, null, null, null];
+  introQuizSubmitted: boolean = false;
+  introQuizScore: number = 0;
+
+  selectLimb(index: number) {
+    this.activeLimbIndex = index;
+  }
+
+  nextLimb() {
+    if (this.activeLimbIndex < this.yaappuLimbs.length - 1) {
+      this.activeLimbIndex++;
+    }
+  }
+
+  prevLimb() {
+    if (this.activeLimbIndex > 0) {
+      this.activeLimbIndex--;
+    }
+  }
+
+  selectIntroAnswer(qIdx: number, oIdx: number) {
+    if (this.introQuizSubmitted) return;
+    this.introQuizAnswers[qIdx] = oIdx;
+  }
+
+  submitIntroQuiz() {
+    let score = 0;
+    this.introQuestions.forEach((q, idx) => {
+      if (this.introQuizAnswers[idx] === q.correct) {
+        score++;
+      }
+    });
+    this.introQuizScore = score;
+    this.introQuizSubmitted = true;
+  }
+
+  resetIntroQuiz() {
+    this.introQuizAnswers = [null, null, null, null];
+    this.introQuizSubmitted = false;
+    this.introQuizScore = 0;
+  }
+
   constructor(
     private tamilNLP: TamilNLPService,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
     private router: Router,
-    private location: Location
+    private location: Location,
+    private http: HttpClient
   ) { }
+
+  loadYaappuIntroFromDatabase(chapterId: number | string = 1) {
+    this.http.get<any>(`${environment.apiUrl}/chapters/${chapterId}`).subscribe({
+      next: (res) => {
+        if (res && res.contents && Array.isArray(res.contents)) {
+          const dbQuestions: any[] = [];
+          const dbLimbs: any[] = [];
+
+          res.contents.forEach((c: any) => {
+            if (c.text_content) {
+              try {
+                const parsed = JSON.parse(c.text_content);
+                if (parsed.blocks) {
+                  parsed.blocks.forEach((b: any) => {
+                    if (b.type === 'activity' && b.data) {
+                      if (b.data.type === 'mcq' && b.data.question) {
+                        dbQuestions.push({
+                          question: b.data.question,
+                          options: b.data.options || [b.data.correctAnswer || 'சரி'],
+                          correct: b.data.correctIndex || 0,
+                          explanation: b.data.explanation || ''
+                        });
+                      } else if (b.data.limbTitle) {
+                        dbLimbs.push({
+                          id: dbLimbs.length + 1,
+                          title: b.data.limbTitle,
+                          sub: b.data.limbSub || '',
+                          desc: b.data.limbDesc || '',
+                          examples: b.data.examples || [],
+                          icon: b.data.icon || 'bi-book',
+                          color: b.data.color || '#8B5CF6',
+                          bg: b.data.bg || '#F3E8FF'
+                        });
+                      }
+                    }
+                  });
+                }
+              } catch (e) {}
+            }
+          });
+
+          if (dbQuestions.length > 0) {
+            this.introQuestions = dbQuestions;
+            this.introQuizAnswers = new Array(dbQuestions.length).fill(null);
+          }
+          if (dbLimbs.length > 0) {
+            this.yaappuLimbs = dbLimbs;
+          }
+        }
+      },
+      error: () => {}
+    });
+  }
 
   getRandomTamilLetter(): string {
     const types = ['uyir_kuril', 'uyir_nedil', 'mei', 'uyirmei_kuril', 'uyirmei_nedil'];
@@ -121,19 +311,27 @@ export class PracticeEngineComponent implements OnInit {
       if (mod && mod !== 'all') {
         let detectedMod = mod;
         if (modName) {
-           if (modName.includes('எழுத்து')) detectedMod = 'ezhuthu';
-           else if (modName.includes('அசை')) detectedMod = 'asai';
-           else if (modName.includes('சீர்')) detectedMod = 'seer';
-           else if (modName.includes('தளை')) detectedMod = 'thalai';
-           else if (modName.includes('அலகிடு') || modName.includes('யாப்பு')) detectedMod = 'alagidhal';
+          if (modName.includes('அறிமுகம்') || modName.includes('யாப்பு - அறிமுகம்')) detectedMod = 'yaappu_intro';
+          else if (modName.includes('எழுத்து')) detectedMod = 'ezhuthu';
+          else if (modName.includes('அசை')) detectedMod = 'asai';
+          else if (modName.includes('சீர்')) detectedMod = 'seer';
+          else if (modName.includes('தளை')) detectedMod = 'thalai';
+          else if (modName.includes('அலகிடு')) detectedMod = 'alagidhal';
+        } else if (mod === '1' || mod === 'level_1' || mod === 'yaappu_intro' || mod === 'intro') {
+          detectedMod = 'yaappu_intro';
         }
 
-        if (detectedMod === 'ezhuthu') this.activeTab = 'eluthu';
+        if (detectedMod === 'yaappu_intro') this.activeTab = 'yaappu_intro';
+        else if (detectedMod === 'ezhuthu') this.activeTab = 'eluthu';
         else if (detectedMod === 'asai') this.activeTab = 'asai';
         else if (detectedMod === 'seer') this.activeTab = 'seer';
         else if (detectedMod === 'thalai') this.activeTab = 'thalai';
         else if (detectedMod === 'alagidhal') this.activeTab = 'alahidu';
         this.practiceType = this.activeTab;
+
+        if (this.practiceType === 'yaappu_intro') {
+          this.loadYaappuIntroFromDatabase(mod || 1);
+        }
       } else {
         // When All Modules is selected, pick activeTab dynamically based on game type
         if (mode === 'memory' || mode === 'audio' || mode === 'build') {
@@ -202,6 +400,7 @@ export class PracticeEngineComponent implements OnInit {
   }
 
   getModuleTitle(): string {
+    if (this.practiceType === 'yaappu_intro') return 'யாப்பு - அறிமுகம்';
     if (this.practiceType === 'eluthu') return '1. எழுத்து இலக்கணம்';
     if (this.practiceType === 'asai') return '2. அசை இலக்கணம்';
     if (this.practiceType === 'seer') return '3. சீர் இலக்கணம்';

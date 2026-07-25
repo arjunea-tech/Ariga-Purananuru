@@ -252,7 +252,8 @@ export class GamesHubComponent implements OnInit {
   }
 
   openCourse(course: any) {
-    this.fetchCourseStructure(course.id);
+    const courseId = (course && course.id) ? course.id : (this.availableCourses() && this.availableCourses()[0]?.id) || 1;
+    this.fetchCourseStructure(courseId);
     this.router.navigate([], { relativeTo: this.route, queryParams: { view: 'categories' }, queryParamsHandling: 'merge' });
   }
   

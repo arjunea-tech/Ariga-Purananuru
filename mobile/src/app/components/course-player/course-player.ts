@@ -530,62 +530,103 @@ export class CoursePlayer implements OnInit, OnDestroy {
   loadGameModeSequence(moduleId: string, gameType: string) {
     this.isLoadingLesson.set(true);
     const structure = this.courseStructure();
-    if (!structure) {
-       this.isLoadingLesson.set(false);
-       return;
-    }
-
-    const level = structure.levels.find(l => l.id.toString() === moduleId || l.name === moduleId || l.id.toString() === '101'); // fallback to first if not found
-    if (!level) {
+    if (!structure || !structure.levels || structure.levels.length === 0) {
       this.isLoadingLesson.set(false);
       return;
     }
 
-    let steps: any[] = [];
-    let actIndex = 0;
+    const level = structure.levels.find(l => l.id.toString() === moduleId || l.name === moduleId || l.id.toString() === '101');
+    const targetLevel = level || structure.levels[0];
+    if (!targetLevel || !targetLevel.chapters || targetLevel.chapters.length === 0) {
+      this.isLoadingLesson.set(false);
+      return;
+    }
 
-    level.chapters.forEach(chap => {
-      const cacheKey = `lang_app_resolved_chapter_${chap.id}`;
-      const cachedRaw = localStorage.getItem(cacheKey);
-      if (cachedRaw) {
-        try {
-          const cached = JSON.parse(cachedRaw);
-          if (cached.contents) {
-            cached.contents.forEach((content: any) => {
+    const requests = targetLevel.chapters.map(chap =>
+      this.http.get<any>(`${environment.apiUrl}/chapters/${chap.id}`).pipe(
+        switchMap(chapterData => {
+          if (!chapterData) return of(null);
+          const contents = (chapterData.contents || [])
+            .filter((c: any) => c.is_active !== false)
+            .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
+
+          return this.resolveActivityReferences(contents).pipe(
+            map(resolvedContents => ({ chapterInfo: chapterData, contents: resolvedContents }))
+          );
+        }),
+        catchError(() => of(null))
+      )
+    );
+
+    forkJoin(requests).subscribe({
+      next: (results) => {
+        let steps: any[] = [];
+        let actIndex = 0;
+
+        results.forEach(res => {
+          if (res && res.contents) {
+            res.contents.forEach((content: any) => {
               if (content.text_content) {
-                const parsed = JSON.parse(content.text_content);
-                if (parsed.blocks) {
-                  parsed.blocks.forEach((block: any) => {
-                    if (block.type === 'activity' && block.data && block.data.type === gameType) {
-                      let actName = gameType.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-                      if (gameType === 'mcq') actName = 'Multiple Choice';
+                try {
+                  const parsed = JSON.parse(content.text_content);
+                  if (parsed.blocks) {
+                    parsed.blocks.forEach((block: any) => {
+                      if (block.type === 'activity' && block.data && (block.data.type === gameType || !gameType || gameType === 'all')) {
+                        let actName = (block.data.type || gameType).split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+                        if (block.data.type === 'mcq') actName = 'Multiple Choice';
 
-                      steps.push({
-                        type: 'activity',
-                        title: `${actName} - ${++actIndex}`,
-                        data: block
-                      });
-                    }
-                  });
-                }
+                        steps.push({
+                          type: 'activity',
+                          title: block.data.title || `${actName} - ${++actIndex}`,
+                          data: block
+                        });
+                      }
+                    });
+                  }
+                } catch (e) {}
               }
             });
           }
-        } catch(e) {}
+        });
+
+        // Fallback: If no activity blocks exist in the database for this game type yet, provide interactive game activity!
+        if (steps.length === 0) {
+          const defaultTitleMap: Record<string, string> = {
+            'mcq': 'சரியான விடையைத் தேர்ந்தெடு',
+            'word_hunt': 'வார்த்தை தேடல்',
+            'balloon_pop': 'பலூன் விளையாட்டு',
+            'letter_basket': 'எழுத்து கூடை',
+            'word_builder': 'வார்த்தை உருவாக்கு',
+            'match': 'பொருத்துக',
+            'fill_blanks': 'கோடிட்ட இடத்தை நிரப்புக',
+            'true_false': 'சரி அல்லது தவறு'
+          };
+          const gameTitle = defaultTitleMap[gameType] || 'பயிற்சி விளையாட்டு';
+
+          steps.push({
+            type: 'activity',
+            title: gameTitle,
+            data: {
+              type: 'activity',
+              data: {
+                type: gameType || 'mcq',
+                title: gameTitle,
+                question: 'சரியான விடையைத் தேர்ந்தெடுக்குக',
+                options: ['விடை 1', 'விடை 2', 'விடை 3', 'விடை 4'],
+                correctIndex: 0
+              }
+            }
+          });
+        }
+
+        this.lessonSequence.set(steps);
+        this.currentStepIndex.set(0);
+        this.isLoadingLesson.set(false);
+      },
+      error: () => {
+        this.isLoadingLesson.set(false);
       }
     });
-
-    if (steps.length === 0) {
-      steps.push({
-         type: 'reading',
-         title: 'விளையாட்டுகள் ஏதுமில்லை',
-         data: { isJson: true, blocks: [{ type: 'paragraph', data: { text: '<div class="text-center p-5 fw-bold text-muted">இந்த பிரிவில் விளையாட்டுகள் ஏதுமில்லை.</div>' } }] }
-      });
-    }
-
-    this.lessonSequence.set(steps);
-    this.currentStepIndex.set(0);
-    this.isLoadingLesson.set(false);
   }
 
   loadLessonSequence(chapterId: number) {
@@ -609,28 +650,12 @@ export class CoursePlayer implements OnInit, OnDestroy {
       }
     }
 
-    // 1. Instant Load from LocalStorage Cache
-    const cacheKey = `lang_app_resolved_chapter_${chapterId}`;
-    const cachedRaw = localStorage.getItem(cacheKey);
-    let loadedFromLocal = false;
-
-    if (cachedRaw) {
-      try {
-        const cached = JSON.parse(cachedRaw);
-        if (cached && cached.contents) {
-          this.generateLessonSequence(cached.contents, cached.assessments, cached.chapterInfo);
-          loadedFromLocal = true;
-        }
-      } catch (e) {}
-    }
-
-    // 2. Instant Load Fallback from active courseStructure in memory (0ms delay)
-    if (!loadedFromLocal && structure) {
+    // 1. Instant Load Fallback from active courseStructure in memory (0ms delay)
+    if (structure) {
       for (const level of structure.levels) {
         const chap = level.chapters.find(c => c.id === chapterId);
         if (chap && chap.contents && chap.contents.length > 0) {
           this.generateLessonSequence(chap.contents, chap.assessments || [], chap);
-          loadedFromLocal = true;
           break;
         }
       }
@@ -653,36 +678,25 @@ export class CoursePlayer implements OnInit, OnDestroy {
       })
     ).subscribe({
       next: (result) => {
-        localStorage.setItem(cacheKey, JSON.stringify(result));
-        // Only update signals if we haven't started playing or if it wasn't loaded from local memory/cache
-        if (!loadedFromLocal || this.currentStepIndex() === 0) {
-          this.generateLessonSequence(result.contents, result.assessments, result.chapterInfo);
-        }
+        this.generateLessonSequence(result.contents, result.assessments, result.chapterInfo);
       },
       error: (err) => {
         console.warn('Failed to load chapter contents from backend, generating fallback sequence:', err);
         
-        // If it's a 404, the chapter likely was deleted from the backend. 
-        // We must clear the stale caches and force a reload of the course structure.
         if (err.status === 404) {
-          localStorage.removeItem(cacheKey);
-          localStorage.removeItem('lang_app_course_structure');
           this.activeChapterId.set(null);
           this.loadStructure(); // Re-fetch structure which will correct the state
           return;
         }
 
-        // Only fallback if we don't even have cached content
-        if (!localStorage.getItem(cacheKey)) {
-          const fallbackContents: Content[] = [
-            {
-              id: chapterId,
-              name: 'Tamil Grammar Concept',
-              text_content: '{"blocks":[{"type":"header","data":{"text":"தமிழ் இலக்கண பாடம்"}},{"type":"paragraph","data":{"text":"அடிப்படை இலக்கண கருத்துக்களை கற்றுக்கொண்டு பயிற்சி செய்து தேர்ச்சி பெறுக!"}}]}'
-            }
-          ];
-          this.generateLessonSequence(fallbackContents, []);
-        }
+        const fallbackContents: Content[] = [
+          {
+            id: chapterId,
+            name: 'Tamil Grammar Concept',
+            text_content: '{"blocks":[{"type":"header","data":{"text":"தமிழ் இலக்கண பாடம்"}},{"type":"paragraph","data":{"text":"அடிப்படை இலக்கண கருத்துக்களை கற்றுக்கொண்டு பயிற்சி செய்து தேர்ச்சி பெறுக!"}}]}'
+          }
+        ];
+        this.generateLessonSequence(fallbackContents, []);
       }
     });
   }
