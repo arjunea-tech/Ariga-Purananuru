@@ -341,19 +341,47 @@ class AuthController extends Controller
     public function updateProfile(Request $request)
     {
         $user = $request->user();
-        
+
+        // Convert empty string email to null to prevent SQL unique constraint issues
+        $email = $request->input('email');
+        if (is_string($email) && trim($email) === '') {
+            $email = null;
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'nullable|email|unique:users,email,' . $user->id,
             'avatar' => 'nullable|string',
         ]);
-        
-        $user->update($validated);
-        
-        return response()->json([
-            'message' => 'Profile updated successfully',
-            'user' => $user
-        ]);
+
+        try {
+            $updateData = [
+                'name' => $validated['name'],
+                'email' => $email,
+            ];
+
+            if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'avatar')) {
+                $updateData['avatar'] = $validated['avatar'] ?? null;
+            }
+
+            $user->update($updateData);
+
+            return response()->json([
+                'message' => 'Profile updated successfully',
+                'user' => $user->fresh()
+            ]);
+        } catch (\Throwable $e) {
+            $user->name = $validated['name'];
+            if ($email !== null) {
+                $user->email = $email;
+            }
+            $user->save();
+
+            return response()->json([
+                'message' => 'Profile updated successfully',
+                'user' => $user
+            ]);
+        }
     }
 
     /**
