@@ -23,9 +23,9 @@
   --bs-primary-rgb: 14, 165, 233;
   --primary-color: #0EA5E9;
   --secondary-color: #F43F5E; /* Bright Rose */
-  --sidebar-bg: #FFFFFF;
-  --sidebar-text: #1F2937;
-  --sidebar-active: #0EA5E9;
+  --sidebar-bg: #1E293B;
+  --sidebar-text: #F8FAFC;
+  --sidebar-active: #2563EB;
 }
 
 body,

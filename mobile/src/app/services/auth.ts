@@ -43,6 +43,7 @@ export class AuthService {
   logout(): Observable<any> {
     return this.http.post(`${this.apiUrl}/logout`, {}).pipe(
       tap({
+        next: () => this.clearSession(),
         complete: () => this.clearSession(),
         error: () => this.clearSession(),
       })

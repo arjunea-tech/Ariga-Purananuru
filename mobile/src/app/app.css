@@ -7,8 +7,9 @@
   transition: transform 0.3s ease-in-out;
 }
 
-.sidebar, .sidebar * {
-  font-family: 'Times New Roman', 'Noto Serif Tamil', Times, serif !important;
+.sidebar,
+.sidebar * {
+  font-family: 'Nunito', 'Baloo Thambi 2', system-ui, -apple-system, sans-serif !important;
 }
 
 .main-content {
@@ -45,11 +46,11 @@
     transform: translateX(-100%);
     z-index: 1050;
   }
-  
+
   .sidebar.show {
     transform: translateX(0);
   }
-  
+
   .main-content {
     margin-left: 0;
     width: 100%;
@@ -97,10 +98,12 @@
     display: flex;
     align-items: center;
   }
+
   .sidebar {
     padding-top: max(28px, env(safe-area-inset-top)) !important;
   }
-  .main-content > div {
+
+  .main-content>div {
     margin-top: calc(60px + max(28px, env(safe-area-inset-top))) !important;
   }
 }
