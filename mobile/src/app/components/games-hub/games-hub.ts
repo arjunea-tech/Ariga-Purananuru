@@ -1,6 +1,8 @@
 import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 export interface EducationalGame {
   id: string;
@@ -26,9 +28,11 @@ export interface EducationalGame {
 export class GamesHubComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private http = inject(HttpClient);
 
   viewState = signal<'courses' | 'categories'>('courses');
   availableCourses = signal<any[]>([]);
+  isLoading = signal<boolean>(true);
 
   selectedModule = signal<string>('all');
 
@@ -191,23 +195,30 @@ export class GamesHubComponent implements OnInit {
   }
 
   private loadDynamicCoursesAndModules() {
-    // Load cached courses dynamically
-    const cachedCourses = localStorage.getItem('lang_app_courses_list');
-    if (cachedCourses) {
-      try {
-        const parsed = JSON.parse(cachedCourses);
-        if (parsed && parsed.length > 0) {
-          this.availableCourses.set(parsed);
-        }
-      } catch (e) {}
-    }
+    this.isLoading.set(true);
+    this.http.get<any[]>(`${environment.apiUrl}/courses`).subscribe({
+      next: (courses) => {
+        this.isLoading.set(false);
+        if (courses && courses.length > 0) {
+          const activeCourses = courses.filter(c => c.is_active !== false);
+          const listToUse = activeCourses.length > 0 ? activeCourses : courses;
+          this.availableCourses.set(listToUse);
 
-    // Load dynamic levels/modules from active course structure
-    const cachedStructure = localStorage.getItem('lang_app_course_structure');
-    if (cachedStructure) {
-      try {
-        const struct = JSON.parse(cachedStructure);
-        if (struct.levels && Array.isArray(struct.levels) && struct.levels.length > 0) {
+          const targetCourseId = listToUse[0].id;
+          this.fetchCourseStructure(targetCourseId);
+        }
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        console.error('Failed to load courses from DB:', err);
+      }
+    });
+  }
+
+  fetchCourseStructure(courseId: number | string): void {
+    this.http.get<any>(`${environment.apiUrl}/courses/${courseId}/player-structure`).subscribe({
+      next: (struct) => {
+        if (struct && struct.levels && Array.isArray(struct.levels) && struct.levels.length > 0) {
           const dynamicMods = [
             { id: 'all', label: 'அனைத்தும்' },
             ...struct.levels.map((lvl: any, index: number) => ({
@@ -217,8 +228,9 @@ export class GamesHubComponent implements OnInit {
           ];
           this.modules.set(dynamicMods);
         }
-      } catch (e) {}
-    }
+      },
+      error: () => {}
+    });
   }
 
   filteredGames = computed(() => {
@@ -240,6 +252,7 @@ export class GamesHubComponent implements OnInit {
   }
 
   openCourse(course: any) {
+    this.fetchCourseStructure(course.id);
     this.router.navigate([], { relativeTo: this.route, queryParams: { view: 'categories' }, queryParamsHandling: 'merge' });
   }
   
