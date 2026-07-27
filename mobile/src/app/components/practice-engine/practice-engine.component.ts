@@ -5,6 +5,7 @@ import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { TamilNLPService, SeiyulAnalysis } from '../../services/tamil-nlp.service';
 import { environment } from '../../../environments/environment';
+import { ALL_PRACTICE_WORDS, NER_ASAI_WORDS, NIRAI_ASAI_WORDS } from '../../data/practice-words.data';
 
 @Component({
   selector: 'app-practice-engine',
@@ -81,6 +82,19 @@ export class PracticeEngineComponent implements OnInit {
   // Asai specific practice words (Pre-verified single asai words)
   nerAsaiWords = ['கல்', 'கால்', 'மா', 'பொன்', 'பூ', 'தீ', 'மெய்', 'நெய்', 'கை', 'கண்', 'நாள்'];
   niraiAsaiWords = ['பல', 'பலா', 'நிலம்', 'கனா', 'விழா', 'மலர்', 'குயில்', 'தமிழ்', 'உயிர்', 'புலி'];
+
+  selectedWordForPractice: string = '';
+  practiceWordPool: string[] = [
+    'அகழ்வாரைத்',
+    'செயற்கரிய',
+    'திருவள்ளுவர்',
+    'சீவகசிந்தாமணி',
+    'தமிழ்த்தாய்',
+    'பொறையுடைமை',
+    'அகர முதல எழுத்தெல்லாம்',
+    'கற்க கசடறக் கற்பவை',
+    'எப்பொருள் யார்யார்வாய்க் கேட்பினும்'
+  ];
 
   // Yaappu Intro: 6 Limbs (ஆறு உறுப்புகள்) & Beginner Quiz
   yaappuLimbs = [
@@ -301,6 +315,52 @@ export class PracticeEngineComponent implements OnInit {
     return allWords[Math.floor(Math.random() * allWords.length)];
   }
 
+  getRandomPracticeWord(): string {
+    const pool = ALL_PRACTICE_WORDS.length > 0 ? ALL_PRACTICE_WORDS : [...this.nerAsaiWords, ...this.niraiAsaiWords, ...this.practiceWordPool];
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  fetchRandomWordFromDB() {
+    this.http.get<any>(`${environment.apiUrl}/practice-words/random`).subscribe({
+      next: (res) => {
+        if (res && res.word) {
+          this.interactiveWord = res.word;
+          this.selectedWordForPractice = res.word;
+        } else {
+          this.interactiveWord = this.getRandomPracticeWord();
+          this.selectedWordForPractice = this.interactiveWord;
+        }
+      },
+      error: () => {
+        // Fallback to local data pool if backend API is offline
+        this.interactiveWord = this.getRandomPracticeWord();
+        this.selectedWordForPractice = this.interactiveWord;
+      }
+    });
+  }
+
+  refreshRandomWord() {
+    this.feedbackMessage = null;
+    this.fetchRandomWordFromDB();
+  }
+
+  confirmSelectedWord() {
+    if (!this.interactiveWord.trim()) {
+      this.showFeedback('தயவுசெய்து ஒரு வார்த்தையை உள்ளிடுக.', 'error');
+      return;
+    }
+    this.selectedWordForPractice = this.interactiveWord.trim();
+    this.interactiveWord = this.selectedWordForPractice;
+    this.step = 'split_word';
+    this.feedbackMessage = null;
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { step: 'split_word' },
+      queryParamsHandling: 'merge'
+    });
+  }
+
   ngOnInit() {
     this.route.queryParams.subscribe(params => {
       const mode = params['mode'];
@@ -311,27 +371,22 @@ export class PracticeEngineComponent implements OnInit {
       if (mod && mod !== 'all') {
         let detectedMod = mod;
         if (modName) {
-          if (modName.includes('அறிமுகம்') || modName.includes('யாப்பு - அறிமுகம்')) detectedMod = 'yaappu_intro';
-          else if (modName.includes('எழுத்து')) detectedMod = 'ezhuthu';
+          if (modName.includes('அறிமுகம்') || modName.includes('யாப்பு - அறிமுகம்') || modName.includes('எழுத்து')) detectedMod = 'ezhuthu';
           else if (modName.includes('அசை')) detectedMod = 'asai';
           else if (modName.includes('சீர்')) detectedMod = 'seer';
           else if (modName.includes('தளை')) detectedMod = 'thalai';
           else if (modName.includes('அலகிடு')) detectedMod = 'alagidhal';
-        } else if (mod === '1' || mod === 'level_1' || mod === 'yaappu_intro' || mod === 'intro') {
-          detectedMod = 'yaappu_intro';
+        } else if (mod === '1' || mod === 'level_1' || mod === 'ezhuthu') {
+          detectedMod = 'ezhuthu';
         }
 
-        if (detectedMod === 'yaappu_intro') this.activeTab = 'yaappu_intro';
-        else if (detectedMod === 'ezhuthu') this.activeTab = 'eluthu';
+        if (detectedMod === 'ezhuthu') this.activeTab = 'eluthu';
         else if (detectedMod === 'asai') this.activeTab = 'asai';
         else if (detectedMod === 'seer') this.activeTab = 'seer';
         else if (detectedMod === 'thalai') this.activeTab = 'thalai';
         else if (detectedMod === 'alagidhal') this.activeTab = 'alahidu';
+        else this.activeTab = 'eluthu';
         this.practiceType = this.activeTab;
-
-        if (this.practiceType === 'yaappu_intro') {
-          this.loadYaappuIntroFromDatabase(mod || 1);
-        }
       } else {
         // When All Modules is selected, pick activeTab dynamically based on game type
         if (mode === 'memory' || mode === 'audio' || mode === 'build') {
@@ -396,11 +451,15 @@ export class PracticeEngineComponent implements OnInit {
   // --- INTERACTIVE FLOW METHODS --- //
 
   goBackToGames() {
-    this.location.back();
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (this.step === 'input_word' || this.step === 'split_word' || this.step === 'analyze_word' || this.step === 'identify_seer' || this.step === 'identify_thalai' || this.step === 'result') {
+      this.goBackToInput();
+    } else {
+      this.router.navigate(['/tabs/games'], { queryParams: { view: 'categories' } });
+    }
   }
 
   getModuleTitle(): string {
-    if (this.practiceType === 'yaappu_intro') return 'யாப்பு - அறிமுகம்';
     if (this.practiceType === 'eluthu') return '1. எழுத்து இலக்கணம்';
     if (this.practiceType === 'asai') return '2. அசை இலக்கணம்';
     if (this.practiceType === 'seer') return '3. சீர் இலக்கணம்';
@@ -410,9 +469,16 @@ export class PracticeEngineComponent implements OnInit {
   }
 
   selectPlayMode(mode: 'explain' | 'practice') {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     this.playMode = mode;
     this.feedbackMessage = null;
-    this.interactiveWord = '';
+    
+    if (mode === 'practice') {
+      this.refreshRandomWord();
+    } else {
+      this.interactiveWord = '';
+      this.selectedWordForPractice = '';
+    }
     
     this.router.navigate([], {
       relativeTo: this.route,
@@ -438,12 +504,14 @@ export class PracticeEngineComponent implements OnInit {
   }
 
   goBackToInput() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     let nextStep = 'dashboard_input';
     if (this.isGameMode) {
       nextStep = 'select_mode';
     }
     
     this.interactiveWord = '';
+    this.selectedWordForPractice = '';
     this.interactiveAnalysis = null;
     this.interactiveParts = [];
     this.interactiveValidationResults = [];
@@ -458,6 +526,8 @@ export class PracticeEngineComponent implements OnInit {
     this.interactiveCurrentThalaiIndex = 0;
     this.interactiveThalaiValidationResults = [];
     this.feedbackMessage = null;
+
+    this.step = nextStep as any;
 
     this.router.navigate([], {
       relativeTo: this.route,

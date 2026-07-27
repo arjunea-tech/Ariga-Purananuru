@@ -1,7 +1,8 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterOutlet, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { Location } from '@angular/common';
+import { filter } from 'rxjs/operators';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from './services/auth';
 import { NotificationService } from './services/notification.service';
@@ -61,6 +62,20 @@ export class App implements OnInit {
   showExitModal = signal<boolean>(false);
 
   ngOnInit() {
+    // Scroll to top on every router navigation
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd)
+    ).subscribe(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+      setTimeout(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        const scrollables = document.querySelectorAll('.games-hub-page, .container-fluid, ion-content, .card');
+        scrollables.forEach(el => { el.scrollTop = 0; });
+      }, 50);
+    });
+
     // Only configure native plugins on physical/emulated mobile platforms
     if (Capacitor.isNativePlatform()) {
       try {

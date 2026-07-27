@@ -33,7 +33,32 @@ export class StudentTabsComponent {
       else if (url.includes('/progress')) this.activeTab.set('progress');
       else if (url.includes('/profile')) this.activeTab.set('profile');
       else this.activeTab.set('home');
+
+      this.scrollToTop();
     });
+  }
+
+  scrollToTop() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+
+    setTimeout(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      const tabContent = document.querySelector('.tab-content-area');
+      if (tabContent) {
+        tabContent.scrollTop = 0;
+      }
+      const scrollables = document.querySelectorAll('.games-hub-page, .container-fluid, ion-content, .card');
+      scrollables.forEach(el => { el.scrollTop = 0; });
+    }, 0);
+
+    setTimeout(() => {
+      const tabContent = document.querySelector('.tab-content-area');
+      if (tabContent) {
+        tabContent.scrollTop = 0;
+      }
+    }, 50);
   }
 
   animationClass = signal<string>('');
@@ -76,6 +101,7 @@ export class StudentTabsComponent {
     if (event) {
       event.preventDefault();
     }
+    this.scrollToTop();
     const tab = this.tabs.find(t => t.id === tabId || t.id.toLowerCase() === tabId.toLowerCase());
     if (tab) {
       

@@ -219,9 +219,14 @@ export class GamesHubComponent implements OnInit {
     this.http.get<any>(`${environment.apiUrl}/courses/${courseId}/player-structure`).subscribe({
       next: (struct) => {
         if (struct && struct.levels && Array.isArray(struct.levels) && struct.levels.length > 0) {
+          const practiceLevels = struct.levels.filter((lvl: any) => {
+            const name = (lvl.name || lvl.title || '').trim();
+            return !name.includes('அறிமுகம்') && !name.includes('yappu_intro') && !name.includes('intro');
+          });
+
           const dynamicMods = [
             { id: 'all', label: 'அனைத்தும்' },
-            ...struct.levels.map((lvl: any, index: number) => ({
+            ...practiceLevels.map((lvl: any, index: number) => ({
               id: lvl.id ? lvl.id.toString() : `level_${index + 1}`,
               label: lvl.name || `நிலை ${index + 1}`
             }))
@@ -252,20 +257,24 @@ export class GamesHubComponent implements OnInit {
   }
 
   openCourse(course: any) {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     const courseId = (course && course.id) ? course.id : (this.availableCourses() && this.availableCourses()[0]?.id) || 1;
     this.fetchCourseStructure(courseId);
     this.router.navigate([], { relativeTo: this.route, queryParams: { view: 'categories' }, queryParamsHandling: 'merge' });
   }
   
   goBackToCourses() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     this.router.navigate([], { relativeTo: this.route, queryParams: { view: null }, queryParamsHandling: 'merge' });
   }
 
   goBackToHome() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     this.router.navigate(['/tabs/home']);
   }
 
   launchPracticeEngine(moduleId: string, moduleLabel?: string) {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     this.router.navigate(['/learn/practice'], {
       queryParams: {
         module: moduleId,

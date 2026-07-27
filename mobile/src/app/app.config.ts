@@ -1,6 +1,6 @@
 import { ApplicationConfig, importProvidersFrom } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { provideIonicAngular } from '@ionic/angular/standalone';
@@ -14,7 +14,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideIonicAngular({}),
     provideHttpClient(withInterceptors([authInterceptor, loaderInterceptor])),
-    provideRouter(routes),
+    provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'top', anchorScrolling: 'enabled' })),
     provideTranslateService({
       fallbackLang: 'en'
     }),
