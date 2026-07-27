@@ -288,26 +288,6 @@ export class LearnModulesComponent implements OnInit {
       }
     });
 
-    // Fallback: If no activity blocks exist in the chapters yet, provide default interactive practice activities so games work!
-    if (activities.length === 0) {
-      const defaultTypes = [
-        { type: 'mcq', title: 'சரியான விடையைத் தேர்ந்தெடு' },
-        { type: 'word_hunt', title: 'வார்த்தை தேடல்' },
-        { type: 'balloon_pop', title: 'பலூன் விளையாட்டு' },
-        { type: 'yappu_asai_slice', title: 'அசை வெட்டு' },
-        { type: 'yappu_asai_detective', title: 'அசை பிழை திருத்துதல்' }
-      ];
-      defaultTypes.forEach((t, i) => {
-        activities.push({
-          id: `default_${categoryId}_${t.type}`,
-          title: t.title,
-          type: t.type,
-          data: { type: t.type, title: t.title },
-          chapterId: mod.chapters && mod.chapters[0] ? mod.chapters[0].id : 1
-        });
-      });
-    }
-
     return activities;
   }
 

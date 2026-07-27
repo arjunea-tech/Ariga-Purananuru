@@ -66,6 +66,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             TamilYappuSeeder::class,
             PracticeWordSeeder::class,
+            EluthuActivitySeeder::class,
         ]);
     }
 }

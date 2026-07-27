@@ -597,38 +597,6 @@ export class CoursePlayer implements OnInit, OnDestroy {
           }
         }
 
-        // Fallback: If no activity blocks exist in the database for this game type yet, provide interactive game activity!
-        if (steps.length === 0) {
-          const defaultTitleMap: Record<string, string> = {
-            'mcq': 'சரியான விடையைத் தேர்ந்தெடு',
-            'word_hunt': 'வார்த்தை தேடல்',
-            'balloon_pop': 'பலூன் விளையாட்டு',
-            'letter_basket': 'எழுத்து கூடை',
-            'word_builder': 'வார்த்தை உருவாக்கு',
-            'match': 'பொருத்துக',
-            'fill_blanks': 'கோடிட்ட இடத்தை நிரப்புக',
-            'true_false': 'சரி அல்லது தவறு',
-            'yappu_asai_slice': 'அசை வெட்டு',
-            'yappu_asai_detective': 'அசை பிழை திருத்துதல்'
-          };
-          const gameTitle = defaultTitleMap[gameType] || 'பயிற்சி விளையாட்டு';
-
-          steps.push({
-            type: 'activity',
-            title: gameTitle,
-            data: {
-              type: 'activity',
-              data: {
-                type: gameType || 'mcq',
-                title: gameTitle,
-                question: 'சரியான விடையைத் தேர்ந்தெடுக்குக',
-                options: ['விடை 1', 'விடை 2', 'விடை 3', 'விடை 4'],
-                correctIndex: 0
-              }
-            }
-          });
-        }
-
         this.lessonSequence.set(steps);
         this.currentStepIndex.set(0);
         this.isLoadingLesson.set(false);
