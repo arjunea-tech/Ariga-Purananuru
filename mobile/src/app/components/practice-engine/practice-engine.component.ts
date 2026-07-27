@@ -162,25 +162,25 @@ export class PracticeEngineComponent implements OnInit {
 
   introQuestions = [
     {
-      question: '1. யாப்பிலக்கணத்தின் உறுப்புகள் எத்தனை?',
+      question: 'யாப்பிலக்கணத்தின் உறுப்புகள் எத்தனை?',
       options: ['4 உறுப்புகள்', '6 உறுப்புகள்', '8 உறுப்புகள்', '12 உறுப்புகள்'],
       correct: 1,
       explanation: 'யாப்பிலக்கணத்தின் உறுப்புகள் 6 ஆகும் (எழுத்து, அசை, சீர், தளை, அடி, தொடை).'
     },
     {
-      question: '2. எழுத்துக்கள் ஒன்றோ பலவோ சேர்ந்து அமைவது எது?',
+      question: 'எழுத்துக்கள் ஒன்றோ பலவோ சேர்ந்து அமைவது எது?',
       options: ['அசை', 'சீர்', 'தளை', 'தொடை'],
       correct: 0,
       explanation: 'எழுத்துக்கள் ஒன்று அல்லது அதற்கு மேல் இணைந்து அசை உருவாகிறது (நேரசை, நிரையசை).'
     },
     {
-      question: '3. அசைகள் சேர்ந்து அமைவது எது?',
+      question: 'அசைகள் சேர்ந்து அமைவது எது?',
       options: ['எழுத்து', 'சீர்', 'அடி', 'தொடை'],
       correct: 1,
       explanation: 'ஒன்றோ பலவோ அசைகள் இணைந்து சீர் அமைக்கும் (ஓரசைச் சீர், ஈரசைச் சீர், மூவசைச் சீர்).'
     },
     {
-      question: '4. செய்யுளில் மோனை, எதுகை போன்றவை எந்த உறுப்பில் அடங்கும்?',
+      question: 'செய்யுளில் மோனை, எதுகை போன்றவை எந்த உறுப்பில் அடங்கும்?',
       options: ['தளை', 'அடி', 'தொடை', 'எழுத்து'],
       correct: 2,
       explanation: 'செய்யுளுக்கு ஓசை இன்பத்தையும் நயத்தையும் தரும் மோனை, எதுகை போன்றவை தொடை உறுப்பில் அடங்கும்.'
@@ -225,7 +225,8 @@ export class PracticeEngineComponent implements OnInit {
   }
 
   resetIntroQuiz() {
-    this.introQuizAnswers = [null, null, null, null];
+    this.introQuestions = this.shuffleArray(this.introQuestions);
+    this.introQuizAnswers = new Array(this.introQuestions.length).fill(null);
     this.introQuizSubmitted = false;
     this.introQuizScore = 0;
   }
@@ -280,8 +281,10 @@ export class PracticeEngineComponent implements OnInit {
           });
 
           if (dbQuestions.length > 0) {
-            this.introQuestions = dbQuestions;
-            this.introQuizAnswers = new Array(dbQuestions.length).fill(null);
+            let prepared = this.shuffleArray(dbQuestions);
+            if (prepared.length > 10) prepared = prepared.slice(0, 10);
+            this.introQuestions = prepared;
+            this.introQuizAnswers = new Array(prepared.length).fill(null);
           }
           if (dbLimbs.length > 0) {
             this.yaappuLimbs = dbLimbs;
@@ -941,5 +944,14 @@ export class PracticeEngineComponent implements OnInit {
     setTimeout(() => {
       this.feedbackMessage = null;
     }, 4000);
+  }
+
+  private shuffleArray<T>(array: T[]): T[] {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
   }
 }

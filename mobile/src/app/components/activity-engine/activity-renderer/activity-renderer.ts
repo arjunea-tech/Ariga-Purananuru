@@ -250,11 +250,13 @@ export class ActivityRenderer implements OnChanges {
       normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.audioUrl = raw.media_url || additional.audioUrl || '';
       const rawOptions = raw.options || additional.options || [];
-      normalized.options = rawOptions.map((opt: any, idx: number) => ({
+      const mappedOptions = rawOptions.map((opt: any, idx: number) => ({
         id: opt.id ?? idx,
         text: opt.option_text ?? opt.text ?? '',
         isCorrect: !!(opt.is_correct ?? opt.isCorrect ?? false)
       }));
+      // Shuffle options for MCQ (Requirement: Option Shuffling)
+      normalized.options = this.shuffleArray(mappedOptions);
     } else if (type === 'fill_blanks') {
       normalized.text = this.convertEditorJsToHtml(raw.text || raw.question_text || '');
       normalized.audioUrl = raw.media_url || additional.audioUrl || '';
@@ -491,5 +493,14 @@ export class ActivityRenderer implements OnChanges {
       type: this.activity?.type || 'yappu_seer',
       ...event
     });
+  }
+
+  private shuffleArray<T>(array: T[]): T[] {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
   }
 }
