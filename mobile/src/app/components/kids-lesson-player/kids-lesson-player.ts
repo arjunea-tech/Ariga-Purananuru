@@ -230,13 +230,21 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
         this.currentContentPage.update(p => p + 1);
         const isComplete = this.currentContentPage() >= step.data.blocks.length - 1;
         this.stepCompleted.emit(isComplete);
+      } else {
+        this.nextLessonStep();
       }
+    } else {
+      this.nextLessonStep();
     }
   }
 
   prevContentPage() {
-    this.currentContentPage.update(p => Math.max(0, p - 1));
-    this.stepCompleted.emit(false); // Can't be complete if moving backwards
+    if (this.currentContentPage() > 0) {
+      this.currentContentPage.update(p => Math.max(0, p - 1));
+      this.stepCompleted.emit(false);
+    } else if (this.currentStepIndex() > 0) {
+      this.prevStep.emit();
+    }
   }
 
   onActivityAnswered(event: any) {
