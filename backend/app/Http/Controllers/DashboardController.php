@@ -107,11 +107,11 @@ class DashboardController extends Controller
             $averageScore = 0;
         }
 
-        // 3. Calculate streak dynamically
-        $streak = $this->calculateStreak($userId);
+        // 3. Get streak from user profile (Persistent gamification)
+        $streak = $user->current_streak ?? 0;
 
-        // 4. Calculate XP Points dynamically
-        $xpPoints = ($completedChapters * 100) + ($passedAttempts * 200) + ($totalAttempts * 50) + ($streak * 25) + ($activityCompletions * 75);
+        // 4. Get XP Points from user profile (Persistent gamification)
+        $xpPoints = $user->total_xp ?? 0;
 
         // 5. Course-by-course progressions
         $courseProgressions = [];
@@ -419,11 +419,11 @@ class DashboardController extends Controller
             ->pluck('chapter_id')
             ->toArray();
 
-        // questions_answered: sum all individual activity answers (each row = 1 question)
-        // Each activity row in user_course_progress (status=activity_completed) has score = 100 (correct) or 0 (wrong)
+        // questions_answered: only count LESSON mode rows (activity_completed)
+        // Practice rows are stored as 'practice_completed' and excluded from official stats
         $activityRows = DB::table('user_course_progress')
             ->where('user_id', $userId)
-            ->where('status', 'activity_completed')
+            ->where('status', 'activity_completed')  // lesson mode only
             ->select('score')
             ->get();
 
@@ -722,12 +722,18 @@ class DashboardController extends Controller
     public function recordActivity(Request $request)
     {
         $validated = $request->validate([
-            'content_id' => 'nullable|integer',
-            'course_id' => 'nullable|integer',
+            'content_id'    => 'nullable|integer',
+            'course_id'     => 'nullable|integer',
+            'activity_id'   => 'nullable|string',
             'activity_type' => 'required|string|in:mcq,match,flashcard,assessment,activity',
-            'score' => 'required|numeric|min:0',
-            'total' => 'required|integer|min:1',
+            'score'         => 'required|numeric|min:0',
+            'total'         => 'required|integer|min:1',
+            // OPTION 3: mode separates official lesson tracking from free practice
+            'mode'          => 'nullable|string|in:lesson,practice',
         ]);
+
+        // Default mode: lesson (official progress tracking)
+        $mode = $validated['mode'] ?? 'lesson';
 
         $user = $request->user();
         $userId = $user->id;
@@ -764,22 +770,109 @@ class DashboardController extends Controller
             $courseId = $mapping ? $mapping->course_id : null;
         }
 
-        // Record the activity in user_course_progress as a general activity log entry
-        // This feeds into the streak calculation (calculateStreak uses completed_at dates)
-        DB::table('user_course_progress')->insert([
-            'user_id' => $userId,
-            'course_id' => $courseId,
-            'chapter_id' => $validated['content_id'] ?? null,
-            'status' => 'activity_completed',
-            'score' => $pctScore,
-            'completed_at' => now(),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // OPTION 2 — Best Score Retention:
+        // For lesson/chapter questions (chapter_id present): only update if new score is BETTER.
+        // This prevents score from dropping on bad re-attempts and motivates students to practice.
+        // OPTION 3 — Mode Separation:
+        // LESSON mode  → Official progress tracking (Option 2 best-score retention, status=activity_completed)
+        // PRACTICE mode → Unlimited re-attempts, gives streak credit, but status=practice_completed
+        //                  so it NEVER inflates official Questions Answered / Accuracy counts.
+        if ($mode === 'practice') {
+            // 🎮 Practice mode — insert new row every attempt (streak tracking only)
+            // Use 'practice_completed' so dashboard stats queries skip these rows
+            DB::table('user_course_progress')->insert([
+                'user_id'      => $userId,
+                'course_id'    => $courseId,
+                'chapter_id'   => $validated['content_id'] ?? null,
+                'activity_id'  => $validated['activity_id'] ?? null,
+                'status'       => 'practice_completed',
+                'score'        => $pctScore,
+                'completed_at' => now(),
+                'created_at'   => now(),
+                'updated_at'   => now(),
+            ]);
+        } else {
+            // 📚 Lesson mode (with or without chapter) — Option 2: Best Score Retention
+            $query = DB::table('user_course_progress')
+                ->where('user_id', $userId)
+                ->where('status', 'activity_completed');
+                
+            // Match chapter_id if provided, otherwise match null
+            if (!empty($validated['content_id'])) {
+                $query->where('chapter_id', $validated['content_id']);
+            } else {
+                $query->whereNull('chapter_id');
+            }
+                
+            // Differentiate multiple questions inside the same chapter/module
+            if (isset($validated['activity_id'])) {
+                $query->where('activity_id', $validated['activity_id']);
+            } else {
+                $query->whereNull('activity_id');
+            }
+            
+            $existing = $query->first();
+
+            if (!$existing) {
+                // First attempt — insert fresh official record
+                DB::table('user_course_progress')->insert([
+                    'user_id'      => $userId,
+                    'course_id'    => $courseId,
+                    'chapter_id'   => $validated['content_id'] ?? null,
+                    'activity_id'  => $validated['activity_id'] ?? null,
+                    'status'       => 'activity_completed',
+                    'score'        => $pctScore,
+                    'completed_at' => now(),
+                    'created_at'   => now(),
+                    'updated_at'   => now(),
+                ]);
+            } elseif ($pctScore > $existing->score) {
+                // Re-attempt with BETTER score — update to reflect improvement
+                DB::table('user_course_progress')
+                    ->where('id', $existing->id)
+                    ->update([
+                        'course_id'    => $courseId,
+                        'score'        => $pctScore,
+                        'completed_at' => now(),
+                        'updated_at'   => now(),
+                    ]);
+            } else {
+                // Same or worse score — only refresh completed_at for streak credit
+                DB::table('user_course_progress')
+                    ->where('id', $existing->id)
+                    ->update([
+                        'completed_at' => now(),
+                        'updated_at'   => now(),
+                    ]);
+            }
+        }
+
+        // Calculate and update Streak & Total XP
+        $today = now()->toDateString();
+        $yesterday = now()->subDay()->toDateString();
+        
+        $streakExtended = false;
+        
+        if ($user->last_streak_date === $yesterday) {
+            $user->current_streak += 1;
+            $user->last_streak_date = $today;
+            $streakExtended = true;
+            $xpEarned += 25; // Bonus XP for extending streak
+        } elseif ($user->last_streak_date !== $today) {
+            $user->current_streak = 1;
+            $user->last_streak_date = $today;
+            $streakExtended = true; // Technically a new streak
+        }
+        
+        $user->total_xp += $xpEarned;
+        $user->save();
 
         return response()->json([
             'success' => true,
             'xp_earned' => $xpEarned,
+            'total_xp' => $user->total_xp,
+            'current_streak' => $user->current_streak,
+            'streak_extended' => $streakExtended,
             'activity_type' => $validated['activity_type'],
             'message' => "Activity recorded! You earned {$xpEarned} XP.",
         ]);
@@ -794,6 +887,13 @@ class DashboardController extends Controller
 
         DB::table('user_course_progress')->where('user_id', $userId)->delete();
         DB::table('user_assessment_attempts')->where('user_id', $userId)->delete();
+        
+        // Also reset Gamification stats
+        $user = $request->user();
+        $user->total_xp = 0;
+        $user->current_streak = 0;
+        $user->last_streak_date = null;
+        $user->save();
 
         return response()->json([
             'success' => true,

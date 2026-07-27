@@ -12,7 +12,9 @@ export const loaderInterceptor: HttpInterceptorFn = (req, next) => {
                      req.url.includes('/courses') ||
                      req.url.includes('/chapters') ||
                      req.url.includes('/activities') ||
-                     req.url.includes('/student/dashboard') ||
+                     req.url.includes('/student/') ||
+                     req.url.includes('/assessments') ||
+                     req.url.includes('/practice-words') ||
                      req.url.includes('/progress-stats') ||
                      req.url.includes('/users') ||
                      req.url.includes('/logout') ||

@@ -8,6 +8,7 @@ import { map, switchMap, catchError } from 'rxjs/operators';
 export interface LessonStep {
   type: 'intro' | 'video' | 'pdf' | 'reading' | 'activity' | 'assessment' | 'practice' | 'remediation';
   title: string;
+  activity_id?: string;
   data: any;
 }
 
@@ -464,7 +465,66 @@ export class CoursePlayer implements OnInit, OnDestroy {
     });
   }
 
-  resolveActivityReferences(contents: Content[]): Observable<Content[]> {
+  triggerStreakConfetti() {
+    this.audioService.playSuccess();
+    
+    // Fire confetti from the bottom center
+    const duration = 3000;
+    const end = Date.now() + duration;
+
+    const frame = () => {
+      confetti({
+        particleCount: 5,
+        angle: 60,
+        spread: 55,
+        origin: { x: 0, y: 0.8 },
+        colors: ['#ff9900', '#ff0000', '#ffff00'] // Fire/streak colors
+      });
+      confetti({
+        particleCount: 5,
+        angle: 120,
+        spread: 55,
+        origin: { x: 1, y: 0.8 },
+        colors: ['#ff9900', '#ff0000', '#ffff00']
+      });
+
+      if (Date.now() < end) {
+        requestAnimationFrame(frame);
+      }
+    };
+    frame();
+  }
+
+  showXpFloatAnimation(xp: number) {
+    const el = document.createElement('div');
+    el.innerHTML = `⭐ +${xp} XP`;
+    el.style.position = 'fixed';
+    el.style.bottom = '20%';
+    el.style.left = '50%';
+    el.style.transform = 'translate(-50%, 0)';
+    el.style.color = '#fbbf24';
+    el.style.fontWeight = 'bold';
+    el.style.fontSize = '2rem';
+    el.style.textShadow = '0 4px 6px rgba(0,0,0,0.3)';
+    el.style.zIndex = '9999';
+    el.style.pointerEvents = 'none';
+    
+    document.body.appendChild(el);
+
+    gsap.to(el, {
+      y: -100,
+      opacity: 0,
+      duration: 1.5,
+      ease: 'power2.out',
+      onComplete: () => {
+        el.remove();
+      }
+    });
+  }
+
+  // --- End Gamification Animation Functions ---
+
+  private resolveActivityReferences(contents: Content[]): Observable<Content[]> {
     const referencePositions: Array<{ contentIdx: number, blockIdx: number, refId: number }> = [];
     const uniqueIds = new Set<number>();
 
@@ -578,6 +638,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
                         steps.push({
                           type: 'activity',
                           title: block.data.title || `${actName} - ${++actIndex}`,
+                          activity_id: `q_${actIndex}`,
                           data: block
                         });
                       }
@@ -616,6 +677,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
           steps.push({
             type: 'activity',
             title: gameTitle,
+            activity_id: 'q_default',
             data: {
               type: 'activity',
               data: {
@@ -869,6 +931,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
               steps.push({
                 type: 'activity',
                 title: `${idx + 1}. Activity - ${actName}`,
+                activity_id: `q_${idx}`,
                 data: block
               });
             });
@@ -1072,12 +1135,22 @@ export class CoursePlayer implements OnInit, OnDestroy {
       if (token) {
         this.http.post<any>(`${environment.apiUrl}/student/record-activity`, {
           activity_type: 'activity',
+          mode: 'lesson',
           course_id: this.courseId() ?? null,
           content_id: this.activeChapterId() ?? null,
+          activity_id: this.currentStep()?.activity_id || this.currentStepIndex().toString(),
           score: event.isCorrect ? 1 : 0,
           total: 1,
         }, { headers: { Authorization: `Bearer ${token}` } }).subscribe({
-          next: (res) => console.log('[record-activity] OK:', res),
+          next: (res) => {
+            console.log('[record-activity] OK:', res);
+            if (res.xp_earned > 0) {
+              this.showXpFloatAnimation(res.xp_earned);
+            }
+            if (res.streak_extended) {
+              this.triggerStreakConfetti();
+            }
+          },
           error: (err) => console.error('[record-activity] FAILED:', err.status, err.error)
         });
       } else {
@@ -1094,8 +1167,10 @@ export class CoursePlayer implements OnInit, OnDestroy {
       const currentStep = this.currentStep();
       if (currentStep) {
         // Clone the step and data to ensure Angular detects the reference change and resets state
-        const clonedStep = {
-          ...currentStep,
+        const clonedStep: LessonStep = {
+          type: currentStep.type,
+          title: currentStep.title + ' (Retry)',
+          activity_id: currentStep.activity_id,
           data: currentStep.data ? {
             ...currentStep.data,
             data: currentStep.data.data ? { ...currentStep.data.data } : undefined
