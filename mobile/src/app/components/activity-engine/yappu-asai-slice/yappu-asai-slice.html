@@ -1,0 +1,111 @@
+<div class="asai-slicer-container">
+  <!-- Header / Scoreboard -->
+  <div class="slicer-header">
+    <div class="title-badge">
+      <i class="bi bi-scissors"></i>
+      <span>அசை வெட்டு (Asai Slicer)</span>
+    </div>
+    <div class="stats-pills">
+      <div class="stat-pill score">
+        <i class="bi bi-trophy-fill"></i>
+        <span>{{ score() }}</span>
+      </div>
+      <div class="stat-pill streak" *ngIf="streak() > 0">
+        <i class="bi bi-lightning-charge-fill"></i>
+        <span>{{ streak() }} Streak</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instruction Banner -->
+  <div class="instruction-box">
+    <p class="mb-0">
+      <i class="bi bi-info-circle-fill me-1"></i>
+      எழுத்துக்களுக்கு இடையில் <strong>கத்தரிக்கோல் / கோடு</strong> இட்டுச் சொல்லை அசைகளாகப் பிரிக்கவும்!
+    </p>
+  </div>
+
+  <!-- Interactive Word Slicer Canvas -->
+  <div class="word-canvas-card">
+    <div class="word-letters-row">
+      <ng-container *ngFor="let letter of tamilLetters(); let i = index">
+        <!-- Letter Bubble -->
+        <div class="letter-bubble">
+          {{ letter }}
+        </div>
+
+        <!-- Cut Toggle Point (between letters) -->
+        <button 
+          *ngIf="i < tamilLetters().length - 1"
+          class="cut-toggle-btn"
+          [class.active]="cutPositions()[i]"
+          [disabled]="isEvaluated()"
+          (click)="toggleCut(i)"
+          [title]="cutPositions()[i] ? 'Remove slice' : 'Slice here'">
+          <span class="cut-line" *ngIf="cutPositions()[i]">/</span>
+          <i class="bi bi-scissors cut-icon" *ngIf="!cutPositions()[i]"></i>
+        </button>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Action Button: Evaluate -->
+  <div class="action-bar" *ngIf="!isEvaluated()">
+    <button class="btn btn-slice-check" (click)="evaluateSlices()">
+      <i class="bi bi-check-circle-fill me-2"></i>அசை பிரிப்பைச் சரிபார்
+    </button>
+  </div>
+
+  <!-- Evaluation & Results Section -->
+  <div class="results-section" *ngIf="isEvaluated()">
+    <!-- Overall Feedback Alert -->
+    <div class="alert feedback-alert" [class.alert-success]="isWordCorrect()" [class.alert-danger]="!isWordCorrect()">
+      <div class="d-flex align-items-center">
+        <i class="bi" [class.bi-check-circle-fill]="isWordCorrect()" [class.bi-exclamation-triangle-fill]="!isWordCorrect()" style="font-size: 1.6rem;"></i>
+        <div class="ms-3">
+          <h5 class="alert-heading mb-1">{{ isWordCorrect() ? 'அற்புதம்! சரியான அசை பிரிப்பு!' : 'அசை பிரிப்பு தவறானது!' }}</h5>
+          <p class="mb-0 text-sm">
+            {{ isWordCorrect() ? 'யாப்பிலக்கண விதிப்படி சரியாகப் பிரித்துள்ளீர்கள்.' : 'சரியான அசை துண்டுகளைக் கீழே காண்க.' }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sliced Segments & Asai Badges -->
+    <div class="segments-grid">
+      <div class="segment-card" *ngFor="let seg of segments(); let idx = index" [class.correct]="isWordCorrect()" [class.incorrect]="!isWordCorrect()">
+        <div class="segment-text">{{ seg.text }}</div>
+        
+        <div class="asai-badge" [class.badge-ner]="seg.correctAsai === 'நேர்'" [class.badge-nirai]="seg.correctAsai === 'நிரை'">
+          {{ seg.correctAsai }}சை
+        </div>
+
+        <button class="rule-hint-btn" (click)="showRuleModal(seg)">
+          <i class="bi bi-question-circle-fill me-1"></i>விதி
+        </button>
+      </div>
+    </div>
+
+    <!-- Next Word Button -->
+    <div class="next-action mt-4">
+      <button class="btn btn-next-word" (click)="nextWord()">
+        அடுத்த சொல் <i class="bi bi-arrow-right-circle-fill ms-2"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Rule Explanation Modal Popup -->
+  <div class="rule-modal-backdrop" *ngIf="selectedRuleInfo()" (click)="closeRuleModal()">
+    <div class="rule-modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header-badge" [class.ner]="selectedRuleInfo()?.type === 'நேர்'" [class.nirai]="selectedRuleInfo()?.type === 'நிரை'">
+        <h3>{{ selectedRuleInfo()?.segment }} ➔ {{ selectedRuleInfo()?.type }}சை</h3>
+      </div>
+      <div class="modal-body p-3">
+        <p class="rule-text">{{ selectedRuleInfo()?.rule }}</p>
+      </div>
+      <div class="modal-footer p-2 text-end">
+        <button class="btn btn-sm btn-secondary" (click)="closeRuleModal()">மூடுக (Close)</button>
+      </div>
+    </div>
+  </div>
+</div>

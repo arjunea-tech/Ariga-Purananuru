@@ -599,7 +599,9 @@ export class CoursePlayer implements OnInit, OnDestroy {
             'word_builder': 'வார்த்தை உருவாக்கு',
             'match': 'பொருத்துக',
             'fill_blanks': 'கோடிட்ட இடத்தை நிரப்புக',
-            'true_false': 'சரி அல்லது தவறு'
+            'true_false': 'சரி அல்லது தவறு',
+            'yappu_asai_slice': 'அசை வெட்டு',
+            'yappu_asai_detective': 'அசை பிழை திருத்துதல்'
           };
           const gameTitle = defaultTitleMap[gameType] || 'பயிற்சி விளையாட்டு';
 

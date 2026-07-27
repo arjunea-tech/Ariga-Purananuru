@@ -24,9 +24,11 @@ import { YappuSeerN2pComponent } from '../yappu-seer-n2p/yappu-seer-n2p';
 import { YappuSeerBuildComponent } from '../yappu-seer-build/yappu-seer-build';
 import { YappuSeerSpeedComponent } from '../yappu-seer-speed/yappu-seer-speed';
 import { YappuSeerMatchComponent } from '../yappu-seer-match/yappu-seer-match';
+import { YappuAsaiSliceComponent } from '../yappu-asai-slice/yappu-asai-slice';
+import { YappuAsaiDetectiveComponent } from '../yappu-asai-detective/yappu-asai-detective';
 
 export interface NormalizedActivity {
-  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard' | 'yappu_seer' | 'yappu_seer_p2n' | 'yappu_seer_n2p' | 'yappu_seer_build' | 'yappu_seer_speed' | 'yappu_seer_match';
+  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard' | 'yappu_seer' | 'yappu_seer_p2n' | 'yappu_seer_n2p' | 'yappu_seer_build' | 'yappu_seer_speed' | 'yappu_seer_match' | 'yappu_asai_slice' | 'yappu_asai_detective';
   question?: string;
   text?: string;
   front?: string;
@@ -104,7 +106,9 @@ export interface NormalizedActivity {
     YappuSeerN2pComponent,
     YappuSeerBuildComponent,
     YappuSeerSpeedComponent,
-    YappuSeerMatchComponent
+    YappuSeerMatchComponent,
+    YappuAsaiSliceComponent,
+    YappuAsaiDetectiveComponent
   ],
   templateUrl: './activity-renderer.html',
   styleUrls: ['./activity-renderer.css']

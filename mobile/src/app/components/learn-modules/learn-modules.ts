@@ -234,6 +234,8 @@ export class LearnModulesComponent implements OnInit {
                             case 'match': title = 'பொருத்துக'; break;
                             case 'fill_blanks': title = 'கோடிட்ட இடத்தை நிரப்புக'; break;
                             case 'true_false': title = 'சரி அல்லது தவறு'; break;
+                            case 'yappu_asai_slice': title = 'அசை வெட்டு'; break;
+                            case 'yappu_asai_detective': title = 'அசை பிழை திருத்துதல்'; break;
                             default: title = 'பயிற்சி விளையாட்டு'; break;
                           }
                         }
@@ -267,6 +269,8 @@ export class LearnModulesComponent implements OnInit {
                     case 'match': title = 'பொருத்துக'; break;
                     case 'fill_blanks': title = 'கோடிிட்ட இடத்தை நிரப்புக'; break;
                     case 'true_false': title = 'சரி அல்லது தவறு'; break;
+                    case 'yappu_asai_slice': title = 'அசை வெட்டு'; break;
+                    case 'yappu_asai_detective': title = 'அசை பிழை திருத்துதல்'; break;
                     default: title = 'பயிற்சி விளையாட்டு'; break;
                   }
                 }
@@ -289,7 +293,9 @@ export class LearnModulesComponent implements OnInit {
       const defaultTypes = [
         { type: 'mcq', title: 'சரியான விடையைத் தேர்ந்தெடு' },
         { type: 'word_hunt', title: 'வார்த்தை தேடல்' },
-        { type: 'balloon_pop', title: 'பலூன் விளையாட்டு' }
+        { type: 'balloon_pop', title: 'பலூன் விளையாட்டு' },
+        { type: 'yappu_asai_slice', title: 'அசை வெட்டு' },
+        { type: 'yappu_asai_detective', title: 'அசை பிழை திருத்துதல்' }
       ];
       defaultTypes.forEach((t, i) => {
         activities.push({
@@ -323,6 +329,8 @@ export class LearnModulesComponent implements OnInit {
         case 'match': label = 'பொருத்துக'; icon = 'bi-arrow-left-right'; color = '#6366F1'; break; // indigo
         case 'fill_blanks': label = 'கோடிட்ட இடத்தை நிரப்புக'; icon = 'bi-input-cursor-text'; color = '#14B8A6'; break; // teal
         case 'true_false': label = 'சரி அல்லது தவறு'; icon = 'bi-check-circle-fill'; color = '#F43F5E'; break; // rose
+        case 'yappu_asai_slice': label = 'அசை வெட்டு'; icon = 'bi-scissors'; color = '#4F46E5'; break; // indigo
+        case 'yappu_asai_detective': label = 'அசை பிழை திருத்துதல்'; icon = 'bi-search'; color = '#EA580C'; break; // orange
       }
 
       if (!groupsMap.has(act.type)) {

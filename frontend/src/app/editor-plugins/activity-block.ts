@@ -26,6 +26,8 @@ import { renderBalloonPopForm } from './activity-block/forms/balloon-pop';
 import { renderWordBuilderForm } from './activity-block/forms/word-builder';
 import { renderYappuFlashcardForm } from './activity-block/forms/yappu-flashcard';
 import { renderYappuSeerForm } from './activity-block/forms/yappu-seer';
+import { renderYappuAsaiSliceForm } from './activity-block/forms/yappu-asai-slice';
+import { renderYappuAsaiDetectiveForm } from './activity-block/forms/yappu-asai-detective';
 
 export class ActivityBlock {
   private data: any;
@@ -407,6 +409,8 @@ export class ActivityBlock {
             <option value="yappu_seer_build" ${tempData.type === 'yappu_seer_build' ? 'selected' : ''}>Yappu Seer: சீர் கட்டமைப்பு (Pattern Builder)</option>
             <option value="yappu_seer_speed" ${tempData.type === 'yappu_seer_speed' ? 'selected' : ''}>Yappu Seer: வேக வினா (Speed Round)</option>
             <option value="yappu_seer_match" ${tempData.type === 'yappu_seer_match' ? 'selected' : ''}>Yappu Seer: ஜோடி பொருத்து (Match Pairs)</option>
+            <option value="yappu_asai_slice" ${tempData.type === 'yappu_asai_slice' ? 'selected' : ''}>அசை வெட்டு (Asai Slicer Game)</option>
+            <option value="yappu_asai_detective" ${tempData.type === 'yappu_asai_detective' ? 'selected' : ''}>அசை பிழை திருத்துதல் (Asai Error Detective)</option>
           </select>
           <div class="modal-form-container"></div>
         </div>
@@ -466,6 +470,10 @@ export class ActivityBlock {
         renderYappuFlashcardForm(formContainer, tempData, this.renderExplanationInput);
       } else if (type === 'yappu_seer' || type.startsWith('yappu_seer_')) {
         renderYappuSeerForm(formContainer, tempData, this.renderExplanationInput);
+      } else if (type === 'yappu_asai_slice') {
+        renderYappuAsaiSliceForm(formContainer, tempData, this.renderExplanationInput);
+      } else if (type === 'yappu_asai_detective') {
+        renderYappuAsaiDetectiveForm(formContainer, tempData, this.renderExplanationInput);
       }
     };
 

@@ -1,0 +1,78 @@
+<div class="asai-detective-container">
+  <!-- Header / Scoreboard -->
+  <div class="detective-header">
+    <div class="title-badge">
+      <i class="bi bi-search"></i>
+      <span>அசை பிழை திருத்துதல் (Asai Detective)</span>
+    </div>
+    <div class="stats-pills">
+      <div class="stat-pill score">
+        <i class="bi bi-trophy-fill"></i>
+        <span>{{ score() }}</span>
+      </div>
+      <div class="stat-pill streak" *ngIf="streak() > 0">
+        <i class="bi bi-lightning-charge-fill"></i>
+        <span>{{ streak() }} Streak</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instruction Banner -->
+  <div class="instruction-box">
+    <p class="mb-0">
+      <i class="bi bi-shield-exclamation me-1"></i>
+      கீழே உள்ள சொல்லுக்கு <strong>பிழையற்ற சரியான யாப்பிலக்கண அசை பிரிப்பைக்</strong> கண்டுபிடிக்கவும்!
+    </p>
+  </div>
+
+  <!-- Target Word Hero Card -->
+  <div class="word-hero-card" *ngIf="currentChallenge() as challenge">
+    <div class="word-badge">சொல் (Word)</div>
+    <div class="hero-word">{{ challenge.word }}</div>
+  </div>
+
+  <!-- Options Selector Grid -->
+  <div class="options-container" *ngIf="currentChallenge() as challenge">
+    <button 
+      *ngFor="let opt of challenge.options; let idx = index"
+      class="option-card"
+      [class.selected]="challenge.selectedOptionIndex === idx"
+      [class.correct]="challenge.isAnswered && opt.isCorrect"
+      [class.incorrect]="challenge.isAnswered && challenge.selectedOptionIndex === idx && !opt.isCorrect"
+      [disabled]="challenge.isAnswered"
+      (click)="selectOption(idx)">
+      
+      <div class="option-content">
+        <span class="option-split-text">{{ opt.label }}</span>
+        
+        <i class="bi status-icon" 
+          *ngIf="challenge.isAnswered"
+          [class.bi-check-circle-fill]="opt.isCorrect"
+          [class.bi-x-circle-fill]="challenge.selectedOptionIndex === idx && !opt.isCorrect"
+          [class.text-success]="opt.isCorrect"
+          [class.text-danger]="challenge.selectedOptionIndex === idx && !opt.isCorrect">
+        </i>
+      </div>
+    </button>
+  </div>
+
+  <!-- Explanation & Feedback Alert -->
+  <div class="feedback-card mt-4" *ngIf="currentChallenge()?.isAnswered">
+    <div class="alert" [class.alert-success]="currentChallenge()?.isCorrect" [class.alert-danger]="!currentChallenge()?.isCorrect">
+      <h5 class="alert-heading mb-2">
+        <i class="bi" [class.bi-check-circle-fill]="currentChallenge()?.isCorrect" [class.bi-exclamation-octagon-fill]="!currentChallenge()?.isCorrect"></i>
+        {{ currentChallenge()?.isCorrect ? 'அற்புதம்! சரியான அசை பிரிப்பைக் கண்டுபிடித்துவிட்டீர்கள்!' : 'பிழையான விடை!' }}
+      </h5>
+      <p class="explanation-text mb-0">
+        {{ currentChallenge()?.explanation }}
+      </p>
+    </div>
+
+    <!-- Next Question Button -->
+    <div class="next-action text-center mt-3">
+      <button class="btn btn-next" (click)="nextChallenge()">
+        அடுத்த வினா <i class="bi bi-arrow-right-circle-fill ms-2"></i>
+      </button>
+    </div>
+  </div>
+</div>

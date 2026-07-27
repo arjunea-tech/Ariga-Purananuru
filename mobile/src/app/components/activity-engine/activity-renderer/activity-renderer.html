@@ -100,6 +100,14 @@
   <app-yappu-seer-match [activity]="data" (answered)="onYappuSeerAnswered($event)">
   </app-yappu-seer-match>
   }
+  @case ('yappu_asai_slice') {
+  <app-yappu-asai-slice [activity]="data" (answered)="onYappuSeerAnswered($event)">
+  </app-yappu-asai-slice>
+  }
+  @case ('yappu_asai_detective') {
+  <app-yappu-asai-detective [activity]="data" (answered)="onYappuSeerAnswered($event)">
+  </app-yappu-asai-detective>
+  }
   }
 </div>
 }
