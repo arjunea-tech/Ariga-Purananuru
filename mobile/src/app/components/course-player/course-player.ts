@@ -108,11 +108,11 @@ export class CoursePlayer implements OnInit, OnDestroy {
   activityFeedbackState = signal<'correct' | 'incorrect' | null>(null);
   heartRefillTimer = signal<number>(0);
   private timerInterval: any;
-  
+
   showRewardModal = signal<boolean>(false);
   rewardData = signal<{ xp_earned: number, badges: any[] } | null>(null);
 
-  constructor() {}
+  constructor() { }
 
   mascotWarning = signal<string | null>(null);
   showMascotWarning = signal<boolean>(false);
@@ -246,9 +246,9 @@ export class CoursePlayer implements OnInit, OnDestroy {
       }
 
       if (view === 'game-mode' && gameType && moduleId) {
-         if (this.courseStructure()) {
-           this.loadGameModeSequence(moduleId, gameType);
-         }
+        if (this.courseStructure()) {
+          this.loadGameModeSequence(moduleId, gameType);
+        }
       } else if (chapterId && chapterId !== this.activeChapterId()) {
         this.activeChapterId.set(chapterId);
         if (this.courseStructure()) {
@@ -271,7 +271,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
             this.loadStructure();
           }
         },
-        error: () => {}
+        error: () => { }
       });
       return;
     }
@@ -291,7 +291,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
               this.loadStructure();
             }
           },
-          error: () => {}
+          error: () => { }
         });
       }
     });
@@ -311,9 +311,9 @@ export class CoursePlayer implements OnInit, OnDestroy {
     const chapterId = params['chapterId'] ? +params['chapterId'] : null;
     const gameType = params['gameType'];
     const moduleId = params['moduleId'];
-    
+
     if (params['view'] === 'game-mode' && gameType && moduleId) {
-       this.loadGameModeSequence(moduleId, gameType);
+      this.loadGameModeSequence(moduleId, gameType);
     } else if (chapterId) {
       this.loadLessonSequence(chapterId);
     }
@@ -329,7 +329,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
           this.completedChapterIds.set(res.completed_chapter_ids);
         }
       },
-      error: () => {}
+      error: () => { }
     });
   }
 
@@ -397,7 +397,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
       next: (res) => {
         if (res.rewards && res.rewards.xp_earned > 0) {
           this.rewardData.set(res.rewards);
-          
+
           // Small delay before showing modal to allow confetti to start
           setTimeout(() => {
             this.showRewardModal.set(true);
@@ -467,7 +467,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
 
   triggerStreakConfetti() {
     this.audioService.playSuccess();
-    
+
     // Fire confetti from the bottom center
     const duration = 3000;
     const end = Date.now() + duration;
@@ -508,7 +508,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
     el.style.textShadow = '0 4px 6px rgba(0,0,0,0.3)';
     el.style.zIndex = '9999';
     el.style.pointerEvents = 'none';
-    
+
     document.body.appendChild(el);
 
     gsap.to(el, {
@@ -544,7 +544,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
                 }
               }
             });
-          } catch (e) {}
+          } catch (e) { }
         }
       }
     });
@@ -570,14 +570,14 @@ export class CoursePlayer implements OnInit, OnDestroy {
             const parsed = JSON.parse(content.text_content);
             const block = parsed.blocks[pos.blockIdx];
             const realData = typeof act.data_json === 'string' ? JSON.parse(act.data_json) : act.data_json;
-            
+
             block.data = {
               ...realData,
               type: act.type,
               title: act.title
             };
             content.text_content = JSON.stringify(parsed);
-          } catch (e) {}
+          } catch (e) { }
         });
         return contents;
       }),
@@ -644,52 +644,28 @@ export class CoursePlayer implements OnInit, OnDestroy {
                       }
                     });
                   }
-                } catch (e) {}
+                } catch (e) { }
               }
             });
           }
         });
 
         // Question Shuffling & Pick 10 max
-        if (steps.length > 0) {
+        if (steps.length >= 40) {
+          const basicSteps = steps.slice(0, 30);
+          const specialSteps = steps.slice(30);
+
+          const shuffledBasic = this.shuffleArray(basicSteps).slice(0, 5);
+          const shuffledSpecial = this.shuffleArray(specialSteps).slice(0, 5);
+
+          steps = this.shuffleArray([...shuffledBasic, ...shuffledSpecial]);
+        } else if (steps.length > 0) {
           steps = this.shuffleArray(steps);
           if (steps.length > 10) {
             steps = steps.slice(0, 10);
           }
         }
 
-        // Fallback: If no activity blocks exist in the database for this game type yet, provide interactive game activity!
-        if (steps.length === 0) {
-          const defaultTitleMap: Record<string, string> = {
-            'mcq': 'சரியான விடையைத் தேர்ந்தெடு',
-            'word_hunt': 'வார்த்தை தேடல்',
-            'balloon_pop': 'பலூன் விளையாட்டு',
-            'letter_basket': 'எழுத்து கூடை',
-            'word_builder': 'வார்த்தை உருவாக்கு',
-            'match': 'பொருத்துக',
-            'fill_blanks': 'கோடிட்ட இடத்தை நிரப்புக',
-            'true_false': 'சரி அல்லது தவறு',
-            'yappu_asai_slice': 'அசை வெட்டு',
-            'yappu_asai_detective': 'அசை பிழை திருத்துதல்'
-          };
-          const gameTitle = defaultTitleMap[gameType] || 'பயிற்சி விளையாட்டு';
-
-          steps.push({
-            type: 'activity',
-            title: gameTitle,
-            activity_id: 'q_default',
-            data: {
-              type: 'activity',
-              data: {
-                type: gameType || 'mcq',
-                title: gameTitle,
-                question: 'சரியான விடையைத் தேர்ந்தெடுக்குக',
-                options: ['விடை 1', 'விடை 2', 'விடை 3', 'விடை 4'],
-                correctIndex: 0
-              }
-            }
-          });
-        }
 
         this.lessonSequence.set(steps);
         this.currentStepIndex.set(0);
@@ -701,368 +677,382 @@ export class CoursePlayer implements OnInit, OnDestroy {
     });
   }
 
-  loadLessonSequence(chapterId: number) {
-    this.lessonSequence.set([]);
-    this.isLoadingLesson.set(true);
-    this.currentStepIndex.set(0);
-    this.isVideoCompleted.set(false);
-    this.hearts.set(5);
-    this.showGameOver.set(false);
-    this.lessonFinished.set(false);
-    this.activityFeedbackState.set(null);
+loadLessonSequence(chapterId: number) {
+  this.lessonSequence.set([]);
+  this.isLoadingLesson.set(true);
+  this.currentStepIndex.set(0);
+  this.isVideoCompleted.set(false);
+  this.hearts.set(5);
+  this.showGameOver.set(false);
+  this.lessonFinished.set(false);
+  this.activityFeedbackState.set(null);
 
-    // Auto-resolve activeLevelId if not set (e.g. navigating directly via URL)
-    const structure = this.courseStructure();
-    if (structure && !this.activeLevelId()) {
-      for (const l of structure.levels) {
-        if (l.chapters.some(c => c.id === chapterId)) {
-          this.activeLevelId.set(l.id);
-          break;
-        }
+  // Auto-resolve activeLevelId if not set (e.g. navigating directly via URL)
+  const structure = this.courseStructure();
+  if (structure && !this.activeLevelId()) {
+    for (const l of structure.levels) {
+      if (l.chapters.some(c => c.id === chapterId)) {
+        this.activeLevelId.set(l.id);
+        break;
       }
     }
-
-    // 1. Instant Load Fallback from active courseStructure in memory (0ms delay)
-    if (structure) {
-      for (const level of structure.levels) {
-        const chap = level.chapters.find(c => c.id === chapterId);
-        if (chap && chap.contents && chap.contents.length > 0) {
-          this.generateLessonSequence(chap.contents, chap.assessments || [], chap);
-          break;
-        }
-      }
-    }
-
-    // Fetch the full chapter details including contents and assessments in a single request
-    this.http.get<any>(`${environment.apiUrl}/chapters/${chapterId}`).pipe(
-      switchMap(chapterData => {
-        const contents: Content[] = (chapterData.contents || [])
-          .filter((c: any) => c.is_active !== false)
-          .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
-
-        return this.resolveActivityReferences(contents).pipe(
-          map(resolvedContents => ({
-            chapterInfo: chapterData,
-            contents: resolvedContents,
-            assessments: chapterData.assessments || []
-          }))
-        );
-      })
-    ).subscribe({
-      next: (result) => {
-        this.generateLessonSequence(result.contents, result.assessments, result.chapterInfo);
-      },
-      error: (err) => {
-        console.warn('Failed to load chapter contents from backend, generating fallback sequence:', err);
-        
-        if (err.status === 404) {
-          this.activeChapterId.set(null);
-          this.loadStructure(); // Re-fetch structure which will correct the state
-          return;
-        }
-
-        const fallbackContents: Content[] = [
-          {
-            id: chapterId,
-            name: 'Tamil Grammar Concept',
-            text_content: '{"blocks":[{"type":"header","data":{"text":"தமிழ் இலக்கண பாடம்"}},{"type":"paragraph","data":{"text":"அடிப்படை இலக்கண கருத்துக்களை கற்றுக்கொண்டு பயிற்சி செய்து தேர்ச்சி பெறுக!"}}]}'
-          }
-        ];
-        this.generateLessonSequence(fallbackContents, []);
-      }
-    });
   }
 
-  generateLessonSequence(contents: Content[], chapterAssessments: any[], chapterInfo?: any) {
-    const steps: LessonStep[] = [];
+  // 1. Instant Load Fallback from active courseStructure in memory (0ms delay)
+  if (structure) {
+    for (const level of structure.levels) {
+      const chap = level.chapters.find(c => c.id === chapterId);
+      if (chap && chap.contents && chap.contents.length > 0) {
+        this.generateLessonSequence(chap.contents, chap.assessments || [], chap);
+        break;
+      }
+    }
+  }
 
-    // Step 1: Chapter Intro (Skipped to go directly to content as requested)
+  // Fetch the full chapter details including contents and assessments in a single request
+  this.http.get<any>(`${environment.apiUrl}/chapters/${chapterId}`).pipe(
+    switchMap(chapterData => {
+      const contents: Content[] = (chapterData.contents || [])
+        .filter((c: any) => c.is_active !== false)
+        .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
 
-    contents.forEach(content => {
-      // if (content.id === 1) {
-      //   steps.push({
-      //     type: 'video',
-      //     title: 'Homophones Lesson',
-      //     data: 'assets/Homophones video .mp4'
-      //   });
-      // }
+      return this.resolveActivityReferences(contents).pipe(
+        map(resolvedContents => ({
+          chapterInfo: chapterData,
+          contents: resolvedContents,
+          assessments: chapterData.assessments || []
+        }))
+      );
+    })
+  ).subscribe({
+    next: (result) => {
+      this.generateLessonSequence(result.contents, result.assessments, result.chapterInfo);
+    },
+    error: (err) => {
+      console.warn('Failed to load chapter contents from backend, generating fallback sequence:', err);
 
-      // if (content.external_url && content.external_url.length > 0) {
-      //   steps.push({
-      //     type: 'video',
-      //     title: content.title || content.name,
-      //     data: content.external_url[0] // Assume first URL is the video link
-      //   });
-      // }
-
-      if (content.attachments && content.attachments.length > 0) {
-        steps.push({
-          type: 'pdf',
-          title: content.title || content.name + ' - Document',
-          data: content.attachments
-        });
+      if (err.status === 404) {
+        this.activeChapterId.set(null);
+        this.loadStructure(); // Re-fetch structure which will correct the state
+        return;
       }
 
-      if (content.text_content) {
-        let isJson = false;
-        let blocks = [];
-        const trimmed = content.text_content.trim();
-        if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
-          try {
-            const data = JSON.parse(trimmed);
-            blocks = data.blocks || [];
-            isJson = true;
-          } catch (e) { }
+      const fallbackContents: Content[] = [
+        {
+          id: chapterId,
+          name: 'Tamil Grammar Concept',
+          text_content: '{"blocks":[{"type":"header","data":{"text":"தமிழ் இலக்கண பாடம்"}},{"type":"paragraph","data":{"text":"அடிப்படை இலக்கண கருத்துக்களை கற்றுக்கொண்டு பயிற்சி செய்து தேர்ச்சி பெறுக!"}}]}'
+        }
+      ];
+      this.generateLessonSequence(fallbackContents, []);
+    }
+  });
+}
+
+generateLessonSequence(contents: Content[], chapterAssessments: any[], chapterInfo ?: any) {
+  const steps: LessonStep[] = [];
+
+  // Step 1: Chapter Intro (Skipped to go directly to content as requested)
+
+  contents.forEach(content => {
+    // if (content.id === 1) {
+    //   steps.push({
+    //     type: 'video',
+    //     title: 'Homophones Lesson',
+    //     data: 'assets/Homophones video .mp4'
+    //   });
+    // }
+
+    // if (content.external_url && content.external_url.length > 0) {
+    //   steps.push({
+    //     type: 'video',
+    //     title: content.title || content.name,
+    //     data: content.external_url[0] // Assume first URL is the video link
+    //   });
+    // }
+
+    if (content.attachments && content.attachments.length > 0) {
+      steps.push({
+        type: 'pdf',
+        title: content.title || content.name + ' - Document',
+        data: content.attachments
+      });
+    }
+
+    if (content.text_content) {
+      let isJson = false;
+      let blocks = [];
+      const trimmed = content.text_content.trim();
+      if (trimmed.startsWith('{') && trimmed.endsWith('}')) {
+        try {
+          const data = JSON.parse(trimmed);
+          blocks = data.blocks || [];
+          isJson = true;
+        } catch (e) { }
+      }
+
+      if (isJson) {
+        const videoBlocks = blocks.filter((b: any) => b.type === 'video' || b.type === 'embed');
+        const pdfBlocks = blocks.filter((b: any) => b.type === 'pdf');
+        const readingBlocks = blocks.filter((b: any) => b.type !== 'activity' && b.type !== 'video' && b.type !== 'embed' && b.type !== 'practice' && b.type !== 'pdf' && b.type !== 'assessment');
+        const practiceBlocks = blocks.filter((b: any) => b.type === 'practice');
+        const activityBlocks = blocks.filter((b: any) => b.type === 'activity');
+        const assessmentBlocks = blocks.filter((b: any) => b.type === 'assessment');
+
+        // if (videoBlocks.length > 0) {
+        //   videoBlocks.forEach((block: any, idx: number) => {
+        //     steps.push({
+        //       type: 'video',
+        //       title: (content.title || content.name) + (videoBlocks.length > 1 ? ` - Video ${idx + 1}` : ' - Video'),
+        //       data: block.data.url || block.data.embed
+        //     });
+        //   });
+        // }
+
+        if (pdfBlocks.length > 0) {
+          pdfBlocks.forEach((block: any, idx: number) => {
+            steps.push({
+              type: 'pdf',
+              title: (content.title || content.name) + (pdfBlocks.length > 1 ? ` - Document ${idx + 1}` : ' - Document'),
+              data: block.data.url
+            });
+          });
         }
 
-        if (isJson) {
-          const videoBlocks = blocks.filter((b: any) => b.type === 'video' || b.type === 'embed');
-          const pdfBlocks = blocks.filter((b: any) => b.type === 'pdf');
-          const readingBlocks = blocks.filter((b: any) => b.type !== 'activity' && b.type !== 'video' && b.type !== 'embed' && b.type !== 'practice' && b.type !== 'pdf' && b.type !== 'assessment');
-          const practiceBlocks = blocks.filter((b: any) => b.type === 'practice');
-          const activityBlocks = blocks.filter((b: any) => b.type === 'activity');
-          const assessmentBlocks = blocks.filter((b: any) => b.type === 'assessment');
-
-          // if (videoBlocks.length > 0) {
-          //   videoBlocks.forEach((block: any, idx: number) => {
-          //     steps.push({
-          //       type: 'video',
-          //       title: (content.title || content.name) + (videoBlocks.length > 1 ? ` - Video ${idx + 1}` : ' - Video'),
-          //       data: block.data.url || block.data.embed
-          //     });
-          //   });
-          // }
-
-          if (pdfBlocks.length > 0) {
-            pdfBlocks.forEach((block: any, idx: number) => {
-              steps.push({
-                type: 'pdf',
-                title: (content.title || content.name) + (pdfBlocks.length > 1 ? ` - Document ${idx + 1}` : ' - Document'),
-                data: block.data.url
-              });
-            });
-          }
-
-          if (readingBlocks.length > 0) {
-            let processedReadingBlocks: any[] = [];
-            for (let i = 0; i < readingBlocks.length; i++) {
-              let b = readingBlocks[i];
-              if ((b.type === 'paragraph' || b.type === 'text') && b.data && b.data.text && b.data.text.length > 400 && !b.data.text.includes('<table') && !b.data.text.includes('<ul') && !b.data.text.includes('<ol') && !b.data.text.includes('<div') && !b.data.text.includes('<li') && !b.data.text.includes('class=')) {
-                 const rawHtml = b.data.text;
-                 let parts = rawHtml.split(/(?<=[\.\?\!]\s+)|(?=<h[1-6]|<p|<ul|<ol|<li|<div|<br|\n)/gi);
-                 if (parts.length === 1 && parts[0].length > 500) {
-                    parts = rawHtml.split(/(?<=\s+)/g);
-                 }
-                 let currentPageHtml = '';
-                 for (let part of parts) {
-                    if (currentPageHtml.length + part.length > 500 && currentPageHtml.length > 0) {
-                       processedReadingBlocks.push({ type: 'paragraph', data: { text: currentPageHtml } });
-                       currentPageHtml = part;
-                    } else {
-                       currentPageHtml += part;
-                    }
-                 }
-                 if (currentPageHtml.length > 0) {
-                    processedReadingBlocks.push({ type: 'paragraph', data: { text: currentPageHtml } });
-                 }
-              } else {
-                 processedReadingBlocks.push(b);
-              }
-            }
-
-            let groupedBlocks = [];
-            let currentGroup = [];
-            let currentGroupLength = 0;
-
-            for (let i = 0; i < processedReadingBlocks.length; i++) {
-              let b = processedReadingBlocks[i];
-              let bLength = (b.data && typeof b.data.text === 'string') ? b.data.text.length : 100;
-              
-              if (currentGroupLength > 0 && currentGroupLength + bLength > 600) {
-                 groupedBlocks.push(currentGroup);
-                 currentGroup = [b];
-                 currentGroupLength = bLength;
-              } else {
-                 currentGroup.push(b);
-                 currentGroupLength += bLength;
-                 if (currentGroup.length >= 3 && b.type !== 'header') {
-                   groupedBlocks.push(currentGroup);
-                   currentGroup = [];
-                   currentGroupLength = 0;
-                 }
-              }
-            }
-            if (currentGroup.length > 0) {
-              groupedBlocks.push(currentGroup);
-            }
-
-            steps.push({
-              type: 'reading',
-              title: content.title || content.name,
-              data: { isJson: true, blocks: groupedBlocks }
-            });
-          }
-
-          // Practice mode steps are now accessed directly via the Games tab
-          /*
-          if (practiceBlocks.length > 0) {
-            practiceBlocks.forEach((block: any, idx: number) => {
-              steps.push({
-                type: 'practice',
-                title: 'Practice Mode - ' + (block.data?.topic || 'Grammar'),
-                data: block.data
-              });
-            });
-          }
-          */
-
-          if (this.currentView() !== 'content' && activityBlocks.length > 0) {
-            let preparedBlocks = this.shuffleArray(activityBlocks);
-            if (preparedBlocks.length > 10) {
-              preparedBlocks = preparedBlocks.slice(0, 10);
-            }
-            preparedBlocks.forEach((block: any, idx: number) => {
-              let actName = 'Unknown';
-              if (block.data && block.data.type) {
-                actName = block.data.type.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-                if (block.data.type === 'mcq') actName = 'Multiple Choice';
-              }
-
-              steps.push({
-                type: 'activity',
-                title: `${idx + 1}. Activity - ${actName}`,
-                activity_id: `q_${idx}`,
-                data: block
-              });
-            });
-          }
-
-          if (this.currentView() !== 'content' && assessmentBlocks.length > 0) {
-            assessmentBlocks.forEach((block: any, idx: number) => {
-              steps.push({
-                type: 'assessment',
-                title: 'Final Assessment',
-                data: block
-              });
-            });
-          }
-        } else {
-          const rawHtml = content.text_content || '';
-          let pages = [];
-          
-          if (rawHtml.length > 400) {
-             let parts = rawHtml.split(/(?<=[\.\?\!]\s+)|(?=<h[1-6]|<p|<ul|<ol|<li|<div|<br|\n)/gi);
-             if (parts.length === 1 && parts[0].length > 500) {
+        if (readingBlocks.length > 0) {
+          let processedReadingBlocks: any[] = [];
+          for (let i = 0; i < readingBlocks.length; i++) {
+            let b = readingBlocks[i];
+            if ((b.type === 'paragraph' || b.type === 'text') && b.data && b.data.text && b.data.text.length > 400 && !b.data.text.includes('<table') && !b.data.text.includes('<ul') && !b.data.text.includes('<ol') && !b.data.text.includes('<div') && !b.data.text.includes('<li') && !b.data.text.includes('class=')) {
+              const rawHtml = b.data.text;
+              let parts = rawHtml.split(/(?<=[\.\?\!]\s+)|(?=<h[1-6]|<p|<ul|<ol|<li|<div|<br|\n)/gi);
+              if (parts.length === 1 && parts[0].length > 500) {
                 parts = rawHtml.split(/(?<=\s+)/g);
-             }
-             let currentPage = '';
-             for (let part of parts) {
-                if (currentPage.length + part.length > 500 && currentPage.length > 0) {
-                   pages.push([{ type: 'paragraph', data: { text: currentPage } }]);
-                   currentPage = part;
+              }
+              let currentPageHtml = '';
+              for (let part of parts) {
+                if (currentPageHtml.length + part.length > 500 && currentPageHtml.length > 0) {
+                  processedReadingBlocks.push({ type: 'paragraph', data: { text: currentPageHtml } });
+                  currentPageHtml = part;
                 } else {
-                   currentPage += part;
+                  currentPageHtml += part;
                 }
-             }
-             if (currentPage.length > 0) {
-                pages.push([{ type: 'paragraph', data: { text: currentPage } }]);
-             }
-          } else {
-             pages = [[{ type: 'paragraph', data: { text: rawHtml } }]];
+              }
+              if (currentPageHtml.length > 0) {
+                processedReadingBlocks.push({ type: 'paragraph', data: { text: currentPageHtml } });
+              }
+            } else {
+              processedReadingBlocks.push(b);
+            }
+          }
+
+          let groupedBlocks = [];
+          let currentGroup = [];
+          let currentGroupLength = 0;
+
+          for (let i = 0; i < processedReadingBlocks.length; i++) {
+            let b = processedReadingBlocks[i];
+            let bLength = (b.data && typeof b.data.text === 'string') ? b.data.text.length : 100;
+
+            if (currentGroupLength > 0 && currentGroupLength + bLength > 600) {
+              groupedBlocks.push(currentGroup);
+              currentGroup = [b];
+              currentGroupLength = bLength;
+            } else {
+              currentGroup.push(b);
+              currentGroupLength += bLength;
+              if (currentGroup.length >= 3 && b.type !== 'header') {
+                groupedBlocks.push(currentGroup);
+                currentGroup = [];
+                currentGroupLength = 0;
+              }
+            }
+          }
+          if (currentGroup.length > 0) {
+            groupedBlocks.push(currentGroup);
           }
 
           steps.push({
             type: 'reading',
             title: content.title || content.name,
-            data: { isJson: true, blocks: pages }
+            data: { isJson: true, blocks: groupedBlocks }
           });
         }
-      }
 
-      if (content.assessments && content.assessments.length > 0) {
+        // Practice mode steps are now accessed directly via the Games tab
+        /*
+        if (practiceBlocks.length > 0) {
+          practiceBlocks.forEach((block: any, idx: number) => {
+            steps.push({
+              type: 'practice',
+              title: 'Practice Mode - ' + (block.data?.topic || 'Grammar'),
+              data: block.data
+            });
+          });
+        }
+        */
+
+        if (activityBlocks.length > 0) {
+          let preparedBlocks = [];
+
+          // Check if this is the Eluthu module (which has 50 questions)
+          if (activityBlocks.length >= 40) {
+            const basicBlocks = activityBlocks.slice(0, 30);
+            const specialBlocks = activityBlocks.slice(30);
+
+            const shuffledBasic = this.shuffleArray(basicBlocks).slice(0, 5);
+            const shuffledSpecial = this.shuffleArray(specialBlocks).slice(0, 5);
+
+            preparedBlocks = this.shuffleArray([...shuffledBasic, ...shuffledSpecial]);
+          } else {
+            preparedBlocks = this.shuffleArray(activityBlocks);
+            if (preparedBlocks.length > 10) {
+              preparedBlocks = preparedBlocks.slice(0, 10);
+            }
+          }
+
+          preparedBlocks.forEach((block: any, idx: number) => {
+            let actName = 'Unknown';
+            if (block.data && block.data.type) {
+              actName = block.data.type.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+              if (block.data.type === 'mcq') actName = 'Multiple Choice';
+            }
+
+            steps.push({
+              type: 'activity',
+              title: `${idx + 1}. Activity - ${actName}`,
+              activity_id: `q_${idx}`,
+              data: block
+            });
+          });
+        }
+
+        if (assessmentBlocks.length > 0) {
+          assessmentBlocks.forEach((block: any, idx: number) => {
+            steps.push({
+              type: 'assessment',
+              title: 'Final Assessment',
+              data: block
+            });
+          });
+        }
+      } else {
+        const rawHtml = content.text_content || '';
+        let pages = [];
+
+        if (rawHtml.length > 400) {
+          let parts = rawHtml.split(/(?<=[\.\?\!]\s+)|(?=<h[1-6]|<p|<ul|<ol|<li|<div|<br|\n)/gi);
+          if (parts.length === 1 && parts[0].length > 500) {
+            parts = rawHtml.split(/(?<=\s+)/g);
+          }
+          let currentPage = '';
+          for (let part of parts) {
+            if (currentPage.length + part.length > 500 && currentPage.length > 0) {
+              pages.push([{ type: 'paragraph', data: { text: currentPage } }]);
+              currentPage = part;
+            } else {
+              currentPage += part;
+            }
+          }
+          if (currentPage.length > 0) {
+            pages.push([{ type: 'paragraph', data: { text: currentPage } }]);
+          }
+        } else {
+          pages = [[{ type: 'paragraph', data: { text: rawHtml } }]];
+        }
+
         steps.push({
-          type: 'assessment',
-          title: content.title || content.name + ' - Quiz',
-          data: content.assessments
+          type: 'reading',
+          title: content.title || content.name,
+          data: { isJson: true, blocks: pages }
         });
       }
-    });
+    }
 
-    if (chapterAssessments.length > 0) {
+    if (content.assessments && content.assessments.length > 0) {
       steps.push({
         type: 'assessment',
-        title: 'Chapter Quiz',
-        data: chapterAssessments
+        title: content.title || content.name + ' - Quiz',
+        data: content.assessments
       });
     }
+  });
 
-    this.lessonSequence.set(steps);
-    this.evaluateStepCompletion();
-    this.isLoadingLesson.set(false);
+  if (chapterAssessments.length > 0) {
+    steps.push({
+      type: 'assessment',
+      title: 'Chapter Quiz',
+      data: chapterAssessments
+    });
   }
 
-  handleStepCompleted(isCompleted: boolean) {
-    this.isStepCompleted.set(isCompleted);
+  this.lessonSequence.set(steps);
+  this.evaluateStepCompletion();
+  this.isLoadingLesson.set(false);
+}
+
+handleStepCompleted(isCompleted: boolean) {
+  this.isStepCompleted.set(isCompleted);
+}
+
+evaluateStepCompletion() {
+  const step = this.currentStep();
+  if (!step) return;
+
+  if (this.learningMode() === 'easy') {
+    this.isStepCompleted.set(true); // Easy mode allows skipping anything
+    return;
   }
 
-  evaluateStepCompletion() {
-    const step = this.currentStep();
-    if (!step) return;
-
-    if (this.learningMode() === 'easy') {
-      this.isStepCompleted.set(true); // Easy mode allows skipping anything
-      return;
-    }
-
-    if (step.type === 'pdf' || step.type === 'remediation') {
-      this.isStepCompleted.set(true);
-    } else if (step.type === 'reading') {
-      if (step.data.isJson && step.data.blocks && step.data.blocks.length > 0) {
-        this.isStepCompleted.set(false); // KidsLessonPlayer emits stepCompleted
-      } else {
-        this.isStepCompleted.set(true);
-      }
-    } else if (step.type === 'video') {
-      this.isStepCompleted.set(this.isVideoCompleted());
-    } else if (step.type === 'practice') {
-      this.isStepCompleted.set(false); // KidsLessonPlayer emits practiceCompleted
+  if (step.type === 'pdf' || step.type === 'remediation') {
+    this.isStepCompleted.set(true);
+  } else if (step.type === 'reading') {
+    if (step.data.isJson && step.data.blocks && step.data.blocks.length > 0) {
+      this.isStepCompleted.set(false); // KidsLessonPlayer emits stepCompleted
     } else {
-      this.isStepCompleted.set(false);
+      this.isStepCompleted.set(true);
     }
+  } else if (step.type === 'video') {
+    this.isStepCompleted.set(this.isVideoCompleted());
+  } else if (step.type === 'practice') {
+    this.isStepCompleted.set(false); // KidsLessonPlayer emits practiceCompleted
+  } else {
+    this.isStepCompleted.set(false);
   }
+}
 
-  goToLevels() {
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { view: 'levels', levelId: null, chapterId: null },
-      queryParamsHandling: 'merge'
-    });
-  }
+goToLevels() {
+  this.router.navigate([], {
+    relativeTo: this.route,
+    queryParams: { view: 'levels', levelId: null, chapterId: null },
+    queryParamsHandling: 'merge'
+  });
+}
 
-  selectTopic(id: number): void {
-    this.activeContentId.set(id);
-    this.fullContent.set(null); // Reset while loading
+selectTopic(id: number): void {
+  this.activeContentId.set(id);
+  this.fullContent.set(null); // Reset while loading
 
-    const url = `${environment.apiUrl}/contents/${id}`;
-    this.http.get<Content>(url).subscribe({
-      next: (content) => {
-        this.fullContent.set(content);
-        this.currentView.set('content'); // Switch to content overlay
-      },
-      error: (err) => console.error('Failed to load topic content:', err)
-    });
-  }
+  const url = `${environment.apiUrl}/contents/${id}`;
+  this.http.get<Content>(url).subscribe({
+    next: (content) => {
+      this.fullContent.set(content);
+      this.currentView.set('content'); // Switch to content overlay
+    },
+    error: (err) => console.error('Failed to load topic content:', err)
+  });
+}
 
-  goToMap(): void {
-    this.location.back();
-  }
+goToMap(): void {
+  this.location.back();
+}
 
-  goToActivity(): void {
-    this.hearts.set(5);
-    this.showGameOver.set(false);
-    this.currentActivityIndex.set(0);
-    this.currentView.set('activity');
-  }
+goToActivity(): void {
+  this.hearts.set(5);
+  this.showGameOver.set(false);
+  this.currentActivityIndex.set(0);
+  this.currentView.set('activity');
+}
 
 
 
@@ -1070,288 +1060,288 @@ export class CoursePlayer implements OnInit, OnDestroy {
   private activitySessionCorrect = 0;
   private activitySessionTotal = 0;
 
-  onActivityAnswered(event: any) {
-    if (event && event.isCorrect !== undefined) {
-      this.activityFeedbackState.set(event.isCorrect ? 'correct' : 'incorrect');
+onActivityAnswered(event: any) {
+  if (event && event.isCorrect !== undefined) {
+    this.activityFeedbackState.set(event.isCorrect ? 'correct' : 'incorrect');
 
-      // Track stats for backend sync
-      this.activitySessionTotal++;
-      if (event.isCorrect) this.activitySessionCorrect++;
+    // Track stats for backend sync
+    this.activitySessionTotal++;
+    if (event.isCorrect) this.activitySessionCorrect++;
 
-      if (event.isCorrect) {
-        this.audioService.playSuccess();
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.8 },
-          colors: ['#4ade80', '#fcd34d', '#3b82f6']
+    if (event.isCorrect) {
+      this.audioService.playSuccess();
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.8 },
+        colors: ['#4ade80', '#fcd34d', '#3b82f6']
+      });
+
+      this.coins.update(c => c + 5);
+      this.xp.update(x => x + 10);
+      this.isStepCompleted.set(true);
+
+      setTimeout(() => {
+        gsap.fromTo('.stat-badge',
+          { scale: 1.3, boxShadow: '0 0 20px #fcd34d' },
+          { scale: 1, boxShadow: 'none', duration: 0.8, ease: 'elastic.out(1, 0.3)', stagger: 0.1 }
+        );
+
+        gsap.fromTo('.mascot-happy',
+          { y: 50, scaleY: 0.7, rotation: -15 },
+          { y: 0, scaleY: 1.1, rotation: 10, duration: 0.6, ease: 'back.out(1.7)' }
+        );
+        gsap.to('.mascot-happy', {
+          y: -8, rotation: 0, scaleY: 1, duration: 1.5, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 0.6
         });
+      }, 50);
+    } else {
+      this.audioService.playError();
+      this.hearts.update(h => Math.max(0, h - 1));
 
-        this.coins.update(c => c + 5);
-        this.xp.update(x => x + 10);
-        this.isStepCompleted.set(true);
-
-        setTimeout(() => {
-          gsap.fromTo('.stat-badge',
-            { scale: 1.3, boxShadow: '0 0 20px #fcd34d' },
-            { scale: 1, boxShadow: 'none', duration: 0.8, ease: 'elastic.out(1, 0.3)', stagger: 0.1 }
-          );
-
-          gsap.fromTo('.mascot-happy',
-            { y: 50, scaleY: 0.7, rotation: -15 },
-            { y: 0, scaleY: 1.1, rotation: 10, duration: 0.6, ease: 'back.out(1.7)' }
-          );
-          gsap.to('.mascot-happy', {
-            y: -8, rotation: 0, scaleY: 1, duration: 1.5, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: 0.6
-          });
-        }, 50);
-      } else {
-        this.audioService.playError();
-        this.hearts.update(h => Math.max(0, h - 1));
-
-        setTimeout(() => {
-          gsap.fromTo('.mascot-sad',
-            { x: -15, rotation: -20 },
-            { x: 15, rotation: 20, duration: 0.1, repeat: 5, yoyo: true, ease: 'sine.inOut' }
-          );
-          gsap.to('.mascot-sad', { x: 0, rotation: 0, duration: 0.3, delay: 0.6 });
-        }, 50);
-        if (this.hearts() === 0) {
-          this.showGameOver.set(true);
-          this.heartRefillTimer.set(30);
-          this.timerInterval = setInterval(() => {
-            const currentTimer = this.heartRefillTimer();
-            if (currentTimer > 0) {
-              this.heartRefillTimer.set(currentTimer - 1);
-            } else {
-              clearInterval(this.timerInterval);
-            }
-          }, 1000);
-        }
-      }
-
-      // Record this individual activity answer to backend (fire-and-forget)
-      const token = this.authService.getToken();
-      if (token) {
-        this.http.post<any>(`${environment.apiUrl}/student/record-activity`, {
-          activity_type: 'activity',
-          mode: 'lesson',
-          course_id: this.courseId() ?? null,
-          content_id: this.activeChapterId() ?? null,
-          activity_id: this.currentStep()?.activity_id || this.currentStepIndex().toString(),
-          score: event.isCorrect ? 1 : 0,
-          total: 1,
-        }, { headers: { Authorization: `Bearer ${token}` } }).subscribe({
-          next: (res) => {
-            console.log('[record-activity] OK:', res);
-            if (res.xp_earned > 0) {
-              this.showXpFloatAnimation(res.xp_earned);
-            }
-            if (res.streak_extended) {
-              this.triggerStreakConfetti();
-            }
-          },
-          error: (err) => console.error('[record-activity] FAILED:', err.status, err.error)
-        });
-      } else {
-        console.warn('[record-activity] No token — activity not recorded');
-      }
-    }
-  }
-
-  continueFromFeedback() {
-    const state = this.activityFeedbackState();
-    this.activityFeedbackState.set(null);
-
-    if (state === 'incorrect' && this.hearts() > 0) {
-      const currentStep = this.currentStep();
-      if (currentStep) {
-        // Clone the step and data to ensure Angular detects the reference change and resets state
-        const clonedStep: LessonStep = {
-          type: currentStep.type,
-          title: currentStep.title + ' (Retry)',
-          activity_id: currentStep.activity_id,
-          data: currentStep.data ? {
-            ...currentStep.data,
-            data: currentStep.data.data ? { ...currentStep.data.data } : undefined
-          } : undefined
-        };
-
-        const remediationStep: LessonStep = {
-          type: 'remediation',
-          title: 'மீண்டும் முயற்சி செய்வோம்!',
-          data: { 
-            isJson: false, 
-            text: 'சில கேள்விகளுக்குத் தவறாகப் பதில் அளித்துவிட்டீர்கள்! கவலை வேண்டாம், மீண்டும் ஒருமுறை முயற்சி செய்வோம்! உங்களால் முடியும்! ✨' 
-          }
-        };
-
-        this.lessonSequence.update(seq => {
-          const newSeq = [...seq];
-          const firstAssessmentIdx = newSeq.findIndex(s => s.type === 'assessment');
-
-          if (firstAssessmentIdx !== -1) {
-            // Check if remediation warning is already injected before this assessment
-            const hasRemediation = newSeq.slice(0, firstAssessmentIdx).some(s => s.title === 'மீண்டும் முயற்சி செய்வோம்!');
-            if (!hasRemediation) {
-              newSeq.splice(firstAssessmentIdx, 0, remediationStep, clonedStep);
-            } else {
-              newSeq.splice(firstAssessmentIdx, 0, clonedStep);
-            }
+      setTimeout(() => {
+        gsap.fromTo('.mascot-sad',
+          { x: -15, rotation: -20 },
+          { x: 15, rotation: 20, duration: 0.1, repeat: 5, yoyo: true, ease: 'sine.inOut' }
+        );
+        gsap.to('.mascot-sad', { x: 0, rotation: 0, duration: 0.3, delay: 0.6 });
+      }, 50);
+      if (this.hearts() === 0) {
+        this.showGameOver.set(true);
+        this.heartRefillTimer.set(30);
+        this.timerInterval = setInterval(() => {
+          const currentTimer = this.heartRefillTimer();
+          if (currentTimer > 0) {
+            this.heartRefillTimer.set(currentTimer - 1);
           } else {
-            // No assessment, append to end
-            const hasRemediation = newSeq.some(s => s.title === 'மீண்டும் முயற்சி செய்வோம்!');
-            if (!hasRemediation) {
-              newSeq.push(remediationStep, clonedStep);
-            } else {
-              newSeq.push(clonedStep);
-            }
+            clearInterval(this.timerInterval);
           }
-          return newSeq;
-        });
+        }, 1000);
       }
     }
 
-    if (this.hearts() > 0) {
-      this.nextLessonStep();
+    // Record this individual activity answer to backend (fire-and-forget)
+    const token = this.authService.getToken();
+    if (token) {
+      this.http.post<any>(`${environment.apiUrl}/student/record-activity`, {
+        activity_type: 'activity',
+        mode: 'lesson',
+        course_id: this.courseId() ?? null,
+        content_id: this.activeChapterId() ?? null,
+        activity_id: this.currentStep()?.activity_id || this.currentStepIndex().toString(),
+        score: event.isCorrect ? 1 : 0,
+        total: 1,
+      }, { headers: { Authorization: `Bearer ${token}` } }).subscribe({
+        next: (res) => {
+          console.log('[record-activity] OK:', res);
+          if (res.xp_earned > 0) {
+            this.showXpFloatAnimation(res.xp_earned);
+          }
+          if (res.streak_extended) {
+            this.triggerStreakConfetti();
+          }
+        },
+        error: (err) => console.error('[record-activity] FAILED:', err.status, err.error)
+      });
+    } else {
+      console.warn('[record-activity] No token — activity not recorded');
+    }
+  }
+}
+
+continueFromFeedback() {
+  const state = this.activityFeedbackState();
+  this.activityFeedbackState.set(null);
+
+  if (state === 'incorrect' && this.hearts() > 0) {
+    const currentStep = this.currentStep();
+    if (currentStep) {
+      // Clone the step and data to ensure Angular detects the reference change and resets state
+      const clonedStep: LessonStep = {
+        type: currentStep.type,
+        title: currentStep.title + ' (Retry)',
+        activity_id: currentStep.activity_id,
+        data: currentStep.data ? {
+          ...currentStep.data,
+          data: currentStep.data.data ? { ...currentStep.data.data } : undefined
+        } : undefined
+      };
+
+      const remediationStep: LessonStep = {
+        type: 'remediation',
+        title: 'மீண்டும் முயற்சி செய்வோம்!',
+        data: {
+          isJson: false,
+          text: 'சில கேள்விகளுக்குத் தவறாகப் பதில் அளித்துவிட்டீர்கள்! கவலை வேண்டாம், மீண்டும் ஒருமுறை முயற்சி செய்வோம்! உங்களால் முடியும்! ✨'
+        }
+      };
+
+      this.lessonSequence.update(seq => {
+        const newSeq = [...seq];
+        const firstAssessmentIdx = newSeq.findIndex(s => s.type === 'assessment');
+
+        if (firstAssessmentIdx !== -1) {
+          // Check if remediation warning is already injected before this assessment
+          const hasRemediation = newSeq.slice(0, firstAssessmentIdx).some(s => s.title === 'மீண்டும் முயற்சி செய்வோம்!');
+          if (!hasRemediation) {
+            newSeq.splice(firstAssessmentIdx, 0, remediationStep, clonedStep);
+          } else {
+            newSeq.splice(firstAssessmentIdx, 0, clonedStep);
+          }
+        } else {
+          // No assessment, append to end
+          const hasRemediation = newSeq.some(s => s.title === 'மீண்டும் முயற்சி செய்வோம்!');
+          if (!hasRemediation) {
+            newSeq.push(remediationStep, clonedStep);
+          } else {
+            newSeq.push(clonedStep);
+          }
+        }
+        return newSeq;
+      });
     }
   }
 
-  retryActivity() {
-    if (this.heartRefillTimer() > 0) return; // Prevent early click
-    this.hearts.set(5);
-    this.showGameOver.set(false);
-    this.activityFeedbackState.set(null);
+  if (this.hearts() > 0) {
+    this.nextLessonStep();
+  }
+}
+
+retryActivity() {
+  if (this.heartRefillTimer() > 0) return; // Prevent early click
+  this.hearts.set(5);
+  this.showGameOver.set(false);
+  this.activityFeedbackState.set(null);
+  this.evaluateStepCompletion();
+}
+
+
+
+nextLessonStep() {
+  const currentIdx = this.currentStepIndex();
+  if (currentIdx < this.lessonSequence().length - 1) {
+    this.currentStepIndex.set(currentIdx + 1);
+    this.isVideoCompleted.set(false);
     this.evaluateStepCompletion();
+    this.activityFeedbackState.set(null);
+  } else {
+    this.lessonFinished.set(true);
   }
+}
 
+prevLessonStep() {
+  const currentIdx = this.currentStepIndex();
+  if (currentIdx > 0) {
+    this.currentStepIndex.set(currentIdx - 1);
+    this.evaluateStepCompletion();
+    this.lessonFinished.set(false);
+    this.activityFeedbackState.set(null);
+  }
+}
 
-
-  nextLessonStep() {
-    const currentIdx = this.currentStepIndex();
-    if (currentIdx < this.lessonSequence().length - 1) {
-      this.currentStepIndex.set(currentIdx + 1);
-      this.isVideoCompleted.set(false);
-      this.evaluateStepCompletion();
-      this.activityFeedbackState.set(null);
-    } else {
-      this.lessonFinished.set(true);
+logout() {
+  this.authService.logout().subscribe({
+    complete: () => {
+      window.location.href = '/login';
+    },
+    error: () => {
+      this.authService.clearSession();
+      window.location.href = '/login';
     }
-  }
+  });
+}
 
-  prevLessonStep() {
-    const currentIdx = this.currentStepIndex();
-    if (currentIdx > 0) {
-      this.currentStepIndex.set(currentIdx - 1);
-      this.evaluateStepCompletion();
-      this.lessonFinished.set(false);
-      this.activityFeedbackState.set(null);
-    }
-  }
 
-  logout() {
-    this.authService.logout().subscribe({
-      complete: () => {
-        window.location.href = '/login';
-      },
-      error: () => {
-        this.authService.clearSession();
-        window.location.href = '/login';
-      }
+ngOnDestroy() {
+  if (this.timerInterval) {
+    clearInterval(this.timerInterval);
+  }
+}
+
+finishLesson() {
+  this.audioService.playSuccess();
+
+  const duration = 2.5 * 1000;
+  const end = Date.now() + duration;
+
+  const frame = () => {
+    confetti({
+      particleCount: 5,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0 },
+      colors: ['#4ade80', '#fcd34d', '#3b82f6', '#ec4899', '#8b5cf6']
     });
-  }
+    confetti({
+      particleCount: 5,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1 },
+      colors: ['#4ade80', '#fcd34d', '#3b82f6', '#ec4899', '#8b5cf6']
+    });
 
-
-  ngOnDestroy() {
-      if (this.timerInterval) {
-          clearInterval(this.timerInterval);
-      }
-  }
-
-  finishLesson() {
-    this.audioService.playSuccess();
-
-    const duration = 2.5 * 1000;
-    const end = Date.now() + duration;
-
-    const frame = () => {
-      confetti({
-        particleCount: 5,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0 },
-        colors: ['#4ade80', '#fcd34d', '#3b82f6', '#ec4899', '#8b5cf6']
-      });
-      confetti({
-        particleCount: 5,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1 },
-        colors: ['#4ade80', '#fcd34d', '#3b82f6', '#ec4899', '#8b5cf6']
-      });
-
-      if (Date.now() < end) {
-        requestAnimationFrame(frame);
-      }
-    };
-    frame();
-
-    const activeChapId = this.activeChapterId();
-    if (activeChapId) {
-      this.completeChapter(activeChapId);
+    if (Date.now() < end) {
+      requestAnimationFrame(frame);
     }
+  };
+  frame();
 
-    setTimeout(() => {
-      this.goToMap();
-    }, 2000);
+  const activeChapId = this.activeChapterId();
+  if (activeChapId) {
+    this.completeChapter(activeChapId);
   }
 
-  completeActiveChapterAndGoToMap() {
-    const activeChapId = this.activeChapterId();
-    if (activeChapId) {
-      this.completeChapter(activeChapId);
-    }
+  setTimeout(() => {
     this.goToMap();
-  }
+  }, 2000);
+}
 
-  nextActivityPage(): void {
-    this.currentActivityIndex.update(v => v + 1);
+completeActiveChapterAndGoToMap() {
+  const activeChapId = this.activeChapterId();
+  if (activeChapId) {
+    this.completeChapter(activeChapId);
   }
+  this.goToMap();
+}
 
-  prevActivityPage(): void {
-    this.currentActivityIndex.update(v => Math.max(0, v - 1));
-  }
+nextActivityPage(): void {
+  this.currentActivityIndex.update(v => v + 1);
+}
 
-  toggleLevel(level: Level): void {
-    level.is_expanded = !level.is_expanded;
-  }
+prevActivityPage(): void {
+  this.currentActivityIndex.update(v => Math.max(0, v - 1));
+}
 
-  toggleChapter(chapter: Chapter): void {
-    chapter.is_expanded = !chapter.is_expanded;
-  }
+toggleLevel(level: Level): void {
+  level.is_expanded = !level.is_expanded;
+}
 
-  toggleFullscreen() {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().then(() => {
-        this.isFullscreen.set(true);
-      }).catch(err => {
-        console.error(`Error attempting to enable fullscreen: ${err.message}`);
+toggleChapter(chapter: Chapter): void {
+  chapter.is_expanded = !chapter.is_expanded;
+}
+
+toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().then(() => {
+      this.isFullscreen.set(true);
+    }).catch(err => {
+      console.error(`Error attempting to enable fullscreen: ${err.message}`);
+    });
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen().then(() => {
+        this.isFullscreen.set(false);
       });
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen().then(() => {
-          this.isFullscreen.set(false);
-        });
-      }
     }
   }
+}
 
   private shuffleArray<T>(array: T[]): T[] {
-    const arr = [...array];
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
+  return arr;
+}
 }

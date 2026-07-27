@@ -82,9 +82,12 @@ class CourseController extends Controller
                     ->orderBy('level_chapter.sort_order');
             },
             'levels.chapters.contents' => function ($query) {
-                $query->select('contents.id', 'contents.name', 'contents.title', 'contents.sort_order', 'contents.is_active')
+                $query->select('contents.id', 'contents.name', 'contents.title', 'contents.sort_order', 'contents.is_active', 'contents.text_content', 'contents.external_url')
                     ->where('contents.is_active', true)
                     ->orderBy('contents.sort_order');
+            },
+            'levels.chapters.contents.attachments' => function ($query) {
+                $query->where('content_attachments.is_deleted', false);
             },
             'levels.chapters.assessments' => function ($query) {
                 $query->where('assessments.is_active', true);
