@@ -42,25 +42,25 @@ export class KidsDashboard implements OnInit, OnDestroy {
   userName = signal<string>('Student');
   timeGreeting = signal<string>('வணக்கம்'); // Time based greeting
   
-  streakDays = signal<number>(1);
-  xpPoints = signal<number>(150);
+  streakDays = signal<number>(0);
+  xpPoints = signal<number>(0);
   completedCount = signal<number>(0);
-  totalCount = signal<number>(15);
+  totalCount = signal<number>(0);
   overallProgress = signal<number>(0);
 
   // Daily Goal (e.g. 15 mins a day)
   dailyGoalMins = signal<number>(15);
-  dailyCompletedMins = signal<number>(12); // Simulated value
-  dailyGoalProgress = signal<number>(80);
+  dailyCompletedMins = signal<number>(0);
+  dailyGoalProgress = signal<number>(0);
 
   assignedCourses = signal<any[]>([]);
 
-  activeCourse = signal({
-    title: 'கற்றல் பாடநெறி',
-    chapterName: 'பாட அத்தியாயம்',
-    progress: 0,
-    chapterId: 1
-  });
+  activeCourse = signal<{
+    title: string;
+    chapterName: string;
+    progress: number;
+    chapterId: number;
+  } | null>(null);
 
   dynamicModules = signal<DynamicModuleItem[]>([]);
   
@@ -72,7 +72,28 @@ export class KidsDashboard implements OnInit, OnDestroy {
     this.updateTimeGreeting();
     this.loadUserData();
     this.fetchDashboardData();
+    this.fetchAssignedCourses();
     this.startCourseCarousel();
+  }
+
+  fetchAssignedCourses(): void {
+    this.http.get<any[]>(`${environment.apiUrl}/courses`).subscribe({
+      next: (courses) => {
+        if (courses && courses.length > 0) {
+          this.assignedCourses.set(courses);
+          const firstCourse = courses[0];
+          this.activeCourse.set({
+            title: firstCourse.title || firstCourse.name || 'பாடநெறி',
+            chapterName: firstCourse.description || 'பாடங்கள்',
+            progress: this.overallProgress(),
+            chapterId: firstCourse.id
+          });
+        }
+      },
+      error: (err) => {
+        console.error('Failed to fetch assigned courses from DB:', err);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -147,7 +168,10 @@ export class KidsDashboard implements OnInit, OnDestroy {
           }
           if (res.completion_percentage !== undefined) {
             this.overallProgress.set(res.completion_percentage);
-            this.activeCourse.update(ac => ({ ...ac, progress: res.completion_percentage }));
+            const currentAc = this.activeCourse();
+            if (currentAc) {
+              this.activeCourse.set({ ...currentAc, progress: res.completion_percentage });
+            }
           }
           if (res.module_progressions && Array.isArray(res.module_progressions) && res.module_progressions.length > 0) {
             const bgColors = ['#10B981', '#6366F1', '#F59E0B', '#EC4899', '#8B5CF6'];
