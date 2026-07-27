@@ -84,6 +84,9 @@ export class PracticeEngineComponent implements OnInit {
 
   selectedWordForPractice: string = '';
   practiceWordPool: string[] = [];
+  introQuestions: any[] = [];
+  introQuizAnswers: (number | null)[] = [];
+  yaappuLimbs: any[] = [];
 
   constructor(
     private tamilNLP: TamilNLPService,
@@ -93,6 +96,61 @@ export class PracticeEngineComponent implements OnInit {
     private location: Location,
     private http: HttpClient
   ) { }
+
+  loadYaappuIntroFromDatabase(chapterId: number | string = 1) {
+    this.http.get<any>(`${environment.apiUrl}/chapters/${chapterId}`).subscribe({
+      next: (res) => {
+        if (res && res.contents && Array.isArray(res.contents)) {
+          const dbQuestions: any[] = [];
+          const dbLimbs: any[] = [];
+
+          res.contents.forEach((c: any) => {
+            if (c.text_content) {
+              try {
+                const parsed = JSON.parse(c.text_content);
+                if (parsed.blocks) {
+                  parsed.blocks.forEach((b: any) => {
+                    if (b.type === 'activity' && b.data) {
+                      if (b.data.type === 'mcq' && b.data.question) {
+                        dbQuestions.push({
+                          question: b.data.question,
+                          options: b.data.options || [b.data.correctAnswer || 'சரி'],
+                          correct: b.data.correctIndex || 0,
+                          explanation: b.data.explanation || ''
+                        });
+                      } else if (b.data.limbTitle) {
+                        dbLimbs.push({
+                          id: dbLimbs.length + 1,
+                          title: b.data.limbTitle,
+                          sub: b.data.limbSub || '',
+                          desc: b.data.limbDesc || '',
+                          examples: b.data.examples || [],
+                          icon: b.data.icon || 'bi-book',
+                          color: b.data.color || '#8B5CF6',
+                          bg: b.data.bg || '#F3E8FF'
+                        });
+                      }
+                    }
+                  });
+                }
+              } catch (e) { }
+            }
+          });
+
+          if (dbQuestions.length > 0) {
+            let prepared = this.shuffleArray(dbQuestions);
+            if (prepared.length > 10) prepared = prepared.slice(0, 10);
+            this.introQuestions = prepared;
+            this.introQuizAnswers = new Array(prepared.length).fill(null);
+          }
+          if (dbLimbs.length > 0) {
+            this.yaappuLimbs = dbLimbs;
+          }
+        }
+      },
+      error: () => { }
+    });
+  }
 
   getRandomTamilLetter(): string {
     const types = ['uyir_kuril', 'uyir_nedil', 'mei', 'uyirmei_kuril', 'uyirmei_nedil'];
@@ -126,7 +184,7 @@ export class PracticeEngineComponent implements OnInit {
 
         if (wordsList.length > 0) {
           this.practiceWordPool = wordsList;
-          
+
           // Categorize single-asai DB words dynamically using TamilNLP
           const ner: string[] = [];
           const nirai: string[] = [];
@@ -324,14 +382,14 @@ export class PracticeEngineComponent implements OnInit {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     this.playMode = mode;
     this.feedbackMessage = null;
-    
+
     if (mode === 'practice') {
       this.refreshRandomWord();
     } else {
       this.interactiveWord = '';
       this.selectedWordForPractice = '';
     }
-    
+
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { step: 'input_word' },
@@ -361,7 +419,7 @@ export class PracticeEngineComponent implements OnInit {
     if (this.isGameMode) {
       nextStep = 'select_mode';
     }
-    
+
     this.interactiveWord = '';
     this.selectedWordForPractice = '';
     this.interactiveAnalysis = null;
@@ -687,7 +745,7 @@ export class PracticeEngineComponent implements OnInit {
             completedMods.push(modKey);
             localStorage.setItem('completed_modules', JSON.stringify(completedMods));
           }
-        } catch (e) {}
+        } catch (e) { }
         setTimeout(() => {
           this.step = 'result';
           this.practiceCompleted.emit();
@@ -793,5 +851,14 @@ export class PracticeEngineComponent implements OnInit {
     setTimeout(() => {
       this.feedbackMessage = null;
     }, 4000);
+  }
+
+  private shuffleArray<T>(array: T[]): T[] {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
   }
 }

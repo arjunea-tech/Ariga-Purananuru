@@ -95,9 +95,35 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
     });
   }
 
+  private shuffleArray<T>(array: T[]): T[] {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
   startAttempt(): void {
     const exam = this.assessment();
     if (!exam) return;
+
+    // 1. Question Shuffling, 2. Option Shuffling, 3. Pick 10 of 30+
+    if (exam.questions && exam.questions.length > 0) {
+      let preparedQuestions = this.shuffleArray(exam.questions);
+      if (preparedQuestions.length > 10) {
+        preparedQuestions = preparedQuestions.slice(0, 10);
+      }
+      preparedQuestions = preparedQuestions.map(q => ({
+        ...q,
+        options: q.options ? this.shuffleArray(q.options) : []
+      }));
+
+      this.assessment.set({
+        ...exam,
+        questions: preparedQuestions
+      });
+    }
 
     this.gameState.set('active');
     this.currentQuestionIdx.set(0);

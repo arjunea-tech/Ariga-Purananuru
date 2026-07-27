@@ -589,6 +589,14 @@ export class CoursePlayer implements OnInit, OnDestroy {
           }
         });
 
+        // Question Shuffling & Pick 10 max
+        if (steps.length > 0) {
+          steps = this.shuffleArray(steps);
+          if (steps.length > 10) {
+            steps = steps.slice(0, 10);
+          }
+        }
+
         // Fallback: If no activity blocks exist in the database for this game type yet, provide interactive game activity!
         if (steps.length === 0) {
           const defaultTitleMap: Record<string, string> = {
@@ -847,7 +855,11 @@ export class CoursePlayer implements OnInit, OnDestroy {
           */
 
           if (this.currentView() !== 'content' && activityBlocks.length > 0) {
-            activityBlocks.forEach((block: any, idx: number) => {
+            let preparedBlocks = this.shuffleArray(activityBlocks);
+            if (preparedBlocks.length > 10) {
+              preparedBlocks = preparedBlocks.slice(0, 10);
+            }
+            preparedBlocks.forEach((block: any, idx: number) => {
               let actName = 'Unknown';
               if (block.data && block.data.type) {
                 actName = block.data.type.split('-').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
@@ -1259,4 +1271,12 @@ export class CoursePlayer implements OnInit, OnDestroy {
     }
   }
 
+  private shuffleArray<T>(array: T[]): T[] {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
 }
