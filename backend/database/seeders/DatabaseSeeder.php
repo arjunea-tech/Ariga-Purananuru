@@ -17,10 +17,10 @@ class DatabaseSeeder extends Seeder
     {
         // 1. Seed Super Admin (Global Administrator with no tenant_id)
         User::updateOrCreate(
-            ['username' => 'superadmin'],
+            ['email' => 'admin@ariga.local'],
             [
+                'username' => 'superadmin',
                 'name' => 'Global Administrator',
-                'email' => 'admin@ariga.local',
                 'password' => Hash::make('admin123'),
                 'role' => 'super_admin',
                 'tenant_id' => null,
@@ -42,10 +42,10 @@ class DatabaseSeeder extends Seeder
 
         // 4. Seed Staff (School Coordinator)
         User::updateOrCreate(
-            ['username' => 'coordinator'],
+            ['email' => 'manager@ariga.school'],
             [
+                'username' => 'coordinator',
                 'name' => 'School Coordinator',
-                'email' => 'manager@ariga.school',
                 'password' => Hash::make('admin123'),
                 'role' => 'staff',
                 'tenant_id' => $tenant->id,
@@ -54,11 +54,11 @@ class DatabaseSeeder extends Seeder
 
         // 5. Seed Student
         User::updateOrCreate(
-            ['username' => 'karthik_std'],
+            ['username' => 'karthik'],
             [
-                'name' => 'Karthik Student',
+                'name' => 'Karthik',
                 'email' => null,
-                'password' => Hash::make('student123'),
+                'password' => Hash::make('test123'),
                 'role' => 'student',
                 'tenant_id' => $tenant->id,
             ]
