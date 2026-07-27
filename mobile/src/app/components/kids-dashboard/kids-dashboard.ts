@@ -243,6 +243,102 @@ export class KidsDashboard implements OnInit, OnDestroy {
     this.router.navigate(['/tabs/learn']);
   }
 
+  showAttachmentsModal = signal<boolean>(false);
+  attachmentsList = signal<any[]>([]);
+  isLoadingAttachments = signal<boolean>(false);
+
+  openAttachments(): void {
+    this.showAttachmentsModal.set(true);
+    this.attachmentsList.set([]);
+    
+    const courses = this.assignedCourses();
+    if (!courses || courses.length === 0) return;
+
+    this.isLoadingAttachments.set(true);
+    const requests = courses.map(course => 
+      this.http.get<any>(`${environment.apiUrl}/courses/${course.id}/player-structure`)
+    );
+
+    // Dynamic resolution of structures
+    import('rxjs').then(({ forkJoin }) => {
+      forkJoin(requests).subscribe({
+        next: (structures: any[]) => {
+          const list: any[] = [];
+          structures.forEach(struct => {
+            if (struct && struct.levels) {
+              struct.levels.forEach((lvl: any) => {
+                if (lvl.chapters) {
+                  lvl.chapters.forEach((chap: any) => {
+                    // Check chapter level attachments if any
+                    if (chap.contents) {
+                      chap.contents.forEach((cont: any) => {
+                        // Check if content has attachments
+                        if (cont.attachments && cont.attachments.length > 0) {
+                          cont.attachments.forEach((att: any) => {
+                            let fileUrl = att.url || att;
+                            if (fileUrl && fileUrl.startsWith('http://localhost/') && !fileUrl.includes(':8000')) {
+                              fileUrl = fileUrl.replace('http://localhost/', `${environment.baseUrl}/`);
+                            } else if (fileUrl && !fileUrl.startsWith('http') && !fileUrl.startsWith('data:')) {
+                              fileUrl = `${environment.baseUrl}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+                            }
+                            list.push({
+                              courseName: struct.name || 'பாடநெறி',
+                              chapterName: chap.name || 'அத்தியாயம்',
+                              fileName: att.name || 'பாட புத்தகம் / ஆவணம்',
+                              url: fileUrl
+                            });
+                          });
+                        }
+                        // Also scan text_content json for embedded pdf blocks
+                        if (cont.text_content) {
+                          try {
+                            const parsed = JSON.parse(cont.text_content);
+                            if (parsed.blocks) {
+                              parsed.blocks.forEach((b: any) => {
+                                if (b.type === 'pdf' && b.data && b.data.url) {
+                                  let fileUrl = b.data.url;
+                                  if (fileUrl && fileUrl.startsWith('http://localhost/') && !fileUrl.includes(':8000')) {
+                                    fileUrl = fileUrl.replace('http://localhost/', `${environment.baseUrl}/`);
+                                  } else if (fileUrl && !fileUrl.startsWith('http') && !fileUrl.startsWith('data:')) {
+                                    fileUrl = `${environment.baseUrl}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+                                  }
+                                  list.push({
+                                    courseName: struct.name || 'பாடநெறி',
+                                    chapterName: chap.name || 'அத்தியாயம்',
+                                    fileName: b.data.title || 'பாட புத்தகம் (PDF)',
+                                    url: fileUrl
+                                  });
+                                }
+                              });
+                            }
+                          } catch (e) {}
+                        }
+                      });
+                    }
+                  });
+                }
+              });
+            }
+          });
+          this.attachmentsList.set(list);
+          this.isLoadingAttachments.set(false);
+        },
+        error: () => {
+          this.isLoadingAttachments.set(false);
+        }
+      });
+    });
+  }
+
+  closeAttachments(): void {
+    this.showAttachmentsModal.set(false);
+  }
+
+  openPdf(url: string): void {
+    console.log('Opening PDF URL:', url);
+    window.open(url, '_blank');
+  }
+
   getCategoryBg(id: string): string {
     const bgs: Record<string, string> = {
       'ezhuthu': '#FFF3C7',

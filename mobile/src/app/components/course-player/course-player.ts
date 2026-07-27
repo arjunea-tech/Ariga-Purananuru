@@ -591,9 +591,19 @@ export class CoursePlayer implements OnInit, OnDestroy {
 
         // Question Shuffling & Pick 10 max
         if (steps.length > 0) {
-          steps = this.shuffleArray(steps);
-          if (steps.length > 10) {
-            steps = steps.slice(0, 10);
+          if (steps.length >= 40) {
+            const basicSteps = steps.slice(0, 30);
+            const specialSteps = steps.slice(30);
+            
+            const shuffledBasic = this.shuffleArray(basicSteps).slice(0, 5);
+            const shuffledSpecial = this.shuffleArray(specialSteps).slice(0, 5);
+            
+            steps = this.shuffleArray([...shuffledBasic, ...shuffledSpecial]);
+          } else {
+            steps = this.shuffleArray(steps);
+            if (steps.length > 10) {
+              steps = steps.slice(0, 10);
+            }
           }
         }
 
@@ -822,11 +832,25 @@ export class CoursePlayer implements OnInit, OnDestroy {
           }
           */
 
-          if (this.currentView() !== 'content' && activityBlocks.length > 0) {
-            let preparedBlocks = this.shuffleArray(activityBlocks);
-            if (preparedBlocks.length > 10) {
-              preparedBlocks = preparedBlocks.slice(0, 10);
+          if (activityBlocks.length > 0) {
+            let preparedBlocks = [];
+            
+            // Check if this is the Eluthu module (which has 50 questions)
+            if (activityBlocks.length >= 40) {
+              const basicBlocks = activityBlocks.slice(0, 30);
+              const specialBlocks = activityBlocks.slice(30);
+              
+              const shuffledBasic = this.shuffleArray(basicBlocks).slice(0, 5);
+              const shuffledSpecial = this.shuffleArray(specialBlocks).slice(0, 5);
+              
+              preparedBlocks = this.shuffleArray([...shuffledBasic, ...shuffledSpecial]);
+            } else {
+              preparedBlocks = this.shuffleArray(activityBlocks);
+              if (preparedBlocks.length > 10) {
+                preparedBlocks = preparedBlocks.slice(0, 10);
+              }
             }
+
             preparedBlocks.forEach((block: any, idx: number) => {
               let actName = 'Unknown';
               if (block.data && block.data.type) {
@@ -842,7 +866,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
             });
           }
 
-          if (this.currentView() !== 'content' && assessmentBlocks.length > 0) {
+          if (assessmentBlocks.length > 0) {
             assessmentBlocks.forEach((block: any, idx: number) => {
               steps.push({
                 type: 'assessment',
