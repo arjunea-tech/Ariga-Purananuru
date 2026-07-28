@@ -6,6 +6,7 @@ import { AudioService } from '../../../services/audio.service';
 export interface YappuAsaiDetectiveData {
   type: 'yappu_asai_detective';
   question?: string;
+  words?: string[];
   challenges?: Array<{
     word: string;
     incorrectSplits: string[]; // e.g., ['தா', 'மர', 'ை'] or ['அ', 'கர', 'ம்']
@@ -101,17 +102,97 @@ export class YappuAsaiDetectiveComponent implements OnInit, OnChanges {
     }
   }
 
+  generateOptionsForWord(word: string): any[] {
+    const correctGroups = this.tamilNLPService.identifyAsai(word);
+    const correctSplits = correctGroups.map(g => g.text);
+    
+    // Label for correct split
+    const labelExplanation = correctGroups.map(g => `${g.text} (${g.type})`).join(' + ');
+    const correctLabel = `${correctSplits.join(' / ')} (சரியான பிரிப்பு: ${labelExplanation})`;
+
+    const options = [
+      { splits: correctSplits, isCorrect: true, label: correctLabel }
+    ];
+
+    // Generate incorrect splits
+    const letters = this.tamilNLPService.splitTamilLetters(word);
+    
+    // Incorrect 1: Split every letter (E.g. தா / ம / ரை or க / ல் / வி)
+    if (letters.length > 2) {
+      const allSplit = letters.map(l => l);
+      if (allSplit.join('/') !== correctSplits.join('/')) {
+        options.push({
+          splits: allSplit,
+          isCorrect: false,
+          label: allSplit.join(' / ') + ' (தவறு: அசை விதிகளைப் பின்பற்றவில்லை)'
+        });
+      }
+    }
+
+    // Incorrect 2: An alternative wrong split
+    if (letters.length > 1) {
+      const firstSplit = [letters[0], letters.slice(1).join('')];
+      if (firstSplit.join('/') !== correctSplits.join('/')) {
+        options.push({
+          splits: firstSplit,
+          isCorrect: false,
+          label: firstSplit.join(' / ') + ' (தவறு: அசை வாய்பாடு பொருந்தவில்லை)'
+        });
+      }
+    }
+
+    if (options.length === 1) {
+      options.push({
+        splits: [word],
+        isCorrect: false,
+        label: word + ' (தவறு: அசை பிரிக்கப்படவில்லை)'
+      });
+    }
+
+    return options;
+  }
+
   initGame(): void {
-    const list: DetectiveChallenge[] = this.defaultChallenges.map(c => {
-      // Shuffle options for variety
-      const shuffledOptions = [...c.options].sort(() => Math.random() - 0.5);
+    let list: DetectiveChallenge[] = [];
+
+    const sourceChallenges = (this.activity?.challenges && this.activity.challenges.length > 0)
+      ? this.activity.challenges
+      : this.defaultChallenges;
+
+    list = sourceChallenges.map((c: any) => {
+      const options: any[] = [];
+
+      // Correct option
+      const correctSplits = c.correctSplits || [];
+      options.push({
+        splits: correctSplits,
+        isCorrect: true,
+        label: correctSplits.join(' / ')
+      });
+
+      // Wrong options — from manually entered wrongOptions OR incorrectSplits fallback
+      const wrongOpts: string[][] = c.wrongOptions && c.wrongOptions.length > 0
+        ? c.wrongOptions
+        : (c.incorrectSplits ? [c.incorrectSplits] : []);
+
+      wrongOpts.forEach((wrongSplit: string[]) => {
+        options.push({
+          splits: wrongSplit,
+          isCorrect: false,
+          label: wrongSplit.join(' / ')
+        });
+      });
+
+      // Shuffle options randomly
+      const shuffledOptions = [...options].sort(() => Math.random() - 0.5);
+
       return {
         word: c.word,
         options: shuffledOptions,
         selectedOptionIndex: null,
         isAnswered: false,
         isCorrect: false,
-        explanation: c.explanation
+        explanation: c.explanation || ''
       };
     });
 

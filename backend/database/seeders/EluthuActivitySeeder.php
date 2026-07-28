@@ -370,6 +370,854 @@ class EluthuActivitySeeder extends Seeder
                 ];
             }
 
+            // Add Letter Basket Activity
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'letter_basket',
+                    'title'       => 'எழுத்து கூடைப் பயிற்சி',
+                    'question'    => 'கொடுக்கப்பட்டுள்ள எழுத்துக்களைச் சரியான கூடையில் போடுக:',
+                    'items'       => [],
+                ]
+            ];
+
+            // Add Word Hunt 1 - Nedil
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'word_hunt',
+                    'title'       => 'நெடில் எழுத்து வேட்டை',
+                    'question'    => 'கீழே கொடுக்கப்பட்டுள்ள அட்டவணையில் உள்ள நெடில் எழுத்துக்களை மட்டும் தேர்ந்தெடுக்கவும்:',
+                    'gridSize'    => 4,
+                    'boxes'       => [],
+                ]
+            ];
+
+            // Add Word Hunt 2 - Kuril
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'word_hunt',
+                    'title'       => 'குறில் எழுத்து வேட்டை',
+                    'question'    => 'கீழே கொடுக்கப்பட்டுள்ள அட்டவணையில் உள்ள குறில் எழுத்துக்களை மட்டும் தேர்ந்தெடுக்கவும்:',
+                    'gridSize'    => 4,
+                    'boxes'       => [],
+                ]
+            ];
+
+            // Add Word Hunt 3 - Mei
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'word_hunt',
+                    'title'       => 'மெய் எழுத்து வேட்டை',
+                    'question'    => 'கீழே கொடுக்கப்பட்டுள்ள அட்டவணையில் உள்ள மெய் எழுத்துக்களை மட்டும் தேர்ந்தெடுக்கவும்:',
+                    'gridSize'    => 4,
+                    'boxes'       => [],
+                ]
+            ];
+
+            // Add 50 Odd One Out Activities
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #1',
+                    'question'    => 'கீழே உள்ளவற்றில் வேறுபட்ட மாத்திரை அளவு கொண்ட எழுத்தைக் கண்டறிக (குறில் vs நெடில்):',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'அ', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'இ', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'உ', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'ஆ', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'ஆ என்பது நெடில் எழுத்து (2 மாத்திரை), மற்றவை குறில் எழுத்துக்கள் (1 மாத்திரை).'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #2',
+                    'question'    => 'வேறுபட்ட ஒலியளவு கொண்ட எழுத்தைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'கா', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'சா', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'தா', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'கி', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'கி என்பது குறில் உயிர்மெய் (1 மாத்திரை), மற்றவை நெடில் உயிர்மெய் எழுத்துக்கள் (2 மாத்திரை).'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #3',
+                    'question'    => 'வேறுபட்ட மெய்யெழுத்து வகையைக் கண்டறிக (வல்லினம் vs பிற):',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'க்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ச்', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ட்', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'ங்', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'ங் என்பது மெல்லின மெய், மற்றவை வல்லின மெய் எழுத்துக்கள் (கசடதபர).'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #4',
+                    'question'    => 'வேறுபட்ட மெய்யெழுத்து வகையைக் கண்டறிக (மெல்லினம் vs பிற):',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'ங்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ஞ்', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ண்', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'ய்', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'ய் என்பது இடையின மெய், மற்றவை மெல்லின மெய் எழுத்துக்கள் (ஙஞணநமன).'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #5',
+                    'question'    => 'வேறுபட்ட மெய்யெழுத்து வகையைக் கண்டறிக (இடையினம் vs பிற):',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'ய்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ர்', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ல்', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'த்', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'த் என்பது வல்லின மெய், மற்றவை இடையின மெய் எழுத்துக்கள் (யரலவழள).'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #6',
+                    'question'    => 'கீழே உள்ளவற்றில் உயிர் எழுத்துக்களுள் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'எ', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ஒ', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'உ', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'ஏ', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'ஏ என்பது நெடில் உயிர் எழுத்து, மற்றவை குறில் உயிர் எழுத்துக்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #7',
+                    'question'    => 'கீழே உள்ளவற்றில் உயிர்மெய் எழுத்துக்களுள் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'பே', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'கோ', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'மை', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'மு', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'மு என்பது குறில் உயிர்மெய் எழுத்து, மற்றவை நெடில் உயிர்மெய் எழுத்துக்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #8',
+                    'question'    => 'மாத்திரை அளவின் அடிப்படையில் வேறுபட்ட ஒன்றைக் கண்டறிக (மெய் எழுத்துக்கள்):',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'க்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ச்', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ப்', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'அ', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'அ என்பது குறில் எழுத்து (1 மாத்திரை), மற்ற மெய் எழுத்துக்கள் அரை (1/2) மாத்திரை அளவு உடையவை.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #9',
+                    'question'    => 'வல்லின உயிர்மெய் எழுத்துக்களுள் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'க', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ச', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ட', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'ம', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'ம என்பது மெல்லின உயிர்மெய், மற்றவை வல்லின உயிர்மெய் எழுத்துக்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #10',
+                    'question'    => 'மெல்லின உயிர்மெய் எழுத்துக்களுள் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'ங', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ஞ', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ண', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'ய', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'ய என்பது இடையின உயிர்மெய், மற்றவை மெல்லின உயிர்மெய் எழுத்துக்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #11',
+                    'question'    => 'இடையின உயிர்மெய் எழுத்துக்களுள் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'ய', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ர', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ல', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'ப', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'ப என்பது வல்லின உயிர்மெய், மற்றவை இடையின உயிர்மெய் எழுத்துக்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #12',
+                    'question'    => 'ஆய்த எழுத்தின் மாத்திரை அளவோடு பொருந்தாத எழுத்தைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'ஃ', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'க்', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ஞ்', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'ஐ', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'ஐ என்பது நெடில் எழுத்து (2 மாத்திரை), ஆய்த எழுத்து மற்றும் மெய் எழுத்துக்கள் அரை (1/2) மாத்திரை அளவு உடையவை.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #13',
+                    'question'    => 'உயிரெழுத்துக்களுள் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'ஆ', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ஈ', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ஊ', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'இ', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'இ என்பது குறில், மற்றவை நெடில் உயிர் எழுத்துக்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #14',
+                    'question'    => 'சுட்டெழுத்துக்களுள் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'அ', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'இ', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'உ', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'எ', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'எ என்பது வினா எழுத்து, மற்றவை (அ, இ, உ) சுட்டெழுத்துக்கள் ஆகும்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #15',
+                    'question'    => 'வினா எழுத்துக்களுள் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'ஏ', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'யா', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ஆ', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'உ', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'உ என்பது சுட்டெழுத்து, மற்றவை வினா எழுத்துக்கள் ஆகும்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #16',
+                    'question'    => 'அடிப்படையில் வேறுபட்ட தமிழ் எழுத்து வகையைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'க்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ச்', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ட்', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'ஃ', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'ஃ என்பது ஆய்த எழுத்து (தனிநிலை), மற்றவை வல்லின மெய் எழுத்துக்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #17',
+                    'question'    => 'கீழே உள்ள சொற்களில் குறில் உயிர்மெய்யில் தொடங்கும் வேறுபட்ட சொல்லைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'படம்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'கனி', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'மலை', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'வாழை', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'வாழை நெடிலில் தொடங்குகிறது, மற்றவை குறில் உயிர்மெய்யில் தொடங்குகின்றன.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #18',
+                    'question'    => 'நெடில் உயிர்மெய்யில் தொடங்கும் வேறுபட்ட சொல்லைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'காடு', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'தேனி', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'யானை', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'கிளி', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'கிளி குறிலில் தொடங்குகிறது, மற்றவை நெடில் உயிர்மெய் எழுத்தில் தொடங்குகின்றன.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #19',
+                    'question'    => 'மாத்திரை அளவின் அடிப்படையில் வேறுபட்ட சொல்லைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'கண்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'கல்', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'மண்', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'பலா', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'பலா என்பது 3 மாத்திரை (குறில் 1 + நெடில் 2), மற்ற சொற்கள் 1.5 மாத்திரை அளவு கொண்டவை (குறில் 1 + மெய் 1/2).'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #20',
+                    'question'    => 'உயிரெழுத்து வரிசையில் ஐகார, ஔகார எழுத்துக்களுடன் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'ஐ', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ஔ', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ஏ', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'ஒ', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'ஒ என்பது குறில் எழுத்து, மற்றவை நெடில் எழுத்துக்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #21',
+                    'question'    => 'மெய்யெழுத்துக்களில் புள்ளி வைக்காத வடிவமுடைய வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'க்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ங்', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'க', 'isCorrect' => true],
+                        ['id' => 4, 'text' => 'ச்', 'isCorrect' => false]
+                    ],
+                    'explanation' => 'க என்பது உயிர்மெய் எழுத்து, மற்றவை மெய் எழுத்துக்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #22',
+                    'question'    => 'குறில் உயிர்மெய் எழுத்துக்களின் மாத்திரை அளவோடு வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'கு', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'செ', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'பி', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'பூ', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'பூ என்பது நெடில் (2 மாத்திரை), மற்றவை குறில் உயிர்மெய் (1 மாத்திரை).'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #23',
+                    'question'    => 'நெடில் உயிர்மெய் எழுத்துக்களின் மாத்திரை அளவோடு வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'கே', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'சோ', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'பை', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'டு', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'டு என்பது குறில் (1 மாத்திரை), மற்றவை நெடில் உயிர்மெய் (2 மாத்திரை).'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #24',
+                    'question'    => 'கீழே உள்ளவற்றில் ஆய்த எழுத்து அமையாத வேறுபட்ட சொல்லைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'அஃது', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'இஃது', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'எஃகு', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'அம்மா', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'அம்மாவில் ஆய்த எழுத்து இல்லை, மற்ற சொற்களில் ஆய்த எழுத்து (ஃ) பயின்று வந்துள்ளது.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #25',
+                    'question'    => 'அசை பிரிக்கப் பயன்படும் குறில்-நெடில் அடிப்படையில் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'உ', 'isCorrect' => true],
+                        ['id' => 2, 'text' => 'ஊ', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ஏ', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'ஓ', 'isCorrect' => false]
+                    ],
+                    'explanation' => 'உ என்பது குறில் எழுத்து, மற்றவை நெடில் எழுத்துக்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #26',
+                    'question'    => 'குற்றியலுகர வகைகளுள் வேறுபட்ட ஒன்றைக் கண்டறிக (வன்தொடர் vs பிற):',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'நாக்கு', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'பஞ்சு', 'isCorrect' => true],
+                        ['id' => 3, 'text' => 'பாட்டு', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'உப்பு', 'isCorrect' => false]
+                    ],
+                    'explanation' => 'பஞ்சு என்பது மென்தொடர் குற்றியலுகரம், மற்றவை வன்தொடர் குற்றியலுகரங்கள் (வல்லின மெய்யின் மேல் உகரம் ஏறி வந்தது).'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #27',
+                    'question'    => 'மென்தொடர் குற்றியலுகர சொற்களுள் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'பஞ்சு', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'பந்து', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'கரும்பு', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'காது', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'காது என்பது நெடில்தொடர் குற்றியலுகரம், மற்றவை மென்தொடர் குற்றியலுகரங்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #28',
+                    'question'    => 'இடைத்தொடர் குற்றியலுகர சொற்களுள் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'எய்து', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'மார்பு', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'சால்பு', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'ஆடு', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'ஆடு என்பது நெடில்தொடர் குற்றியலுகரம், மற்றவை இடைத்தொடர் குற்றியலுகரங்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #29',
+                    'question'    => 'நெடில்தொடர் குற்றியலுகர சொற்களுள் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'பாகு', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'மாடு', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'காது', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'எஃகு', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'எஃகு என்பது ஆய்தத்தொடர் குற்றியலுகரம், மற்றவை நெடில்தொடர் குற்றியலுகரங்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #30',
+                    'question'    => 'ஆய்தத்தொடர் குற்றியலுகர சொற்களுள் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'எஃகு', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'அஃது', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'கஃசு', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'வரகு', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'வரகு என்பது உயிர்த்தொடர் குற்றியலுகரம், மற்றவை ஆய்தத்தொடர் குற்றியலுகரங்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #31',
+                    'question'    => 'உயிர்த்தொடர் குற்றியலுகர சொற்களுள் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'வரகு', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'முரசு', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'அழகு', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'கதவு', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'கதவு என்பது இடைத்தொடர் குற்றியலுகரம் (வ் - இடையினம்), மற்றவை உயிர்த்தொடர் குற்றியலுகரங்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #32',
+                    'question'    => 'முற்றியலுகரச் சொற்களுள் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'புகு', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'பசு', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'அது', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'காடு', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'காடு என்பது நெடில்தொடர் குற்றியலுகரம், மற்றவை தனிக் குறிலை அடுத்து வல்லின உகரம் வந்ததால் முற்றியலுகரங்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #33',
+                    'question'    => 'சார்பெழுத்துக்களுள் குறுக்கம் பெறாத வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'ஐகாரக்குறுக்கம்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ஔகாரக்குறுக்கம்', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'மகரக்குறுக்கம்', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'உயிரளபெடை', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'உயிரளபெடை என்பது அளபெடை வகை, மற்றவை எழுத்துக்கள் தத்தம் மாத்திரை அளவில் இருந்து குறைந்து ஒலிக்கும் குறுக்கங்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #34',
+                    'question'    => 'ஐகாரக்குறுக்கம் சொல்லின் இறுதியில் வரும்போது ஒலிக்கும் மாத்திரை அளவுடன் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'வளையல்', 'isCorrect' => true],
+                        ['id' => 2, 'text' => 'திண்ணை', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'பறவை', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'கடலை', 'isCorrect' => false]
+                    ],
+                    'explanation' => 'வளையல் சொல்லின் இடையில் வந்துள்ளது (1 மாத்திரை), மற்ற சொற்களில் இறுதியில் வந்துள்ளது (1 மாத்திரை). [வளையல் சொல்லின் இடையில் வந்தாலும் இறுதி அளவோடு ஒத்துப்போகும், ஆனால் மாத்திரை குறைவு அடிப்படையில் வேறுபடும்].'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #35',
+                    'question'    => 'ஔகாரக்குறுக்கம் சொல்லின் எவ்விடங்களில் வராது என்ற விதியின் அடிப்படையில் வேறுபட்ட சொல்லைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'ஔவையார்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'வௌவால்', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'கௌதமர்', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'மதுரை', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'மதுரையில் ஔகாரக்குறுக்கம் இல்லை, மற்ற சொற்களின் முதலில் ஔகாரக்குறுக்கம் பயின்று வந்துள்ளது (ஔகாரம் சொல்லின் இடையிலும் இறுதியிலும் வராது).'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #36',
+                    'question'    => 'ஒற்றளபெடையில் அளபெடுக்கும் மெய்யெழுத்துக்களுள் அடங்காத வேறுபட்ட மெய்யைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'ங்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ஞ்', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ண்', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'க்', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'க் என்பது வல்லின மெய், ஒற்றளபெடையில் மெல்லின மெய்களும் இடையின மெய்களும் (ங், ஞ, ண், ந, ம், ன், ய், ர், ல், வ், ழ், ள்) மட்டுமே அளபெடுக்கும்; வல்லின மெய்கள் அளபெடுக்காது.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #37',
+                    'question'    => 'உயிரளபெடை வகைகளுள் வேறுபட்ட ஒன்றைக் கண்டறிக (இசைகெடாத இடத்திலும் இனிய ஓசைக்காக அளபெடுப்பது):',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'இன்னிசை அளபெடை', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'செய்யுளிசை அளபெடை', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'சொல்லிசை அளபெடை', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'ஒற்றளபெடை', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'ஒற்றளபெடை மெய்யெழுத்து அளபெடுப்பது, மற்றவை உயிரெழுத்து அளபெடுக்கும் உயிரளபெடை வகைகள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #38',
+                    'question'    => 'செய்யுளிசை அளபெடையின் மற்றொரு பெயர் அல்லாத வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'இசைநிறை அளபெடை', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'செய்யுளிசை அளபெடை', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'சொல்லிசை அளபெடை', 'isCorrect' => true],
+                        ['id' => 4, 'text' => 'நேரிசை அளபெடை', 'isCorrect' => false]
+                    ],
+                    'explanation' => 'சொல்லிசை அளபெடை என்பது பெயர்ச்சொல்லை வினையெச்சமாக மாற்ற அளபெடுப்பது, மற்றவை செய்யுளின் ஓசை குறையும்போது அதை நிறைவு செய்ய அளபெடுப்பது.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #39',
+                    'question'    => 'சொல்லிசை அளபெடைச் சொற்களுள் வேறுபட்ட ஒன்றைக் கண்டறிக (ஈகாரத்தில் முடியும் சொல்):',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'உரணசைஇ', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'வரனசைஇ', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'குடிதழீஇ', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'உழாஅது', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'உழாஅது என்பது செய்யுளிசை அளபெடை (ஆ-உ), மற்றவை சொல்லிசை அளபெடைகள் (இ கார இறுதி).'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #40',
+                    'question'    => 'இன்னிசை அளபெடைச் சொற்களுள் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'கெடுப்பதூஉம்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'எடுப்பதூஉம்', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'கொடுப்பதூஉம்', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'தழீஇ', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'தழீஇ என்பது சொல்லிசை அளபெடை, மற்றவை இன்னிசை அளபெடைச் சொற்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #41',
+                    'question'    => 'சார்பெழுத்துக்களின் எண்ணிக்கையில் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'உயிர்மெய்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ஆயுதம்', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'உயிரளபெடை', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'உயிரெழுத்து', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'உயிரெழுத்து என்பது முதல் எழுத்து வகை, மற்றவை சார்பெழுத்துக்கள் (பத்து வகை) ஆகும்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #42',
+                    'question'    => 'ழகர எழுத்தின் சிறப்பு தன்மைகளில் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'சிறப்பு ழகரம்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'தமிழுக்கே உரிய சிறப்பு எழுத்து', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'வல்லின ழகரம்', 'isCorrect' => true],
+                        ['id' => 4, 'text' => 'இடையின ழகரம்', 'isCorrect' => false]
+                    ],
+                    'explanation' => 'ழகரம் என்பது இடையின எழுத்து (யரலவழள), வல்லின எழுத்து அல்ல.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #43',
+                    'question'    => 'றகர, னகர உச்சரிப்பு வேறுபாட்டின் அடிப்படையில் வல்லின மெய் எழுத்தோடு வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'ற்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ட்', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ப்', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'ன்', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'ன் என்பது மெல்லின மெய் எழுத்து, மற்றவை வல்லின மெய் எழுத்துக்கள்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #44',
+                    'question'    => 'குற்றியலிகரத்தின் மாத்திரை அளவுடன் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'நாடு யாது (நாடியாது)', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'வரகு யாது (வரகியாது)', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'கொக்கு யாது (கொக்கியாது)', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'பலா பழம்', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'பலா பழத்தில் குற்றியலிகரம் இல்லை. மற்ற சொற்களில் நிலைமொழி ஈற்று உகரம் வருமொழி யகரத்தோடு புணரும்போது இகரமாகத் திரிந்து அரை மாத்திரை அளவாகக் குறைந்து ஒலிக்கும்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #45',
+                    'question'    => 'ஆயுதக்குறுக்கம் சொல்லில் ஒலிக்கும் மாத்திரை அளவுடன் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'கஃறீது', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'முஃடீது', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'எஃகு', 'isCorrect' => true],
+                        ['id' => 4, 'text' => 'அஃது', 'isCorrect' => false]
+                    ],
+                    'explanation' => 'எஃகில் உள்ள ஆயுதம் தனக்கே உரிய அரை மாத்திரை அளவில் ஒலிக்கும். கஃறீது, முஃடீது ஆகியவற்றில் ஆயுதம் கால் (1/4) மாத்திரையாகக் குறைந்து ஒலிக்கும்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #46',
+                    'question'    => 'மகரக்குறுக்கம் பயின்று வராத வேறுபட்ட சொல்லைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'வலம் வந்தான் (வலன்வந்தான்)', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'போலும் (போன்ம்)', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'மருளும் (மருண்ம்)', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'அம்மா', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'அம்மாவில் மகரம் தனக்கே உரிய அரை மாத்திரையில் ஒலிக்கும். மற்ற சொற்களில் மகர மெய் கால் (1/4) மாத்திரையாகக் குறைந்து ஒலிக்கும்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #47',
+                    'question'    => 'ஒற்றளபெடைச் சொற்களுள் வேறுபட்ட சொல்லைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'எங்ஙனம்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'மஞ்ஞை', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'கண்ண்', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'கல்வி', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'கல்விச் சொல்லில் ஒற்றளபெடை இல்லை, மற்ற சொற்களில் மெய்யெழுத்துக்கள் அளபெடுத்துள்ளன.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #48',
+                    'question'    => 'நெடில்தொடர் குற்றியலுகர சொல்லுக்குரிய விதியில் வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'ஈரெழுத்துச் சொல்லாக மட்டுமே வரும்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'முதல் எழுத்து நெடிலாக இருக்கும்', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ஈற்று எழுத்து வல்லின உகரமாக இருக்கும்', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'மூன்று எழுத்துச் சொல்லாக வரும்', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'நெடில்தொடர் குற்றியலுகரம் எப்போதும் ஈரெழுத்துச் சொல்லாக மட்டுமே வரும் என்பது விதியாகும்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #49',
+                    'question'    => 'வன்தொடர் குற்றியலுகர சொல்லுக்குரிய விதியில் ஈற்றயல் (கடைசிக்கு முந்தைய) எழுத்தாக அமையாத வேறுபட்ட மெய்யைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'க்', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ச்', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ட்', 'isCorrect' => false],
+                        ['id' => 4, 'text' => 'ஞ்', 'isCorrect' => true]
+                    ],
+                    'explanation' => 'ஞ் என்பது மெல்லின மெய், வன்தொடர் குற்றியலுகரத்தின் ஈற்றயல் எழுத்து எப்போதும் வல்லின மெய்யாகவே (க், ச், ட், த், ப், ற்) இருக்கும்.'
+                ]
+            ];
+
+            $activityContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'        => 'odd_one_out',
+                    'title'       => 'வேறுபட்ட எழுத்து #50',
+                    'question'    => 'சார்பெழுத்துக்களுள் அளபெடை அல்லாத வேறுபட்ட ஒன்றைக் கண்டறிக:',
+                    'options'     => [
+                        ['id' => 1, 'text' => 'உயிரளபெடை', 'isCorrect' => false],
+                        ['id' => 2, 'text' => 'ஒற்றளபெடை', 'isCorrect' => false],
+                        ['id' => 3, 'text' => 'ஆயுதக்குறுக்கம்', 'isCorrect' => true],
+                        ['id' => 4, 'text' => 'அளபெடை', 'isCorrect' => false]
+                    ],
+                    'explanation' => 'ஆயுதக்குறுக்கம் என்பது குறுக்க வகையாகும், மற்றவை நீண்டு ஒலிக்கும் அளபெடை வகைகளாகும்.'
+                ]
+            ];
+
             Content::where('title', 'LIKE', '%50 வினாக்கள் பயிற்சி%')
                 ->orWhere('title', 'LIKE', '%எழுத்து – பயிற்சி வினாக்கள்%')
                 ->orWhere('title', 'LIKE', '%எழுத்துப் பயிற்சி - 50%')
@@ -734,6 +1582,7 @@ class EluthuActivitySeeder extends Seeder
                 ];
             }
 
+            // 1. Original MCQ Only: 'அசைப் பயிற்சி - 50'
             Content::where('title', 'LIKE', '%அசைப் பயிற்சி - 50%')
                 ->get()
                 ->each(function($oc) {
@@ -741,7 +1590,7 @@ class EluthuActivitySeeder extends Seeder
                     $oc->delete();
                 });
 
-            $content = Content::create([
+            $contentMcqOnly = Content::create([
                 'name'         => 'அசைப் பயிற்சி - 50',
                 'title'        => 'அசைப் பயிற்சி - 50',
                 'text_content' => json_encode(['blocks' => $asaiContentBlocks], JSON_UNESCAPED_UNICODE),
@@ -750,7 +1599,382 @@ class EluthuActivitySeeder extends Seeder
 
             DB::table('content_chapters')->insert([
                 'chapter_id' => $asaiChapter->id,
-                'content_id' => $content->id,
+                'content_id' => $contentMcqOnly->id,
+            ]);
+
+            // 2. 'அசை வெட்டுப் பயிற்சி - 50' (Asai Slice Game)
+            Content::where('title', 'LIKE', '%அசை வெட்டுப் பயிற்சி - 50%')
+                ->get()
+                ->each(function($oc) {
+                    DB::table('content_chapters')->where('content_id', $oc->id)->delete();
+                    $oc->delete();
+                });
+
+            // 50 Tamil words for Slicing Practice
+            $sliceWordsList = [
+                'தாமரை', 'கல்வி', 'அகரம்', 'கண்ணன்', 'அம்மா', 'அப்பா', 'தம்பி', 'செல்வம்', 'பள்ளி', 'நாடு',
+                'வீடு', 'காடு', 'தோட்டம்', 'வானம்', 'பூமி', 'நீதி', 'நன்மை', 'உண்மை', 'பாடல்', 'ஆடல்',
+                'பேச்சு', 'பாட்டு', 'வாழ்க', 'வெற்றி', 'வீரம்', 'காலம்', 'அழகு', 'மனமே', 'உலகம்', 'நிலமே',
+                'கனவு', 'நினைவு', 'பணமே', 'அறமே', 'தவமே', 'குணமே', 'சினமே', 'மரமே', 'வழியே', 'மொழியே',
+                'நெறிதான்', 'உயிரோ', 'கனலோ', 'புயலோ', 'அலையோ', 'மலரோ', 'பேரழகு', 'வான்மழை', 'கார்முகில்', 'செம்மொழி'
+            ];
+
+            $sliceBlocks = [
+                [
+                    'type' => 'activity',
+                    'data' => [
+                        'type'     => 'yappu_asai_slice',
+                        'question' => 'வார்த்தையை சரியான அசைகளாகப் பிரிக்கவும்:',
+                        'words'    => $sliceWordsList,
+                    ]
+                ]
+            ];
+
+            $contentSlice = Content::create([
+                'name'         => 'அசை வெட்டுப் பயிற்சி - 50',
+                'title'        => 'அசை வெட்டுப் பயிற்சி - 50',
+                'text_content' => json_encode(['blocks' => $sliceBlocks], JSON_UNESCAPED_UNICODE),
+                'is_active'    => true,
+            ]);
+
+            DB::table('content_chapters')->insert([
+                'chapter_id' => $asaiChapter->id,
+                'content_id' => $contentSlice->id,
+            ]);
+
+            // 3. 'அசை துப்பறியும் பயிற்சி - 50' (Asai Detective Game)
+            Content::where('title', 'LIKE', '%அசை துப்பறியும் பயிற்சி - 50%')
+                ->get()
+                ->each(function($oc) {
+                    DB::table('content_chapters')->where('content_id', $oc->id)->delete();
+                    $oc->delete();
+                });
+
+            // 50 challenges for Detective Mode (Word + Correct Split + Wrong Splits + Explanation)
+            $detectiveChallengesList = [
+                [
+                    'word' => 'தாமரை',
+                    'correctSplits' => ['தாம', 'ரை'],
+                    'wrongOptions' => [['தா', 'மர', 'ை'], ['தாமர', 'ை']],
+                    'explanation' => '"தாம" (நிரை) + "ரை" (நேர்) என்பதே சரியான அசை பிரிப்பு.'
+                ],
+                [
+                    'word' => 'கல்வி',
+                    'correctSplits' => ['கல்', 'வி'],
+                    'wrongOptions' => [['க', 'ல்', 'வி'], ['கல்வ', 'ி']],
+                    'explanation' => '"கல்" (நேர்) + "வி" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'அகரம்',
+                    'correctSplits' => ['அக', 'ரம்'],
+                    'wrongOptions' => [['அ', 'கர', 'ம்'], ['அகரம்']],
+                    'explanation' => '"அக" (நிரை) + "ரம்" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'கண்ணன்',
+                    'correctSplits' => ['கண்', 'ணன்'],
+                    'wrongOptions' => [['க', 'ண்', 'ண', 'ன்'], ['கண்ணன்']],
+                    'explanation' => '"கண்" (நேர்) + "ணன்" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'அம்மா',
+                    'correctSplits' => ['அம்', 'மா'],
+                    'wrongOptions' => [['அ', 'ம்மா'], ['அம்ம', 'ா']],
+                    'explanation' => '"அம்" (நேர்) + "மா" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'அப்பா',
+                    'correctSplits' => ['அப்', 'பா'],
+                    'wrongOptions' => [['அ', 'ப்பா'], ['அப்ப', 'ா']],
+                    'explanation' => '"அப்" (நேர்) + "பா" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'தம்பி',
+                    'correctSplits' => ['தம்', 'பி'],
+                    'wrongOptions' => [['த', 'ம்பி'], ['தம்ப', 'ி']],
+                    'explanation' => '"தம்" (நேர்) + "பி" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'செல்வம்',
+                    'correctSplits' => ['செல்', 'வம்'],
+                    'wrongOptions' => [['செ', 'ல்வ', 'ம்'], ['செல்வ', 'ம்']],
+                    'explanation' => '"செல்" (நேர்) + "வம்" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'பள்ளி',
+                    'correctSplits' => ['பள்', 'ளி'],
+                    'wrongOptions' => [['ப', 'ள்ளி'], ['பள்ள', 'ி']],
+                    'explanation' => '"பள்" (நேர்) + "ளி" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'நாடு',
+                    'correctSplits' => ['நா', 'டு'],
+                    'wrongOptions' => [['நாட', 'ு'], ['நாடு']],
+                    'explanation' => '"நா" (நேர்) + "டு" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'வீடு',
+                    'correctSplits' => ['வீ', 'டு'],
+                    'wrongOptions' => [['வீட', 'u'], ['வீடு']],
+                    'explanation' => '"வீ" (நேர்) + "டு" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'காடு',
+                    'correctSplits' => ['கா', 'டு'],
+                    'wrongOptions' => [['காட', 'ு'], ['காடு']],
+                    'explanation' => '"கா" (நேர்) + "டு" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'தோட்டம்',
+                    'correctSplits' => ['தோட்', 'டம்'],
+                    'wrongOptions' => [['தோ', 'ட்ட', 'ம்'], ['தோட்ட', 'ம்']],
+                    'explanation' => '"தோட்" (நேர்) + "டம்" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'வானம்',
+                    'correctSplits' => ['வா', 'னம்'],
+                    'wrongOptions' => [['வான', 'ம்'], ['வா', 'ன', 'ம்']],
+                    'explanation' => '"வா" (நேர்) + "னம்" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'பூமி',
+                    'correctSplits' => ['பூ', 'மி'],
+                    'wrongOptions' => [['பூம', 'ி'], ['பூமி']],
+                    'explanation' => '"பூ" (நேர்) + "மி" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'நீதி',
+                    'correctSplits' => ['நீ', 'தி'],
+                    'wrongOptions' => [['நீத', 'ி'], ['நீதி']],
+                    'explanation' => '"நீ" (நேர்) + "தி" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'நன்மை',
+                    'correctSplits' => ['நன்', 'மை'],
+                    'wrongOptions' => [['ந', 'ன்மை'], ['நன்ம', 'ை']],
+                    'explanation' => '"நன்" (நேர்) + "மை" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'உண்மை',
+                    'correctSplits' => ['உண்', 'மை'],
+                    'wrongOptions' => [['உ', 'ண்மை'], ['உண்ம', 'ை']],
+                    'explanation' => '"உண்" (நேர்) + "மை" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'பாடல்',
+                    'correctSplits' => ['பா', 'டல்'],
+                    'wrongOptions' => [['பாட', 'ல்'], ['பா', 'ட', 'ல்']],
+                    'explanation' => '"பா" (நேர்) + "டல்" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'ஆடல்',
+                    'correctSplits' => ['ஆ', 'டல்'],
+                    'wrongOptions' => [['ஆட', 'ல்'], ['ஆ', 'ட', 'ல்']],
+                    'explanation' => '"ஆ" (நேர்) + "டல்" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'பேச்சு',
+                    'correctSplits' => ['பேச்', 'சு'],
+                    'wrongOptions' => [['பே', 'ச்சு'], ['பேச்ச', 'ு']],
+                    'explanation' => '"பேச்" (நேர்) + "சு" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'பாட்டு',
+                    'correctSplits' => ['பாட்', 'டு'],
+                    'wrongOptions' => [['பா', 'ட்டு'], ['பாட்ட', 'ு']],
+                    'explanation' => '"பாட்" (நேர்) + "டு" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'வாழ்க',
+                    'correctSplits' => ['வாழ்', 'க'],
+                    'wrongOptions' => [['வா', 'ழ்க'], ['வாழக', 'ு']],
+                    'explanation' => '"வாழ்" (நேர்) + "க" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'வெற்றி',
+                    'correctSplits' => ['வெற்', 'றி'],
+                    'wrongOptions' => [['வெ', 'ற்றி'], ['வெற்ற', 'ி']],
+                    'explanation' => '"வெற்" (நேர்) + "றி" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'வீரம்',
+                    'correctSplits' => ['வீ', 'ரம்'],
+                    'wrongOptions' => [['வீர', 'ம்'], ['வீ', 'ர', 'ம்']],
+                    'explanation' => '"வீ" (நேர்) + "ரம்" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'காலம்',
+                    'correctSplits' => ['கா', 'லம்'],
+                    'wrongOptions' => [['கால', 'ம்'], ['கா', 'ல', 'ம்']],
+                    'explanation' => '"கா" (நேர்) + "லம்" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'அழகு',
+                    'correctSplits' => ['அழ', 'கு'],
+                    'wrongOptions' => [['அ', 'ழகு'], ['அழக', 'ு']],
+                    'explanation' => '"அழ" (நிரை) + "கு" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'மனமே',
+                    'correctSplits' => ['மன', 'மே'],
+                    'wrongOptions' => [['ம', 'னமே'], ['மனம', 'ே']],
+                    'explanation' => '"மன" (நிரை) + "மே" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'உலகம்',
+                    'correctSplits' => ['உல', 'கம்'],
+                    'wrongOptions' => [['உ', 'லக', 'ம்'], ['உலக', 'ம்']],
+                    'explanation' => '"உல" (நிரை) + "கம்" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'நிலமே',
+                    'correctSplits' => ['நில', 'மே'],
+                    'wrongOptions' => [['நி', 'லமே'], ['நிலம', 'ே']],
+                    'explanation' => '"நில" (நிரை) + "மே" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'கனவு',
+                    'correctSplits' => ['கன', 'வு'],
+                    'wrongOptions' => [['க', 'னவு'], ['கனவ', 'ு']],
+                    'explanation' => '"கன" (நிரை) + "வு" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'நினைவு',
+                    'correctSplits' => ['நினை', 'வு'],
+                    'wrongOptions' => [['நி', 'னைவு'], ['நினைவ', 'ு']],
+                    'explanation' => '"நினை" (நிரை) + "வு" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'பணமே',
+                    'correctSplits' => ['பண', 'மே'],
+                    'wrongOptions' => [['ப', 'ணமே'], ['பணம', 'ே']],
+                    'explanation' => '"பண" (நிரை) + "மே" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'அறமே',
+                    'correctSplits' => ['அற', 'மே'],
+                    'wrongOptions' => [['அ', 'றமே'], ['அறம', 'ே']],
+                    'explanation' => '"அற" (நிரை) + "மே" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'தவமே',
+                    'correctSplits' => ['தவ', 'மே'],
+                    'wrongOptions' => [['த', 'வமே'], ['தவம', 'ே']],
+                    'explanation' => '"தவ" (நிரை) + "மே" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'குணமே',
+                    'correctSplits' => ['குண', 'மே'],
+                    'wrongOptions' => [['கு', 'ணமே'], ['குணம', 'ே']],
+                    'explanation' => '"குண" (நிரை) + "மே" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'சினமே',
+                    'correctSplits' => ['சின', 'மே'],
+                    'wrongOptions' => [['சி', 'னமே'], ['சினம', 'ே']],
+                    'explanation' => '"சின" (நிரை) + "மே" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'மரமே',
+                    'correctSplits' => ['மர', 'மே'],
+                    'wrongOptions' => [['ம', 'ரமே'], ['மரம', 'ே']],
+                    'explanation' => '"மர" (நிரை) + "மே" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'வழியே',
+                    'correctSplits' => ['வழி', 'யே'],
+                    'wrongOptions' => [['வ', 'ழியே'], ['வழிய', 'ே']],
+                    'explanation' => '"வழி" (நிரை) + "யே" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'மொழியே',
+                    'correctSplits' => ['மொழி', 'யே'],
+                    'wrongOptions' => [['மொ', 'ழியே'], ['மொழிய', 'ே']],
+                    'explanation' => '"மொழி" (நிரை) + "யே" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'நெறிதான்',
+                    'correctSplits' => ['நெறி', 'தான்'],
+                    'wrongOptions' => [['நெ', 'றிதான்'], ['நெறிதா', 'ன்']],
+                    'explanation' => '"நெறி" (நிரை) + "தான்" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'உயிரோ',
+                    'correctSplits' => ['உயி', 'ரோ'],
+                    'wrongOptions' => [['உ', 'யிரோ'], ['உயிர', 'ோ']],
+                    'explanation' => '"உயி" (நிரை) + "ரோ" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'கனலோ',
+                    'correctSplits' => ['கன', 'லோ'],
+                    'wrongOptions' => [['க', 'னலோ'], ['கனல', 'ோ']],
+                    'explanation' => '"கன" (நிரை) + "லோ" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'புயலோ',
+                    'correctSplits' => ['புய', 'லோ'],
+                    'wrongOptions' => [['பு', 'யலோ'], ['புயல', 'ோ']],
+                    'explanation' => '"புய" (நிரை) + "லோ" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'அலையோ',
+                    'correctSplits' => ['அலை', 'யோ'],
+                    'wrongOptions' => [['அ', 'லையோ'], ['அலைய', 'ー']],
+                    'explanation' => '"அலை" (நிரை) + "யோ" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'மலரோ',
+                    'correctSplits' => ['மல', 'ரோ'],
+                    'wrongOptions' => [['ம', 'லரோ'], ['மலர', 'ோ']],
+                    'explanation' => '"மல" (நிரை) + "ரோ" (நேர்) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'பேரழகு',
+                    'correctSplits' => ['பேர', 'ழகு'],
+                    'wrongOptions' => [['பே', 'ரழ', 'கு'], ['பேரழ', 'கு']],
+                    'explanation' => '"பேர" (நேர்) + "ழகு" (நிரை) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'வான்மழை',
+                    'correctSplits' => ['வான்', 'மழை'],
+                    'wrongOptions' => [['வா', 'ன்மழை'], ['வான்ம', 'ழை']],
+                    'explanation' => '"வான்" (நேர்) + "மழை" (நிரை) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'கார்முகில்',
+                    'correctSplits' => ['கார்', 'முகில்'],
+                    'wrongOptions' => [['கா', 'ர்மு', 'கில்'], ['கார்மு', 'கில்']],
+                    'explanation' => '"கார்" (நேர்) + "முகில்" (நிரை) என்பதே சரியான பிரிப்பு.'
+                ],
+                [
+                    'word' => 'செம்மொழி',
+                    'correctSplits' => ['செம்', 'மொழி'],
+                    'wrongOptions' => [['செ', 'ம்மொ', 'ழி'], ['செம்மொ', 'ழி']],
+                    'explanation' => '"செம்" (நேர்) + "மொழி" (நிரை) என்பதே சரியான பிரிப்பு.'
+                ]
+            ];
+
+            $detectiveBlocks = [
+                [
+                    'type' => 'activity',
+                    'data' => [
+                        'type'       => 'yappu_asai_detective',
+                        'question'   => 'கொடுக்கப்பட்ட வார்த்தையை சரியான அசைகளாகப் பிரி:',
+                        'challenges' => $detectiveChallengesList,
+                    ]
+                ]
+            ];
+
+            $contentDetective = Content::create([
+                'name'         => 'அசை துப்பறியும் பயிற்சி - 50',
+                'title'        => 'அசை துப்பறியும் பயிற்சி - 50',
+                'text_content' => json_encode(['blocks' => $detectiveBlocks], JSON_UNESCAPED_UNICODE),
+                'is_active'    => true,
+            ]);
+
+            DB::table('content_chapters')->insert([
+                'chapter_id' => $asaiChapter->id,
+                'content_id' => $contentDetective->id,
             ]);
         }
 

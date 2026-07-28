@@ -67,9 +67,9 @@ export class ActivityBlock {
         { left: '', right: '', rightImage: '' }
       ],
       gridSize: data?.gridSize || 10,
-      words: data?.words || [
-        { word: '', clue: '', row: 1, col: 1, direction: 'across' }
-      ],
+      words: data?.words?.length
+        ? data.words
+        : (type === 'yappu_asai_slice' ? [] : [{ word: '', clue: '', row: 1, col: 1, direction: 'across' }]),
       theme: data?.theme || (data?.isCloud ? 'cloud' : 'standard'),
       allowDragDrop: !!(data?.allowDragDrop ?? (data?.matchMode !== 'click_match')),
       allowClickMatch: !!(data?.allowClickMatch ?? (data?.matchMode !== 'drag_drop')),
@@ -114,7 +114,12 @@ export class ActivityBlock {
       timer: data?.timer || 30,
       targetWord: data?.targetWord || (type === 'word_hunt' ? 'கல்வி' : ''),
       letterCount: data?.letterCount || data?.items?.length || 10,
-      syllableCount: data?.syllableCount || 1
+      syllableCount: data?.syllableCount || 1,
+
+      // Yappu Asai activities
+      challenges: data?.challenges || [],
+      nerWords: data?.nerWords || [],
+      niraiWords: data?.niraiWords || []
     };
     this.api = api;
     this.readOnly = readOnly;
@@ -241,93 +246,15 @@ export class ActivityBlock {
         icon = 'bi-lightning-fill';
         details = `Question: "${this.data.question || ''}" | Level: ${this.data.level || 2}`;
         break;
-    }
-    return { typeLabel, icon, details };
-    switch (type) {
-      case 'mcq':
-        typeLabel = 'Multiple Choice';
-        icon = 'bi-record-circle';
-        details = `Question: "${this.data.question || '(No Question)'}" | Options: ${this.data.options?.length || 0}`;
+      case 'yappu_asai_slice':
+        typeLabel = 'Yappu Asai Slice Game';
+        icon = 'bi-scissors';
+        details = `Words: ${this.data.words?.length || 0} சொற்கள்`;
         break;
-      case 'fill_blanks':
-        typeLabel = 'Fill in the Blanks';
-        icon = 'bi-input-cursor-text';
-        details = `Text: "${this.data.text || '(No Text)'}"`;
-        break;
-      case 'flashcard':
-        typeLabel = '3D Flashcard';
-        icon = 'bi-square-half';
-        details = `Front: "${this.data.front || ''}" | Back: "${this.data.back || ''}"`;
-        break;
-      case 'match':
-        typeLabel = 'Match It';
-        icon = 'bi-puzzle';
-        details = `Pairs: ${this.data.pairs?.length || 0} | Theme: ${this.data.theme || 'standard'}`;
-        break;
-      case 'crossword':
-        typeLabel = 'Crossword Puzzle';
-        icon = 'bi-grid-3x3';
-        details = `Words: ${this.data.words?.length || 0} | Grid: ${this.data.gridSize}x${this.data.gridSize}`;
-        break;
-      case 'word_arrange':
-        typeLabel = 'Word Arrangement';
-        icon = 'bi-sort-alpha-down';
-        details = `Sentence: "${this.data.text || ''}"`;
-        break;
-      case 'speaking':
-        typeLabel = 'Speaking Practice';
-        icon = 'bi-mic';
-        details = `Target: "${this.data.targetText || ''}"`;
-        break;
-      case 'role_play':
-        typeLabel = 'Role Play Conversation';
-        icon = 'bi-chat-quote';
-        details = `Dialogue: ${this.data.dialogue?.length || 0} lines`;
-        break;
-      case 'sequencing':
-        typeLabel = 'Sequencing (Ordering)';
-        icon = 'bi-list-ol';
-        details = `Events: ${this.data.events?.length || 0}`;
-        break;
-      case 'parts_of_speech':
-        typeLabel = 'Parts of Speech Tagger';
-        icon = 'bi-tags';
-        details = `Sentence: "${this.data.text || ''}" | Tagged: ${this.data.parts?.length || 0}`;
-        break;
-      case 'mind_map':
-        typeLabel = 'Mind Mapping Diagram';
-        icon = 'bi-diagram-3';
-        details = `Nodes: ${this.data.nodes?.length || 0}`;
-        break;
-      case 'writing':
-        typeLabel = 'Writing Practice';
-        icon = 'bi-pencil-square';
-        details = `Prompt: "${this.data.text || ''}"`;
-        break;
-      case 'odd_one_out':
-        typeLabel = 'Odd One Out';
-        icon = 'bi-exclamation-triangle';
-        details = `Question: "${this.data.question || ''}" | Options: ${this.data.options?.length || 0}`;
-        break;
-      case 'word_hunt':
-        typeLabel = 'Hunt Words';
-        icon = 'bi-grid';
-        details = `Question: "${this.data.question || ''}" | Grid: ${this.data.gridSize}x${this.data.gridSize}`;
-        break;
-      case 'letter_basket':
-        typeLabel = 'Letter Basket';
-        icon = 'bi-bucket';
-        details = `Question: "${this.data.question || ''}" | Letters: ${this.data.items?.length || 0}`;
-        break;
-      case 'balloon_pop':
-        typeLabel = 'Balloon Pop Game';
-        icon = 'bi-balloon';
-        details = `Question: "${this.data.question || ''}" | Level: ${this.data.level} | Target: ${this.data.target}`;
-        break;
-      case 'word_builder':
-        typeLabel = 'Word Builder';
-        icon = 'bi-grid-fill';
-        details = `Question: "${this.data.question || ''}" | Words: "${this.data.text || ''}"`;
+      case 'yappu_asai_detective':
+        typeLabel = 'Yappu Asai Detective Game';
+        icon = 'bi-search';
+        details = `Challenges: ${this.data.challenges?.length || 0} சவால்கள்`;
         break;
     }
     return { typeLabel, icon, details };
@@ -560,7 +487,31 @@ export class ActivityBlock {
         }
         if (tempData.level === undefined) tempData.level = 2;
       }
+      if (tempData.type === 'yappu_asai_slice') {
+        if (!tempData.question || tempData.question === '') {
+          tempData.question = "வார்த்தையை சரியான அசைகளாகப் பிரிக்கவும்:";
+        }
+        if (!tempData.words || tempData.words.length === 0) {
+          tempData.words = ['தாமரை', 'கல்வி', 'அகரம்'];
+        }
+      }
+      if (tempData.type === 'yappu_asai_detective') {
+        if (!tempData.question || tempData.question === '') {
+          tempData.question = "கொடுக்கப்பட்ட வார்த்தையை சரியான அசைகளாகப் பிரி:";
+        }
+        if (!tempData.challenges || tempData.challenges.length === 0) {
+          tempData.challenges = [
+            {
+              word: 'தாமரை',
+              correctSplits: ['தாம', 'ரை'],
+              wrongOptions: [['தா', 'மர', 'ை'], ['தாமர', 'ை']],
+              explanation: '"தாம" (நிரை) + "ரை" (நேர்) என்பதே சரியான அசை பிரிப்பு.'
+            }
+          ];
+        }
+      }
       renderForm();
+
     });
 
     const closeModal = () => {
@@ -749,6 +700,17 @@ export class ActivityBlock {
     } else if (type === 'yappu_seer' || type.startsWith('yappu_seer_')) {
       savedData.question = this.data.question || '';
       savedData.level = parseInt(this.data.level) || 2;
+    } else if (type === 'yappu_asai_slice') {
+      savedData.question = this.data.question || '';
+      savedData.words = (this.data.words || []).filter((w: string) => w.trim().length > 0);
+    } else if (type === 'yappu_asai_detective') {
+      savedData.question = this.data.question || '';
+      savedData.challenges = (this.data.challenges || []).map((c: any) => ({
+        word: c.word || '',
+        correctSplits: c.correctSplits || [],
+        wrongOptions: c.wrongOptions || [],
+        explanation: c.explanation || ''
+      }));
     }
 
     return savedData;

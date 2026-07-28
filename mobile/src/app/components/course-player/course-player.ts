@@ -703,7 +703,14 @@ export class CoursePlayer implements OnInit, OnDestroy {
       for (const level of structure.levels) {
         const chap = level.chapters.find(c => c.id === chapterId);
         if (chap && chap.contents && chap.contents.length > 0) {
-          this.generateLessonSequence(chap.contents, chap.assessments || [], chap);
+          let chContents = chap.contents;
+          if (this.currentView() === 'content') {
+            chContents = chContents.filter((c: any) => {
+              const titleLower = (c.title || c.name || '').toLowerCase();
+              return !titleLower.includes('பயிற்சி') && !titleLower.includes('practice') && !titleLower.includes('activity');
+            });
+          }
+          this.generateLessonSequence(chContents, chap.assessments || [], chap);
           break;
         }
       }
@@ -712,9 +719,16 @@ export class CoursePlayer implements OnInit, OnDestroy {
     // Fetch the full chapter details including contents and assessments in a single request
     this.http.get<any>(`${environment.apiUrl}/chapters/${chapterId}`).pipe(
       switchMap(chapterData => {
-        const contents: Content[] = (chapterData.contents || [])
+        let contents: Content[] = (chapterData.contents || [])
           .filter((c: any) => c.is_active !== false)
           .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0));
+
+        if (this.currentView() === 'content') {
+          contents = contents.filter((c: any) => {
+            const titleLower = (c.title || c.name || '').toLowerCase();
+            return !titleLower.includes('பயிற்சி') && !titleLower.includes('practice') && !titleLower.includes('activity');
+          });
+        }
 
         return this.resolveActivityReferences(contents).pipe(
           map(resolvedContents => ({

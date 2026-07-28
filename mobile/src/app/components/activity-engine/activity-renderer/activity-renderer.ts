@@ -76,6 +76,7 @@ export interface NormalizedActivity {
   timer?: number;
   nerWords?: string[];
   niraiWords?: string[];
+  challenges?: any[];
 }
 
 @Component({
@@ -239,6 +240,10 @@ export class ActivityRenderer implements OnChanges {
       type = 'yappu_seer_speed';
     } else if (typeInput.toLowerCase() === 'yappu_seer_match') {
       type = 'yappu_seer_match';
+    } else if (['yappu_asai_slice', 'yappu-asai-slice'].includes(typeInput.toLowerCase())) {
+      type = 'yappu_asai_slice';
+    } else if (['yappu_asai_detective', 'yappu-asai-detective'].includes(typeInput.toLowerCase())) {
+      type = 'yappu_asai_detective';
     }
 
     // 2. Extract explanation & options
@@ -341,6 +346,13 @@ export class ActivityRenderer implements OnChanges {
     } else if (type === 'yappu_seer' || type.startsWith('yappu_seer_')) {
       normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.level = raw.level || additional.level || 2;
+    } else if (type === 'yappu_asai_slice') {
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.words = raw.words || additional.words || [];
+    } else if (type === 'yappu_asai_detective') {
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.challenges = raw.challenges || additional.challenges || [];
+      normalized.words = raw.words || additional.words || [];
     }
 
     this.normalizedActivity.set(normalized);
