@@ -40,6 +40,7 @@ export class KidsDashboard implements OnInit, OnDestroy {
   private router = inject(Router);
 
   userName = signal<string>('Student');
+  userAvatar = signal<string | null>(null);
   timeGreeting = signal<string>('வணக்கம்'); // Time based greeting
   
   streakDays = signal<number>(0);
@@ -63,43 +64,107 @@ export class KidsDashboard implements OnInit, OnDestroy {
   } | null>(null);
 
   dynamicModules = signal<DynamicModuleItem[]>([]);
-  
-  private carouselInterval: any;
-  activeCourseIndex = signal<number>(0);
-  carouselAnimation = signal<string>(''); // Used for triggering css transitions
 
+  currentScrollIndex = signal<number>(0);
+
+  onCourseScroll(event: Event): void {
+    const target = event.target as HTMLElement;
+    const scrollLeft = target.scrollLeft;
+    const cardWidth = target.clientWidth * 0.85; // Matches the 85% min-width in CSS
+    const index = Math.round(scrollLeft / cardWidth);
+    if (this.currentScrollIndex() !== index) {
+      this.currentScrollIndex.set(index);
+    }
+  }
+
+  getCourseGradient(index: number): string {
+    const gradients = [
+      'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)', // Purple world
+      'linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%)', // Mint/Ocean world
+      'linear-gradient(120deg, #f6d365 0%, #fda085 100%)', // Sun/Fire world
+      'linear-gradient(to right, #4facfe 0%, #00f2fe 100%)', // Sky world
+      'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)' // Cherry Blossom
+    ];
+    return gradients[index % gradients.length];
+  }
+
+  getCourseProgressColor(index: number): string {
+    const colors = ['#9C88FF', '#2ED573', '#FF6348', '#1E90FF', '#FF4757'];
+    return colors[index % colors.length];
+  }
+  
   ngOnInit(): void {
     this.updateTimeGreeting();
     this.loadUserData();
-    this.fetchDashboardData();
-    this.fetchAssignedCourses();
-    this.startCourseCarousel();
+    this.fetchCoursesAndProgress();
   }
 
-  fetchAssignedCourses(): void {
+  fetchCoursesAndProgress(): void {
+    // Fetch courses first, then dashboard data to merge
     this.http.get<any[]>(`${environment.apiUrl}/courses`).subscribe({
       next: (courses) => {
-        if (courses && courses.length > 0) {
-          this.assignedCourses.set(courses);
-          const firstCourse = courses[0];
-          this.activeCourse.set({
-            title: firstCourse.title || firstCourse.name || 'பாடநெறி',
-            chapterName: firstCourse.description || 'பாடங்கள்',
-            progress: this.overallProgress(),
-            chapterId: firstCourse.id
-          });
-        }
+        let activeCourses = courses || [];
+        this.http.get<any>(`${environment.apiUrl}/student/dashboard`).subscribe({
+          next: (res) => {
+            if (res) {
+              if (res.streak_days !== undefined) this.streakDays.set(res.streak_days);
+              if (res.xp_points !== undefined) this.xpPoints.set(res.xp_points);
+              if (res.completion_percentage !== undefined) this.overallProgress.set(res.completion_percentage);
+              
+              if (res.course_progressions && Array.isArray(res.course_progressions)) {
+                activeCourses = activeCourses.map(c => {
+                  const prog = res.course_progressions.find((p: any) => p.course_id === c.id);
+                  return { ...c, progress: prog ? prog.percentage : 0 };
+                });
+              } else {
+                activeCourses = activeCourses.map(c => ({ ...c, progress: 0 }));
+              }
+
+              // Sort: In-progress first, then untouched, then completed
+              activeCourses.sort((a, b) => {
+                const aInProgress = a.progress > 0 && a.progress < 100 ? 1 : 0;
+                const bInProgress = b.progress > 0 && b.progress < 100 ? 1 : 0;
+                if (aInProgress !== bInProgress) return bInProgress - aInProgress;
+                
+                const aUntouched = a.progress === 0 ? 1 : 0;
+                const bUntouched = b.progress === 0 ? 1 : 0;
+                if (aUntouched !== bUntouched) return bUntouched - aUntouched;
+                
+                return 0;
+              });
+
+              this.assignedCourses.set(activeCourses);
+
+              if (res.module_progressions && Array.isArray(res.module_progressions) && res.module_progressions.length > 0) {
+                const bgColors = ['#10B981', '#6366F1', '#F59E0B', '#EC4899', '#8B5CF6'];
+                const dynamicList: DynamicModuleItem[] = res.module_progressions.map((m: any, idx: number) => ({
+                  id: m.id || `level_${idx + 1}`,
+                  nameTa: m.name || `நிலை ${idx + 1}`,
+                  nameEn: m.code || `Level ${idx + 1}`,
+                  totalChapters: m.total_chapters || 0,
+                  completedChapters: m.completed_chapters || 0,
+                  progress: m.percentage || 0,
+                  status: (m.percentage >= 100) ? 'completed' : 'in-progress',
+                  color: m.color || bgColors[idx % bgColors.length]
+                }));
+                this.dynamicModules.set(dynamicList);
+              } else if (res.completed_chapter_ids && Array.isArray(res.completed_chapter_ids)) {
+                this.initializeModules(res.completed_chapter_ids);
+              }
+            }
+          },
+          error: () => {
+            this.assignedCourses.set(activeCourses.map(c => ({ ...c, progress: 0 })));
+          }
+        });
       },
       error: (err) => {
-        console.error('Failed to fetch assigned courses from DB:', err);
+        console.error('Failed to fetch assigned courses:', err);
       }
     });
   }
 
   ngOnDestroy(): void {
-    if (this.carouselInterval) {
-      clearInterval(this.carouselInterval);
-    }
   }
 
   updateTimeGreeting(): void {
@@ -113,38 +178,14 @@ export class KidsDashboard implements OnInit, OnDestroy {
     }
   }
 
-  startCourseCarousel(): void {
-    this.carouselInterval = setInterval(() => {
-      const courses = this.assignedCourses();
-      if (courses && courses.length > 1) {
-        this.carouselAnimation.set('fade-out');
-        
-        setTimeout(() => {
-          let nextIndex = this.activeCourseIndex() + 1;
-          if (nextIndex >= courses.length) {
-            nextIndex = 0;
-          }
-          this.activeCourseIndex.set(nextIndex);
-          
-          const nextCourse = courses[nextIndex];
-          this.activeCourse.set({
-            title: nextCourse.title || nextCourse.name || 'கற்றல் பாடநெறி',
-            chapterName: nextCourse.description || 'பாட அத்தியாயம்',
-            progress: 0, 
-            chapterId: nextCourse.id
-          });
-          
-          this.carouselAnimation.set('fade-in');
-        }, 300);
-      }
-    }, 3000);
-  }
-
   loadUserData(): void {
     const user = this.authService.getUser();
     if (user && user.name) {
       const firstName = user.name.split(' ')[0];
       this.userName.set(firstName);
+      if (user.avatar) {
+        this.userAvatar.set(user.avatar);
+      }
     }
   }
 
@@ -154,45 +195,6 @@ export class KidsDashboard implements OnInit, OnDestroy {
       { id: 'level_1', nameTa: 'பாடப் பிரிவு 1', nameEn: 'Level 1', totalChapters: 3, completedChapters: Math.min(completedIds.length, 3), progress: Math.min(Math.round((Math.min(completedIds.length, 3) / 3) * 100), 100), status: completedIds.length >= 3 ? 'completed' : 'in-progress', color: '#10B981' }
     ];
     this.dynamicModules.set(defaultMods);
-  }
-
-  fetchDashboardData(): void {
-    this.http.get<any>(`${environment.apiUrl}/student/dashboard`).subscribe({
-      next: (res) => {
-        if (res) {
-          if (res.streak_days !== undefined) {
-            this.streakDays.set(res.streak_days);
-          }
-          if (res.xp_points !== undefined) {
-            this.xpPoints.set(res.xp_points);
-          }
-          if (res.completion_percentage !== undefined) {
-            this.overallProgress.set(res.completion_percentage);
-            const currentAc = this.activeCourse();
-            if (currentAc) {
-              this.activeCourse.set({ ...currentAc, progress: res.completion_percentage });
-            }
-          }
-          if (res.module_progressions && Array.isArray(res.module_progressions) && res.module_progressions.length > 0) {
-            const bgColors = ['#10B981', '#6366F1', '#F59E0B', '#EC4899', '#8B5CF6'];
-            const dynamicList: DynamicModuleItem[] = res.module_progressions.map((m: any, idx: number) => ({
-              id: m.id || `level_${idx + 1}`,
-              nameTa: m.name || `நிலை ${idx + 1}`,
-              nameEn: m.code || `Level ${idx + 1}`,
-              totalChapters: m.total_chapters || 0,
-              completedChapters: m.completed_chapters || 0,
-              progress: m.percentage || 0,
-              status: (m.percentage >= 100) ? 'completed' : 'in-progress',
-              color: m.color || bgColors[idx % bgColors.length]
-            }));
-            this.dynamicModules.set(dynamicList);
-          } else if (res.completed_chapter_ids && Array.isArray(res.completed_chapter_ids)) {
-            this.initializeModules(res.completed_chapter_ids);
-          }
-        }
-      },
-      error: () => {}
-    });
   }
 
   triggerConfetti(): void {
@@ -208,19 +210,11 @@ export class KidsDashboard implements OnInit, OnDestroy {
     this.router.navigate(['/tabs/learn']);
   }
 
-  startNextLesson(): void {
+  startNextLesson(course: any): void {
     this.triggerConfetti();
     setTimeout(() => {
-      const courses = this.assignedCourses();
-      const activeIdx = this.activeCourseIndex();
-      if (courses && courses[activeIdx]) {
-        this.openCourse(courses[activeIdx]);
-      } else {
-        const nextId = this.completedCount() + 1;
-        this.selectChapterNode.emit(nextId);
-        this.router.navigate(['/tabs/learn']);
-      }
-    }, 600); // Wait for confetti before navigating
+      this.openCourse(course);
+    }, 600);
   }
 
   startQuickQuiz(): void {
@@ -235,8 +229,7 @@ export class KidsDashboard implements OnInit, OnDestroy {
   }
 
   openCourse(course: any): void {
-    localStorage.setItem('lang_app_last_course_id', course.id.toString());
-    this.router.navigate(['/tabs/learn'], { queryParams: { view: 'modules' } });
+    this.router.navigate(['/tabs/learn'], { queryParams: { id: course.id, view: 'modules' } });
   }
 
   openModule(mod: DynamicModuleItem): void {

@@ -170,10 +170,31 @@ class DashboardController extends Controller
                     ->pluck('comp', 'course_id')->toArray();
             }
 
+            $courseActivityStats = DB::table('user_course_progress')
+                ->join('level_chapter', 'user_course_progress.chapter_id', '=', 'level_chapter.chapter_id')
+                ->join('course_package_levels', 'level_chapter.level_id', '=', 'course_package_levels.level_id')
+                ->where('user_course_progress.user_id', $userId)
+                ->where('user_course_progress.status', 'activity_completed')
+                ->whereIn('course_package_levels.course_id', $courseIds)
+                ->select(
+                    'course_package_levels.course_id',
+                    DB::raw('count(user_course_progress.id) as questions_answered'),
+                    DB::raw('sum(case when user_course_progress.score >= 100 then 1 else 0 end) as correct_answers')
+                )
+                ->groupBy('course_package_levels.course_id')
+                ->get()
+                ->keyBy('course_id');
+
             foreach ($courses as $course) {
                 $totalC = $totalCourseChapsList[$course->id] ?? 0;
                 $compC = $compCourseChapsList[$course->id] ?? 0;
                 $percentage = $totalC > 0 ? round(($compC / $totalC) * 100, 1) : 0;
+
+                $stats = $courseActivityStats->get($course->id);
+                $questionsAnswered = $stats ? $stats->questions_answered : 0;
+                $correctAnswers = $stats ? $stats->correct_answers : 0;
+                $wrongAnswers = max(0, $questionsAnswered - $correctAnswers);
+                $accuracy = $questionsAnswered > 0 ? round(($correctAnswers / $questionsAnswered) * 100) : 0;
 
                 $courseProgressions[] = [
                     'course_id' => $course->id,
@@ -181,6 +202,10 @@ class DashboardController extends Controller
                     'total_chapters' => $totalC,
                     'completed_chapters' => $compC,
                     'percentage' => $percentage,
+                    'questions_answered' => (int) $questionsAnswered,
+                    'correct_answers' => (int) $correctAnswers,
+                    'wrong_answers' => (int) $wrongAnswers,
+                    'accuracy_percentage' => (int) $accuracy,
                 ];
             }
         }
@@ -195,7 +220,7 @@ class DashboardController extends Controller
             $levelsQuery->whereIn('course_package_levels.course_id', $allowedCourseIds);
         }
         
-        $levels = $levelsQuery->select('levels.id', 'levels.name', 'levels.code', 'levels.sort_order')
+        $levels = $levelsQuery->select('levels.id', 'levels.name', 'levels.code', 'levels.sort_order', 'course_package_levels.course_id')
             ->distinct()
             ->orderBy('levels.sort_order', 'asc')
             ->orderBy('levels.id', 'asc')
@@ -204,7 +229,7 @@ class DashboardController extends Controller
         if ($levels->isEmpty()) {
             $levels = DB::table('levels')
                 ->where('is_active', true)
-                ->select('id', 'name', 'code', 'sort_order')
+                ->select('id', 'name', 'code', 'sort_order', DB::raw('null as course_id'))
                 ->orderBy('sort_order', 'asc')
                 ->get();
         }
@@ -251,6 +276,7 @@ class DashboardController extends Controller
 
             $moduleProgressions[] = [
                 'id' => (string)$lvl->id,
+                'course_id' => $lvl->course_id ?? null,
                 'name' => $lvl->name,
                 'code' => $lvl->code,
                 'total_chapters' => $totalLvlChapters,
@@ -265,6 +291,7 @@ class DashboardController extends Controller
         // 6. Skill Mastery — derived from real module progressions (no fake data)
         $skillMastery = array_map(function($m) {
             return [
+                'course_id' => $m['course_id'],
                 'topic' => $m['name'],
                 'mastery' => $m['percentage'],
                 'color' => $m['color'],

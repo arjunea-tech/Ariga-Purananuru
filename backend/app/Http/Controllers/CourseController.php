@@ -9,29 +9,56 @@ class CourseController extends Controller
 {
     public function index(Request $request)
     {
-        $user = $request->user();
+        $user      = $request->user();
+        $search    = $request->query('search', '');
+        $perPage   = (int) $request->query('per_page', 0); // 0 = return all (backwards-compat)
+        $paginate  = $perPage > 0;
+
+        $query = Course::where('is_active', true);
+
+        // Tenant-scoped filtering for students
         if ($user && $user->role === 'student' && $user->tenant_id) {
             $today = now()->toDateString();
-            $courses = Course::where('is_active', true)
-                ->whereIn('id', function($query) use ($user, $today) {
-                    $query->select('property_packages.course_id')
-                        ->from('property_packages')
-                        ->join('properties', 'property_packages.property_id', '=', 'properties.id')
-                        ->where('properties.tenant_id', $user->tenant_id)
-                        ->where('property_packages.is_active', true)
-                        ->whereNotNull('property_packages.course_id')
-                        ->where(function ($q) use ($today) {
-                            $q->whereNull('property_packages.start_date')
-                              ->orWhere('property_packages.start_date', '<=', $today);
-                        })
-                        ->where(function ($q) use ($today) {
-                            $q->whereNull('property_packages.end_date')
-                              ->orWhere('property_packages.end_date', '>=', $today);
-                        });
-                })->latest()->get();
-            return response()->json($courses);
+            $query->whereIn('id', function ($q) use ($user, $today) {
+                $q->select('property_packages.course_id')
+                    ->from('property_packages')
+                    ->join('properties', 'property_packages.property_id', '=', 'properties.id')
+                    ->where('properties.tenant_id', $user->tenant_id)
+                    ->where('property_packages.is_active', true)
+                    ->whereNotNull('property_packages.course_id')
+                    ->where(function ($q2) use ($today) {
+                        $q2->whereNull('property_packages.start_date')
+                           ->orWhere('property_packages.start_date', '<=', $today);
+                    })
+                    ->where(function ($q2) use ($today) {
+                        $q2->whereNull('property_packages.end_date')
+                           ->orWhere('property_packages.end_date', '>=', $today);
+                    });
+            });
         }
-        return response()->json(Course::latest()->get());
+
+        // Search by name or title
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('title', 'like', "%{$search}%");
+            });
+        }
+
+        $query->latest();
+
+        if ($paginate) {
+            $result = $query->paginate($perPage);
+            return response()->json([
+                'data'         => $result->items(),
+                'total'        => $result->total(),
+                'per_page'     => $result->perPage(),
+                'current_page' => $result->currentPage(),
+                'last_page'    => $result->lastPage(),
+            ]);
+        }
+
+        return response()->json($query->get());
     }
 
     public function store(Request $request)

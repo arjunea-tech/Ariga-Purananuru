@@ -59,13 +59,13 @@ export class StudentProfileComponent implements OnInit {
   userEmail = signal<string>('');
   userRole = signal<string>('மாணவர்');
   studentOrg = signal<string>('');
-  userAvatar = signal<string>('assets/images/mascot.png');
+  userAvatar = signal<string | null>(null);
 
   // Editable Profile signals
   isEditingProfile = signal<boolean>(false);
   editName = signal<string>('');
   editEmail = signal<string>('');
-  editAvatar = signal<string>('assets/images/mascot.png');
+  editAvatar = signal<string | null>(null);
   isSavingProfile = signal<boolean>(false);
   profileSuccessMsg = signal<string>('');
   profileErrorMsg = signal<string>('');
@@ -97,10 +97,10 @@ export class StudentProfileComponent implements OnInit {
 
   // ── Multi-course support ────────────────────────────────────────────
   enrolledCourses = signal<EnrolledCourse[]>([]);
-  /** Selected course ID for Certificates tab */
-  selectedCertCourseId = signal<string>('');
+  /** Selected course ID for Certificates tab (null = show list, string = show that course's certificate) */
+  selectedCertCourseId = signal<string | null>(null);
   /** Selected course ID for Statistics tab */
-  selectedStatsCourseId = signal<string>('');
+  selectedStatsCourseId = signal<string>('all');
 
   // Certificates from backend & Preview mode
   certificates = signal<any[]>([]);
@@ -164,7 +164,7 @@ export class StudentProfileComponent implements OnInit {
       if (user.avatar) {
         this.userAvatar.set(user.avatar);
       } else {
-        this.userAvatar.set('assets/images/mascot.png');
+        this.userAvatar.set(null);
       }
     }
   }
@@ -226,6 +226,7 @@ export class StudentProfileComponent implements OnInit {
         // Skill Mastery — from real module_progressions
         if (res.skill_mastery && Array.isArray(res.skill_mastery) && res.skill_mastery.length > 0) {
           this.skillMastery.set(res.skill_mastery.map((s: any) => ({
+            course_id: s.course_id,
             topic: s.topic || s.name,
             mastery: typeof s.mastery === 'number' ? s.mastery : 0,
             color: s.color || '#3b82f6'
@@ -234,6 +235,7 @@ export class StudentProfileComponent implements OnInit {
           const colors = ['#22c55e', '#00B894', '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b'];
           this.skillMastery.set(
             res.module_progressions.map((m: any, idx: number) => ({
+              course_id: m.course_id,
               topic: m.name,
               mastery: typeof m.percentage === 'number' ? m.percentage : 0,
               color: m.color || colors[idx % colors.length]
@@ -267,6 +269,24 @@ export class StudentProfileComponent implements OnInit {
             })) : []
           }));
           this.enrolledCourses.set(courses);
+        } else if (res.course_progressions && Array.isArray(res.course_progressions) && res.course_progressions.length > 0) {
+          // ✅ Use course_progressions — what backend actually returns for all enrolled courses
+          const mastery = this.skillMastery();
+          const courses: EnrolledCourse[] = res.course_progressions.map((cp: any, idx: number) => ({
+            id: String(cp.course_id || idx),
+            name: cp.course_name || `Course ${idx + 1}`,
+            completion: cp.percentage != null ? Math.round(Number(cp.percentage)) : 0,
+            accuracy: cp.accuracy_percentage ?? this.accuracyPercentage(),
+            questionsAnswered: cp.questions_answered ?? this.questionsAnswered(),
+            correctAnswers: cp.correct_answers ?? this.correctAnswers(),
+            wrongAnswers: cp.wrong_answers ?? this.wrongAnswers(),
+            streakDays: this.streakDays(), // Streak is user-level, not course-level
+            xpPoints: this.xpPoints(),
+            certDate: this.certDate,
+            certId: Math.floor(100000 + Math.random() * 900000).toString(),
+            skillMastery: this.skillMastery().filter((m: any) => m.course_id == cp.course_id)
+          }));
+          this.enrolledCourses.set(courses);
         } else {
           // 🔄 Current single-course backend — wrap as first course
           let cName = 'புறநானூறு - யாப்பு இலக்கணம்';
@@ -295,19 +315,15 @@ export class StudentProfileComponent implements OnInit {
           this.enrolledCourses.set([singleCourse]);
         }
 
-        // Default selected course
-        const courses = this.enrolledCourses();
-        if (courses.length > 0) {
-          this.selectedCertCourseId.set(courses[0].id);
-          this.selectedStatsCourseId.set(courses[0].id);
+        // Default to "Overall" for stats tab if nothing selected
+        if (!this.selectedStatsCourseId() && this.enrolledCourses().length > 0) {
+          this.selectedStatsCourseId.set('all'); // 'all' signifies "Overall"
         }
 
         // Certificates from backend
         if (res.certificates && Array.isArray(res.certificates)) {
           this.certificates.set(res.certificates);
         }
-      },
-      error: () => {
         this.isLoading.set(false);
       }
     });
@@ -402,7 +418,7 @@ export class StudentProfileComponent implements OnInit {
     this.authService.updateProfile({
       name: newName,
       email: newEmail,
-      avatar: this.editAvatar()
+      avatar: this.editAvatar() || undefined
     }).subscribe({
       next: (res) => {
         this.isSavingProfile.set(false);

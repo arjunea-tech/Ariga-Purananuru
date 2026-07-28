@@ -34,7 +34,13 @@
     <!-- User Avatar & Identity Card -->
     <div class="user-card card border-0 shadow-sm p-3 mb-3 text-center">
       <div class="mx-auto mb-2 position-relative d-inline-block">
-        <img [src]="userAvatar() || 'assets/images/mascot.png'" alt="User Avatar" class="rounded-circle shadow-sm border border-3 border-light bg-light" style="width: 85px; height: 85px; object-fit: contain;">
+        @if (userAvatar()) {
+          <img [src]="userAvatar()" alt="User Avatar" class="rounded-circle shadow-sm border border-3 border-light bg-light" style="width: 85px; height: 85px; object-fit: contain;">
+        } @else {
+          <div class="rounded-circle shadow-sm border border-3 border-light bg-light d-flex align-items-center justify-content-center fw-bold" style="width: 85px; height: 85px; font-size: 3rem; color: #BE185D;">
+            {{ (userName() || 'S').charAt(0).toUpperCase() }}
+          </div>
+        }
         <button class="btn btn-primary rounded-circle position-absolute bottom-0 end-0 p-1 shadow-sm d-flex align-items-center justify-content-center"
                 style="width: 28px; height: 28px; border: 2px solid white;" (click)="onMenuClick({id: 'personal_info'})" title="Edit Profile">
           <i class="bi bi-pencil-fill" style="font-size: 0.7rem;"></i>
@@ -169,7 +175,13 @@
         <div *ngIf="!isEditingProfile()">
           <div class="text-center mb-4">
             <div class="d-inline-block position-relative">
-              <div class="avatar-emoji shadow-sm border border-4 border-white" style="width: 95px; height: 95px; font-size: 3.5rem; background: #F0F9FF; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto;">👦🏽</div>
+              @if (userAvatar()) {
+                <img [src]="userAvatar()" alt="User Avatar" class="shadow-sm border border-4 border-white bg-light" style="width: 95px; height: 95px; object-fit: contain; border-radius: 50%;">
+              } @else {
+                <div class="shadow-sm border border-4 border-white bg-light d-flex align-items-center justify-content-center fw-bold" style="width: 95px; height: 95px; font-size: 3.5rem; border-radius: 50%; color: #BE185D;">
+                  {{ (userName() || 'S').charAt(0).toUpperCase() }}
+                </div>
+              }
               <button class="btn btn-primary rounded-circle position-absolute bottom-0 end-0 p-1 shadow-sm d-flex align-items-center justify-content-center"
                       style="width: 30px; height: 30px; border: 2px solid white;" (click)="toggleEditMode()" title="Edit Profile">
                 <i class="bi bi-pencil-fill" style="font-size: 0.75rem;"></i>
@@ -215,7 +227,13 @@
           <!-- Avatar Picker Header -->
           <div class="text-center mb-3">
             <div class="d-inline-block position-relative mb-2">
-              <img [src]="editAvatar() || 'assets/images/mascot.png'" alt="Avatar Preview" class="rounded-circle shadow-sm border border-4 border-primary bg-light" style="width: 95px; height: 95px; object-fit: contain;">
+              @if (editAvatar()) {
+                <img [src]="editAvatar()" alt="Avatar Preview" class="rounded-circle shadow-sm border border-4 border-primary bg-light" style="width: 95px; height: 95px; object-fit: contain;">
+              } @else {
+                <div class="rounded-circle shadow-sm border border-4 border-primary bg-light d-flex align-items-center justify-content-center fw-bold" style="width: 95px; height: 95px; font-size: 3.5rem; color: #BE185D;">
+                  {{ (editName() || userName() || 'S').charAt(0).toUpperCase() }}
+                </div>
+              }
               <button type="button" class="btn btn-dark rounded-circle position-absolute bottom-0 end-0 p-1 shadow-sm d-flex align-items-center justify-content-center"
                       style="width: 32px; height: 32px; border: 2px solid white;" (click)="avatarFileInput.click()" title="Upload Custom Photo">
                 <i class="bi bi-camera-fill" style="font-size: 0.85rem;"></i>
@@ -275,35 +293,69 @@
       <!-- CERTIFICATES MODAL -->
       <div *ngIf="activeModal() === 'certificates'">
 
-        <!-- Course Selector Tabs (shows when >1 course enrolled) -->
-        @if (enrolledCourses().length > 1) {
+        <!-- Certificate View State -->
+        @if (selectedCertCourseId() === null) {
+          <!-- List of Courses (Card Format) -->
           <div class="mb-3">
-            <p class="small text-muted fw-bold mb-2">Select a Course:</p>
-            <div class="d-flex gap-2 flex-wrap">
-              @for (course of enrolledCourses(); track course.id) {
-                <button class="btn btn-sm rounded-pill fw-semibold border"
-                        [class.btn-primary]="selectedCertCourseId() === course.id"
-                        [class.btn-light]="selectedCertCourseId() !== course.id"
-                        (click)="selectCertCourse(course.id)">
-                  {{ course.name }}
-                </button>
+            <h6 class="fw-bold text-dark mb-3">My Certificates</h6>
+            <div class="d-flex flex-column gap-3">
+              @for (course of enrolledCourses(); track course.id; let idx = $index) {
+                <div class="card border-0 rounded-4 p-4 cursor-pointer hover-lift transition-all position-relative overflow-hidden"
+                     [ngStyle]="{
+                       'background': idx % 3 === 0 ? 'linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)' : (idx % 3 === 1 ? 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)' : 'linear-gradient(135deg, #FFF0F3 0%, #FFE4E6 100%)'),
+                       'box-shadow': '0 8px 20px rgba(0,0,0,0.06)'
+                     }"
+                     (click)="selectCertCourse(course.id)">
+                  <div class="d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                      <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-white shadow-sm"
+                           [ngStyle]="{
+                             'background': course.completion === 100 ? 'linear-gradient(135deg, #34D399, #059669)' : 'linear-gradient(135deg, #94A3B8, #475569)',
+                             'width': '52px', 'height': '52px'
+                           }">
+                        <i class="bi fs-3" [class.bi-patch-check-fill]="course.completion === 100" [class.bi-shield-lock-fill]="course.completion < 100"></i>
+                      </div>
+                      <div>
+                        <h2 class="fw-extrabold mb-0 text-dark" style="font-size: 1.1rem; line-height: 1.3;">
+                          {{ course.name }}
+                        </h2>
+                        <span class="small" [class.text-success]="course.completion === 100" [class.text-muted]="course.completion < 100">
+                          {{ course.completion === 100 ? '100% முடிந்தது' : course.completion + '% முடிந்தது' }}
+                        </span>
+                      </div>
+                    </div>
+                    <div class="d-flex flex-column align-items-end gap-1">
+                      @if (course.completion === 100) {
+                        <i class="bi bi-chevron-right text-success"></i>
+                      } @else {
+                        <i class="bi bi-lock-fill text-secondary"></i>
+                      }
+                    </div>
+                  </div>
+                </div>
               }
             </div>
           </div>
-          <hr class="my-2">
-        }
+        } @else {
+          <!-- Single Certificate Detail View -->
+          <div class="mb-3">
+            <button class="btn btn-sm btn-light border rounded-pill fw-semibold mb-3 d-flex align-items-center shadow-sm text-dark"
+                    (click)="selectedCertCourseId.set(null)">
+              <i class="bi bi-arrow-left me-2"></i> பின்செல் (Back)
+            </button>
+          </div>
 
-        <!-- Per-Course Certificate Content -->
-        @let cert = selectedCertCourse;
-        @if (cert) {
+          <!-- Per-Course Certificate Content -->
+          @let cert = selectedCertCourse;
+          @if (cert) {
 
-          <!-- Locked Status View -->
-          <div *ngIf="cert.completion < 100 && !showCertPreview()" class="text-center py-4">
-            <div class="position-relative d-inline-block mb-3">
-              <i class="bi bi-shield-lock-fill text-warning" style="font-size: 3.5rem; filter: drop-shadow(0 4px 10px rgba(234,179,8,0.3));"></i>
-            </div>
-            <h5 class="fw-bold text-dark mb-1">Certificate Locked</h5>
-            <p class="text-secondary small mb-3">You have completed <strong>{{ cert.completion }}%</strong> of <em>{{ cert.name }}</em>. Reach 100% to earn your verified certificate!</p>
+            <!-- Locked Status View -->
+            <div *ngIf="cert.completion < 100 && !showCertPreview()" class="text-center py-4 bg-light rounded-4 border">
+              <div class="position-relative d-inline-block mb-3">
+                <i class="bi bi-shield-lock-fill text-secondary" style="font-size: 3.5rem;"></i>
+              </div>
+              <h5 class="fw-bold text-dark mb-1">Certificate Locked</h5>
+              <p class="text-secondary small mb-3">You have completed <strong>{{ cert.completion }}%</strong> of <em>{{ cert.name }}</em>. Reach 100% to earn your verified certificate!</p>
 
             <div class="progress mb-4 rounded-pill bg-light border mx-auto" style="height: 12px; max-width: 320px;">
               <div class="progress-bar bg-warning rounded-pill" [style.width.%]="cert.completion"></div>
@@ -396,6 +448,7 @@
 
           </div>
         }
+        } <!-- Close the @else block -->
 
       </div>
 

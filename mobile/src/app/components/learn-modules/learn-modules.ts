@@ -2,8 +2,8 @@ import { Component, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
-import { of, Observable } from 'rxjs';
-import { switchMap, map, catchError } from 'rxjs/operators';
+import { of, Observable, switchMap } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 import { AuthService } from '../../services/auth';
@@ -75,10 +75,24 @@ export class LearnModulesComponent implements OnInit {
   viewState = signal<'courses' | 'modules' | 'category-details'>('courses');
   selectedModuleForDetails = signal<any | null>(null);
 
+  // Pagination & Search for courses list
+  courseSearchQuery = signal<string>('');
+  coursePage = signal<number>(1);
+  readonly coursesPerPage = 10;
+  coursesTotal = signal<number>(0);
+  coursesLastPage = signal<number>(1);
+  isLoadingMoreCourses = signal<boolean>(false);
+  private searchDebounceTimer: any = null;
+
   pendingModuleId: string | null = null;
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
+      const qid = params['id'] ? +params['id'] : null;
+      if (qid) {
+        this.currentSelectedCourseId.set(qid);
+      }
+
       if (params['view'] === 'category-details') {
         this.viewState.set('category-details');
         if (params['moduleId']) {
@@ -95,11 +109,11 @@ export class LearnModulesComponent implements OnInit {
       } else {
         this.viewState.set('courses');
       }
-    });
 
-    this.loadUserProgressFromStorage();
-    // Load modules direct from backend DB
-    this.loadModules();
+      this.loadUserProgressFromStorage();
+      // Load modules direct from backend DB using the correct course ID
+      this.loadModules();
+    });
   }
 
   getCategoryBg(id: string): string {
@@ -124,7 +138,7 @@ export class LearnModulesComponent implements OnInit {
   openCourse(course: any) {
     const courseId = (course && course.id) ? course.id : (this.availableCourses() && this.availableCourses()[0]?.id) || 1;
     this.currentSelectedCourseId.set(courseId);
-    this.router.navigate([], { relativeTo: this.route, queryParams: { view: 'modules' }, queryParamsHandling: 'merge' });
+    this.router.navigate([], { relativeTo: this.route, queryParams: { id: courseId, view: 'modules' }, queryParamsHandling: 'merge' });
     // Fetch fresh structure for this course directly from DB
     this.fetchCourseModules(courseId);
   }
@@ -133,19 +147,77 @@ export class LearnModulesComponent implements OnInit {
     this.router.navigate([], { relativeTo: this.route, queryParams: { view: null }, queryParamsHandling: 'merge' });
   }
 
+  /** Load a page of courses (with optional search). Appends to list when page > 1. */
+  loadCoursesPage(page: number = 1, append: boolean = false): void {
+    if (append) {
+      this.isLoadingMoreCourses.set(true);
+    } else {
+      this.isLoadingChapters.set(true);
+    }
+
+    const search = this.courseSearchQuery();
+    let url = `${environment.apiUrl}/courses?per_page=${this.coursesPerPage}&page=${page}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+
+    this.http.get<any>(url).subscribe({
+      next: (res) => {
+        // Backend returns paginated shape: { data, total, last_page }
+        const items: any[] = Array.isArray(res) ? res : (res.data || []);
+        const total: number = res.total ?? items.length;
+        const lastPage: number = res.last_page ?? 1;
+
+        this.coursesTotal.set(total);
+        this.coursesLastPage.set(lastPage);
+        this.coursePage.set(page);
+
+        if (append) {
+          this.availableCourses.update(existing => [...existing, ...items]);
+        } else {
+          this.availableCourses.set(items);
+        }
+        this.isLoadingMoreCourses.set(false);
+        this.isLoadingChapters.set(false);
+      },
+      error: () => {
+        this.isLoadingMoreCourses.set(false);
+        this.isLoadingChapters.set(false);
+      }
+    });
+  }
+
+  /** Load the next page of courses (called when user scrolls to bottom). */
+  loadMoreCourses(): void {
+    const nextPage = this.coursePage() + 1;
+    if (nextPage > this.coursesLastPage() || this.isLoadingMoreCourses()) return;
+    this.loadCoursesPage(nextPage, true);
+  }
+
+  /** Called on search input change — debounced 300ms */
+  onCourseSearch(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.courseSearchQuery.set(value);
+    if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+    this.searchDebounceTimer = setTimeout(() => {
+      this.loadCoursesPage(1, false);
+    }, 300);
+  }
+
+
   goBackToHome() {
     this.router.navigate(['/tabs/home']);
   }
 
   openCategoryModule(mod: any) {
-    this.router.navigate([], { relativeTo: this.route, queryParams: { view: 'category-details', moduleId: mod.id }, queryParamsHandling: 'merge' });
+    const cid = this.currentSelectedCourseId();
+    this.router.navigate([], { relativeTo: this.route, queryParams: { view: 'category-details', moduleId: mod.id, id: cid || undefined }, queryParamsHandling: 'merge' });
     this.selectedModuleForDetails.set(mod);
     this.selectedTabForModule.set(null);
     this.prefetchModuleChapters(mod.id);
   }
 
   goBackToModules() {
-    this.router.navigate([], { relativeTo: this.route, queryParams: { view: 'modules', moduleId: null }, queryParamsHandling: 'merge' });
+    const cid = this.currentSelectedCourseId();
+    this.router.navigate([], { relativeTo: this.route, queryParams: { view: 'modules', moduleId: null, id: cid || undefined }, queryParamsHandling: 'merge' });
     this.selectedModuleForDetails.set(null);
   }
 
@@ -335,8 +407,59 @@ export class LearnModulesComponent implements OnInit {
   }
 
   loadModules(): void {
-    this.fetchBackendChapters(false);
+    this.isLoadingChapters.set(true);
+    // Step 1: Fetch student progress FIRST from DB
+    this.http.get<any>(`${environment.apiUrl}/student/dashboard`).pipe(
+      switchMap(res => {
+        // Store completed chapter IDs so syncModulesWithBackendStructure uses them
+        if (res && res.completed_chapter_ids && Array.isArray(res.completed_chapter_ids)) {
+          this.completedChapterIds.set(res.completed_chapter_ids);
+        }
+
+        // Annotate each course with progress% from dashboard's course_progressions
+        const courseProgressions: any[] = res?.course_progressions || [];
+
+        // Step 2: Fetch paginated first page of courses
+        return this.http.get<any>(`${environment.apiUrl}/courses?per_page=${this.coursesPerPage}&page=1`).pipe(
+          switchMap((coursesRes: any) => {
+            const courses: any[] = Array.isArray(coursesRes) ? coursesRes : (coursesRes.data || []);
+            const total: number = coursesRes.total ?? courses.length;
+            const lastPage: number = coursesRes.last_page ?? 1;
+
+            this.coursesTotal.set(total);
+            this.coursesLastPage.set(lastPage);
+            this.coursePage.set(1);
+
+            if (!courses || courses.length === 0) return of(null);
+
+            const annotated = courses.map((c: any) => {
+              const cp = courseProgressions.find((p: any) => +p.course_id === +c.id);
+              return { ...c, progress: cp ? Math.round(cp.percentage) : 0 };
+            });
+            this.availableCourses.set(annotated);
+
+            // Step 3: Fetch structure for the currently selected course
+            const courseId = this.currentSelectedCourseId() || courses[0].id;
+            if (!this.currentSelectedCourseId()) {
+              this.currentSelectedCourseId.set(courseId);
+            }
+            return this.http.get<any>(`${environment.apiUrl}/courses/${courseId}/player-structure`);
+          })
+        );
+      }),
+      catchError(() => of(null))
+    ).subscribe({
+      next: (structure) => {
+        if (structure && structure.levels && structure.levels.length > 0) {
+          this.syncModulesWithBackendStructure(structure.levels, structure);
+        } else {
+          this.handleFetchError();
+        }
+      },
+      error: () => this.handleFetchError()
+    });
   }
+
 
   setMode(mode: 'freestyle' | 'strict'): void {
     this.learningMode.set(mode);
@@ -507,6 +630,12 @@ export class LearnModulesComponent implements OnInit {
     this.modules.set(updated);
   }
 
+  handleFetchError(): void {
+    this.modules.set([]);
+    this.resolvePendingModule();
+    this.isLoadingChapters.set(false);
+  }
+
   fetchBackendChapters(silent: boolean = false): void {
     if (!silent) this.isLoadingChapters.set(true);
 
@@ -514,8 +643,9 @@ export class LearnModulesComponent implements OnInit {
       next: (courses) => {
         if (courses && courses.length > 0) {
           this.availableCourses.set(courses);
-          const targetCourseId = courses[0].id;
-          const courseMode = (courses[0].mode || courses[0].learning_mode || '').toLowerCase();
+          const targetCourseId = this.currentSelectedCourseId() || courses[0].id;
+          const targetCourse = courses.find((c: any) => c.id === targetCourseId) || courses[0];
+          const courseMode = (targetCourse.mode || targetCourse.learning_mode || '').toLowerCase();
           if (courseMode.includes('free') || courseMode.includes('open')) {
             this.learningMode.set('freestyle');
           }
@@ -525,49 +655,45 @@ export class LearnModulesComponent implements OnInit {
               if (structure && structure.levels && structure.levels.length > 0) {
                 this.syncModulesWithBackendStructure(structure.levels, structure);
               } else {
-                if (!silent) this.useDefaultModulesFallback();
+                if (!silent) this.handleFetchError();
               }
             },
-            error: () => { if (!silent) this.useDefaultModulesFallback(); }
+            error: () => { if (!silent) this.handleFetchError(); }
           });
         } else {
-          if (!silent) this.useDefaultModulesFallback();
+          if (!silent) this.handleFetchError();
         }
       },
-      error: () => { if (!silent) this.useDefaultModulesFallback(); }
+      error: () => { if (!silent) this.handleFetchError(); }
     });
   }
 
   fetchCourseModules(courseId: any): void {
     this.isLoadingChapters.set(true);
-    this.http.get<any>(`${environment.apiUrl}/courses/${courseId}/player-structure`).subscribe({
+    // Fetch student progress FIRST, then the course structure
+    this.http.get<any>(`${environment.apiUrl}/student/dashboard`).pipe(
+      switchMap(res => {
+        if (res && res.completed_chapter_ids && Array.isArray(res.completed_chapter_ids)) {
+          this.completedChapterIds.set(res.completed_chapter_ids);
+        }
+        return this.http.get<any>(`${environment.apiUrl}/courses/${courseId}/player-structure`);
+      }),
+      catchError(() => this.http.get<any>(`${environment.apiUrl}/courses/${courseId}/player-structure`))
+    ).subscribe({
       next: (structure) => {
         if (structure && structure.levels && structure.levels.length > 0) {
           this.syncModulesWithBackendStructure(structure.levels, structure);
         } else {
-          this.useDefaultModulesFallback();
+          this.handleFetchError();
         }
       },
-      error: () => { this.useDefaultModulesFallback(); }
-    });
-  }
-
-  fallbackFetchChapters(): void {
-    this.http.get<any[]>(`${environment.apiUrl}/chapters`).subscribe({
-      next: (data) => {
-        this.backendChapters.set(data || []);
-        this.useDefaultModulesFallback();
-      },
-      error: (err) => {
-        console.warn('Failed to load real chapters from API, fallback to default:', err);
-        this.useDefaultModulesFallback();
-      }
+      error: () => { this.handleFetchError(); }
     });
   }
 
   syncModulesWithBackendStructure(levels: any[], rawStructure?: any): void {
     if (!levels || levels.length === 0) {
-      this.useDefaultModulesFallback();
+      this.handleFetchError();
       return;
     }
 
@@ -681,49 +807,28 @@ export class LearnModulesComponent implements OnInit {
     return this.isChapterCompleted(prevChap.id);
   }
 
-  useDefaultModulesFallback(): void {
-    const bgColors = ['#00B894', '#E67E22', '#6C5CE7', '#FD79A8', '#00CEC9'];
-    const defaultMods: LearningModule[] = [
-      {
-        id: 'level_1',
-        titleTa: 'பாடப் பிரிவு 1',
-        titleEn: 'Level 1',
-        status: 'in-progress',
-        progress: 50,
-        description: 'பாடங்கள் மற்றும் பயிற்சிகள்',
-        icon: 'bi-play-circle-fill',
-        badgeBg: '#00B894',
-        badgeText: 'In Progress',
-        introTextTa: 'பாடப்பிரிவு பற்றிய அடிப்படை பாடங்கள்.',
-        introTextEn: 'Basic lessons.',
-        lessonTitle: 'அடிப்படை பாடங்கள்',
-        lessonSubtitle: '2 chapters',
-        assessmentQuestions: 10,
-        assessmentMinutes: 10,
-        assessmentPassingScore: 70,
-        chapters: [
-          { id: 1, name: 'அத்தியாயம் 1: அறிமுகம்', description: 'அடிப்படை பற்றி அறிவோம்' },
-          { id: 2, name: 'அத்தியாயம் 2: பயிற்சி', description: 'தொடர் பயிற்சி' }
-        ]
-      }
-    ];
-    this.modules.set(defaultMods);
-    this.resolvePendingModule();
-    this.isLoadingChapters.set(false);
-  }
+
 
   getModuleChapters(module: LearningModule): any[] {
     return module.chapters || [];
   }
 
-  isChapterCompleted(chapId: number): boolean {
-    return this.completedChapterIds().includes(chapId);
+  isChapterCompleted(chapId: number | string): boolean {
+    const id = +chapId; // normalize to number
+    return this.completedChapterIds().some(cid => +cid === id);
   }
 
   isModuleCompleted(moduleId: string): boolean {
     const chapters = this.getCategoryChapters(moduleId);
     if (!chapters || chapters.length === 0) return false;
     return chapters.every(c => this.isChapterCompleted(c.id));
+  }
+
+  /** Returns true when every module (level) in the currently loaded course is completed */
+  isCourseFullyCompleted(): boolean {
+    const mods = this.modules();
+    if (!mods || mods.length === 0) return false;
+    return mods.every(m => m.status === 'completed' || this.isModuleCompleted(m.id));
   }
 
   openModule(module: LearningModule) {

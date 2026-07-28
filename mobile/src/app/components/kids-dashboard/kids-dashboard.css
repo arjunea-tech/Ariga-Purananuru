@@ -295,3 +295,115 @@
 .list-group-item:hover {
   background-color: #F8FAFC !important;
 }
+
+/* Horizontal Scroll Wrapper for Courses */
+.horizontal-scroll-wrapper {
+  display: flex;
+  overflow-x: auto;
+  gap: 16px;
+  padding-bottom: 12px;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+}
+
+.horizontal-scroll-wrapper::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.horizontal-scroll-wrapper .continue-learning-card {
+  min-width: 85%;
+  flex-shrink: 0;
+  scroll-snap-align: center;
+  margin-bottom: 0 !important;
+  border: none;
+  overflow: visible; /* To allow mascot to overflow */
+}
+
+/* Drop shadow for text on gradients */
+.drop-shadow-text {
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Locked Reward Preview */
+.reward-preview {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.reward-preview .lock-icon {
+  position: absolute;
+  font-size: 0.6rem;
+  bottom: 0;
+  right: -2px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 50%;
+  padding: 2px;
+}
+
+/* Mascot Overlay */
+.mascot-overlay {
+  position: absolute;
+  top: -30px;
+  right: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+  pointer-events: none;
+}
+.mascot-avatar {
+  font-size: 2.5rem;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
+  animation: floatMascot 3s ease-in-out infinite;
+}
+.speech-bubble {
+  background: white;
+  color: #333;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  position: relative;
+  margin-bottom: 4px;
+  white-space: nowrap;
+}
+.speech-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  right: 15px;
+  border-width: 5px 5px 0;
+  border-style: solid;
+  border-color: white transparent transparent;
+}
+
+@keyframes floatMascot {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* Pulsing Play Button */
+@keyframes pulsePlay {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7); }
+  70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+.pulse-btn {
+  animation: pulsePlay 2s infinite;
+}
+
+/* Pagination Dots */
+.pagination-dots .dot {
+  width: 8px;
+  height: 8px;
+  background: #CBD5E1;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+.pagination-dots .dot.active {
+  width: 20px;
+  background: #0EA5E9;
+}

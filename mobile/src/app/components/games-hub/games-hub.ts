@@ -194,25 +194,79 @@ export class GamesHubComponent implements OnInit {
     this.loadDynamicCoursesAndModules();
   }
 
+  coursePage = signal<number>(1);
+  coursesTotal = signal<number>(0);
+  coursesLastPage = signal<number>(1);
+  isLoadingMoreCourses = signal<boolean>(false);
+  courseSearchQuery = signal<string>('');
+  coursesPerPage = 10;
+  private searchDebounceTimer: any;
+
   private loadDynamicCoursesAndModules() {
     this.isLoading.set(true);
-    this.http.get<any[]>(`${environment.apiUrl}/courses`).subscribe({
-      next: (courses) => {
-        this.isLoading.set(false);
-        if (courses && courses.length > 0) {
-          const activeCourses = courses.filter(c => c.is_active !== false);
-          const listToUse = activeCourses.length > 0 ? activeCourses : courses;
-          this.availableCourses.set(listToUse);
+    this.loadCoursesPage(1, false, true);
+  }
 
-          const targetCourseId = listToUse[0].id;
-          this.fetchCourseStructure(targetCourseId);
+  /** Load a page of courses (with optional search). Appends to list when page > 1. */
+  loadCoursesPage(page: number = 1, append: boolean = false, isInitialLoad: boolean = false): void {
+    if (append) {
+      this.isLoadingMoreCourses.set(true);
+    }
+
+    const search = this.courseSearchQuery();
+    let url = `${environment.apiUrl}/courses?per_page=${this.coursesPerPage}&page=${page}`;
+    if (search) url += `&search=${encodeURIComponent(search)}`;
+
+    this.http.get<any>(url).subscribe({
+      next: (res) => {
+        const items: any[] = Array.isArray(res) ? res : (res.data || []);
+        const total: number = res.total ?? items.length;
+        const lastPage: number = res.last_page ?? 1;
+
+        this.coursesTotal.set(total);
+        this.coursesLastPage.set(lastPage);
+        this.coursePage.set(page);
+
+        const activeCourses = items.filter(c => c.is_active !== false);
+        const listToUse = activeCourses.length > 0 ? activeCourses : items;
+
+        if (append) {
+          this.availableCourses.update(existing => [...existing, ...listToUse]);
+        } else {
+          this.availableCourses.set(listToUse);
         }
+
+        if (isInitialLoad && this.availableCourses().length > 0) {
+           const targetCourseId = this.availableCourses()[0].id;
+           this.fetchCourseStructure(targetCourseId);
+        }
+
+        this.isLoading.set(false);
+        this.isLoadingMoreCourses.set(false);
       },
       error: (err) => {
         this.isLoading.set(false);
+        this.isLoadingMoreCourses.set(false);
         console.error('Failed to load courses from DB:', err);
       }
     });
+  }
+
+  /** Load the next page of courses (called when user scrolls to bottom). */
+  loadMoreCourses(): void {
+    const nextPage = this.coursePage() + 1;
+    if (nextPage > this.coursesLastPage() || this.isLoadingMoreCourses()) return;
+    this.loadCoursesPage(nextPage, true);
+  }
+
+  /** Called on search input change — debounced 300ms */
+  onCourseSearch(event: Event): void {
+    const value = (event.target as HTMLInputElement).value;
+    this.courseSearchQuery.set(value);
+    if (this.searchDebounceTimer) clearTimeout(this.searchDebounceTimer);
+    this.searchDebounceTimer = setTimeout(() => {
+      this.loadCoursesPage(1, false);
+    }, 300);
   }
 
   fetchCourseStructure(courseId: number | string): void {

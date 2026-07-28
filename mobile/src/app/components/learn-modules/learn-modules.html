@@ -61,7 +61,20 @@
   <div class="container-fluid px-3 pt-4" style="position: relative; z-index: 10;">
     
     @if (viewState() === 'courses') {
-      <div class="d-flex flex-column gap-3.5 mb-5">
+      <!-- Search Bar (Only show if more than 5 courses) -->
+      @if (coursesTotal() > 5) {
+        <div class="mb-3 position-relative">
+          <i class="bi bi-search position-absolute" style="left: 14px; top: 50%; transform: translateY(-50%); color: #94A3B8; font-size: 1rem; pointer-events: none;"></i>
+          <input type="search"
+                 class="form-control rounded-pill border-0 shadow-sm ps-5"
+                 style="background: #F1F5F9; height: 44px; font-size: 0.95rem;"
+                 placeholder="படிப்பை தேடுங்கள்..."
+                 [value]="courseSearchQuery()"
+                 (input)="onCourseSearch($event)">
+        </div>
+      }
+
+      <div class="d-flex flex-column gap-3 mb-3">
         @for (course of availableCourses(); track course.id; let idx = $index) {
           <div class="card border-0 rounded-5 p-4 cursor-pointer hover-lift transition-all position-relative overflow-hidden"
                [ngStyle]="{
@@ -84,10 +97,41 @@
                   </h2>
                 </div>
               </div>
+              <div class="d-flex flex-column align-items-end gap-1">
+                @if (course.progress === 100) {
+                  <span class="badge bg-success text-white rounded-pill px-2 py-1" style="font-size: 0.7rem;">
+                    <i class="bi bi-check-circle-fill me-1"></i>முடிந்தது
+                  </span>
+                }
+                <i class="bi bi-chevron-right text-secondary"></i>
+              </div>
             </div>
           </div>
         }
+
+        @if (availableCourses().length === 0 && !isLoadingChapters()) {
+          <div class="text-center py-5 text-secondary">
+            <i class="bi bi-search fs-1 mb-3 d-block opacity-40"></i>
+            <p class="fw-semibold">தேடிய படிப்பு இல்லை</p>
+          </div>
+        }
       </div>
+
+      <!-- Load More / Pagination -->
+      @if (coursePage() < coursesLastPage()) {
+        <div class="text-center mb-5">
+          <button class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold shadow-sm"
+                  [disabled]="isLoadingMoreCourses()"
+                  (click)="loadMoreCourses()">
+            @if (isLoadingMoreCourses()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>ஏற்றுகிறது...
+            } @else {
+              <i class="bi bi-arrow-down-circle me-1"></i>மேலும் காட்டு ({{ coursesTotal() - availableCourses().length }} left)
+            }
+          </button>
+        </div>
+      }
+
     } @else if (viewState() === 'modules') {
       <div class="row g-3 mb-5">
       @for (mod of modules(); track mod.id) {
