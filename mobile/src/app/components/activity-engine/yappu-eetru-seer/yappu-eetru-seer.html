@@ -1,0 +1,68 @@
+<div class="eetru-container">
+  <!-- Game Play Card -->
+  <div class="game-card" *ngIf="!gameCompleted() && currentQuestion() as q">
+
+    <!-- Seer Arena Card -->
+    <div class="seer-arena">
+      <div class="seer-display-card">
+        <div class="kural-snippet" *ngIf="q.lineSnippet">
+          "{{ q.lineSnippet }}"
+        </div>
+        <div class="seer-word">
+          {{ q.seer }}
+        </div>
+        <div class="asai-breakdown">
+          <span>அசைப் பிரிப்பு: <strong>{{ q.asaiBreakdown }}</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Options Grid (4 Venba EetruSeer Formulas) -->
+    <div class="options-container">
+      <div class="options-label">ஈற்றுச்சீர் வாய்ப்பாட்டைத் தேர்வு செய்க:</div>
+      <div class="options-grid">
+        <button 
+          *ngFor="let opt of allFormulaOptions"
+          class="option-btn"
+          [class.correct]="isAnswered() && opt.vaibaadu === q.vaibaadu"
+          [class.wrong]="isAnswered() && selectedOption() === opt.vaibaadu && opt.vaibaadu !== q.vaibaadu"
+          [disabled]="isAnswered()"
+          (click)="selectOption(opt)"
+        >
+          <div class="opt-icon">{{ opt.icon }}</div>
+          <div class="opt-name">{{ opt.vaibaadu }}</div>
+          <div class="opt-asai">({{ opt.asaiType }})</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Feedback & Grammar Explanation Modal -->
+    <div class="explanation-box" *ngIf="showExplanation()">
+      <div class="exp-header" [class.success-header]="isCorrect()" [class.error-header]="!isCorrect()">
+        <span class="exp-icon">
+          {{ isCorrect() ? '🎉 சரியான விடை!' : '❌ தவறான விடை' }}
+        </span>
+        <span class="exp-formula">வாய்ப்பாடு: {{ q.vaibaadu }} ({{ q.asaiType }})</span>
+      </div>
+      <div class="exp-body">
+        {{ q.explanation }}
+      </div>
+      <button class="next-btn" (click)="nextQuestion()">
+        அடுத்த வினா ➔
+      </button>
+    </div>
+  </div>
+
+  <!-- Game Completion Card -->
+  <div class="completion-card" *ngIf="gameCompleted()">
+    <div class="trophy-icon">🏆</div>
+    <h2>வாழ்த்துக்கள்!</h2>
+    <p>ஈற்றுச்சீர் புதிர் விளையாட்டை வெற்றிகரமாக நிறைவு செய்துவிட்டீர்கள்!</p>
+    <div class="score-summary">
+      மொத்த புள்ளிகள்: <strong>{{ score() }} / {{ total() }}</strong>
+    </div>
+    <button class="restart-btn" (click)="restartGame()">
+      மீண்டும் விளையாடு 🔄
+    </button>
+  </div>
+</div>

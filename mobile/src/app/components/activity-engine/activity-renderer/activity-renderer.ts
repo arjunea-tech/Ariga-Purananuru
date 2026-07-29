@@ -22,9 +22,14 @@ import { YappuSeerBuildComponent } from '../yappu-seer-build/yappu-seer-build';
 import { YappuSeerMatchComponent } from '../yappu-seer-match/yappu-seer-match';
 import { YappuAsaiSliceComponent } from '../yappu-asai-slice/yappu-asai-slice';
 import { YappuAsaiDetectiveComponent } from '../yappu-asai-detective/yappu-asai-detective';
+import { EluthuFlashcardComponent } from '../eluthu-flashcard/eluthu-flashcard';
+import { EluthuDetectiveComponent } from '../eluthu-detective/eluthu-detective';
+import { YappuThalaiComponent } from '../yappu-thalai/yappu-thalai';
+import { YappuKuralPuzzleComponent } from '../yappu-kural-puzzle/yappu-kural-puzzle';
+import { YappuEetruSeerComponent } from '../yappu-eetru-seer/yappu-eetru-seer';
 
 export interface NormalizedActivity {
-  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard' | 'yappu_seer' | 'yappu_seer_p2n' | 'yappu_seer_n2p' | 'yappu_seer_build' | 'yappu_seer_speed' | 'yappu_seer_match' | 'yappu_asai_slice' | 'yappu_asai_detective';
+  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard' | 'eluthu_flashcard' | 'yappu_seer' | 'yappu_seer_p2n' | 'yappu_seer_n2p' | 'yappu_seer_build' | 'yappu_seer_speed' | 'yappu_seer_match' | 'yappu_asai_slice' | 'yappu_asai_detective' | 'eluthu_detective' | 'yappu_thalai' | 'yappu_kural_puzzle' | 'yappu_eetru_seer';
   question?: string;
   text?: string;
   front?: string;
@@ -101,7 +106,12 @@ export interface NormalizedActivity {
     YappuSeerBuildComponent,
     YappuSeerMatchComponent,
     YappuAsaiSliceComponent,
-    YappuAsaiDetectiveComponent
+    YappuAsaiDetectiveComponent,
+    EluthuFlashcardComponent,
+    EluthuDetectiveComponent,
+    YappuThalaiComponent,
+    YappuKuralPuzzleComponent,
+    YappuEetruSeerComponent
   ],
   templateUrl: './activity-renderer.html',
   styleUrls: ['./activity-renderer.css']
@@ -220,6 +230,8 @@ export class ActivityRenderer implements OnChanges {
       type = 'word_builder';
     } else if (['yappu_flashcard', 'yappu-flashcard', 'yappuflashcard', 'flashcard_yappu'].includes(typeInput.toLowerCase())) {
       type = 'yappu_flashcard';
+    } else if (['eluthu_flashcard', 'eluthu-flashcard', 'eluthuflashcard'].includes(typeInput.toLowerCase())) {
+      type = 'eluthu_flashcard';
     } else if (['yappu_seer', 'yappu-seer', 'seer_game', 'seer-game'].includes(typeInput.toLowerCase())) {
       type = 'yappu_seer';
     } else if (typeInput.toLowerCase() === 'yappu_seer_p2n') {
@@ -236,6 +248,14 @@ export class ActivityRenderer implements OnChanges {
       type = 'yappu_asai_slice';
     } else if (['yappu_asai_detective', 'yappu-asai-detective'].includes(typeInput.toLowerCase())) {
       type = 'yappu_asai_detective';
+    } else if (['eluthu_detective', 'eluthu-detective'].includes(typeInput.toLowerCase())) {
+      type = 'eluthu_detective';
+    } else if (['yappu_thalai', 'yappu-thalai', 'thalai_game', 'thalai-game'].includes(typeInput.toLowerCase())) {
+      type = 'yappu_thalai';
+    } else if (['yappu_kural_puzzle', 'yappu-kural-puzzle', 'kural_puzzle', 'kural-puzzle'].includes(typeInput.toLowerCase())) {
+      type = 'yappu_kural_puzzle';
+    } else if (['yappu_eetru_seer', 'yappu-eetru-seer', 'eetru_seer', 'eetru-seer'].includes(typeInput.toLowerCase())) {
+      type = 'yappu_eetru_seer';
     }
 
     // 2. Extract explanation & options
@@ -331,7 +351,7 @@ export class ActivityRenderer implements OnChanges {
     } else if (type === 'word_builder') {
       normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.text = raw.text || raw.question_text || '';
-    } else if (type === 'yappu_flashcard') {
+    } else if (type === 'yappu_flashcard' || type === 'eluthu_flashcard') {
       normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.text = raw.text || raw.question_text || '';
       normalized.syllableCount = raw.syllableCount || additional.syllableCount || 1;
@@ -341,7 +361,7 @@ export class ActivityRenderer implements OnChanges {
     } else if (type === 'yappu_asai_slice') {
       normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.words = raw.words || additional.words || [];
-    } else if (type === 'yappu_asai_detective') {
+    } else if (type === 'yappu_asai_detective' || type === 'eluthu_detective') {
       normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.challenges = raw.challenges || additional.challenges || [];
       normalized.words = raw.words || additional.words || [];
@@ -495,10 +515,34 @@ export class ActivityRenderer implements OnChanges {
     });
   }
 
+  onEluthuFlashcardAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'eluthu_flashcard',
+      ...event
+    });
+  }
+
+  onEluthuDetectiveAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'eluthu_detective',
+      ...event
+    });
+  }
+
   onYappuSeerAnswered(event: any): void {
     this.answered.emit({
       questionId: this.activity?.id,
       type: this.activity?.type || 'yappu_seer',
+      ...event
+    });
+  }
+
+  onYappuEetruSeerAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'yappu_eetru_seer',
       ...event
     });
   }

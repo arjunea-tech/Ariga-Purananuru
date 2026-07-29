@@ -1,0 +1,110 @@
+<div class="eluthu-fc-wrap">
+
+  <!-- START SCREEN -->
+  @if (!gameStarted() && !gameEnded()) {
+  <div class="start-screen">
+    <div class="start-icon">📖</div>
+    <h2 class="start-title">எழுத்து மின்னட்டை சவால்</h2>
+    <p class="start-subtitle">தமிழ் எழுத்துகளை வகைப்படுத்துங்கள்!<br>30 வினாடியில் அதிக மதிப்பெண் பெறுங்கள்.</p>
+
+    <div class="how-to-box">
+      <h6>🎯 விளையாட்டு விதிகள்:</h6>
+      <ul>
+        <li>திரையில் ஒரு தமிழ் எழுத்து தோன்றும்</li>
+        <li>அது எந்த வகை எழுத்து என்று தேர்வு செய்யுங்கள்</li>
+        <li><strong>உயிர்</strong>: அ, ஆ, இ, ஈ, உ, ஊ, எ, ஏ, ஐ, ஒ, ஓ, ஔ</li>
+        <li><strong>வல்லினம்</strong>: க், ச், ட், த், ப், ற்</li>
+        <li><strong>மெல்லினம்</strong>: ங், ஞ், ண், ந், ம், ன்</li>
+        <li><strong>இடையினம்</strong>: ய், ர், ல், வ், ழ், ள்</li>
+      </ul>
+    </div>
+
+    <button class="btn-start" (click)="startGame()">
+      <i class="bi bi-play-fill me-2"></i>விளையாட்டு தொடங்கு!
+    </button>
+  </div>
+  }
+
+  <!-- GAME SCREEN -->
+  @if (gameStarted() && !gameEnded()) {
+  <div class="game-screen">
+
+    <!-- HUD: Score, Streak, Timer -->
+    <div class="hud">
+      <div class="hud-score">
+        <i class="bi bi-star-fill"></i>
+        {{ score() }}
+      </div>
+      @if (streak() >= 2) {
+      <div class="hud-streak">
+        🔥 {{ streak() }}
+      </div>
+      }
+      <div class="timer-area">
+        <div class="timer-bar">
+          <div class="timer-fill" [style.width.%]="timerPercent"></div>
+        </div>
+        <span class="timer-num" [class.urgent]="timeLeft() <= 8">{{ timeLeft() }}s</span>
+      </div>
+    </div>
+
+    <!-- Letter Card -->
+    <div class="letter-card">
+      <div class="letter-label">இந்த எழுத்து எந்த வகை?</div>
+      <div class="letter-display">{{ currentLetter() }}</div>
+
+      @if (lastCorrect() === true) {
+      <div class="feedback-indicator">✅</div>
+      <div class="category-hint correct-reveal">சரி! {{ correctCategory }}</div>
+      } @else if (lastCorrect() === false) {
+      <div class="feedback-indicator">❌</div>
+      <div class="category-hint wrong-reveal">சரியான விடை: {{ correctCategory }}</div>
+      } @else {
+      <div class="category-hint">தேர்வு செய்யுங்கள்...</div>
+      }
+    </div>
+
+    <!-- Options -->
+    <p class="question-label">⬇ சரியான வகையைத் தேர்ந்தெடுக்கவும்</p>
+    <div class="options-grid">
+      @for (opt of options; track opt) {
+      <button
+        class="opt-btn"
+        [class.opt-correct]="isProcessing() && selectedOption() === opt && lastCorrect() === true"
+        [class.opt-wrong]="isProcessing() && selectedOption() === opt && lastCorrect() === false"
+        [class.opt-neutral]="isProcessing() && selectedOption() !== opt && opt !== correctCategory"
+        [class.opt-correct]="isProcessing() && opt === correctCategory"
+        [disabled]="isProcessing()"
+        (click)="selectOption(opt)">
+        <span class="opt-icon">
+          {{ opt === 'உயிர் எழுத்து' ? '🌟' : (opt === 'வல்லின மெய்' ? '💪' : (opt === 'மெல்லின மெய்' ? '🌸' : '🌿')) }}
+        </span>
+        {{ opt }}
+      </button>
+      }
+    </div>
+
+  </div>
+  }
+
+  <!-- END SCREEN -->
+  @if (gameEnded()) {
+  <div class="end-screen">
+    <div class="end-trophy">🏆</div>
+    <h2 class="end-title">விளையாட்டு முடிந்தது!</h2>
+    <div class="end-score-box">
+      <div class="end-score-num">{{ score() }}</div>
+      <div class="end-score-label">{{ totalAnswered() }} வினாக்களில் {{ score() / 10 | number:'1.0-0' }} சரியான விடைகள்</div>
+    </div>
+    <p style="color:#64748b;font-size:0.9rem;">
+      {{ score() >= totalAnswered() * 8 ? '🌟 அற்புதம்! நீங்கள் மிகச் சிறப்பாக விளையாடினீர்கள்!' :
+         score() >= totalAnswered() * 5 ? '👍 நன்றாக விளையாடினீர்கள்! மீண்டும் முயற்சிக்கவும்.' :
+         '💪 மீண்டும் முயற்சிக்கவும்! வெற்றி நிச்சயம்!' }}
+    </p>
+    <button class="btn-restart" (click)="resetGame()">
+      <i class="bi bi-arrow-clockwise me-2"></i>மீண்டும் விளையாடு
+    </button>
+  </div>
+  }
+
+</div>

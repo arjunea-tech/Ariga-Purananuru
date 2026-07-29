@@ -188,6 +188,30 @@ export class YappuAsaiDetectiveComponent implements OnInit, OnChanges {
         });
       });
 
+      // Ensure every challenge has at least 4 distinct options (A, B, C, D) for students
+      if (options.length < 4 && c.word) {
+        const letters = this.tamilNLPService.splitTamilLetters(c.word);
+        const wrongCandidates: string[][] = [
+          letters, // Split every letter
+          [letters[0], letters.slice(1).join('')], // Split first letter
+          [letters.slice(0, -1).join(''), letters.slice(-1)[0]], // Split last letter
+          [c.word], // No split
+        ];
+
+        wrongCandidates.forEach(cand => {
+          if (options.length < 4) {
+            const candKey = cand.join('/');
+            if (!options.some(opt => opt.splits.join('/') === candKey)) {
+              options.push({
+                splits: cand,
+                isCorrect: false,
+                label: cand.join(' / ')
+              });
+            }
+          }
+        });
+      }
+
       // Shuffle options randomly
       const shuffledOptions = [...options].sort(() => Math.random() - 0.5);
 

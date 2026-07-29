@@ -1,0 +1,80 @@
+<div class="eluthu-det-wrap">
+
+  <!-- Header -->
+  <div class="det-header">
+    <div class="det-title-badge">
+      <i class="bi bi-pencil-square"></i>
+      எழுத்து பிழை திருத்துதல்
+    </div>
+    <div class="stats-row">
+      <div class="stat-pill stat-score">
+        <i class="bi bi-star-fill"></i>{{ score() }}
+      </div>
+      @if (challenges().length > 0) {
+      <div class="stat-pill stat-prog">
+        <i class="bi bi-card-checklist"></i>{{ currentIndex() + 1 }} / {{ challenges().length }}
+      </div>
+      }
+      @if (streak() >= 2) {
+      <div class="stat-pill stat-streak">🔥 {{ streak() }}</div>
+      }
+    </div>
+  </div>
+
+  <!-- Instruction -->
+  <div class="instruction-box">
+    <i class="bi bi-lightbulb-fill me-2" style="color:#f97316"></i>
+    கீழே உள்ள சொல்லை <strong>சரியான மயங்கொலி எழுத்துகளுடன்</strong> பிரித்த விடையைக் கண்டுபிடிக்கவும்!
+  </div>
+
+  <!-- Word Hero Card -->
+  @if (currentChallenge(); as challenge) {
+  <div class="word-hero">
+    <div class="word-badge">🔍 சரியான சொல்லைக் கண்டுபிடி</div>
+    <div class="hero-word" style="color: #cbd5e1; font-size: 3.5rem;">???</div>
+  </div>
+
+  <!-- Options -->
+  <div class="options-list">
+    @for (opt of challenge.options; track $index) {
+    <button
+      class="opt-card"
+      [class.opt-correct]="challenge.isAnswered && opt.isCorrect"
+      [class.opt-wrong]="challenge.isAnswered && challenge.selectedOptionIndex === $index && !opt.isCorrect"
+      [disabled]="challenge.isAnswered"
+      (click)="selectOption($index)">
+
+      <div class="opt-letter">
+        {{ $index === 0 ? 'A' : ($index === 1 ? 'B' : ($index === 2 ? 'C' : 'D')) }}
+      </div>
+      <div class="opt-text">{{ opt.label }}</div>
+      @if (challenge.isAnswered) {
+        @if (opt.isCorrect) {
+          <span class="opt-status">✅</span>
+        } @else if (challenge.selectedOptionIndex === $index) {
+          <span class="opt-status">❌</span>
+        }
+      }
+    </button>
+    }
+  </div>
+
+  <!-- Feedback -->
+  @if (challenge.isAnswered) {
+  <div class="feedback-box" [class.correct-box]="challenge.isCorrect" [class.wrong-box]="!challenge.isCorrect">
+    <div class="fb-heading" [class.correct]="challenge.isCorrect" [class.wrong]="!challenge.isCorrect">
+      <i class="bi" [class.bi-check-circle-fill]="challenge.isCorrect" [class.bi-exclamation-octagon-fill]="!challenge.isCorrect"></i>
+      {{ challenge.isCorrect ? 'அற்புதம்! சரியான மயங்கொலி எழுத்தைக் கண்டுபிடித்துவிட்டீர்கள்!' : 'பிழையான விடை!' }}
+    </div>
+    @if (challenge.explanation) {
+    <p class="fb-exp">{{ challenge.explanation }}</p>
+    }
+
+    <button class="btn-next" (click)="nextChallenge()">
+      அடுத்த சவால் <i class="bi bi-arrow-right ms-1"></i>
+    </button>
+  </div>
+  }
+  }
+
+</div>

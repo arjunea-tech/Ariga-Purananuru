@@ -173,7 +173,11 @@ export class MatchComponent implements OnInit, OnChanges {
     const rightItem = this.rightItems().find(i => i.id === rightId);
 
     if (leftItem && rightItem) {
-      if (leftItem.originalIndex === rightItem.originalIndex) {
+      const expectedRightText = this.activity?.pairs[leftItem.originalIndex]?.right;
+      const isCorrectMatch = (leftItem.originalIndex === rightItem.originalIndex) || 
+                             (!!expectedRightText && rightItem.text.trim() === expectedRightText.trim());
+
+      if (isCorrectMatch) {
         // MATCH DETECTED!
         const nextColorIdx = this.matchedPairs().length % this.colorPairsCount;
         

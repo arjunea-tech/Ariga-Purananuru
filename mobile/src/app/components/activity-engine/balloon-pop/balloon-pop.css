@@ -8,435 +8,404 @@
   position: relative;
   width: 100%;
   height: 100%;
-  min-height: 480px;
-  background: linear-gradient(to top, #74b9ff, #a1c4fd);
+  min-height: 520px;
+  background: linear-gradient(180deg, #0284c7 0%, #38bdf8 35%, #818cf8 70%, #c084fc 100%);
   border-radius: 0;
   overflow: hidden;
-  font-family: 'Outfit', 'Inter', 'Segoe UI', sans-serif;
+  font-family: 'Fredoka', 'Outfit', 'Nunito', 'Segoe UI', sans-serif;
   user-select: none;
   border: none;
   box-shadow: none;
 }
 
-/* Clouds background layer */
+/* --- Atmosphere & Clouds --- */
+.sky-decor-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.sun-glow {
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(253, 224, 71, 0.45) 0%, rgba(253, 224, 71, 0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
 .clouds-container {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  pointer-events: none;
-  z-index: 1;
 }
 
 .cloud {
   position: absolute;
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.65);
   border-radius: 100px;
-  filter: blur(4px);
+  filter: blur(2px);
 }
 
 .cloud::before, .cloud::after {
   content: '';
   position: absolute;
-  background: rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.65);
   border-radius: 50%;
 }
 
 .cloud-1 {
-  width: 120px;
-  height: 40px;
-  top: 15%;
-  animation: floatCloud 25s linear infinite;
+  width: 130px;
+  height: 44px;
+  top: 18%;
+  animation: floatCloud 32s linear infinite;
 }
-.cloud-1::before { width: 50px; height: 50px; top: -25px; left: 15px; }
-.cloud-1::after { width: 70px; height: 70px; top: -35px; right: 15px; }
+.cloud-1::before { width: 54px; height: 54px; top: -26px; left: 16px; }
+.cloud-1::after { width: 74px; height: 74px; top: -36px; right: 16px; }
 
 .cloud-2 {
-  width: 180px;
-  height: 50px;
-  top: 35%;
-  animation: floatCloud 38s linear infinite;
-  animation-delay: -10s;
+  width: 190px;
+  height: 54px;
+  top: 42%;
+  animation: floatCloud 45s linear infinite;
+  animation-delay: -12s;
 }
-.cloud-2::before { width: 70px; height: 70px; top: -35px; left: 25px; }
-.cloud-2::after { width: 90px; height: 90px; top: -45px; right: 25px; }
+.cloud-2::before { width: 74px; height: 74px; top: -36px; left: 26px; }
+.cloud-2::after { width: 94px; height: 94px; top: -46px; right: 26px; }
 
 .cloud-3 {
-  width: 100px;
-  height: 35px;
-  top: 60%;
-  animation: floatCloud 30s linear infinite;
-  animation-delay: -5s;
+  width: 110px;
+  height: 38px;
+  top: 68%;
+  animation: floatCloud 36s linear infinite;
+  animation-delay: -6s;
 }
-.cloud-3::before { width: 40px; height: 40px; top: -20px; left: 10px; }
-.cloud-3::after { width: 50px; height: 50px; top: -25px; right: 10px; }
+.cloud-3::before { width: 44px; height: 44px; top: -22px; left: 12px; }
+.cloud-3::after { width: 54px; height: 54px; top: -28px; right: 12px; }
 
 @keyframes floatCloud {
-  0% { transform: translateX(-200px); }
-  100% { transform: translateX(700px); }
+  0% { transform: translateX(-220px); }
+  100% { transform: translateX(800px); }
 }
 
-/* Screens / Card overlays */
-.overlay-card {
+/* --- KIDS HUD TOP DECK (Super Clear, Chunky Control Panel) --- */
+.kids-hud-deck {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 90%;
-  max-width: 440px;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  z-index: 15;
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 30px 24px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
-  text-align: center;
-  z-index: 10;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px);
+  border-radius: 24px;
+  padding: 10px 14px 12px 14px;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.22), inset 0 2px 0 rgba(255, 255, 255, 1);
+  border: 3.5px solid #ffffff;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
+.hud-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
 
-.game-title {
-  color: #1e293b;
-  font-size: 1.8rem;
+/* Score & Timer Widgets */
+.hud-widget {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  border-radius: 18px;
+  padding: 6px 12px;
+  border: 2px solid #e2e8f0;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.score-widget {
+  background: linear-gradient(135deg, #fef08a 0%, #fef3c7 100%);
+  border-color: #f59e0b;
+}
+
+.widget-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+.widget-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.widget-label {
+  font-size: 0.65rem;
   font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
   margin-bottom: 2px;
 }
 
-.game-subtitle {
-  color: #64748b;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 20px;
-}
-
-.instruction-box {
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 16px;
-  text-align: left;
-  margin-bottom: 20px;
-  border: 1px solid #e2e8f0;
-}
-
-.ins-title {
-  font-weight: 700;
+.widget-val {
+  font-size: 1.25rem;
+  font-weight: 900;
   color: #0f172a;
-  margin-bottom: 8px;
+  line-height: 1;
 }
 
-.instruction-box ul {
-  padding-left: 20px;
-  margin: 0;
-  font-size: 0.88rem;
-  color: #334155;
-  line-height: 1.5;
+.score-val {
+  color: #b45309;
 }
 
-.setup-details {
+.timer-widget.critical {
+  background: #fef2f2;
+  border-color: #ef4444;
+  animation: timerCriticalPulse 0.6s ease-in-out infinite alternate;
+}
+
+.timer-widget.critical .timer-val {
+  color: #dc2626;
+}
+
+@keyframes timerCriticalPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(239, 68, 68, 0); }
+  100% { transform: scale(1.05); box-shadow: 0 0 12px rgba(239, 68, 68, 0.5); }
+}
+
+/* Target Goal Banner (Center Goal) */
+.target-goal-banner {
+  flex: 1;
+  max-width: 260px;
   display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.setup-badge {
-  background: #e2e8f0;
-  color: #334155;
+  gap: 8px;
   padding: 6px 14px;
-  border-radius: 30px;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.target-badge {
-  background: #ffedd5;
-  color: #ea580c;
-}
-.target-badge.ner {
-  background: #ccfbf1;
-  color: #0d9488;
-}
-
-.btn-start {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  color: white;
-  border: none;
-  padding: 12px 36px;
-  font-size: 1.1rem;
-  font-weight: 700;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 15px rgba(29, 78, 216, 0.4);
-}
-
-.btn-start:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(29, 78, 216, 0.5);
-}
-
-/* Game Header (Score, Target, Timer) */
-.game-header {
-  position: absolute;
-  top: 15px;
-  left: 0;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 20px;
-  z-index: 5;
-}
-
-.header-stat {
-  background: rgba(255, 255, 255, 0.9);
-  padding: 6px 12px;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 75px;
-}
-
-.stat-label {
-  font-size: 0.7rem;
-  color: #64748b;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
-.stat-value {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #0f172a;
-}
-
-.stat-value.time-critical.warning {
-  color: #ef4444;
-  animation: pulseWarning 0.5s ease-in-out infinite alternate;
-}
-
-@keyframes pulseWarning {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.15); }
-}
-
-.target-panel {
-  background: #ffedd5;
-  color: #c2410c;
-  padding: 8px 18px;
   border-radius: 20px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+  border: 3px solid #ffffff;
+  color: #ffffff;
+  transition: transform 0.2s ease;
+}
+
+.target-goal-banner.ner {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.35);
+}
+
+.target-goal-banner.nirai {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  box-shadow: 0 8px 20px rgba(5, 150, 105, 0.35);
+}
+
+.goal-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.goal-text-group {
   display: flex;
   flex-direction: column;
-  align-items: center;
-}
-.target-panel.ner {
-  background: #e6fffa;
-  color: #0d9488;
+  align-items: flex-start;
 }
 
-.target-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  opacity: 0.8;
-}
-
-.target-text {
-  font-size: 1.15rem;
+.goal-subtext {
+  font-size: 0.68rem;
   font-weight: 800;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  line-height: 1;
+  margin-bottom: 2px;
 }
 
-/* Timer progress bar */
-.timer-bar-container {
+.goal-maintext {
+  font-size: 1.15rem;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Thick Visible Timer Gauge Bar */
+.timer-gauge-track {
+  width: 100%;
+  height: 14px;
+  background: #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+  border: 2px solid #ffffff;
+}
+
+.timer-gauge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #10b981 0%, #f59e0b 65%, #ef4444 100%);
+  border-radius: 10px;
+  transition: width 0.3s linear;
+  position: relative;
+}
+
+.timer-gauge-fill.critical {
+  background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+}
+
+.gauge-glow-tip {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 10px;
+  background: #ffffff;
+  box-shadow: 0 0 10px #ffffff;
+  border-radius: 50%;
+}
+
+/* --- Floating Balloons Field --- */
+.balloon-field {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 6px;
-  background: rgba(0, 0, 0, 0.1);
-  z-index: 6;
-}
-
-.timer-bar-fill {
   height: 100%;
-  background: #3b82f6;
-  width: 100%;
-  transition: width 1s linear;
-}
-.timer-bar-fill.warning {
-  background: #ef4444;
+  pointer-events: auto;
+  z-index: 5;
 }
 
-/* Balloon Game board */
-.balloon-field {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: calc(100% - 60px);
-  z-index: 3;
-}
-
-/* Balloon Layout & Shapes */
 .balloon-wrapper {
   position: absolute;
-  bottom: -150px;
-  width: 66px;
+  bottom: -120px;
   cursor: pointer;
-  animation-name: floatUp;
-  animation-timing-function: linear;
-  animation-fill-mode: forwards;
-  z-index: 4;
+  animation: floatUp linear forwards;
+  will-change: transform;
+}
+
+.balloon-wrapper.popped {
+  pointer-events: none;
+}
+
+.balloon-wrapper.popped .balloon-body {
+  transform: scale(1.35);
+  opacity: 0;
+  transition: transform 0.12s ease-out, opacity 0.12s ease-out;
+}
+
+.balloon-wrapper.popped .blast-particles {
+  display: block;
 }
 
 @keyframes floatUp {
-  0% {
-    bottom: -150px;
-    transform: translateX(0) rotate(0deg);
-  }
-  25% {
-    transform: translateX(12px) rotate(3deg);
-  }
-  50% {
-    transform: translateX(-12px) rotate(-3deg);
-  }
-  75% {
-    transform: translateX(8px) rotate(2deg);
-  }
-  100% {
-    bottom: calc(100% - 90px);
-    transform: translateX(-8px) rotate(-2deg);
-  }
+  0% { transform: translateY(0) rotate(-4deg); }
+  50% { transform: translateY(-320px) rotate(4deg); }
+  100% { transform: translateY(-780px) rotate(-3deg); }
 }
 
-.balloon {
+/* Glossy 3D Balloon Body */
+.balloon-body {
   position: relative;
-  width: 66px;
-  height: 80px;
-  border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+  width: 86px;
+  height: 104px;
+  border-radius: 50% 50% 50% 50% / 42% 42% 58% 58%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.15s ease;
-  box-sizing: border-box;
+  box-shadow: inset -9px -14px 20px rgba(0, 0, 0, 0.28), 0 12px 28px rgba(0, 0, 0, 0.22);
+  transition: transform 0.1s ease;
 }
 
-/* Shiny reflection glare on balloon */
-.balloon::before {
-  content: '';
+.balloon-body:hover {
+  transform: scale(1.1);
+}
+
+.balloon-shine {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 16px;
-  height: 25px;
-  background: rgba(255, 255, 255, 0.3);
+  top: 14px;
+  left: 15px;
+  width: 24px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.72);
   border-radius: 50%;
-  transform: rotate(-15deg);
+  transform: rotate(-30deg);
+  pointer-events: none;
 }
 
 .balloon-text {
-  color: white;
-  font-weight: 800;
-  font-size: 1.15rem;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  font-size: 1.55rem;
+  font-weight: 900;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.6), 0 0 3px rgba(0, 0, 0, 0.7);
   z-index: 2;
-  pointer-events: none;
+  text-align: center;
+  padding: 0 4px;
 }
 
-/* Balloon tie knot at bottom */
-.balloon::after {
-  content: '';
+.balloon-knot {
   position: absolute;
-  bottom: -5px;
+  bottom: -9px;
   left: 50%;
   transform: translateX(-50%);
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-bottom: 7px solid rgba(0, 0, 0, 0.2);
-  z-index: 1;
-}
-
-.balloon-string {
-  position: absolute;
-  bottom: -45px;
-  left: 50%;
-  width: 2px;
-  height: 45px;
-  background: rgba(0, 0, 0, 0.25);
-  transform-origin: top center;
-  animation: stringSway 2s ease-in-out infinite alternate;
-}
-
-@keyframes stringSway {
-  0% { transform: rotate(-5deg); }
-  100% { transform: rotate(5deg); }
-}
-
-/* Pop/Blast animations */
-.balloon-wrapper.popped,
-.balloon-wrapper.blasted {
-  animation-play-state: paused !important;
-}
-
-.balloon-wrapper.popped .balloon {
-  transform: scale(0.1);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.balloon-wrapper.blasted .balloon {
-  transform: scale(0.1);
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Particle explosion particles */
-.blast-particles {
-  position: absolute;
-  top: 40px;
-  left: 33px;
   width: 0;
   height: 0;
-  display: none;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 11px solid #ffffff;
+}
+
+.balloon-string-svg {
+  position: absolute;
+  bottom: -42px;
+  left: 50%;
+  transform: translateX(-50%);
   pointer-events: none;
 }
 
-.balloon-wrapper.popped .blast-particles,
-.balloon-wrapper.blasted .blast-particles {
-  display: block;
+/* Blast Particles */
+.blast-particles {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
 .particle {
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  animation: particleExplode 0.4s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+  animation: blastParticle 0.4s ease-out forwards;
 }
 
-.p-1 { --dx: -35px; --dy: -35px; animation-delay: 0s; }
-.p-2 { --dx: 35px; --dy: -35px; animation-delay: 0s; }
-.p-3 { --dx: -50px; --dy: 10px; animation-delay: 0.05s; }
-.p-4 { --dx: 50px; --dy: 10px; animation-delay: 0.05s; }
-.p-5 { --dx: -20px; --dy: 45px; animation-delay: 0.1s; }
-.p-6 { --dx: 20px; --dy: 45px; animation-delay: 0.1s; }
+.p-1 { animation-name: blast1; }
+.p-2 { animation-name: blast2; }
+.p-3 { animation-name: blast3; }
+.p-4 { animation-name: blast4; }
+.p-5 { animation-name: blast5; }
+.p-6 { animation-name: blast6; }
 
-@keyframes particleExplode {
-  0% {
-    transform: translate(0, 0) scale(1);
-    opacity: 1;
-  }
-  100% {
-    transform: translate(var(--dx), var(--dy)) scale(0.2);
-    opacity: 0;
-  }
-}
+@keyframes blast1 { to { transform: translate(-50px, -50px) scale(0); opacity: 0; } }
+@keyframes blast2 { to { transform: translate(50px, -50px) scale(0); opacity: 0; } }
+@keyframes blast3 { to { transform: translate(-55px, 25px) scale(0); opacity: 0; } }
+@keyframes blast4 { to { transform: translate(55px, 25px) scale(0); opacity: 0; } }
+@keyframes blast5 { to { transform: translate(0px, -65px) scale(0); opacity: 0; } }
+@keyframes blast6 { to { transform: translate(0px, 55px) scale(0); opacity: 0; } }
 
-/* Floating scores layer */
+/* Floating Score Points Indicator (+10 / -5) */
 .floating-points-layer {
   position: absolute;
   top: 0;
@@ -444,573 +413,255 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 5;
+  z-index: 18;
 }
 
 .floating-point {
   position: absolute;
-  font-size: 1.6rem;
-  font-weight: 800;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  animation: floatUpPoint 0.9s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  top: 45%;
+  font-size: 2rem;
+  font-weight: 900;
+  text-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+  animation: floatPoint 1.2s ease-out forwards;
 }
 
-@keyframes floatUpPoint {
-  0% {
-    top: 60%;
-    opacity: 0;
-    transform: translateY(0) scale(0.7);
-  }
-  20% {
-    opacity: 1;
-    transform: translateY(-20px) scale(1.2);
-  }
-  100% {
-    top: 40%;
-    opacity: 0;
-    transform: translateY(-80px) scale(0.9);
-  }
+@keyframes floatPoint {
+  0% { opacity: 1; transform: translateY(0) scale(0.8); }
+  50% { transform: translateY(-45px) scale(1.3); }
+  100% { opacity: 0; transform: translateY(-95px) scale(1); }
 }
 
-/* Gameover Screen layout */
-.gameover-card {
-  padding: 35px 24px;
+/* --- Overlays & Cards (Start / GameOver) --- */
+.overlay-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 25;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(8px);
 }
 
-.gameover-title {
-  font-size: 2.2rem;
-  font-weight: 800;
+.overlay-card {
+  width: 100%;
+  max-width: 460px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(20px);
+  border-radius: 28px;
+  padding: 28px 24px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.25), inset 0 2px 0 rgba(255, 255, 255, 0.8);
+  text-align: center;
+  border: 3px solid rgba(255, 255, 255, 0.85);
+  position: relative;
+  overflow: hidden;
+}
+
+.badge-tag {
+  background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.game-title {
+  font-size: clamp(1.6rem, 5vw, 2.1rem);
+  font-weight: 900;
+  color: #0f172a;
   margin-bottom: 2px;
 }
 
-.gameover-title.success {
-  color: #10b981;
+.game-subtitle {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 700;
+  margin-bottom: 18px;
 }
 
-.gameover-title.fail {
-  color: #f59e0b;
-}
-
-.score-display {
+/* Decorative Floating Balloons in Start Card */
+.decor-balloons {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+
+.decor-balloon {
+  width: 44px;
+  height: 54px;
+  border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+  position: relative;
+  display: flex;
   align-items: center;
-  margin: 25px 0;
+  justify-content: center;
+  box-shadow: inset -4px -6px 10px rgba(0, 0, 0, 0.2), 0 6px 15px rgba(0, 0, 0, 0.15);
+  animation: floatDecor 3s ease-in-out infinite alternate;
+}
+
+.decor-balloon span {
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 900;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.decor-balloon.balloon-red { background: linear-gradient(135deg, #ff4b4b, #dc2626); animation-delay: 0s; }
+.decor-balloon.balloon-yellow { background: linear-gradient(135deg, #fbbf24, #d97706); animation-delay: 0.4s; }
+.decor-balloon.balloon-blue { background: linear-gradient(135deg, #38bdf8, #0284c7); animation-delay: 0.8s; }
+
+@keyframes floatDecor {
+  0% { transform: translateY(0px) rotate(-3deg); }
+  100% { transform: translateY(-8px) rotate(3deg); }
+}
+
+/* Instructions Box */
+.instruction-box {
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 18px;
+  padding: 14px 16px;
+  text-align: left;
+  margin-bottom: 18px;
+}
+
+.ins-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 8px;
+}
+
+.instruction-box ul {
+  padding-left: 18px;
+  margin-bottom: 0;
+  font-size: 0.85rem;
+  color: #334155;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.instruction-box li {
+  margin-bottom: 4px;
+}
+
+.score-plus { background: #10b981; color: white; padding: 2px 6px; border-radius: 6px; }
+.score-minus { background: #ef4444; color: white; padding: 2px 6px; border-radius: 6px; }
+
+/* Setup Pills */
+.setup-details {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.setup-pill {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
+}
+
+.level-pill { background: #e2e8f0; color: #334155; }
+.target-pill.ner { background: #e0e7ff; color: #4338ca; border: 1.5px solid #818cf8; }
+.target-pill.nirai { background: #d1fae5; color: #047857; border: 1.5px solid #34d399; }
+
+/* Giant Action Buttons */
+.btn-start-game {
+  width: 100%;
+  padding: 14px 24px;
+  border-radius: 20px;
+  border: none;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 900;
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4), inset 0 2px 0 rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-start-game:active {
+  transform: scale(0.97);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-retry {
+  background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+}
+
+/* Game Over Screen Details */
+.trophy-badge, .try-badge {
+  font-size: 4rem;
+  line-height: 1;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
+}
+
+.score-card-hero {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 14px;
+  margin-bottom: 16px;
 }
 
 .score-num {
-  font-size: 3.5rem;
+  font-size: 2.5rem;
   font-weight: 900;
-  color: #0f172a;
-  line-height: 1;
+  color: #059669;
 }
 
 .score-lbl {
   font-size: 0.8rem;
-  color: #64748b;
-  font-weight: 600;
-  text-transform: uppercase;
-  margin-top: 6px;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  margin-bottom: 24px;
-}
-
-.stat-box {
-  background: #f8fafc;
-  padding: 10px;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-}
-
-.stat-box-lbl {
-  display: block;
-  font-size: 0.65rem;
-  font-weight: 700;
-  margin-bottom: 4px;
-  text-transform: uppercase;
-}
-
-.stat-box-val {
-  font-size: 1.25rem;
   font-weight: 800;
-  color: #1e293b;
+  color: #64748b;
+  text-transform: uppercase;
 }
 
-.feedback-message {
-  font-size: 0.95rem;
-  line-height: 1.5;
-  margin-bottom: 30px;
-}
-
-.btn-action {
-  width: 100%;
-  border: none;
-  padding: 12px;
-  font-size: 1.05rem;
-  font-weight: 700;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-retry {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
-}
-
-.btn-retry:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
-}
-
-/* Decorative balloons in Start screen */
-.decor-balloons {
-  position: absolute;
-  top: -45px;
-  left: 50%;
-  transform: translateX(-50%);
+.stats-row {
   display: flex;
-  gap: 15px;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.decor-balloon {
-  width: 20px;
-  height: 25px;
-  border-radius: 50%;
-  position: relative;
-  animation: floatDecor 3s ease-in-out infinite alternate;
+.stat-pill-box {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1.5px solid #f1f5f9;
 }
 
-.decor-balloon.red { background: #ff5964; animation-delay: 0s; }
-.decor-balloon.blue { background: #35a7ff; animation-delay: 0.5s; }
-.decor-balloon.yellow { background: #ffb703; animation-delay: 1s; }
-
-@keyframes floatDecor {
-  0% { transform: translateY(0) rotate(-5deg); }
-  100% { transform: translateY(-15px) rotate(5deg); }
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
 }
 
-/* Space Theme override for Balloon Pop container */
-:host-context(.theme-space) .balloon-game-container {
-  border: none !important;
-  box-shadow: none !important;
-  background: linear-gradient(to top, #0d0e15, #1e1b4b) !important;
-}
+.stat-val { font-size: 1.05rem; font-weight: 900; color: #0f172a; line-height: 1; }
+.stat-lbl { font-size: 0.68rem; font-weight: 700; color: #64748b; }
 
-:host-context(.theme-space) .overlay-card,
-:host-context(.theme-space) .stat-box {
-  background: rgba(22, 24, 43, 0.95) !important;
-  border-color: #00e5ff !important;
-  color: #e2e8f0 !important;
-}
-
-:host-context(.theme-space) .game-title,
-:host-context(.theme-space) .ins-title,
-:host-context(.theme-space) .score-num,
-:host-context(.theme-space) .stat-box-val {
-  color: #ffffff !important;
-}
-
-:host-context(.theme-space) .game-subtitle,
-:host-context(.theme-space) .instruction-box ul,
-:host-context(.theme-space) .score-lbl,
-:host-context(.theme-space) .stat-box-lbl {
-  color: #94a3b8 !important;
-}
-
-:host-context(.theme-space) .instruction-box {
-  background: #16182b !important;
-  border-color: #2a2e45 !important;
-}
-
-:host-context(.theme-space) .header-stat {
-  background: rgba(22, 24, 43, 0.9) !important;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
-  border: 1px solid rgba(0, 229, 255, 0.2) !important;
-}
-
-:host-context(.theme-space) .stat-label {
-  color: #00e5ff !important;
-}
-
-:host-context(.theme-space) .stat-value {
-  color: #ffffff !important;
-}
-
-/* Desert Theme override for Balloon Pop container */
-:host-context(.theme-desert) .balloon-game-container {
-  border: none !important;
-  box-shadow: none !important;
-  background: linear-gradient(to top, #eddcd2, #fff1e6) !important;
-}
-
-:host-context(.theme-desert) .overlay-card,
-:host-context(.theme-desert) .stat-box {
-  background: #fff8e1 !important;
-  border-color: #f4a460 !important;
-  color: #5d4037 !important;
-}
-
-:host-context(.theme-desert) .game-title,
-:host-context(.theme-desert) .ins-title,
-:host-context(.theme-desert) .score-num,
-:host-context(.theme-desert) .stat-box-val {
-  color: #4e342e !important;
-}
-
-:host-context(.theme-desert) .game-subtitle,
-:host-context(.theme-desert) .instruction-box ul,
-:host-context(.theme-desert) .score-lbl,
-:host-context(.theme-desert) .stat-box-lbl {
-  color: #6d4c41 !important;
-}
-
-:host-context(.theme-desert) .instruction-box {
-  background: #ffe0b2 !important;
-  border-color: #f4a460 !important;
-}
-
-:host-context(.theme-desert) .header-stat {
-  background: #fff8e1 !important;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
-  border: 1px solid rgba(244, 164, 96, 0.3) !important;
-}
-
-:host-context(.theme-desert) .stat-label {
-  color: #ea580c !important;
-}
-
-:host-context(.theme-desert) .stat-value {
-  color: #4e342e !important;
-}
-
-/* Responsive Scaling Overrides for Viewports */
-@media (max-height: 700px) {
-  .balloon-game-container {
-    height: 100% !important;
-  }
-}
-
-@media (max-width: 576px) {
-  .balloon-game-container {
-    border: none !important;
-    box-shadow: none !important;
-  }
-  .overlay-card {
-    padding: 15px 12px !important;
-    width: 92% !important;
-    max-width: 380px !important;
-    border-radius: 16px !important;
-  }
-  .decor-balloons {
-    display: none !important;
-  }
-  .game-title {
-    font-size: 1.35rem !important;
-    margin-bottom: 2px !important;
-  }
-  .game-subtitle {
-    font-size: 0.75rem !important;
-    margin-bottom: 8px !important;
-  }
-  .instruction-box {
-    padding: 10px 12px !important;
-    margin-bottom: 10px !important;
-  }
-  .ins-title {
-    font-size: 0.85rem !important;
-    margin-bottom: 4px !important;
-  }
-  .instruction-box ul {
-    font-size: 0.76rem !important;
-    line-height: 1.35 !important;
-    padding-left: 15px !important;
-  }
-  .setup-details {
-    margin-bottom: 12px !important;
-    gap: 8px !important;
-  }
-  .setup-badge {
-    padding: 4px 10px !important;
-    font-size: 0.75rem !important;
-  }
-  .btn-start {
-    padding: 10px 28px !important;
-    font-size: 0.95rem !important;
-    width: auto !important;
-  }
-  
-  .game-header {
-    padding: 0 10px !important;
-    top: 10px !important;
-  }
-  .header-stat {
-    min-width: 60px !important;
-    padding: 4px 8px !important;
-    border-radius: 8px !important;
-  }
-  .stat-value {
-    font-size: 0.95rem !important;
-  }
-  .target-panel {
-    padding: 4px 12px !important;
-    border-radius: 12px !important;
-  }
-  .target-text {
-    font-size: 0.95rem !important;
-  }
-  .balloon {
-    width: 54px !important;
-    height: 66px !important;
-  }
-  .balloon-text {
-    font-size: 0.95rem !important;
-  }
-  .balloon-wrapper {
-    width: 54px !important;
-  }
-  
-  .gameover-card {
-    padding: 15px 12px !important;
-  }
-  .gameover-title {
-    font-size: 1.6rem !important;
-    margin-bottom: 2px !important;
-  }
-  .gameover-subtitle {
-    font-size: 0.75rem !important;
-    margin-bottom: 8px !important;
-  }
-  .score-display {
-    margin: 12px 0 !important;
-  }
-  .score-num {
-    font-size: 2.8rem !important;
-  }
-  .stat-box-val {
-    font-size: 1rem !important;
-  }
-  .feedback-message {
-    font-size: 0.82rem !important;
-    margin-bottom: 15px !important;
-  }
-  .btn-action {
-    padding: 10px !important;
-    font-size: 0.95rem !important;
-  }
-}
-
-/* Landscape/Short Screen Height Optimizations */
-@media (max-height: 600px) {
-  .balloon-game-container {
-    min-height: 0 !important;
-    height: 100% !important;
-  }
-  
-  .overlay-card.start-card {
-    display: grid !important;
-    grid-template-columns: 1.2fr 1fr !important;
-    grid-template-rows: auto auto auto auto !important;
-    column-gap: 20px !important;
-    row-gap: 4px !important;
-    max-width: 680px !important;
-    width: 95% !important;
-    padding: 15px 20px !important;
-    align-items: center !important;
-    text-align: left !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-  }
-
-  .overlay-card.start-card .decor-balloons {
-    display: none !important;
-  }
-
-  .overlay-card.start-card .game-title {
-    grid-column: 1 !important;
-    grid-row: 1 !important;
-    font-size: 1.25rem !important;
-    margin: 0 !important;
-    text-align: left !important;
-  }
-
-  .overlay-card.start-card .game-subtitle {
-    grid-column: 1 !important;
-    grid-row: 2 !important;
-    font-size: 0.75rem !important;
-    margin-bottom: 8px !important;
-    text-align: left !important;
-  }
-
-  .overlay-card.start-card .setup-details {
-    grid-column: 1 !important;
-    grid-row: 3 !important;
-    margin-bottom: 12px !important;
-    justify-content: flex-start !important;
-    gap: 8px !important;
-  }
-
-  .overlay-card.start-card .btn-start {
-    grid-column: 1 !important;
-    grid-row: 4 !important;
-    width: 100% !important;
-    padding: 8px 16px !important;
-    font-size: 0.95rem !important;
-    margin: 0 !important;
-  }
-
-  .overlay-card.start-card .instruction-box {
-    grid-column: 2 !important;
-    grid-row: 1 / span 4 !important;
-    margin: 0 !important;
-    padding: 10px 12px !important;
-    height: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-  }
-
-  .overlay-card.start-card .instruction-box ul {
-    font-size: 0.72rem !important;
-    line-height: 1.3 !important;
-    padding-left: 15px !important;
-  }
-  
-  .overlay-card.start-card .ins-title {
-    font-size: 0.8rem !important;
-    margin-bottom: 4px !important;
-  }
-
-  .game-header {
-    top: 5px !important;
-    padding: 0 10px !important;
-  }
-  .header-stat {
-    min-width: 55px !important;
-    padding: 2px 6px !important;
-    border-radius: 8px !important;
-  }
-  .stat-label {
-    font-size: 0.6rem !important;
-  }
-  .stat-value {
-    font-size: 0.85rem !important;
-  }
-  .target-panel {
-    padding: 2px 10px !important;
-    border-radius: 10px !important;
-  }
-  .target-label {
-    font-size: 0.6rem !important;
-  }
-  .target-text {
-    font-size: 0.85rem !important;
-  }
-
-  .overlay-card.gameover-card {
-    display: grid !important;
-    grid-template-columns: 1fr 1.2fr !important;
-    grid-template-rows: auto auto auto auto !important;
-    column-gap: 20px !important;
-    row-gap: 4px !important;
-    max-width: 680px !important;
-    width: 95% !important;
-    padding: 15px 20px !important;
-    align-items: center !important;
-    text-align: left !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-  }
-
-  .overlay-card.gameover-card .gameover-title {
-    grid-column: 1 !important;
-    grid-row: 1 !important;
-    font-size: 1.5rem !important;
-    margin: 0 !important;
-    text-align: left !important;
-  }
-
-  .overlay-card.gameover-card .gameover-subtitle {
-    grid-column: 1 !important;
-    grid-row: 2 !important;
-    font-size: 0.75rem !important;
-    margin-bottom: 4px !important;
-    text-align: left !important;
-  }
-
-  .overlay-card.gameover-card .score-display {
-    grid-column: 1 !important;
-    grid-row: 3 !important;
-    margin: 4px 0 !important;
-    align-items: flex-start !important;
-  }
-
-  .overlay-card.gameover-card .score-num {
-    font-size: 2.2rem !important;
-  }
-
-  .overlay-card.gameover-card .score-lbl {
-    font-size: 0.65rem !important;
-    margin-top: 0 !important;
-    text-align: left !important;
-  }
-
-  .overlay-card.gameover-card .action-buttons {
-    grid-column: 1 !important;
-    grid-row: 4 !important;
-    width: 100% !important;
-  }
-
-  .overlay-card.gameover-card .btn-action {
-    padding: 8px !important;
-    font-size: 0.95rem !important;
-  }
-
-  .overlay-card.gameover-card .stats-grid {
-    grid-column: 2 !important;
-    grid-row: 1 / span 2 !important;
-    margin: 0 !important;
-    gap: 6px !important;
-  }
-
-  .overlay-card.gameover-card .stat-box {
-    padding: 6px !important;
-  }
-
-  .overlay-card.gameover-card .stat-box-lbl {
-    font-size: 0.55rem !important;
-  }
-
-  .overlay-card.gameover-card .stat-box-val {
-    font-size: 0.95rem !important;
-  }
-
-  .overlay-card.gameover-card .feedback-message {
-    grid-column: 2 !important;
-    grid-row: 3 / span 2 !important;
-    margin: 0 !important;
-    font-size: 0.8rem !important;
-  }
-}
-
-/* Safety Scale for Short Viewports in Portrait */
-@media (max-height: 780px) and (orientation: portrait) {
-  .overlay-card {
-    transform: translate(-50%, -50%) scale(0.85) !important;
-    transform-origin: center center !important;
-  }
-}
-@media (max-height: 700px) and (orientation: portrait) {
-  .overlay-card {
-    transform: translate(-50%, -50%) scale(0.78) !important;
-    transform-origin: center center !important;
-  }
+.feedback-card-box {
+  background: #f8fafc;
+  border-radius: 16px;
+  padding: 12px;
+  font-size: 0.9rem;
 }

@@ -1,18 +1,23 @@
 <div class="asai-detective-container">
-  <!-- Header / Scoreboard -->
+  <!-- Top Header / Scoreboard Deck -->
   <div class="detective-header">
     <div class="title-badge">
-      <i class="bi bi-search"></i>
+      <i class="bi bi-search me-1"></i>
       <span>அசை பிழை திருத்துதல் (Asai Detective)</span>
     </div>
+    
     <div class="stats-pills">
       <div class="stat-pill score">
-        <i class="bi bi-trophy-fill"></i>
+        <i class="bi bi-star-fill text-warning me-1"></i>
         <span>{{ score() }}</span>
       </div>
+      <div class="stat-pill progress-pill" *ngIf="challenges().length > 0">
+        <i class="bi bi-card-checklist me-1"></i>
+        <span>{{ currentIndex() + 1 }} / {{ challenges().length }}</span>
+      </div>
       <div class="stat-pill streak" *ngIf="streak() > 0">
-        <i class="bi bi-lightning-charge-fill"></i>
-        <span>{{ streak() }} Streak</span>
+        <i class="bi bi-lightning-charge-fill me-1"></i>
+        <span>{{ streak() }} 🔥</span>
       </div>
     </div>
   </div>
@@ -20,28 +25,32 @@
   <!-- Instruction Banner -->
   <div class="instruction-box">
     <p class="mb-0">
-      <i class="bi bi-shield-exclamation me-1"></i>
+      <i class="bi bi-shield-exclamation me-2"></i>
       கீழே உள்ள சொல்லுக்கு <strong>பிழையற்ற சரியான யாப்பிலக்கண அசை பிரிப்பைக்</strong> கண்டுபிடிக்கவும்!
     </p>
   </div>
 
   <!-- Target Word Hero Card -->
   <div class="word-hero-card" *ngIf="currentChallenge() as challenge">
-    <div class="word-badge">சொல் (Word)</div>
+    <div class="word-badge">🔍 சவால் சொல் (Target Word)</div>
     <div class="hero-word">{{ challenge.word }}</div>
   </div>
 
-  <!-- Options Selector Grid -->
+  <!-- Options Selector Grid (Card Style with A, B, C, D Badges) -->
   <div class="options-container" *ngIf="currentChallenge() as challenge">
     <button 
       *ngFor="let opt of challenge.options; let idx = index"
-      class="option-card"
+      class="option-card hover-lift"
       [class.selected]="challenge.selectedOptionIndex === idx"
       [class.correct]="challenge.isAnswered && opt.isCorrect"
       [class.incorrect]="challenge.isAnswered && challenge.selectedOptionIndex === idx && !opt.isCorrect"
       [disabled]="challenge.isAnswered"
       (click)="selectOption(idx)">
       
+      <div class="option-badge">
+        {{ idx === 0 ? 'A' : (idx === 1 ? 'B' : (idx === 2 ? 'C' : 'D')) }}
+      </div>
+
       <div class="option-content">
         <span class="option-split-text">{{ opt.label }}</span>
         
@@ -56,9 +65,9 @@
     </button>
   </div>
 
-  <!-- Explanation & Feedback Alert -->
+  <!-- Explanation & Feedback Alert Card -->
   <div class="feedback-card mt-4" *ngIf="currentChallenge()?.isAnswered">
-    <div class="alert" [class.alert-success]="currentChallenge()?.isCorrect" [class.alert-danger]="!currentChallenge()?.isCorrect">
+    <div class="alert-box" [class.alert-success-box]="currentChallenge()?.isCorrect" [class.alert-danger-box]="!currentChallenge()?.isCorrect">
       <h5 class="alert-heading mb-2">
         <i class="bi" [class.bi-check-circle-fill]="currentChallenge()?.isCorrect" [class.bi-exclamation-octagon-fill]="!currentChallenge()?.isCorrect"></i>
         {{ currentChallenge()?.isCorrect ? 'அற்புதம்! சரியான அசை பிரிப்பைக் கண்டுபிடித்துவிட்டீர்கள்!' : 'பிழையான விடை!' }}
@@ -70,8 +79,8 @@
 
     <!-- Next Question Button -->
     <div class="next-action text-center mt-3">
-      <button class="btn btn-next" (click)="nextChallenge()">
-        அடுத்த வினா <i class="bi bi-arrow-right-circle-fill ms-2"></i>
+      <button class="btn btn-next hover-lift" (click)="nextChallenge()">
+        <span>அடுத்த வினா 🚀</span>
       </button>
     </div>
   </div>

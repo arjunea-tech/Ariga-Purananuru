@@ -1,0 +1,165 @@
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Thambi+2:wght@400;600;800&display=swap');
+
+.eluthu-det-wrap {
+  font-family: 'Baloo Thambi 2', sans-serif;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Header */
+.det-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: 16px;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+}
+
+.det-title-badge {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: linear-gradient(135deg, #ea580c, #c2410c);
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.stats-row { display: flex; gap: 0.5rem; }
+
+.stat-pill {
+  display: flex; align-items: center; gap: 0.3rem;
+  border-radius: 999px;
+  padding: 0.25rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.stat-score  { background: #fef9c3; color: #92400e; }
+.stat-prog   { background: #e0f2fe; color: #0369a1; }
+.stat-streak { background: #ffedd5; color: #c2410c; }
+
+/* Instruction */
+.instruction-box {
+  background: #fff7ed;
+  border-left: 4px solid #f97316;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 0.88rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+/* Word Hero Card */
+.word-hero {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 6px 24px rgba(234,88,12,0.12);
+  padding: 1.5rem 1rem;
+  text-align: center;
+}
+.word-badge {
+  display: inline-block;
+  background: #fff7ed;
+  color: #ea580c;
+  border-radius: 999px;
+  padding: 0.2rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+}
+.hero-word {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #1e293b;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Options */
+.options-list { display: flex; flex-direction: column; gap: 0.65rem; }
+
+.opt-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #fff;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 0.85rem 1rem;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: all .15s;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #374151;
+}
+.opt-card:hover:not(:disabled) {
+  border-color: #ea580c;
+  background: #fff7ed;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(234,88,12,0.12);
+}
+.opt-card:disabled { cursor: not-allowed; }
+.opt-card.opt-correct { border-color: #22c55e; background: #dcfce7; color: #15803d; }
+.opt-card.opt-wrong   { border-color: #ef4444; background: #fee2e2; color: #991b1b; }
+
+.opt-letter {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+  flex-shrink: 0;
+  background: #f1f5f9;
+  color: #64748b;
+}
+.opt-card.opt-correct .opt-letter { background: #16a34a; color: #fff; }
+.opt-card.opt-wrong   .opt-letter { background: #dc2626; color: #fff; }
+
+.opt-text { flex: 1; line-height: 1.4; }
+.opt-status { font-size: 1.2rem; }
+
+/* Feedback */
+.feedback-box {
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.feedback-box.correct-box { background: #dcfce7; border-left: 4px solid #22c55e; }
+.feedback-box.wrong-box   { background: #fee2e2; border-left: 4px solid #ef4444;  }
+
+.fb-heading {
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.fb-heading.correct { color: #15803d; }
+.fb-heading.wrong   { color: #991b1b; }
+
+.fb-exp { font-size: 0.85rem; color: #374151; line-height: 1.6; }
+
+/* Next Button */
+.btn-next {
+  background: linear-gradient(135deg, #ea580c, #c2410c);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 0.65rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  align-self: flex-end;
+  transition: transform .15s, box-shadow .15s;
+  box-shadow: 0 4px 12px rgba(234,88,12,0.3);
+}
+.btn-next:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(234,88,12,0.4); }
