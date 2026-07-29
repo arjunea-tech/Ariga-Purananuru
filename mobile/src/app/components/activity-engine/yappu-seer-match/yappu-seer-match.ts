@@ -37,7 +37,8 @@ export class YappuSeerMatchComponent implements OnInit, OnChanges, OnDestroy {
   ngOnDestroy(): void {}
 
   initGame(): void {
-    const parsedLevel = this.activity?.level !== undefined ? Number(this.activity.level) : 2;
+    const rawLevel = this.activity?.level;
+    const parsedLevel = (rawLevel !== undefined && rawLevel !== null && rawLevel !== '') ? Number(rawLevel) : 2;
     this.level.set(isNaN(parsedLevel) ? 2 : parsedLevel);
     this.setupMatchPairs();
   }

@@ -1,10 +1,10 @@
 <div class="seer-container">
-  <div class="seer-stage">
+  <div class="seer-stage" style="padding-bottom: 160px;">
     
     <!-- HEADER BAR -->
-    <div class="seer-header text-center mb-3">
-      <div class="d-flex align-items-center justify-content-between mb-2">
-        <span class="badge bg-purple-subtle text-purple fw-bold rounded-pill px-3 py-1" style="background: #F3E8FF; color: #7E22CE;">
+    <div class="seer-header text-center mb-2">
+      <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 mb-2">
+        <span class="badge bg-purple-subtle text-purple fw-bold rounded-pill px-3 py-1 text-wrap text-center" style="background: #F3E8FF; color: #7E22CE; max-width: 100%;">
           🧩 சீர்ப் புதிர் (Jigsaw Snap)
         </span>
         <span class="badge bg-light text-dark fw-bold border rounded-pill px-3 py-1">
@@ -14,9 +14,9 @@
     </div>
 
     <!-- GAMEPLAY AREA -->
-    <div class="screen-play bg-white rounded-5 shadow-sm p-4 text-center position-relative border border-2 border-light overflow-hidden">
+    <div class="screen-play bg-white rounded-5 shadow-sm p-2 p-md-4 text-center position-relative border border-2 border-light overflow-hidden">
       
-      <p class="text-secondary small fw-bold mb-3">
+      <p class="text-secondary small fw-bold mb-2 mb-md-3">
         அட்டை அட்டையாகத் தொட்டு சரியான சீர் ஜோடியைக் கண்டுபிடியுங்கள்! 🧩
       </p>
 
@@ -31,29 +31,30 @@
         </div>
       }
 
-      <div class="cards-grid row g-2 justify-content-center">
+      <div class="row g-2 justify-content-center">
         @for (card of matchCards(); track card.id; let idx = $index) {
-          <div class="col-6 col-sm-4">
-            <button class="btn puzzle-card-item w-100 p-3 rounded-4 border-2 shadow-xs d-flex flex-column align-items-center justify-content-center transition-all"
+          <div class="col-3 col-sm-2 col-md-2">
+            <button class="btn puzzle-card-item w-100 p-1 p-sm-2 p-md-3 rounded-4 border-2 shadow-xs d-flex flex-column align-items-center justify-content-center transition-all"
                     [class.flipped]="matchFlipped().includes(idx) || matchMatched().has(card.matchId)"
                     [class.matched]="matchMatched().has(card.matchId)"
                     [class.incorrect]="matchIncorrect().includes(idx)"
                     [disabled]="matchMatched().has(card.matchId)"
                     (click)="handleCardFlip(idx)"
-                    style="min-height: 95px; border-color: #DDD6FE !important;">
+                    style="border-color: #DDD6FE !important;">
               
               @if (matchFlipped().includes(idx) || matchMatched().has(card.matchId)) {
                 @if (card.type === 'name') {
-                  <div class="card-face d-flex flex-column align-items-center">
-                    <span class="fs-3 mb-0.5 animate-bounce">{{ card.fruit }}</span>
-                    <span class="fw-extrabold text-purple-900" style="color: #581C87; font-size: 1.1rem;">{{ card.name }}</span>
+                  <div class="card-face d-flex flex-column align-items-center text-center">
+                    <span class="fs-4 mb-1 animate-bounce">{{ card.fruit }}</span>
+                    <span class="fw-extrabold text-purple-900" style="color: #581C87; font-size: clamp(0.75rem, 3vw, 1.1rem); line-height: 1.2;">{{ card.name }}</span>
                   </div>
                 } @else {
                   <div class="card-face d-flex flex-column align-items-center">
-                    <div class="d-flex gap-1 mb-1">
+                    <div class="d-flex flex-wrap justify-content-center gap-1 mb-1">
                       @for (asai of card.pattern; track $index) {
-                        <span class="badge rounded-pill text-white fw-bold px-2 py-1"
-                              [style.background]="asai === 'நேர்' ? '#4F46E5' : '#059669'">
+                        <span class="badge rounded-pill text-white fw-bold px-1 py-1 px-sm-2"
+                              [style.background]="asai === 'நேர்' ? '#4F46E5' : '#059669'"
+                              style="font-size: clamp(0.65rem, 2.5vw, 0.8rem);">
                           {{ asai }}
                         </span>
                       }
