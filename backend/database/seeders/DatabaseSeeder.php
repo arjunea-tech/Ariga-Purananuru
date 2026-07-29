@@ -67,7 +67,6 @@ class DatabaseSeeder extends Seeder
             TamilYappuSeeder::class,
             PracticeWordSeeder::class,
             EluthuActivitySeeder::class,
-            SeerMcqSeeder::class,
             YappuSeerActivitySeeder::class,
             
         ]);
