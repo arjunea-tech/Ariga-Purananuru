@@ -306,6 +306,9 @@ export class LearnModulesComponent implements OnInit {
                             case 'yappu_asai_detective': title = 'அசை பிழை திருத்துதல்'; break;
                             case 'eluthu_flashcard': title = 'எழுத்து மின்னட்டை சவால்'; break;
                             case 'eluthu_detective': title = 'எழுத்து பிழை திருத்துதல்'; break;
+                            case 'yappu_thalai': title = 'தளை விளையாட்டு'; break;
+                            case 'yappu_kural_puzzle': title = 'குறள் சீரமைப்பு'; break;
+                            case 'yappu_eetru_seer': title = 'சீர் கண்டறி'; break;
                             default: title = 'பயிற்சி விளையாட்டு'; break;
                           }
                         }
@@ -337,12 +340,15 @@ export class LearnModulesComponent implements OnInit {
                     case 'balloon_pop': title = 'பலூன் விளையாட்டு'; break;
                     case 'word_builder': title = 'வார்த்தை உருவாக்கு'; break;
                     case 'match': title = 'பொருத்துக'; break;
-                    case 'fill_blanks': title = 'கோடிிட்ட இடத்தை நிரப்புக'; break;
+                    case 'fill_blanks': title = 'கோடிட்ட இடத்தை நிரப்புக'; break;
                     case 'true_false': title = 'சரி அல்லது தவறு'; break;
                     case 'yappu_asai_slice': title = 'அசை வெட்டு'; break;
                     case 'yappu_asai_detective': title = 'அசை பிழை திருத்துதல்'; break;
                     case 'eluthu_flashcard': title = 'எழுத்து மின்னட்டை சவால்'; break;
                     case 'eluthu_detective': title = 'எழுத்து பிழை திருத்துதல்'; break;
+                    case 'yappu_thalai': title = 'தளை விளையாட்டு'; break;
+                    case 'yappu_kural_puzzle': title = 'குறள் சீரமைப்பு'; break;
+                    case 'yappu_eetru_seer': title = 'சீர் கண்டறி'; break;
                     default: title = 'பயிற்சி விளையாட்டு'; break;
                   }
                 }
@@ -386,6 +392,9 @@ export class LearnModulesComponent implements OnInit {
         case 'yappu_flashcard': label = 'அசை மின்னட்டை சவால்'; icon = 'bi-card-heading'; color = '#0284C7'; break; // sky blue
         case 'eluthu_flashcard': label = 'எழுத்து மின்னட்டை சவால்'; icon = 'bi-card-heading'; color = '#0284C7'; break; // sky blue
         case 'eluthu_detective': label = 'எழுத்து பிழை திருத்துதல்'; icon = 'bi-pencil-square'; color = '#EA580C'; break; // orange
+        case 'yappu_thalai': label = 'தளை விளையாட்டு'; icon = 'bi-link-45deg'; color = '#0D9488'; break;
+        case 'yappu_kural_puzzle': label = 'குறள் சீரமைப்பு'; icon = 'bi-puzzle-fill'; color = '#7C3AED'; break;
+        case 'yappu_eetru_seer': label = 'சீர் கண்டறி'; icon = 'bi-music-note-beamed'; color = '#2563EB'; break;
       }
 
       if (!groupsMap.has(act.type)) {

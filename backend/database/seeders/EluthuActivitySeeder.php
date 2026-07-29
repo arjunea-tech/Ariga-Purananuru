@@ -2947,7 +2947,37 @@ class EluthuActivitySeeder extends Seeder
             $thalaiContentBlocks[] = [
                 'type' => 'paragraph',
                 'data' => [
-                    'text' => '<h2 class="text-primary text-center mb-4">தளை – பயிற்சி வினாக்கள்</h2><p class="fs-5 text-center">தளையின் வகைகள், வாய்பாடுகள் மற்றும் தளை கண்டறியும் விதிகள் பாடங்களின் அடிப்படையிலான பயிற்சி வினாக்கள்.</p>'
+                    'text' => '<h2 class="text-primary text-center mb-4">தளை – பயிற்சி வினாக்கள் & தளைப் பாலம் விளையாட்டு</h2><p class="fs-5 text-center">தளையின் வகைகள், வாய்பாடுகள் மற்றும் தளை கண்டறியும் விதிகள் பாடங்களின் அடிப்படையிலான பயிற்சி வினாக்கள் மற்றும் interactive விளையாட்டு.</p>'
+                ]
+            ];
+
+            // 1. Interactive Yappu Thalai Magnet Bridge Game
+            $thalaiContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'     => 'yappu_thalai',
+                    'title'    => 'தளைப் பாலம் (Thalai Magnet Bridge)',
+                    'question' => 'நின்ற சீரின் ஈற்றசையையும் வரும் சீரின் முதலசையும் பிணைக்கும் தளையைக் கண்டறிக:'
+                ]
+            ];
+
+            // 2. Interactive Kural Verse Jigsaw Puzzle
+            $thalaiContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'     => 'yappu_kural_puzzle',
+                    'title'    => 'திருக்குறள் சீரமைக்கும் புதிர் (Kural Verse Puzzle)',
+                    'question' => 'கலைந்துள்ள சீர்களைத் தொட்டு (Tap), திருக்குறளின் சரியான அமைப்பில் (4+3) சீரமைக்கவும்:'
+                ]
+            ];
+
+            // 3. Interactive Eetru Seer Formula Identification Game
+            $thalaiContentBlocks[] = [
+                'type' => 'activity',
+                'data' => [
+                    'type'     => 'yappu_eetru_seer',
+                    'title'    => 'ஈற்றுச்சீர் கண்டறிதல் (Eetru Seer Formula Game)',
+                    'question' => 'திருக்குறளின் 7-ஆம் சீரின் ஈற்றுச்சீர் வாய்ப்பாட்டைக் (நாள், மலர், காசு, பிறப்பு) கண்டறியவும்:'
                 ]
             ];
 

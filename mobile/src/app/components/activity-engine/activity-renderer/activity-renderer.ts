@@ -28,9 +28,12 @@ import { YappuAsaiSliceComponent } from '../yappu-asai-slice/yappu-asai-slice';
 import { YappuAsaiDetectiveComponent } from '../yappu-asai-detective/yappu-asai-detective';
 import { EluthuFlashcardComponent } from '../eluthu-flashcard/eluthu-flashcard';
 import { EluthuDetectiveComponent } from '../eluthu-detective/eluthu-detective';
+import { YappuThalaiComponent } from '../yappu-thalai/yappu-thalai';
+import { YappuKuralPuzzleComponent } from '../yappu-kural-puzzle/yappu-kural-puzzle';
+import { YappuEetruSeerComponent } from '../yappu-eetru-seer/yappu-eetru-seer';
 
 export interface NormalizedActivity {
-  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard' | 'eluthu_flashcard' | 'yappu_seer' | 'yappu_seer_p2n' | 'yappu_seer_n2p' | 'yappu_seer_build' | 'yappu_seer_speed' | 'yappu_seer_match' | 'yappu_asai_slice' | 'yappu_asai_detective' | 'eluthu_detective';
+  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard' | 'eluthu_flashcard' | 'yappu_seer' | 'yappu_seer_p2n' | 'yappu_seer_n2p' | 'yappu_seer_build' | 'yappu_seer_speed' | 'yappu_seer_match' | 'yappu_asai_slice' | 'yappu_asai_detective' | 'eluthu_detective' | 'yappu_thalai' | 'yappu_kural_puzzle' | 'yappu_eetru_seer';
   question?: string;
   text?: string;
   front?: string;
@@ -113,7 +116,10 @@ export interface NormalizedActivity {
     YappuAsaiSliceComponent,
     YappuAsaiDetectiveComponent,
     EluthuFlashcardComponent,
-    EluthuDetectiveComponent
+    EluthuDetectiveComponent,
+    YappuThalaiComponent,
+    YappuKuralPuzzleComponent,
+    YappuEetruSeerComponent
   ],
   templateUrl: './activity-renderer.html',
   styleUrls: ['./activity-renderer.css']
@@ -252,6 +258,12 @@ export class ActivityRenderer implements OnChanges {
       type = 'yappu_asai_detective';
     } else if (['eluthu_detective', 'eluthu-detective'].includes(typeInput.toLowerCase())) {
       type = 'eluthu_detective';
+    } else if (['yappu_thalai', 'yappu-thalai', 'thalai_game', 'thalai-game'].includes(typeInput.toLowerCase())) {
+      type = 'yappu_thalai';
+    } else if (['yappu_kural_puzzle', 'yappu-kural-puzzle', 'kural_puzzle', 'kural-puzzle'].includes(typeInput.toLowerCase())) {
+      type = 'yappu_kural_puzzle';
+    } else if (['yappu_eetru_seer', 'yappu-eetru-seer', 'eetru_seer', 'eetru-seer'].includes(typeInput.toLowerCase())) {
+      type = 'yappu_eetru_seer';
     }
 
     // 2. Extract explanation & options
@@ -531,6 +543,14 @@ export class ActivityRenderer implements OnChanges {
     this.answered.emit({
       questionId: this.activity?.id,
       type: this.activity?.type || 'yappu_seer',
+      ...event
+    });
+  }
+
+  onYappuEetruSeerAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'yappu_eetru_seer',
       ...event
     });
   }

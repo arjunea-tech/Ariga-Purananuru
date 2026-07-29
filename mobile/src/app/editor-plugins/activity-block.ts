@@ -28,6 +28,8 @@ import { renderYappuFlashcardForm } from './activity-block/forms/yappu-flashcard
 import { renderYappuSeerForm } from './activity-block/forms/yappu-seer';
 import { renderYappuAsaiSliceForm } from './activity-block/forms/yappu-asai-slice';
 import { renderYappuAsaiDetectiveForm } from './activity-block/forms/yappu-asai-detective';
+import { renderYappuThalaiForm } from './activity-block/forms/yappu-thalai';
+import { renderYappuKuralPuzzleForm } from './activity-block/forms/yappu-kural-puzzle';
 
 export class ActivityBlock {
   private data: any;
@@ -333,6 +335,9 @@ export class ActivityBlock {
             <option value="yappu_seer_match" ${tempData.type === 'yappu_seer_match' ? 'selected' : ''}>Yappu Seer: ஜோடி பொருத்து (Match Pairs)</option>
             <option value="yappu_asai_slice" ${tempData.type === 'yappu_asai_slice' ? 'selected' : ''}>அசை வெட்டு (Asai Slicer Game)</option>
             <option value="yappu_asai_detective" ${tempData.type === 'yappu_asai_detective' ? 'selected' : ''}>அசை பிழை திருத்துதல் (Asai Error Detective)</option>
+            <option value="yappu_thalai" ${tempData.type === 'yappu_thalai' ? 'selected' : ''}>தளைப் பாலம் (Thalai Magnet Bridge)</option>
+            <option value="yappu_kural_puzzle" ${tempData.type === 'yappu_kural_puzzle' ? 'selected' : ''}>திருக்குறள் சீரமைக்கும் புதிர் (Kural Verse Puzzle)</option>
+            <option value="yappu_eetru_seer" ${tempData.type === 'yappu_eetru_seer' ? 'selected' : ''}>ஈற்றுச்சீர் கண்டறிதல் (Eetru Seer Game)</option>
           </select>
           <div class="modal-form-container"></div>
         </div>
@@ -396,6 +401,10 @@ export class ActivityBlock {
         renderYappuAsaiSliceForm(formContainer, tempData, this.renderExplanationInput);
       } else if (type === 'yappu_asai_detective') {
         renderYappuAsaiDetectiveForm(formContainer, tempData, this.renderExplanationInput);
+      } else if (type === 'yappu_thalai') {
+        renderYappuThalaiForm(formContainer, tempData, this.renderExplanationInput);
+      } else if (type === 'yappu_kural_puzzle') {
+        renderYappuKuralPuzzleForm(formContainer, tempData, this.renderExplanationInput);
       }
     };
 

@@ -1,5 +1,6 @@
 @if (normalizedActivity(); as data) {
-<div class="activity-renderer-container" [class.h-100]="data.type === 'balloon_pop' || data.type.startsWith('yappu_seer')"
+<div class="activity-renderer-container"
+  [class.h-100]="data.type === 'balloon_pop' || data.type.startsWith('yappu_seer')"
   [class.m-0]="data.type === 'balloon_pop' || data.type.startsWith('yappu_seer')">
   @switch (data.type) {
   @case ('mcq') {
@@ -115,6 +116,18 @@
   @case ('eluthu_detective') {
   <app-eluthu-detective [activity]="data" (answered)="onEluthuDetectiveAnswered($event)">
   </app-eluthu-detective>
+  }
+  @case ('yappu_thalai') {
+  <app-yappu-thalai [activity]="data" (answered)="onYappuSeerAnswered($event)">
+  </app-yappu-thalai>
+  }
+  @case ('yappu_kural_puzzle') {
+  <app-yappu-kural-puzzle [activity]="data" (answered)="onYappuSeerAnswered($event)">
+  </app-yappu-kural-puzzle>
+  }
+  @case ('yappu_eetru_seer') {
+  <app-yappu-eetru-seer [activity]="data" (answered)="onYappuEetruSeerAnswered($event)">
+  </app-yappu-eetru-seer>
   }
   }
 </div>
