@@ -56,7 +56,11 @@ export class YappuAsaiSliceComponent implements OnInit, OnChanges {
   selectedRuleInfo = signal<{ segment: string; rule: string; type: string } | null>(null);
 
   defaultWords = [
-    'அகரம்', 'தாமரை', 'கண்ணன்', 'அறத்துப்பால்', 'கம்பராமாயணம்', 'உலகம்', 'திருக்குறள்', 'கல்வி'
+    'தாமரை', 'கல்வி', 'அகரம்', 'கண்ணன்', 'அம்மா', 'அப்பா', 'தம்பி', 'செல்வம்', 'பள்ளி', 'நாடு',
+    'வீடு', 'காடு', 'தோட்டம்', 'வானம்', 'பூமி', 'நீதி', 'நன்மை', 'உண்மை', 'பாடல்', 'ஆடல்',
+    'பேச்சு', 'பாட்டு', 'வாழ்க', 'வெற்றி', 'வீரம்', 'காலம்', 'அழகு', 'மனமே', 'உலகம்', 'நிலமே',
+    'கனவு', 'நினைவு', 'பணமே', 'அறமே', 'தவமே', 'குணமே', 'சினமே', 'மரமே', 'வழியே', 'மொழியே',
+    'நெறிதான்', 'உயிரோ', 'கனலோ', 'புயலோ', 'அலையோ', 'மலரோ', 'பேரழகு', 'வான்மழை', 'கார்முகில்', 'செம்மொழி'
   ];
 
   ngOnInit(): void {
@@ -75,7 +79,10 @@ export class YappuAsaiSliceComponent implements OnInit, OnChanges {
     this.streak.set(0);
 
     if (this.activity?.words && this.activity.words.length > 0) {
-      const shuffled = [...this.activity.words].sort(() => Math.random() - 0.5);
+      let shuffled = [...this.activity.words].sort(() => Math.random() - 0.5);
+      if (shuffled.length > 10) {
+        shuffled = shuffled.slice(0, 10);
+      }
       this.wordsList.set(shuffled);
       this.currentIndex.set(0);
       this.loadWord(0);
@@ -86,8 +93,12 @@ export class YappuAsaiSliceComponent implements OnInit, OnChanges {
           let dbWords: string[] = [];
           if (Array.isArray(res)) dbWords = res;
           else if (res && Array.isArray(res.data)) dbWords = res.data;
+          if (dbWords.length === 0) dbWords = this.defaultWords;
 
-          const shuffled = [...dbWords].sort(() => Math.random() - 0.5);
+          let shuffled = [...dbWords].sort(() => Math.random() - 0.5);
+          if (shuffled.length > 10) {
+            shuffled = shuffled.slice(0, 10);
+          }
           this.wordsList.set(shuffled);
           this.currentIndex.set(0);
           if (shuffled.length > 0) {
@@ -95,7 +106,10 @@ export class YappuAsaiSliceComponent implements OnInit, OnChanges {
           }
         },
         error: (err) => {
-          console.error('Failed to load words from Database API:', err);
+          let shuffled = [...this.defaultWords].sort(() => Math.random() - 0.5).slice(0, 10);
+          this.wordsList.set(shuffled);
+          this.currentIndex.set(0);
+          this.loadWord(0);
         }
       });
     }

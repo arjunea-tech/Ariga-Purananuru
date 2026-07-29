@@ -1564,16 +1564,18 @@ class EluthuActivitySeeder extends Seeder
                 'நெறிதான்', 'உயிரோ', 'கனலோ', 'புயலோ', 'அலையோ', 'மலரோ', 'பேரழகு', 'வான்மழை', 'கார்முகில்', 'செம்மொழி'
             ];
 
-            $sliceBlocks = [
-                [
+            $sliceBlocks = [];
+            foreach ($sliceWordsList as $swIdx => $swWord) {
+                $sliceBlocks[] = [
                     'type' => 'activity',
                     'data' => [
                         'type'     => 'yappu_asai_slice',
+                        'title'    => 'அசை வெட்டு #' . ($swIdx + 1),
                         'question' => 'வார்த்தையை சரியான அசைகளாகப் பிரிக்கவும்:',
-                        'words'    => $sliceWordsList,
+                        'words'    => [$swWord],
                     ]
-                ]
-            ];
+                ];
+            }
 
             $contentSlice = Content::create([
                 'name'         => 'அசை வெட்டுப் பயிற்சி - 50',
@@ -1899,16 +1901,18 @@ class EluthuActivitySeeder extends Seeder
                 ]
             ];
 
-            $detectiveBlocks = [
-                [
+            $detectiveBlocks = [];
+            foreach ($detectiveChallengesList as $detIdx => $detChallenge) {
+                $detectiveBlocks[] = [
                     'type' => 'activity',
                     'data' => [
                         'type'       => 'yappu_asai_detective',
+                        'title'      => 'அசை துப்பறி #' . ($detIdx + 1),
                         'question'   => 'கொடுக்கப்பட்ட வார்த்தையை சரியான அசைகளாகப் பிரி:',
-                        'challenges' => $detectiveChallengesList,
+                        'challenges' => [$detChallenge],
                     ]
-                ]
-            ];
+                ];
+            }
 
             $contentDetective = Content::create([
                 'name'         => 'அசை துப்பறியும் பயிற்சி - 50',

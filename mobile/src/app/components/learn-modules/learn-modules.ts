@@ -257,11 +257,7 @@ export class LearnModulesComponent implements OnInit {
     if (mod && mod.chapters && mod.chapters.length > 0) {
       return mod.chapters;
     }
-    // Return dummy chapters if backend didn't provide any
-    return [
-      { id: 1, name: 'அத்தியாயம் 1: அறிமுகம்', description: 'அடிப்படை பற்றி அறிவோம்' },
-      { id: 2, name: 'அத்தியாயம் 2: பயிற்சி', description: 'தொடர் பயிற்சி' }
-    ];
+    return [];
   }
 
   startCategoryLesson(chap: any) {
@@ -292,7 +288,7 @@ export class LearnModulesComponent implements OnInit {
                 if (parsed.blocks) {
                   parsed.blocks.forEach((block: any, idx: number) => {
                     if (block.type === 'activity' && block.data) {
-                      const actId = block.data.activityId || block.data.activityReferenceId || block.id || `act_${chap.id}_${idx}`;
+                      const actId = block.data.activityId || block.data.activityReferenceId || block.id || `act_${chap.id}_${content.id || ''}_${block.data.type || ''}_${idx}`;
 
                       if (!activities.find(a => a.id === actId)) {
                         let title = block.data.title || block.data.question;
@@ -716,7 +712,7 @@ export class LearnModulesComponent implements OnInit {
       const levelChapters = (lvl.chapters || []).map((c: any) => ({
         id: c.id,
         name: c.name || c.title || 'பாட அத்தியாயம்',
-        description: c.description || c.code || ''
+        description: this.extractPlainDescription(c.description) || c.code || ''
       }));
 
       const isCompleted = levelChapters.length > 0 && levelChapters.every((c: any) => this.isChapterCompleted(c.id));
@@ -817,6 +813,34 @@ export class LearnModulesComponent implements OnInit {
     const id = +chapId; // normalize to number
     return this.completedChapterIds().some(cid => +cid === id);
   }
+
+  /**
+ * Safely extracts a plain-text description from a value that may be:
+ *  - A plain string (returned as-is)
+ *  - An EditorJS JSON blob { time, blocks, version } — extracts text from blocks
+ *  - Our custom blocks JSON { blocks: [...] } — extracts text from first paragraph block
+ */
+  extractPlainDescription(raw: string | null | undefined): string {
+    if (!raw) return '';
+    const trimmed = raw.trim();
+    if (!trimmed.startsWith('{')) return trimmed; // plain string — return as-is
+    try {
+      const parsed = JSON.parse(trimmed);
+      const blocks: any[] = parsed.blocks || [];
+      for (const block of blocks) {
+        const text: string = block?.data?.text || block?.data?.content || '';
+        if (text) {
+          // Strip any HTML tags that may be embedded
+          const plain = text.replace(/<[^>]*>/g, '').trim();
+          if (plain) return plain;
+        }
+      }
+    } catch {
+      // Not valid JSON — return the raw string
+    }
+    return trimmed;
+  }
+
 
   isModuleCompleted(moduleId: string): boolean {
     const chapters = this.getCategoryChapters(moduleId);

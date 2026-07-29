@@ -155,9 +155,14 @@ export class YappuAsaiDetectiveComponent implements OnInit, OnChanges {
   initGame(): void {
     let list: DetectiveChallenge[] = [];
 
-    const sourceChallenges = (this.activity?.challenges && this.activity.challenges.length > 0)
-      ? this.activity.challenges
-      : this.defaultChallenges;
+    let sourceChallenges = (this.activity?.challenges && this.activity.challenges.length > 0)
+      ? [...this.activity.challenges]
+      : [...this.defaultChallenges];
+
+    sourceChallenges = sourceChallenges.sort(() => Math.random() - 0.5);
+    if (sourceChallenges.length > 10) {
+      sourceChallenges = sourceChallenges.slice(0, 10);
+    }
 
     list = sourceChallenges.map((c: any) => {
       const options: any[] = [];
