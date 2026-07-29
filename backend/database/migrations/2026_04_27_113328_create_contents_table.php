@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('name');
             $table->integer('sort_order')->default(0);
             $table->boolean('is_active')->default(true);
-            $table->text('text_content')->nullable();
+            $table->longText('text_content')->nullable();
             $table->json('external_url')->nullable();
             $table->timestamps();
         });

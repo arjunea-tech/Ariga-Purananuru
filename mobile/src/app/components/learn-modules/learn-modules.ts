@@ -716,7 +716,7 @@ export class LearnModulesComponent implements OnInit {
       const levelChapters = (lvl.chapters || []).map((c: any) => ({
         id: c.id,
         name: c.name || c.title || 'பாட அத்தியாயம்',
-        description: c.description || c.code || ''
+        description: this.extractPlainDescription(c.description) || c.code || ''
       }));
 
       const isCompleted = levelChapters.length > 0 && levelChapters.every((c: any) => this.isChapterCompleted(c.id));
@@ -817,6 +817,34 @@ export class LearnModulesComponent implements OnInit {
     const id = +chapId; // normalize to number
     return this.completedChapterIds().some(cid => +cid === id);
   }
+
+  /**
+ * Safely extracts a plain-text description from a value that may be:
+ *  - A plain string (returned as-is)
+ *  - An EditorJS JSON blob { time, blocks, version } — extracts text from blocks
+ *  - Our custom blocks JSON { blocks: [...] } — extracts text from first paragraph block
+ */
+  extractPlainDescription(raw: string | null | undefined): string {
+    if (!raw) return '';
+    const trimmed = raw.trim();
+    if (!trimmed.startsWith('{')) return trimmed; // plain string — return as-is
+    try {
+      const parsed = JSON.parse(trimmed);
+      const blocks: any[] = parsed.blocks || [];
+      for (const block of blocks) {
+        const text: string = block?.data?.text || block?.data?.content || '';
+        if (text) {
+          // Strip any HTML tags that may be embedded
+          const plain = text.replace(/<[^>]*>/g, '').trim();
+          if (plain) return plain;
+        }
+      }
+    } catch {
+      // Not valid JSON — return the raw string
+    }
+    return trimmed;
+  }
+
 
   isModuleCompleted(moduleId: string): boolean {
     const chapters = this.getCategoryChapters(moduleId);
