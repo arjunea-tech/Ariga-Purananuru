@@ -257,11 +257,7 @@ export class LearnModulesComponent implements OnInit {
     if (mod && mod.chapters && mod.chapters.length > 0) {
       return mod.chapters;
     }
-    // Return dummy chapters if backend didn't provide any
-    return [
-      { id: 1, name: 'அத்தியாயம் 1: அறிமுகம்', description: 'அடிப்படை பற்றி அறிவோம்' },
-      { id: 2, name: 'அத்தியாயம் 2: பயிற்சி', description: 'தொடர் பயிற்சி' }
-    ];
+    return [];
   }
 
   startCategoryLesson(chap: any) {
