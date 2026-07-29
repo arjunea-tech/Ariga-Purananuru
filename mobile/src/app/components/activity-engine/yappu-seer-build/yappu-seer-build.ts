@@ -47,7 +47,8 @@ export class YappuSeerBuildComponent implements OnInit, OnChanges, OnDestroy {
 
   getPool(): Seer[] {
     const l = this.level();
-    return l === 2 ? SEERS_2 : l === 3 ? SEERS_3 : ALL_SEERS;
+    const data = getSeersData(this.activity);
+    return l === 2 ? data.seers_2 : l === 3 ? data.seers_3 : data.all_seers;
   }
 
   nextQuestion(): void {
