@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, OnDestroy, SimpleChanges, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AudioService } from '../../../services/audio.service';
-import { Seer, SEERS_2, SEERS_3, ALL_SEERS } from '../yappu-seer/yappu-seer';
+import { Seer, SEERS_2, SEERS_3, ALL_SEERS, getSeersData } from '../yappu-seer-data';
 
 @Component({
   selector: 'app-yappu-seer-match',
@@ -37,13 +37,15 @@ export class YappuSeerMatchComponent implements OnInit, OnChanges, OnDestroy {
   ngOnDestroy(): void {}
 
   initGame(): void {
-    this.level.set(this.activity?.level !== undefined ? parseInt(this.activity.level) : 2);
+    const parsedLevel = this.activity?.level !== undefined ? Number(this.activity.level) : 2;
+    this.level.set(isNaN(parsedLevel) ? 2 : parsedLevel);
     this.setupMatchPairs();
   }
 
   getPool(): Seer[] {
     const l = this.level();
-    return l === 2 ? SEERS_2 : l === 3 ? SEERS_3 : ALL_SEERS;
+    const data = getSeersData(this.activity);
+    return l === 2 ? data.seers_2 : l === 3 ? data.seers_3 : data.all_seers;
   }
 
   shuffle<T>(arr: T[]): T[] {
@@ -56,7 +58,11 @@ export class YappuSeerMatchComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   setupMatchPairs(): void {
-    const pool = this.getPool();
+    let pool = this.getPool();
+    // Max 10 pairs (20 cards)
+    if (pool.length > 10) {
+      pool = this.shuffle(pool).slice(0, 10);
+    }
     const nameCards = pool.map((s, i) => ({ id: `n${i}`, type: 'name', name: s.name, fruit: s.fruit, pattern: s.pattern, matchId: i }));
     const patternCards = pool.map((s, i) => ({ id: `p${i}`, type: 'pattern', name: s.name, fruit: s.fruit, pattern: s.pattern, matchId: i }));
 

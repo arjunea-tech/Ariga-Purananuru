@@ -2,73 +2,95 @@
   <div class="seer-stage">
     
     <!-- HEADER BAR -->
-    <div class="seer-header">
-      <div class="header-logo">
-        <span class="logo-sub">யாப்பு விளையாட்டு</span>
-        <h1 class="logo-title">சீர் கட்டமைப்பு</h1>
+    <div class="seer-header text-center mb-3">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <span class="badge bg-primary-subtle text-primary fw-bold rounded-pill px-3 py-1">
+          🧱 அசைக்கல் கோபுரம் (Block Builder)
+        </span>
+        <span class="badge bg-warning-subtle text-warning-emphasis fw-bold rounded-pill px-3 py-1">
+          ⭐ Score: {{ score() }}/{{ total() }}
+        </span>
       </div>
     </div>
 
-    <!-- GAMEPLAY SCREEN -->
-    <div class="screen-play animate-fade">
-      <div class="game-mode-box">
-        <div class="game-nav-bar">
+    <!-- GAMEPLAY AREA -->
+    <div class="screen-play bg-white rounded-5 shadow-sm p-4 text-center position-relative border border-2 border-light">
+      
+      <p class="text-secondary small fw-bold mb-3">
+        கீழே உள்ள அசைக்கற்களைத் தொட்டு சீரை உருவாக்குங்கள்!
+      </p>
+
+      @if (question(); as q) {
+        <!-- TARGET SEER NAME BADGE -->
+        <div class="target-seer-card p-3 rounded-4 mb-4 shadow-sm" style="background: linear-gradient(135deg, #FEF3C7, #FDE68A); border: 2px solid #FCD34D;">
+          <div class="fs-1 mb-1 animate-bounce">{{ q.fruit }}</div>
+          <h2 class="fw-extrabold text-amber-900 mb-0" style="font-size: 1.6rem; color: #78350F;">{{ q.name }}</h2>
+          <span class="small fw-semibold text-amber-700" style="color: #92400E;">{{ q.pattern.length }} அசைச் சீர்</span>
         </div>
 
-        <!-- Score progress bar -->
-        <div class="score-progress-bar">
-          <div class="bar-bg">
-            <div class="bar-fill" [style.width.%]="total() > 0 ? (score() / total() * 100) : 0"></div>
-          </div>
-          <span class="score-text">{{ score() }}/{{ total() }}</span>
-        </div>
-
-        <p class="hint-text">அசைகளைத் தேர்ந்தெடுத்து சீரை உருவாக்குங்கள்</p>
-
-        @if (question(); as q) {
-          <!-- Target word -->
-          <div class="target-word animate-pop">
-            {{ q.fruit }} {{ q.name }}
-          </div>
-
-          <!-- Slots -->
-          <div class="slots-container">
-            @for (slot of q.pattern; track $index) {
-              <div class="pattern-slot" 
-                [class.filled]="builtPattern()[$index]"
-                [class.neer]="builtPattern()[$index] === 'நேர்'"
-                [class.nirai]="builtPattern()[$index] === 'நிரை'">
-                {{ builtPattern()[$index] ? (builtPattern()[$index] === 'நேர்' ? 'நே' : 'நி') : ($index + 1) }}
-              </div>
-            }
-          </div>
-
-          @if (buildResult(); as result) {
-            <div class="build-status-card" [class.correct]="result === 'correct'" [class.wrong]="result === 'wrong'">
-              {{ result === 'correct' ? '✓ சரி!' : '✗ தவறு — ' + q.mnemonic }}
+        <!-- TOWER SLOTS CONTAINER -->
+        <div class="tower-slots-row d-flex justify-content-center gap-3 mb-4">
+          @for (slot of q.pattern; track $index) {
+            <div class="tower-slot rounded-4 d-flex flex-column align-items-center justify-content-center fw-extrabold transition-all shadow-sm"
+                 [class.slot-empty]="!builtPattern()[$index]"
+                 [class.slot-neer]="builtPattern()[$index] === 'நேர்'"
+                 [class.slot-nirai]="builtPattern()[$index] === 'நிரை'"
+                 style="width: 76px; height: 86px; border: 3px dashed #CBD5E1; font-size: 1.25rem;">
+              @if (builtPattern()[$index]; as asaiVal) {
+                <span class="fs-5 mb-0.5">{{ asaiVal === 'நேர்' ? '❙' : '❙❙' }}</span>
+                <span>{{ asaiVal }}</span>
+              } @else {
+                <span class="text-muted opacity-50 small">{{ $index + 1 }}</span>
+              }
             </div>
           }
+        </div>
 
-          <!-- Builder Buttons -->
-          <div class="action-buttons-row">
-            <button class="asai-btn neer-btn" [disabled]="buildResult() || builtPattern().length >= q.pattern.length" (click)="addAsai('நேர்')">
-              <span class="asai-title">நேர்</span>
-              <span class="asai-sub">■ சதுரம்</span>
-            </button>
-
-            <button class="asai-btn nirai-btn" [disabled]="buildResult() || builtPattern().length >= q.pattern.length" (click)="addAsai('நிரை')">
-              <span class="asai-title">நிரை</span>
-              <span class="asai-sub">● வட்டம்</span>
-            </button>
-
-            <button class="asai-btn undo-btn" [disabled]="buildResult() || builtPattern().length === 0" (click)="removeLastAsai()">
-              <span class="asai-title">↩</span>
-              <span class="asai-sub">நீக்கு</span>
-            </button>
+        <!-- RESULT ANIMATION CARD -->
+        @if (buildResult(); as result) {
+          <div class="result-banner p-3 rounded-4 fw-bold mb-4 shadow-sm animate-pop-in"
+               [class.bg-success-subtle]="result === 'correct'"
+               [class.text-success]="result === 'correct'"
+               [class.bg-danger-subtle]="result === 'wrong'"
+               [class.text-danger]="result === 'wrong'">
+            <div class="fs-3 mb-1">{{ result === 'correct' ? '🎉' : '❌' }}</div>
+            <div>{{ result === 'correct' ? 'அற்புதமான சேர்க்கை! (Correct!)' : 'தவறு! சரியான வாய்ப்பாடு: ' + q.mnemonic }}</div>
           </div>
         }
-      </div>
+
+        <!-- BUILDER TOUCH BUTTONS -->
+        <div class="d-flex align-items-center justify-content-center gap-3">
+          <button class="btn btn-asai btn-neer flex-grow-1 p-3 rounded-4 fw-extrabold border-0 shadow transition-all"
+                  [disabled]="buildResult() !== null || builtPattern().length >= q.pattern.length"
+                  (click)="addAsai('நேர்')"
+                  style="background: linear-gradient(135deg, #4F46E5, #3730A3); color: white;">
+            <div class="fs-4 mb-0.5">❙</div>
+            <div style="font-size: 1.1rem;">நேர்</div>
+            <small class="fw-normal opacity-75" style="font-size: 0.72rem;">1 தட்டு (Single)</small>
+          </button>
+
+          <button class="btn btn-asai btn-nirai flex-grow-1 p-3 rounded-4 fw-extrabold border-0 shadow transition-all"
+                  [disabled]="buildResult() !== null || builtPattern().length >= q.pattern.length"
+                  (click)="addAsai('நிரை')"
+                  style="background: linear-gradient(135deg, #059669, #047857); color: white;">
+            <div class="fs-4 mb-0.5">❙❙</div>
+            <div style="font-size: 1.1rem;">நிரை</div>
+            <small class="fw-normal opacity-75" style="font-size: 0.72rem;">2 தட்டு (Double)</small>
+          </button>
+
+          <button class="btn btn-light p-3 rounded-4 fw-bold border shadow-xs d-flex flex-column align-items-center justify-content-center"
+                  [disabled]="buildResult() !== null || builtPattern().length === 0"
+                  (click)="removeLastAsai()"
+                  style="width: 64px; height: 82px;"
+                  title="Undo last block">
+            <i class="bi bi-arrow-counterclockwise fs-4 text-secondary"></i>
+            <small class="text-muted" style="font-size: 0.7rem;">நீக்கு</small>
+          </button>
+        </div>
+      }
+
     </div>
 
   </div>
 </div>
+

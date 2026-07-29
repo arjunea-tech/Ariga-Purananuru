@@ -85,6 +85,17 @@ export class StudentProgressComponent implements OnInit {
   streakDays = signal<number>(0);
   totalXp = signal<number>(0);
 
+  // Weekly Activity Bar Chart signal
+  weeklyActivity = signal<{ day: string; fullDay: string; count: number; active: boolean; heightPct: number }[]>([
+    { day: 'Mon', fullDay: 'Monday', count: 0, active: false, heightPct: 15 },
+    { day: 'Tue', fullDay: 'Tuesday', count: 0, active: false, heightPct: 15 },
+    { day: 'Wed', fullDay: 'Wednesday', count: 0, active: false, heightPct: 15 },
+    { day: 'Thu', fullDay: 'Thursday', count: 0, active: false, heightPct: 15 },
+    { day: 'Fri', fullDay: 'Friday', count: 0, active: false, heightPct: 15 },
+    { day: 'Sat', fullDay: 'Saturday', count: 0, active: false, heightPct: 15 },
+    { day: 'Sun', fullDay: 'Sunday', count: 0, active: false, heightPct: 15 },
+  ]);
+
   moduleProgressList = signal<ModuleProgressItem[]>([]);
 
   earnedBadgesList = signal<BadgeItem[]>([]);
@@ -189,6 +200,9 @@ export class StudentProgressComponent implements OnInit {
       } else if (typeof data.average_score === 'number') {
         this.accuracyPercentage.set(Math.round(data.average_score));
       }
+
+      // Build Weekly Activity Bar Chart
+      this.buildWeeklyActivity(data.weekly_activity, this.streakDays(), this.questionsAnswered());
 
       // 100% Dynamic module progress from backend DB levels
       if (data.module_progressions && Array.isArray(data.module_progressions) && data.module_progressions.length > 0) {
@@ -314,8 +328,7 @@ export class StudentProgressComponent implements OnInit {
     this.http.post<any>(`${environment.apiUrl}/student/reset-progress`, {}, { headers }).subscribe({
       next: () => {
         this.notificationService.show('success', 'Progress reset to 0%!');
-        const today = new Date().toISOString().split('T')[0];
-        localStorage.removeItem(`study_seconds_${today}`);
+        // Study time is tracked in-memory (no localStorage to clear)
         this.loadProgressData();
       },
       error: (err) => {
@@ -327,5 +340,52 @@ export class StudentProgressComponent implements OnInit {
 
   private showFeedback(type: 'success' | 'error', text: string): void {
     this.notificationService.show(type, text);
+  }
+
+  buildWeeklyActivity(backendWeekly?: any[], streak: number = 0, totalQuestions: number = 0): void {
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const fullDays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    const todayIndex = (new Date().getDay() + 6) % 7; // Convert 0(Sun)-6(Sat) to 0(Mon)-6(Sun)
+
+    let activityMap: Record<number, number> = {};
+
+    if (Array.isArray(backendWeekly) && backendWeekly.length > 0) {
+      backendWeekly.forEach((item: any, idx: number) => {
+        if (typeof item === 'number') {
+          activityMap[idx] = item;
+        } else if (item && typeof item.count === 'number') {
+          activityMap[idx] = item.count;
+        }
+      });
+    } else {
+      if (streak > 0 || totalQuestions > 0) {
+        const activeCount = Math.min(7, Math.max(1, streak));
+        for (let i = 0; i < activeCount; i++) {
+          const idx = (todayIndex - i + 7) % 7;
+          activityMap[idx] = Math.max(1, Math.floor((totalQuestions || 5) / activeCount));
+        }
+      }
+    }
+
+    const maxCount = Math.max(1, ...Object.values(activityMap), 10);
+
+    const result = days.map((day, idx) => {
+      const count = activityMap[idx] || 0;
+      const active = count > 0 || (streak > 0 && idx <= todayIndex && (todayIndex - idx) < streak);
+      const displayCount = count > 0 ? count : (active ? 1 : 0);
+      const heightPct = active 
+        ? Math.max(25, Math.min(100, Math.round((displayCount / maxCount) * 100))) 
+        : 15;
+
+      return {
+        day,
+        fullDay: fullDays[idx],
+        count: displayCount,
+        active,
+        heightPct
+      };
+    });
+
+    this.weeklyActivity.set(result);
   }
 }

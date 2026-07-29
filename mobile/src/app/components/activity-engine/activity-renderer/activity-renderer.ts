@@ -18,11 +18,7 @@ import { LetterBasketComponent, LetterBasketData } from '../letter-basket/letter
 import { BalloonPopComponent, BalloonPopData } from '../balloon-pop/balloon-pop';
 import { WordBuilderComponent, WordBuilderData } from '../word-builder/word-builder';
 import { YappuFlashcardComponent } from '../yappu-flashcard/yappu-flashcard';
-import { YappuSeerComponent } from '../yappu-seer/yappu-seer';
-import { YappuSeerP2nComponent } from '../yappu-seer-p2n/yappu-seer-p2n';
-import { YappuSeerN2pComponent } from '../yappu-seer-n2p/yappu-seer-n2p';
 import { YappuSeerBuildComponent } from '../yappu-seer-build/yappu-seer-build';
-import { YappuSeerSpeedComponent } from '../yappu-seer-speed/yappu-seer-speed';
 import { YappuSeerMatchComponent } from '../yappu-seer-match/yappu-seer-match';
 import { YappuAsaiSliceComponent } from '../yappu-asai-slice/yappu-asai-slice';
 import { YappuAsaiDetectiveComponent } from '../yappu-asai-detective/yappu-asai-detective';
@@ -102,11 +98,7 @@ export interface NormalizedActivity {
     BalloonPopComponent,
     WordBuilderComponent,
     YappuFlashcardComponent,
-    YappuSeerComponent,
-    YappuSeerP2nComponent,
-    YappuSeerN2pComponent,
     YappuSeerBuildComponent,
-    YappuSeerSpeedComponent,
     YappuSeerMatchComponent,
     YappuAsaiSliceComponent,
     YappuAsaiDetectiveComponent

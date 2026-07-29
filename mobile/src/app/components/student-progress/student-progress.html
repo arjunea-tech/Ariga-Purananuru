@@ -274,6 +274,55 @@
           </div>
         </div>
 
+        <!-- Weekly Activity Bar Chart Section -->
+        <div class="card border-0 rounded-4 p-3.5 mb-3 shadow-sm" style="background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%); border: 1px solid #E2E8F0 !important;">
+          <div class="d-flex align-items-center justify-content-between mb-3">
+            <div>
+              <h6 class="fw-bold text-dark mb-0 d-flex align-items-center gap-2" style="font-size: 0.95rem;">
+                <i class="bi bi-bar-chart-fill text-primary"></i>
+                Weekly Activity (வாராந்திர பயிற்சி)
+              </h6>
+              <span class="small text-muted" style="font-size: 0.72rem;">Lessons & Quizzes completed this week</span>
+            </div>
+            <span class="badge bg-primary bg-opacity-10 text-primary fw-bold rounded-pill px-2.5 py-1 small">
+              🔥 {{ streakDays() }} Day Streak
+            </span>
+          </div>
+
+          <!-- Bar Chart Bars -->
+          <div class="d-flex align-items-end justify-content-between gap-2 pt-2 pb-1 px-1" style="height: 135px;">
+            @for (item of weeklyActivity(); track item.day) {
+              <div class="d-flex flex-column align-items-center flex-grow-1 h-100 justify-content-end" style="min-width: 0;">
+                <!-- Count Badge above Bar -->
+                <span class="fw-extrabold mb-1.5" style="font-size: 0.72rem;" [class.text-primary]="item.active" [class.text-muted]="!item.active">
+                  {{ item.count }}
+                </span>
+                
+                <!-- Bar Track -->
+                <div class="w-100 rounded-pill position-relative overflow-hidden" 
+                     style="background: #E2E8F0; max-width: 28px; height: 80px;">
+                  <!-- Filled Bar -->
+                  <div class="w-100 position-absolute bottom-0 start-0 rounded-pill transition-all"
+                       [style.height.%]="item.heightPct"
+                       [ngStyle]="{
+                         'background': item.active 
+                           ? 'linear-gradient(180deg, #3B82F6 0%, #1D4ED8 100%)' 
+                           : 'linear-gradient(180deg, #CBD5E1 0%, #94A3B8 100%)',
+                         'box-shadow': item.active ? '0 4px 12px rgba(59, 130, 246, 0.35)' : 'none'
+                       }">
+                  </div>
+                </div>
+
+                <!-- Day Name -->
+                <span class="fw-bold mt-2 text-truncate" style="font-size: 0.75rem;" 
+                      [class.text-primary]="item.active" [class.text-secondary]="!item.active">
+                  {{ item.day }}
+                </span>
+              </div>
+            }
+          </div>
+        </div>
+
         <!-- Metrics Cards Grid -->
         <div class="metrics-grid mb-3">
           <div class="metric-card card border-0 shadow-sm p-3">

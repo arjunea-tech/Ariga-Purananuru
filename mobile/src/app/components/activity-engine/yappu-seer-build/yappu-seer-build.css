@@ -6,56 +6,55 @@
 
 .seer-container {
   min-height: 100%;
-  background: linear-gradient(135deg, #e0f2fe 0%, #f5f3ff 100%);
+  background: linear-gradient(180deg, #F0F9FF 0%, #F8FAFC 100%);
   color: #1e293b;
-  font-family: 'Outfit', 'Noto Sans Tamil', 'Inter', sans-serif;
-  padding: 24px 16px;
+  font-family: 'Baloo Thambi 2', 'Outfit', 'Inter', sans-serif;
+  padding: 16px;
   box-sizing: border-box;
-  position: relative;
-  overflow-x: hidden;
-}
-
-/* Playful background decorative shapes */
-.seer-container::before {
-  content: '🎈';
-  position: absolute;
-  top: 10%;
-  left: 5%;
-  font-size: 2.5rem;
-  opacity: 0.15;
-  animation: floatEmoji 6s ease-in-out infinite alternate;
-  pointer-events: none;
-}
-
-.seer-container::after {
-  content: '⭐';
-  position: absolute;
-  bottom: 12%;
-  right: 6%;
-  font-size: 2.2rem;
-  opacity: 0.15;
-  animation: floatEmoji 5s ease-in-out infinite alternate-reverse;
-  pointer-events: none;
-}
-
-@keyframes floatEmoji {
-  0% { transform: translateY(0) rotate(0deg); }
-  100% { transform: translateY(-15px) rotate(10deg); }
 }
 
 .seer-stage {
-  max-width: 440px;
+  max-width: 460px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  z-index: 2;
 }
 
-.seer-header {
-  text-align: center;
-  padding: 10px 0 15px;
-  margin-bottom: 20px;
+.slot-empty {
+  background: #F8FAFC;
+  color: #94A3B8;
+}
+
+.slot-neer {
+  background: linear-gradient(135deg, #4F46E5, #3730A3) !important;
+  color: #FFFFFF !important;
+  border: 3px solid #6366F1 !important;
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35) !important;
+  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.slot-nirai {
+  background: linear-gradient(135deg, #059669, #047857) !important;
+  color: #FFFFFF !important;
+  border: 3px solid #10B981 !important;
+  box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35) !important;
+  animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.btn-asai:active {
+  transform: scale(0.95);
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.7); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.animate-bounce {
+  animation: bounce 2s ease-in-out infinite;
 }
 
 .logo-sub {

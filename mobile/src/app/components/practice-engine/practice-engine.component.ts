@@ -736,16 +736,8 @@ export class PracticeEngineComponent implements OnInit {
       this.allCorrect = allThalaiCorrect;
       if (allThalaiCorrect) {
         this.showFeedback('அற்புதம்! முழுமையாக அலகிட்டு முடித்துவிட்டீர்கள். 🌟', 'success');
-        try {
-          const modKey = this.practiceType || 'asai';
-          localStorage.setItem(`${modKey}_completed`, 'true');
-          const completedModsRaw = localStorage.getItem('completed_modules');
-          const completedMods: string[] = completedModsRaw ? JSON.parse(completedModsRaw) : [];
-          if (!completedMods.includes(modKey)) {
-            completedMods.push(modKey);
-            localStorage.setItem('completed_modules', JSON.stringify(completedMods));
-          }
-        } catch (e) { }
+        // Module completion is tracked server-side only — no localStorage caching
+
         setTimeout(() => {
           this.step = 'result';
           this.practiceCompleted.emit();

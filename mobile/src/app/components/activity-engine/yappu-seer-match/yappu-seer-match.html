@@ -2,58 +2,76 @@
   <div class="seer-stage">
     
     <!-- HEADER BAR -->
-    <div class="seer-header">
-      <div class="header-logo">
-        <span class="logo-sub">யாப்பு விளையாட்டு</span>
-        <h1 class="logo-title">ஜோடி பொருத்து</h1>
+    <div class="seer-header text-center mb-3">
+      <div class="d-flex align-items-center justify-content-between mb-2">
+        <span class="badge bg-purple-subtle text-purple fw-bold rounded-pill px-3 py-1" style="background: #F3E8FF; color: #7E22CE;">
+          🧩 சீர்ப் புதிர் (Jigsaw Snap)
+        </span>
+        <span class="badge bg-light text-dark fw-bold border rounded-pill px-3 py-1">
+          🎯 Moves: {{ matchMoves() }}
+        </span>
       </div>
     </div>
 
-    <!-- GAMEPLAY SCREEN -->
-    <div class="screen-play animate-fade">
-      <div class="game-mode-box">
-        <div class="game-nav-bar">
-          <span class="move-counter">நகர்வுகள்: {{ matchMoves() }}</span>
+    <!-- GAMEPLAY AREA -->
+    <div class="screen-play bg-white rounded-5 shadow-sm p-4 text-center position-relative border border-2 border-light overflow-hidden">
+      
+      <p class="text-secondary small fw-bold mb-3">
+        அட்டை அட்டையாகத் தொட்டு சரியான சீர் ஜோடியைக் கண்டுபிடியுங்கள்! 🧩
+      </p>
+
+      @if (matchWon()) {
+        <div class="match-success bg-success-subtle text-success p-4 rounded-4 fw-bold mb-4 shadow-sm animate-pop-in border border-success border-opacity-25">
+          <div class="fs-1 mb-2">🎉 🏆</div>
+          <h4 class="fw-extrabold mb-1">அற்புதமான வெற்றி!</h4>
+          <p class="small text-muted mb-3">{{ matchMoves() }} நகர்வுகளில் அனைத்து ஜோடிகளையும் கண்டுபிடித்தீர்கள்!</p>
+          <button class="btn btn-success rounded-pill px-4 py-2 fw-bold shadow-sm" (click)="setupMatchPairs()">
+            <i class="bi bi-arrow-clockwise me-1"></i> மீண்டும் விளையாடு
+          </button>
         </div>
+      }
 
-        @if (matchWon()) {
-          <div class="match-success animate-pop">
-            <span class="success-message">🎉 வெற்றி! {{ matchMoves() }} நகர்வுகளில் முடித்தீர்கள்!</span>
-            <button class="btn-primary-sm" (click)="setupMatchPairs()">மீண்டும்</button>
-          </div>
-        }
-
-        <div class="cards-grid">
-          @for (card of matchCards(); track card.id; let idx = $index) {
-            <button class="card-item"
-              [class.flipped]="matchFlipped().includes(idx) || matchMatched().has(card.matchId)"
-              [class.matched]="matchMatched().has(card.matchId)"
-              [class.incorrect]="matchIncorrect().includes(idx)"
-              (click)="handleCardFlip(idx)">
+      <div class="cards-grid row g-2 justify-content-center">
+        @for (card of matchCards(); track card.id; let idx = $index) {
+          <div class="col-6 col-sm-4">
+            <button class="btn puzzle-card-item w-100 p-3 rounded-4 border-2 shadow-xs d-flex flex-column align-items-center justify-content-center transition-all"
+                    [class.flipped]="matchFlipped().includes(idx) || matchMatched().has(card.matchId)"
+                    [class.matched]="matchMatched().has(card.matchId)"
+                    [class.incorrect]="matchIncorrect().includes(idx)"
+                    [disabled]="matchMatched().has(card.matchId)"
+                    (click)="handleCardFlip(idx)"
+                    style="min-height: 95px; border-color: #DDD6FE !important;">
               
               @if (matchFlipped().includes(idx) || matchMatched().has(card.matchId)) {
                 @if (card.type === 'name') {
-                  <div class="card-face card-name">
-                    <span class="fruit-emoji">{{ card.fruit }}</span>
-                    <span class="name-text">{{ card.name }}</span>
+                  <div class="card-face d-flex flex-column align-items-center">
+                    <span class="fs-3 mb-0.5 animate-bounce">{{ card.fruit }}</span>
+                    <span class="fw-extrabold text-purple-900" style="color: #581C87; font-size: 1.1rem;">{{ card.name }}</span>
                   </div>
                 } @else {
-                  <div class="card-face card-pattern">
-                    @for (asai of card.pattern; track $index) {
-                      <span class="asai-badge xs" [class.neer]="asai === 'நேர்'" [class.nirai]="asai === 'நிரை'">
-                        {{ asai === 'நேர்' ? 'நே' : 'நி' }}
-                      </span>
-                    }
+                  <div class="card-face d-flex flex-column align-items-center">
+                    <div class="d-flex gap-1 mb-1">
+                      @for (asai of card.pattern; track $index) {
+                        <span class="badge rounded-pill text-white fw-bold px-2 py-1"
+                              [style.background]="asai === 'நேர்' ? '#4F46E5' : '#059669'">
+                          {{ asai }}
+                        </span>
+                      }
+                    </div>
                   </div>
                 }
               } @else {
-                <div class="card-face card-back">?</div>
+                <div class="card-face card-back text-purple-600 fw-extrabold fs-2 opacity-50" style="color: #7E22CE;">
+                  ❓
+                </div>
               }
             </button>
-          }
-        </div>
+          </div>
+        }
       </div>
+
     </div>
 
   </div>
 </div>
+

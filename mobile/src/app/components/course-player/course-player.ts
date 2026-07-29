@@ -334,35 +334,8 @@ export class CoursePlayer implements OnInit, OnDestroy {
   }
 
   saveLocalProgress(): void {
-    const cid = this.courseId();
-    if (!cid) return;
-    const uid = this.userId();
-    try {
-      const levelsKey = `lang_app_completed_levels_${uid}_${cid}`;
-      const chaptersKey = `lang_app_completed_chapters_${uid}_${cid}`;
-      localStorage.setItem(levelsKey, JSON.stringify(this.completedLevelIds()));
-      localStorage.setItem(chaptersKey, JSON.stringify(this.completedChapterIds()));
-
-      // Synchronize with legacy global keys and module completion keys
-      const existingLegacyRaw = localStorage.getItem('completed_chapters');
-      const existingLegacy: number[] = existingLegacyRaw ? JSON.parse(existingLegacyRaw) : [];
-      const mergedChapters = Array.from(new Set([...existingLegacy, ...this.completedChapterIds()]));
-      localStorage.setItem('completed_chapters', JSON.stringify(mergedChapters));
-
-      if (mergedChapters.length > 0) {
-        const activeLevel = this.activeLevelId() ? String(this.activeLevelId()) : 'level_1';
-        localStorage.setItem(`${activeLevel}_completed`, 'true');
-        const completedModsRaw = localStorage.getItem('completed_modules');
-        const completedMods: string[] = completedModsRaw ? JSON.parse(completedModsRaw) : [];
-        if (!completedMods.includes(activeLevel)) {
-          completedMods.push(activeLevel);
-          localStorage.setItem('completed_modules', JSON.stringify(completedMods));
-          localStorage.setItem(`lang_app_completed_modules_${uid}`, JSON.stringify(completedMods));
-        }
-      }
-    } catch (e) {
-      console.error('Failed to save local progress:', e);
-    }
+    // Progress is stored exclusively in the database via /chapters/{id}/complete API.
+    // No localStorage caching — all reads come from loadDatabaseProgress().
   }
 
   isLevelUnlocked(levelId: number): boolean {

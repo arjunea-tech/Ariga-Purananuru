@@ -32,9 +32,8 @@
 
       <div class="horizontal-scroll-wrapper mb-2" (scroll)="onCourseScroll($event)">
         @for (course of assignedCourses(); track course.id; let i = $index) {
-          <!-- Gamified Course Card (World/Island) -->
+          <!-- Clean White Course Card -->
           <div class="continue-learning-card p-4 animate-slide-up-1 position-relative" 
-               [style.background]="getCourseGradient(i)"
                [class.active-course]="currentScrollIndex() === i"
                (click)="startNextLesson(course)">
             
@@ -53,39 +52,30 @@
             }
             
             <div class="carousel-slide h-100 d-flex flex-column" style="z-index: 2; position: relative;">
-              <div class="d-flex justify-content-between align-items-start mb-3">
-                <span class="course-badge fw-bold shadow-sm" style="background: rgba(255,255,255,0.9); color: #333;">பயிற்சியில் உள்ளது</span>
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="course-badge fw-bold shadow-xs">பயிற்சியில் உள்ளது</span>
               </div>
 
-              <h3 class="course-title mb-3 text-white fw-bold drop-shadow-text">{{ course.name || course.title }}</h3>
+              <h3 class="course-title mb-3 fw-bold">{{ course.name || course.title }}</h3>
 
               <div class="d-flex justify-content-between align-items-end mt-auto">
                 <div class="flex-grow-1 me-3">
-                  <div class="d-flex justify-content-between mb-2 align-items-center">
-                    <span class="small fw-bold text-white drop-shadow-text">Progress</span>
-                    <div class="d-flex align-items-center gap-2">
-                      <!-- Locked Reward Preview -->
-                      @if (course.progress < 100) {
-                        <div class="reward-preview" title="Complete level to unlock badge!">
-                          <i class="bi bi-award-fill text-white opacity-50"></i>
-                          <i class="bi bi-lock-fill text-white lock-icon"></i>
-                        </div>
-                      }
-                      <span class="small fw-bold text-white drop-shadow-text">{{ course.progress }}%</span>
-                    </div>
+                  <div class="d-flex justify-content-between mb-1.5 align-items-center">
+                    <span class="small fw-bold text-secondary">Progress</span>
+                    <span class="small fw-extrabold text-primary" style="font-size: 0.88rem;">{{ course.progress }}%</span>
                   </div>
-                  <div class="progress-track bg-white shadow-sm" style="background: rgba(255,255,255,0.4) !important;">
+                  <div class="progress-track bg-light shadow-xs" style="background: #E2E8F0 !important;">
                     <div class="progress-fill" 
                          [style.width.%]="course.progress"
-                         [style.background]="getCourseProgressColor(i)">
+                         style="background: linear-gradient(90deg, #0EA5E9 0%, #2563EB 100%) !important;">
                     </div>
                   </div>
                 </div>
 
-                <button class="btn btn-play shadow-lg d-flex align-items-center gap-2 border border-2 border-white"
+                <button class="btn btn-play shadow-sm d-flex align-items-center gap-1.5"
                         [class.pulse-btn]="currentScrollIndex() === i"
-                        style="background: #FFFFFF !important; color: #333 !important;">
-                  தொடர்க <i class="bi bi-play-fill fs-5" [style.color]="getCourseProgressColor(i)"></i>
+                        style="background: #0EA5E9 !important; color: #FFFFFF !important; border: none;">
+                  தொடர்க <i class="bi bi-play-fill fs-5 text-white"></i>
                 </button>
               </div>
             </div>
