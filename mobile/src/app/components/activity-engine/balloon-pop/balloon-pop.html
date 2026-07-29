@@ -1,79 +1,120 @@
 <div class="balloon-game-container">
   
-  <!-- Drifting background clouds -->
-  <div class="clouds-container">
-    <div class="cloud cloud-1"></div>
-    <div class="cloud cloud-2"></div>
-    <div class="cloud cloud-3"></div>
+  <!-- Atmosphere Background Layers -->
+  <div class="sky-decor-layer">
+    <div class="sun-glow"></div>
+    <div class="clouds-container">
+      <div class="cloud cloud-1"></div>
+      <div class="cloud cloud-2"></div>
+      <div class="cloud cloud-3"></div>
+    </div>
   </div>
 
+  <!-- START OVERLAY SCREEN -->
   @if (gameState() === 'start') {
-    <div class="overlay-card start-card">
-      <div class="decor-balloons">
-        <div class="decor-balloon red"></div>
-        <div class="decor-balloon blue"></div>
-        <div class="decor-balloon yellow"></div>
-      </div>
-      <h2 class="game-title">பலூன் அசை விளையாட்டு!</h2>
-      <p class="game-subtitle">Balloon Pop Speed Challenge</p>
-      
-      <div class="instruction-box">
-        <h4 class="ins-title">விளையாட்டு முறை (How to Play):</h4>
-        <ul>
-          <li>கீழிருந்து மேல் மிதந்து வரும் பலூன்களில் தமிழ் <strong>அசைகள்</strong> (syllables) இருக்கும்.</li>
-          <li>கேட்கப்படும் அசைக்குரிய பலூன்களை மட்டும் தட்டவும்.</li>
-          <li>சரியான பலூனுக்கு <span class="badge score-plus">+10</span> புள்ளிகள்.</li>
-          <li>தவறான பலூனுக்கு <span class="badge score-minus">-5</span> புள்ளிகள் குறையும்.</li>
-          <li>நேர வரம்பு: <strong>30 வினாடிகள்</strong></li>
-          <li>வெற்றி பெற குறைந்தது <strong>40 புள்ளிகள்</strong> எடுக்க வேண்டும்.</li>
-        </ul>
-      </div>
+    <div class="overlay-wrapper animate-pop-in">
+      <div class="overlay-card start-card">
+        <div class="decor-balloons">
+          <div class="decor-balloon balloon-red">
+            <span>நேர்</span>
+            <div class="string"></div>
+          </div>
+          <div class="decor-balloon balloon-yellow">
+            <span>நிரை</span>
+            <div class="string"></div>
+          </div>
+          <div class="decor-balloon balloon-blue">
+            <span>நேர்</span>
+            <div class="string"></div>
+          </div>
+        </div>
 
-      <div class="setup-details">
-        <span class="setup-badge">நிலை (Level): {{ targetLevel() }}</span>
-        <span class="setup-badge target-badge" [class.ner]="targetType() === 'ner'">
-          இலக்கு: {{ targetType() === 'ner' ? 'நேர் அசை (Ner)' : 'நிரை அசை (Nirai)' }}
-        </span>
-      </div>
+        <div class="game-badge-header mb-2">
+          <span class="badge-tag">🎈 அசை விளையாட்டு</span>
+        </div>
 
-      <button class="btn-start" (click)="startGame()">சவாலைத் தொடங்கு (Start Game)</button>
+        <h2 class="game-title">பலூன் உடைக்கும் சவால்!</h2>
+        <p class="game-subtitle">Balloon Pop Syllables Game</p>
+        
+        <div class="instruction-box">
+          <h4 class="ins-title">
+            <i class="bi bi-controller me-1"></i>விளையாடும் முறை:
+          </h4>
+          <ul>
+            <li>மிதந்து வரும் பலூன்களில் தமிழ் <strong>அசைகள்</strong> தோன்றும்.</li>
+            <li>கேட்கப்படும் இலக்கு அசைக்குரிய பலூன்களை மட்டும் தட்டி உடைக்கவும்!</li>
+            <li>சரியான பலூனுக்கு <span class="badge score-plus">+10</span> புள்ளிகள்!</li>
+            <li>தவறான பலூனுக்கு <span class="badge score-minus">-5</span> புள்ளிகள் குறையும்.</li>
+          </ul>
+        </div>
+
+        <div class="setup-details">
+          <div class="setup-pill level-pill">
+            <i class="bi bi-speedometer2 me-1"></i>நிலை {{ targetLevel() }}
+          </div>
+          <div class="setup-pill target-pill" [class.ner]="targetType() === 'ner'" [class.nirai]="targetType() === 'nirai'">
+            <i class="bi bi-crosshair me-1"></i>இலக்கு: {{ targetType() === 'ner' ? 'நேர் அசை (Ner)' : 'நிரை அசை (Nirai)' }}
+          </div>
+        </div>
+
+        <button class="btn-start-game hover-lift" (click)="startGame()">
+          <span>விளையாட்டைத் தொடங்கு 🚀</span>
+        </button>
+      </div>
     </div>
   }
 
+  <!-- ACTIVE PLAYING GAMEPLAY -->
   @if (gameState() === 'playing') {
-    <!-- Scoreboard and Timer panel -->
-    <div class="game-header">
-      <div class="header-stat">
-        <span class="stat-label">மதிப்பெண் (Score)</span>
-        <span class="stat-value">{{ score() }}</span>
-      </div>
-      
-      <div class="target-panel" [class.ner]="targetType() === 'ner'">
-        <span class="target-label">இலக்கு (Pop only):</span>
-        <span class="target-text">{{ targetType() === 'ner' ? 'நேர் அசை' : 'நிரை அசை' }}</span>
+    <!-- Top Deck HUD Panel -->
+    <div class="kids-hud-deck">
+      <div class="hud-top-row">
+        <!-- Score Widget -->
+        <div class="hud-widget score-widget">
+          <div class="widget-icon star-icon">⭐</div>
+          <div class="widget-content">
+            <span class="widget-label">புள்ளிகள்</span>
+            <span class="widget-val score-val">{{ score() }}</span>
+          </div>
+        </div>
+        
+        <!-- Target Goal Banner -->
+        <div class="target-goal-banner" [class.ner]="targetType() === 'ner'" [class.nirai]="targetType() === 'nirai'">
+          <div class="goal-icon">🎯</div>
+          <div class="goal-text-group">
+            <span class="goal-subtext">உடைக்க வேண்டியது:</span>
+            <span class="goal-maintext">{{ targetType() === 'ner' ? 'நேர் அசை' : 'நிரை அசை' }}</span>
+          </div>
+        </div>
+
+        <!-- Timer Widget -->
+        <div class="hud-widget timer-widget" [class.critical]="timeLeft() <= 10">
+          <div class="widget-icon clock-icon" [class.animate-pulse]="timeLeft() <= 10">⏱️</div>
+          <div class="widget-content">
+            <span class="widget-label">மீதி நேரம்</span>
+            <span class="widget-val timer-val">{{ timeLeft() }}<small>வி</small></span>
+          </div>
+        </div>
       </div>
 
-      <div class="header-stat">
-        <span class="stat-label">நேரம் (Timer)</span>
-        <span class="stat-value time-critical" [class.warning]="timeLeft() <= 10">{{ timeLeft() }}s</span>
+      <!-- Thick Visible Timer Gauge Bar -->
+      <div class="timer-gauge-track">
+        <div class="timer-gauge-fill" [style.width.%]="(timeLeft() / 30) * 100" [class.critical]="timeLeft() <= 10">
+          <div class="gauge-glow-tip"></div>
+        </div>
       </div>
     </div>
 
-    <!-- Timer progress bar -->
-    <div class="timer-bar-container">
-      <div class="timer-bar-fill" [style.width.%]="(timeLeft() / 30) * 100" [class.warning]="timeLeft() <= 10"></div>
-    </div>
-
-    <!-- Floating points container -->
+    <!-- Floating Points (+10 / -5) -->
     <div class="floating-points-layer">
       @for (fp of floatingPoints(); track fp.id) {
-        <div class="floating-point" [style.left.%]="fp.left" [style.color]="fp.color">
+        <div class="floating-point animate-float-up" [style.left.%]="fp.left" [style.color]="fp.color">
           {{ fp.text }}
         </div>
       }
     </div>
 
-    <!-- Active floating balloons -->
+    <!-- Active Floating Balloons Field -->
     <div class="balloon-field">
       @for (balloon of activeBalloons(); track balloon.id) {
         <div 
@@ -85,12 +126,18 @@
           (animationend)="onAnimationEnd(balloon)"
           (click)="popBalloon(balloon, $event)">
           
-          <div class="balloon" [style.backgroundColor]="balloon.color" [style.boxShadow]="'inset -10px -10px 0 rgba(0,0,0,0.15)'">
+          <div class="balloon-body" [style.backgroundColor]="balloon.color">
+            <div class="balloon-shine"></div>
             <span class="balloon-text">{{ balloon.text }}</span>
-            <div class="balloon-string"></div>
+            <div class="balloon-knot" [style.borderTopColor]="balloon.color"></div>
+            <div class="balloon-string-svg">
+              <svg width="14" height="40" viewBox="0 0 14 40" fill="none">
+                <path d="M7 0 C3 13, 11 27, 7 40" stroke="rgba(255,255,255,0.75)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+              </svg>
+            </div>
           </div>
           
-          <!-- Blast effect -->
+          <!-- Blast Particles Effect -->
           <div class="blast-particles">
             <div class="particle p-1" [style.backgroundColor]="balloon.color"></div>
             <div class="particle p-2" [style.backgroundColor]="balloon.color"></div>
@@ -104,45 +151,67 @@
     </div>
   }
 
+  <!-- GAME OVER / RESULTS OVERLAY SCREEN -->
   @if (gameState() === 'gameover') {
-    <div class="overlay-card gameover-card">
-      <h2 class="gameover-title" [class.success]="score() >= 40" [class.fail]="score() < 40">
-        {{ score() >= 40 ? 'வெற்றி! 🎉' : 'மீண்டும் முயற்சி செய்க! 👍' }}
-      </h2>
-      <p class="gameover-subtitle">விளையாட்டு முடிந்தது (Game Over)</p>
-
-      <div class="score-display">
-        <span class="score-num">{{ score() }}</span>
-        <span class="score-lbl">புள்ளிகள் (Points Obtained)</span>
-      </div>
-
-      <div class="stats-grid">
-        <div class="stat-box">
-          <span class="stat-box-lbl text-success">சரி (Correct Pops)</span>
-          <span class="stat-box-val">{{ correctPops() }}</span>
+    <div class="overlay-wrapper animate-pop-in">
+      <div class="overlay-card gameover-card">
+        <div class="result-icon-wrapper">
+          @if (score() >= 40) {
+            <div class="trophy-badge animate-bounce">🏆</div>
+          } @else {
+            <div class="try-badge animate-shake">🎯</div>
+          }
         </div>
-        <div class="stat-box">
-          <span class="stat-box-lbl text-danger">தவறு (Wrong Pops)</span>
-          <span class="stat-box-val">{{ incorrectPops() }}</span>
-        </div>
-        <div class="stat-box">
-          <span class="stat-box-lbl text-muted">தவறியவை (Missed Targets)</span>
-          <span class="stat-box-val">{{ missedBalloons() }}</span>
-        </div>
-      </div>
 
-      <div class="feedback-message">
-        @if (score() >= 80) {
-          <p class="text-success fw-bold">அற்புதம்! யாப்பிலக்கண அசைப் பிரித்தலில் நீங்கள் மிகச் சிறந்த தேர்ச்சி பெற்றுள்ளீர்கள்!</p>
-        } @else if (score() >= 40) {
-          <p class="text-info fw-bold">நன்று! அசைகளைச் சரியாகப் பிரித்து வெற்றிப் புள்ளிகளைப் பெற்றுள்ளீர்கள்!</p>
-        } @else {
-          <p class="text-warning fw-bold">நெடுநேரம் பயிற்சி செய்யுங்கள். குறில், நெடில், ஒற்றெழுத்து விதிகளை மீண்டும் படியுங்கள்.</p>
-        }
-      </div>
+        <h2 class="gameover-title" [class.success]="score() >= 40" [class.fail]="score() < 40">
+          {{ score() >= 40 ? 'வெற்றி! 🎉' : 'மீண்டும் முயற்சி செய்க! 👍' }}
+        </h2>
+        <p class="gameover-subtitle">விளையாட்டு முடிந்தது (Game Over)</p>
 
-      <div class="action-buttons">
-        <button class="btn-action btn-retry" (click)="startGame()">மீண்டும் விளையாடு (Try Again)</button>
+        <div class="score-card-hero">
+          <div class="score-num">{{ score() }}</div>
+          <div class="score-lbl">பெற்ற புள்ளிகள் (Points)</div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-pill-box success-box">
+            <i class="bi bi-check-circle-fill text-success"></i>
+            <div class="stat-info">
+              <span class="stat-val">{{ correctPops() }}</span>
+              <span class="stat-lbl">சரியானவை</span>
+            </div>
+          </div>
+          <div class="stat-pill-box danger-box">
+            <i class="bi bi-x-circle-fill text-danger"></i>
+            <div class="stat-info">
+              <span class="stat-val">{{ incorrectPops() }}</span>
+              <span class="stat-lbl">தவறானவை</span>
+            </div>
+          </div>
+          <div class="stat-pill-box muted-box">
+            <i class="bi bi-dash-circle-fill text-muted"></i>
+            <div class="stat-info">
+              <span class="stat-val">{{ missedBalloons() }}</span>
+              <span class="stat-lbl">தவறியவை</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="feedback-card-box">
+          @if (score() >= 80) {
+            <p class="text-success fw-bold mb-0">🌟 அற்புதம்! யாப்பிலக்கண அசைப் பிரித்தலில் மிகச் சிறந்த தேர்ச்சி பெற்றுள்ளீர்கள்!</p>
+          } @else if (score() >= 40) {
+            <p class="text-primary fw-bold mb-0">👏 நன்று! அசைகளைச் சரியாகப் பிரித்து வெற்றிப் புள்ளிகளைப் பெற்றுள்ளீர்கள்!</p>
+          } @else {
+            <p class="text-warning fw-bold mb-0">💪 தொடர்ந்து பயிற்சி செய்யுங்கள். நேரசை, நிரையசை விதிகளை மீண்டும் படியுங்கள்!</p>
+          }
+        </div>
+
+        <div class="action-buttons mt-3">
+          <button class="btn-start-game btn-retry hover-lift" (click)="startGame()">
+            <span>மீண்டும் விளையாடு 🔄</span>
+          </button>
+        </div>
       </div>
     </div>
   }

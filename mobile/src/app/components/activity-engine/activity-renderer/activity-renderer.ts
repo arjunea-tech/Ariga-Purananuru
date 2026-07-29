@@ -26,9 +26,11 @@ import { YappuSeerSpeedComponent } from '../yappu-seer-speed/yappu-seer-speed';
 import { YappuSeerMatchComponent } from '../yappu-seer-match/yappu-seer-match';
 import { YappuAsaiSliceComponent } from '../yappu-asai-slice/yappu-asai-slice';
 import { YappuAsaiDetectiveComponent } from '../yappu-asai-detective/yappu-asai-detective';
+import { EluthuFlashcardComponent } from '../eluthu-flashcard/eluthu-flashcard';
+import { EluthuDetectiveComponent } from '../eluthu-detective/eluthu-detective';
 
 export interface NormalizedActivity {
-  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard' | 'yappu_seer' | 'yappu_seer_p2n' | 'yappu_seer_n2p' | 'yappu_seer_build' | 'yappu_seer_speed' | 'yappu_seer_match' | 'yappu_asai_slice' | 'yappu_asai_detective';
+  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard' | 'eluthu_flashcard' | 'yappu_seer' | 'yappu_seer_p2n' | 'yappu_seer_n2p' | 'yappu_seer_build' | 'yappu_seer_speed' | 'yappu_seer_match' | 'yappu_asai_slice' | 'yappu_asai_detective' | 'eluthu_detective';
   question?: string;
   text?: string;
   front?: string;
@@ -109,7 +111,9 @@ export interface NormalizedActivity {
     YappuSeerSpeedComponent,
     YappuSeerMatchComponent,
     YappuAsaiSliceComponent,
-    YappuAsaiDetectiveComponent
+    YappuAsaiDetectiveComponent,
+    EluthuFlashcardComponent,
+    EluthuDetectiveComponent
   ],
   templateUrl: './activity-renderer.html',
   styleUrls: ['./activity-renderer.css']
@@ -228,6 +232,8 @@ export class ActivityRenderer implements OnChanges {
       type = 'word_builder';
     } else if (['yappu_flashcard', 'yappu-flashcard', 'yappuflashcard', 'flashcard_yappu'].includes(typeInput.toLowerCase())) {
       type = 'yappu_flashcard';
+    } else if (['eluthu_flashcard', 'eluthu-flashcard', 'eluthuflashcard'].includes(typeInput.toLowerCase())) {
+      type = 'eluthu_flashcard';
     } else if (['yappu_seer', 'yappu-seer', 'seer_game', 'seer-game'].includes(typeInput.toLowerCase())) {
       type = 'yappu_seer';
     } else if (typeInput.toLowerCase() === 'yappu_seer_p2n') {
@@ -244,6 +250,8 @@ export class ActivityRenderer implements OnChanges {
       type = 'yappu_asai_slice';
     } else if (['yappu_asai_detective', 'yappu-asai-detective'].includes(typeInput.toLowerCase())) {
       type = 'yappu_asai_detective';
+    } else if (['eluthu_detective', 'eluthu-detective'].includes(typeInput.toLowerCase())) {
+      type = 'eluthu_detective';
     }
 
     // 2. Extract explanation & options
@@ -339,7 +347,7 @@ export class ActivityRenderer implements OnChanges {
     } else if (type === 'word_builder') {
       normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.text = raw.text || raw.question_text || '';
-    } else if (type === 'yappu_flashcard') {
+    } else if (type === 'yappu_flashcard' || type === 'eluthu_flashcard') {
       normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.text = raw.text || raw.question_text || '';
       normalized.syllableCount = raw.syllableCount || additional.syllableCount || 1;
@@ -349,7 +357,7 @@ export class ActivityRenderer implements OnChanges {
     } else if (type === 'yappu_asai_slice') {
       normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.words = raw.words || additional.words || [];
-    } else if (type === 'yappu_asai_detective') {
+    } else if (type === 'yappu_asai_detective' || type === 'eluthu_detective') {
       normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.challenges = raw.challenges || additional.challenges || [];
       normalized.words = raw.words || additional.words || [];
@@ -499,6 +507,22 @@ export class ActivityRenderer implements OnChanges {
     this.answered.emit({
       questionId: this.activity?.id,
       type: 'yappu_flashcard',
+      ...event
+    });
+  }
+
+  onEluthuFlashcardAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'eluthu_flashcard',
+      ...event
+    });
+  }
+
+  onEluthuDetectiveAnswered(event: any): void {
+    this.answered.emit({
+      questionId: this.activity?.id,
+      type: 'eluthu_detective',
       ...event
     });
   }

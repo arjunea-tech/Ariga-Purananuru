@@ -304,6 +304,8 @@ export class LearnModulesComponent implements OnInit {
                             case 'true_false': title = 'சரி அல்லது தவறு'; break;
                             case 'yappu_asai_slice': title = 'அசை வெட்டு'; break;
                             case 'yappu_asai_detective': title = 'அசை பிழை திருத்துதல்'; break;
+                            case 'eluthu_flashcard': title = 'எழுத்து மின்னட்டை சவால்'; break;
+                            case 'eluthu_detective': title = 'எழுத்து பிழை திருத்துதல்'; break;
                             default: title = 'பயிற்சி விளையாட்டு'; break;
                           }
                         }
@@ -339,6 +341,8 @@ export class LearnModulesComponent implements OnInit {
                     case 'true_false': title = 'சரி அல்லது தவறு'; break;
                     case 'yappu_asai_slice': title = 'அசை வெட்டு'; break;
                     case 'yappu_asai_detective': title = 'அசை பிழை திருத்துதல்'; break;
+                    case 'eluthu_flashcard': title = 'எழுத்து மின்னட்டை சவால்'; break;
+                    case 'eluthu_detective': title = 'எழுத்து பிழை திருத்துதல்'; break;
                     default: title = 'பயிற்சி விளையாட்டு'; break;
                   }
                 }
@@ -379,6 +383,9 @@ export class LearnModulesComponent implements OnInit {
         case 'true_false': label = 'சரி அல்லது தவறு'; icon = 'bi-check-circle-fill'; color = '#F43F5E'; break; // rose
         case 'yappu_asai_slice': label = 'அசை வெட்டு'; icon = 'bi-scissors'; color = '#4F46E5'; break; // indigo
         case 'yappu_asai_detective': label = 'அசை பிழை திருத்துதல்'; icon = 'bi-search'; color = '#EA580C'; break; // orange
+        case 'yappu_flashcard': label = 'அசை மின்னட்டை சவால்'; icon = 'bi-card-heading'; color = '#0284C7'; break; // sky blue
+        case 'eluthu_flashcard': label = 'எழுத்து மின்னட்டை சவால்'; icon = 'bi-card-heading'; color = '#0284C7'; break; // sky blue
+        case 'eluthu_detective': label = 'எழுத்து பிழை திருத்துதல்'; icon = 'bi-pencil-square'; color = '#EA580C'; break; // orange
       }
 
       if (!groupsMap.has(act.type)) {

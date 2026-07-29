@@ -108,6 +108,14 @@
   <app-yappu-asai-detective [activity]="data" (answered)="onYappuSeerAnswered($event)">
   </app-yappu-asai-detective>
   }
+  @case ('eluthu_flashcard') {
+  <app-eluthu-flashcard [activity]="data" (answered)="onEluthuFlashcardAnswered($event)">
+  </app-eluthu-flashcard>
+  }
+  @case ('eluthu_detective') {
+  <app-eluthu-detective [activity]="data" (answered)="onEluthuDetectiveAnswered($event)">
+  </app-eluthu-detective>
+  }
   }
 </div>
 }

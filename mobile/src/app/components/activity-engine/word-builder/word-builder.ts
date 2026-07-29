@@ -166,6 +166,27 @@ export class WordBuilderComponent implements OnInit, OnChanges {
       });
     });
 
+    // Expand pool to at least 7-8 options if needed for challenging student choices
+    const EXTRA_DISTRACTOR_POOL = [
+      'தா', 'பூ', 'தீ', 'கூ', 'தே', 'மா', 'யா', 'வா', 'நாள்', 'கால்', 'தேர்', 'வேர்',
+      'கல்', 'மண்', 'பல்', 'வில்', 'சொல்', 'புல்', 'கண்', 'பண்', 'மகிழ்', 'பசு', 'பலா',
+      'மழை', 'குடை', 'நிலா', 'மனை', 'தமிழ்', 'சிலை', 'நடை', 'கிளி', 'குரல்', 'மலர்',
+      'கடல்', 'நகர்', 'கமல்', 'மனம்', 'தலை', 'கிளை', 'மலை', 'கனி', 'நதி', 'வழி', 'மொழி'
+    ];
+
+    let extraIndex = 0;
+    while (poolLetters.length < 7 && extraIndex < EXTRA_DISTRACTOR_POOL.length) {
+      const candidate = EXTRA_DISTRACTOR_POOL[extraIndex++];
+      if (!poolLetters.some(p => p.text === candidate)) {
+        poolLetters.push({
+          id: `extra-distractor-${letterCounter++}`,
+          text: candidate,
+          isUsed: false,
+          isDistractor: true
+        });
+      }
+    }
+
     // Shuffle the letter pool
     for (let i = poolLetters.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));

@@ -1176,6 +1176,180 @@ class EluthuActivitySeeder extends Seeder
                 'chapter_id' => $eluthuChapter->id,
                 'content_id' => $content->id,
             ]);
+
+            // 2. 'எழுத்து பொருத்துக - 50' (Eluthu Match Pairs)
+            Content::where('title', 'LIKE', '%எழுத்து பொருத்துக - 50%')
+                ->get()
+                ->each(function($oc) {
+                    DB::table('content_chapters')->where('content_id', $oc->id)->delete();
+                    $oc->delete();
+                });
+
+            $eluthuMatchPool = [
+                ['left' => 'அ, இ, உ, எ, ஒ', 'right' => '1 மாத்திரை (உயிர்க்குறில்)'],
+                ['left' => 'ஆ, ஈ, ஊ, ஏ, ஓ', 'right' => '2 மாத்திரை (உயிர்நெடில்)'],
+                ['left' => 'க், ங், ச், ஞ், ட்', 'right' => 'அரை (½) மாத்திரை (மெய்)'],
+                ['left' => 'ஃ (ஆய்தம்)', 'right' => 'அரை (½) மாத்திரை'],
+                ['left' => 'க், ச், ட், த், ப், ற்', 'right' => 'வல்லின மெய்'],
+                ['left' => 'ங், ஞ், ண், ந், ம், ன்', 'right' => 'மெல்லின மெய்'],
+                ['left' => 'ய், ர், ல், வ், ழ், ள்', 'right' => 'இடையின மெய்'],
+                ['left' => 'உயிர் எழுத்துகள்', 'right' => '12 எழுத்துகள்'],
+                ['left' => 'மெய் எழுத்துகள்', 'right' => '18 எழுத்துகள்'],
+                ['left' => 'உயிர்மெய் எழுத்துகள்', 'right' => '216 எழுத்துகள்'],
+                ['left' => 'சார்பெழுத்துகள்', 'right' => '10 வகைகள்'],
+                ['left' => 'தமிழ் மொத்த எழுத்துகள்', 'right' => '247 எழுத்துகள்']
+            ];
+
+            $eluthuMatchBlocks = [];
+            for ($emIdx = 0; $emIdx < 50; $emIdx++) {
+                $shuffled = $eluthuMatchPool;
+                shuffle($shuffled);
+                $selectedPairs = array_slice($shuffled, 0, 4);
+
+                $eluthuMatchBlocks[] = [
+                    'type' => 'activity',
+                    'data' => [
+                        'type'        => 'match',
+                        'title'       => 'எழுத்து பொருத்துக #' . ($emIdx + 1),
+                        'pairs'       => $selectedPairs,
+                        'explanation' => 'எழுத்துகளும் அவற்றின் மாத்திரை/வகை விளக்கங்களும் சரியாகப் பொருந்தியுள்ளன.'
+                    ]
+                ];
+            }
+
+            $contentEluthuMatch = Content::create([
+                'name'         => 'எழுத்து பொருத்துக - 50',
+                'title'        => 'எழுத்து பொருத்துக - 50',
+                'text_content' => json_encode(['blocks' => $eluthuMatchBlocks], JSON_UNESCAPED_UNICODE),
+                'is_active'    => true,
+            ]);
+
+            DB::table('content_chapters')->insert([
+                'chapter_id' => $eluthuChapter->id,
+                'content_id' => $contentEluthuMatch->id,
+            ]);
+
+            // 3. 'எழுத்து மின்னட்டை சவால் - 50' (Eluthu Flashcard Quiz)
+            Content::where('title', 'LIKE', '%எழுத்து மின்னட்டை சவால் - 50%')
+                ->get()
+                ->each(function($oc) {
+                    DB::table('content_chapters')->where('content_id', $oc->id)->delete();
+                    $oc->delete();
+                });
+
+            $eluthuFlashcardBlocks = [];
+            for ($efcIdx = 0; $efcIdx < 50; $efcIdx++) {
+                $eluthuFlashcardBlocks[] = [
+                    'type' => 'activity',
+                    'data' => [
+                        'type'          => 'eluthu_flashcard',
+                        'title'         => 'எழுத்து மின்னட்டை #' . ($efcIdx + 1),
+                        'text'          => 'அ, ஆ, இ, ஈ, உ, ஊ, எ, ஏ, ஐ, ஒ, ஓ, ஔ, க், ங், ச், ஞ், ட், ண், த், ந், ப், ம், ய், ர், ல், வ், ழ், ள், ற், ன்',
+                        'syllableCount' => 1,
+                        'explanation'   => 'எழுத்துகளின் இனம் மற்றும் மாத்திரை அளவைச் சரியாகக் கணித்துத் தேர்ச்சி பெற்றீர்கள்.'
+                    ]
+                ];
+            }
+
+            $contentEluthuFlashcard = Content::create([
+                'name'         => 'எழுத்து மின்னட்டை சவால் - 50',
+                'title'        => 'எழுத்து மின்னட்டை சவால் - 50',
+                'text_content' => json_encode(['blocks' => $eluthuFlashcardBlocks], JSON_UNESCAPED_UNICODE),
+                'is_active'    => true,
+            ]);
+
+            DB::table('content_chapters')->insert([
+                'chapter_id' => $eluthuChapter->id,
+                'content_id' => $contentEluthuFlashcard->id,
+            ]);
+
+            // 4. 'எழுத்து பிழை திருத்துதல் - 50' (Eluthu Detective / Error Spotting)
+            Content::where('title', 'LIKE', '%எழுத்து பிழை திருத்துதல் - 50%')
+                ->get()
+                ->each(function($oc) {
+                    DB::table('content_chapters')->where('content_id', $oc->id)->delete();
+                    $oc->delete();
+                });
+
+            $eluthuDetectiveList = [
+                ['word' => 'தமிழ்',   'correct' => ['த', 'மி', 'ழ்'],   'wrongs' => [['த', 'மி', 'ள்'], ['த', 'மி', 'ல்'], ['த', 'மி', 'ழ']]],
+                ['word' => 'கல்வி',   'correct' => ['க', 'ல்', 'வி'],   'wrongs' => [['க', 'ள்', 'வி'], ['க', 'ழ்', 'வி'], ['க', 'ல்', 'வ']]],
+                ['word' => 'மரம்',    'correct' => ['ம', 'ர', 'ம்'],    'wrongs' => [['ம', 'ற', 'ம்'], ['ம', 'ர', 'ன்'], ['ம', 'ற', 'ன்']]],
+                ['word' => 'பள்ளி',   'correct' => ['ப', 'ள்', 'ளி'],   'wrongs' => [['ப', 'ல்', 'லி'], ['ப', 'ழ்', 'ழி'], ['ப', 'ள', 'லி']]],
+                ['word' => 'அறம்',    'correct' => ['அ', 'ற', 'ம்'],    'wrongs' => [['அ', 'ர', 'ம்'], ['அ', 'ற', 'ன்'], ['அ', 'ர', 'ன்']]],
+                ['word' => 'பணி',    'correct' => ['ப', 'ணி'],         'wrongs' => [['ப', 'னி'], ['ப', 'நீ'], ['ப', 'ணீ']]],
+                ['word' => 'வளி',    'correct' => ['வ', 'ளி'],         'wrongs' => [['வ', 'லி'], ['வ', 'ழி'], ['வா', 'லி']]],
+                ['word' => 'அலை',    'correct' => ['அ', 'லை'],         'wrongs' => [['அ', 'ளை'], ['அ', 'ழை'], ['ஆ', 'லை']]],
+                ['word' => 'இலை',    'correct' => ['இ', 'லை'],         'wrongs' => [['இ', 'ளை'], ['இ', 'ழை'], ['ஈ', 'லை']]],
+                ['word' => 'கிளி',   'correct' => ['கி', 'ளி'],        'wrongs' => [['கி', 'லி'], ['கி', 'ழி'], ['கீ', 'ளி']]],
+                ['word' => 'புலி',   'correct' => ['பு', 'லி'],        'wrongs' => [['பு', 'ளி'], ['பு', 'ழி'], ['பூ', 'லி']]],
+                ['word' => 'மழை',    'correct' => ['ம', 'ழை'],         'wrongs' => [['ம', 'லை'], ['ம', 'ளை'], ['மா', 'ழை']]],
+                ['word' => 'வாழை',   'correct' => ['வா', 'ழை'],        'wrongs' => [['வா', 'லை'], ['வா', 'ளை'], ['வ', 'ழை']]],
+                ['word' => 'காளை',   'correct' => ['கா', 'ளை'],        'wrongs' => [['கா', 'லை'], ['கா', 'ழை'], ['க', 'ளை']]],
+                ['word' => 'பாறை',   'correct' => ['பா', 'றை'],        'wrongs' => [['பா', 'ரை'], ['ப', 'றை'], ['பா', 'ரே']]],
+                ['word' => 'சுவர்',   'correct' => ['சு', 'வ', 'ர்'],   'wrongs' => [['சு', 'வ', 'ற்'], ['சூ', 'வ', 'ர்'], ['சு', 'பா', 'ர்']]],
+                ['word' => 'பொன்',   'correct' => ['பொ', 'ன்'],        'wrongs' => [['பொ', 'ண்'], ['பொ', 'ன்ன்'], ['போ', 'ன்']]],
+                ['word' => 'கண்',    'correct' => ['க', 'ண்'],         'wrongs' => [['க', 'ன்'], ['கா', 'ண்'], ['க', 'ணி']]],
+                ['word' => 'மண்',    'correct' => ['ம', 'ண்'],         'wrongs' => [['ம', 'ன்'], ['மா', 'ண்'], ['ம', 'ணி']]],
+                ['word' => 'விண்',   'correct' => ['வி', 'ண்'],        'wrongs' => [['வி', 'ன்'], ['வீ', 'ண்'], ['வி', 'ணி']]],
+                ['word' => 'தான்',   'correct' => ['தா', 'ன்'],        'wrongs' => [['தா', 'ண்'], ['த', 'ன்'], ['தா', 'னி']]],
+                ['word' => 'மான்',   'correct' => ['மா', 'ன்'],        'wrongs' => [['மா', 'ண்'], ['ம', 'ன்'], ['மா', 'னி']]],
+                ['word' => 'தேன்',   'correct' => ['தே', 'ன்'],        'wrongs' => [['தே', 'ண்'], ['தெ', 'ன்'], ['தே', 'னி']]],
+                ['word' => 'வான்',   'correct' => ['வா', 'ன்'],        'wrongs' => [['வா', 'ண்'], ['வ', 'ன்'], ['வா', 'னி']]],
+                ['word' => 'மீன்',   'correct' => ['மீ', 'ன்'],        'wrongs' => [['மீ', 'ண்'], ['மி', 'ன்'], ['மீ', 'னி']]],
+                ['word' => 'நீதி',   'correct' => ['நீ', 'தி'],        'wrongs' => [['நி', 'தி'], ['நீ', 'தீ'], ['நி', 'தீ']]],
+                ['word' => 'அழகு',   'correct' => ['அ', 'ழ', 'கு'],    'wrongs' => [['அ', 'ல', 'கு'], ['அ', 'ள', 'கு'], ['ஆ', 'ழ', 'கு']]],
+                ['word' => 'புகழ்',   'correct' => ['பு', 'க', 'ழ்'],    'wrongs' => [['பு', 'க', 'ல்'], ['பு', 'க', 'ள்'], ['பூ', 'க', 'ழ்']]],
+                ['word' => 'மகிழ்',  'correct' => ['ம', 'கி', 'ழ்'],   'wrongs' => [['ம', 'கி', 'ல்'], ['ம', 'கி', 'ள்'], ['மா', 'கி', 'ழ்']]],
+                ['word' => 'வாழ்க',  'correct' => ['வா', 'ழ்', 'க'],   'wrongs' => [['வா', 'ல்', 'க'], ['வா', 'ள்', 'க'], ['வ', 'ழ்', 'க']]],
+                ['word' => 'வெற்றி', 'correct' => ['வெ', 'ற்', 'றி'],  'wrongs' => [['வெ', 'ர', 'ரி'], ['வெ', 'ற்', 'ரி'], ['வே', 'ற்', 'றி']]],
+                ['word' => 'வீரம்',   'correct' => ['வீ', 'ர', 'ம்'],    'wrongs' => [['வீ', 'ற', 'ம்'], ['வி', 'ர', 'ம்'], ['வீ', 'ர', 'ன்']]],
+                ['word' => 'காலம்',  'correct' => ['கா', 'ல', 'ம்'],    'wrongs' => [['கா', 'ள', 'ம்'], ['க', 'ல', 'ம்'], ['கா', 'ழ', 'ம்']]],
+                ['word' => 'வானம்',  'correct' => ['வா', 'ன', 'ம்'],    'wrongs' => [['வா', 'ண', 'ம்'], ['வ', 'ன', 'ம்'], ['வா', 'ன', 'ன்']]],
+                ['word' => 'பூமி',   'correct' => ['பூ', 'மி'],        'wrongs' => [['பு', 'மி'], ['பூ', 'மீ'], ['பு', 'மீ']]],
+                ['word' => 'நன்மை',  'correct' => ['ந', 'ன்', 'மை'],   'wrongs' => [['ந', 'ண்', 'மை'], ['ன', 'ன்', 'மை'], ['ந', 'ன்', 'மை']]],
+                ['word' => 'உண்மை',  'correct' => ['உ', 'ண்', 'மை'],   'wrongs' => [['உ', 'ன்', 'மை'], ['ஊ', 'ண்', 'மை'], ['உ', 'ண்', 'மே']]],
+                ['word' => 'பாடல்',  'correct' => ['பா', 'ட', 'ல்'],    'wrongs' => [['பா', 'ட', 'ள்'], ['ப', 'ட', 'ல்'], ['பா', 'ட', 'ழ்']]],
+                ['word' => 'ஆடல்',   'correct' => ['ஆ', 'ட', 'ல்'],    'wrongs' => [['ஆ', 'ட', 'ள்'], ['அ', 'ட', 'ல்'], ['ஆ', 'ட', 'ழ்']]],
+                ['word' => 'பேச்சு',  'correct' => ['பே', 'ச்', 'சு'],  'wrongs' => [['பெ', 'ச்', 'சு'], ['பே', 'சு'], ['பே', 'ச்', 'சூ']]],
+                ['word' => 'பாட்டு', 'correct' => ['பா', 'ட்', 'டு'],  'wrongs' => [['ப', 'ட்', 'டு'], ['பா', 'டு'], ['பா', 'ட்', 'டூ']]],
+                ['word' => 'மனமே',   'correct' => ['ம', 'ன', 'மே'],    'wrongs' => [['ம', 'ண', 'மே'], ['மா', 'ன', 'மே'], ['ம', 'ன', 'ம']]],
+                ['word' => 'உலகம்',  'correct' => ['உ', 'ல', 'க', 'ம்'], 'wrongs' => [['உ', 'ள', 'க', 'ம்'], ['ஊ', 'ல', 'க', 'ம்'], ['உ', 'ழ', 'க', 'ம்']]],
+                ['word' => 'நிலமே',   'correct' => ['நி', 'ல', 'மே'],    'wrongs' => [['நி', 'ள', 'மே'], ['நீ', 'ல', 'மே'], ['நி', 'ழ', 'மே']]],
+                ['word' => 'கனவு',   'correct' => ['க', 'ன', 'வு'],    'wrongs' => [['க', 'ண', 'வு'], ['கா', 'ன', 'வு'], ['க', 'ன', 'பூ']]],
+                ['word' => 'நினைவு', 'correct' => ['நி', 'னை', 'வு'],  'wrongs' => [['நி', 'ணை', 'வு'], ['நீ', 'னை', 'வு'], ['நி', 'னை', 'பூ']]],
+                ['word' => 'பணமே',   'correct' => ['ப', 'ண', 'மே'],    'wrongs' => [['ப', 'ன', 'மே'], ['பா', 'ண', 'மே'], ['ப', 'ண', 'ம']]],
+                ['word' => 'அறமே',   'correct' => ['அ', 'ற', 'மே'],    'wrongs' => [['அ', 'ர', 'மே'], ['ஆ', 'ற', 'மே'], ['அ', 'ற', 'ம']]],
+                ['word' => 'தவமே',   'correct' => ['த', 'வ', 'மே'],    'wrongs' => [['தா', 'வ', 'மே'], ['த', 'ப', 'மே'], ['த', 'வ', 'ம']]],
+                ['word' => 'குணமே',  'correct' => ['கு', 'ண', 'மே'],   'wrongs' => [['கு', 'ன', 'மே'], ['கூ', 'ண', 'மே'], ['கு', 'ண', 'ம']]]
+            ];
+
+            $eluthuDetectiveBlocks = [];
+            foreach ($eluthuDetectiveList as $edIdx => $edItem) {
+                $eluthuDetectiveBlocks[] = [
+                    'type' => 'activity',
+                    'data' => [
+                        'type'          => 'eluthu_detective',
+                        'title'         => 'எழுத்து பிழை திருத்துதல் #' . ($edIdx + 1),
+                        'word'          => $edItem['word'],
+                        'correctSplits' => $edItem['correct'],
+                        'wrongOptions'  => $edItem['wrongs'],
+                        'explanation'   => "சொல்: {$edItem['word']} — சரியான எழுத்து உச்சரிப்பு மற்றும் மயங்கொலி விதிகளைப் பின்பற்றி அமைக்கப்பட்டுள்ளது."
+                    ]
+                ];
+            }
+
+            $contentEluthuDetective = Content::create([
+                'name'         => 'எழுத்து பிழை திருத்துதல் - 50',
+                'title'        => 'எழுத்து பிழை திருத்துதல் - 50',
+                'text_content' => json_encode(['blocks' => $eluthuDetectiveBlocks], JSON_UNESCAPED_UNICODE),
+                'is_active'    => true,
+            ]);
+
+            DB::table('content_chapters')->insert([
+                'chapter_id' => $eluthuChapter->id,
+                'content_id' => $contentEluthuDetective->id,
+            ]);
         }
 
         // ==========================================
@@ -1924,6 +2098,169 @@ class EluthuActivitySeeder extends Seeder
             DB::table('content_chapters')->insert([
                 'chapter_id' => $asaiChapter->id,
                 'content_id' => $contentDetective->id,
+            ]);
+
+            // 4. 'அசை பலூன் விளையாட்டு - 50' (Balloon Pop Game)
+            Content::where('title', 'LIKE', '%அசை பலூன் விளையாட்டு - 50%')
+                ->get()
+                ->each(function($oc) {
+                    DB::table('content_chapters')->where('content_id', $oc->id)->delete();
+                    $oc->delete();
+                });
+
+            $balloonPopBlocks = [];
+            for ($bpIdx = 0; $bpIdx < 50; $bpIdx++) {
+                $target = ($bpIdx % 2 === 0) ? 'ner' : 'nirai';
+                $level = ($bpIdx % 3) + 1;
+                $targetName = ($target === 'ner') ? 'நேரசை' : 'நிரையசை';
+
+                $balloonPopBlocks[] = [
+                    'type' => 'activity',
+                    'data' => [
+                        'type'     => 'balloon_pop',
+                        'title'    => 'பலூன் விளையாட்டு #' . ($bpIdx + 1),
+                        'question' => $targetName . ' பலூன்களை மட்டும் தட்டுங்கள்!',
+                        'target'   => $target,
+                        'level'    => $level,
+                        'timer'    => 30
+                    ]
+                ];
+            }
+
+            $contentBalloonPop = Content::create([
+                'name'         => 'அசை பலூன் விளையாட்டு - 50',
+                'title'        => 'அசை பலூன் விளையாட்டு - 50',
+                'text_content' => json_encode(['blocks' => $balloonPopBlocks], JSON_UNESCAPED_UNICODE),
+                'is_active'    => true,
+            ]);
+
+            DB::table('content_chapters')->insert([
+                'chapter_id' => $asaiChapter->id,
+                'content_id' => $contentBalloonPop->id,
+            ]);
+
+            // 5. 'அசை சொற்றொடர் உருவாக்கு - 50' (Word Builder Game)
+            Content::where('title', 'LIKE', '%அசை சொற்றொடர் உருவாக்கு - 50%')
+                ->get()
+                ->each(function($oc) {
+                    DB::table('content_chapters')->where('content_id', $oc->id)->delete();
+                    $oc->delete();
+                });
+
+            $wordBuilderBlocks = [];
+            foreach ($sliceWordsList as $wbIdx => $wbWord) {
+                $wordBuilderBlocks[] = [
+                    'type' => 'activity',
+                    'data' => [
+                        'type'        => 'word_builder',
+                        'title'       => 'வார்த்தை உருவாக்கு #' . ($wbIdx + 1),
+                        'question'    => 'அசை வாய்பாட்டிற்கு ஏற்ப சொல்லைக் கட்டியெழுப்புங்கள்:',
+                        'text'        => $wbWord,
+                        'explanation' => 'சரியான அசைத் துண்டுகளைப் பொருத்தி சொல் உருவாக்கப்பட்டது.'
+                    ]
+                ];
+            }
+
+            $contentWordBuilder = Content::create([
+                'name'         => 'அசை சொற்றொடர் உருவாக்கு - 50',
+                'title'        => 'அசை சொற்றொடர் உருவாக்கு - 50',
+                'text_content' => json_encode(['blocks' => $wordBuilderBlocks], JSON_UNESCAPED_UNICODE),
+                'is_active'    => true,
+            ]);
+
+            DB::table('content_chapters')->insert([
+                'chapter_id' => $asaiChapter->id,
+                'content_id' => $contentWordBuilder->id,
+            ]);
+
+            // 6. 'அசை பொருத்துக - 50' (Match Asai Pairs)
+            Content::where('title', 'LIKE', '%அசை பொருத்துக - 50%')
+                ->get()
+                ->each(function($oc) {
+                    DB::table('content_chapters')->where('content_id', $oc->id)->delete();
+                    $oc->delete();
+                });
+
+            $nerNerPool    = ['கல்வி', 'கண்ணன்', 'அம்மா', 'தம்பி', 'செல்வம்', 'பள்ளி', 'நாடு', 'வீடு', 'காடு', 'தோட்டம்'];
+            $niraiNerPool  = ['அகரம்', 'அழகு', 'உலகம்', 'மனமே', 'நிலமே', 'கனவு', 'நினைவு', 'பணமே', 'அறமே', 'தவமே'];
+            $nerNiraiPool  = ['தாமரை', 'காரி', 'பாரி', 'வாரி', 'பூமகள்', 'தேனடை', 'வான்மழை', 'நீரலை', 'சீர்பெற', 'வேலவன்'];
+            $niraiNiraiPool= ['அணிமலர்', 'அருவி', 'மணிமுடி', 'நெடுவழி', 'சுடரொளி', 'வளர்மலர்', 'இளமழை', 'புதுமலர்', 'இனியவை', 'நறுமலர்'];
+
+            $matchBlocks = [];
+            for ($mIdx = 0; $mIdx < 50; $mIdx++) {
+                $word1 = $nerNerPool[$mIdx % count($nerNerPool)];
+                $word2 = $niraiNerPool[$mIdx % count($niraiNerPool)];
+                $word3 = $nerNiraiPool[$mIdx % count($nerNiraiPool)];
+                $word4 = $niraiNiraiPool[$mIdx % count($niraiNiraiPool)];
+
+                $selectedPairs = [
+                    ['left' => $word1, 'right' => 'நேர் + நேர்'],
+                    ['left' => $word2, 'right' => 'நிரை + நேர்'],
+                    ['left' => $word3, 'right' => 'நேர் + நிரை'],
+                    ['left' => $word4, 'right' => 'நிரை + நிரை']
+                ];
+                shuffle($selectedPairs);
+
+                $matchBlocks[] = [
+                    'type' => 'activity',
+                    'data' => [
+                        'type'        => 'match',
+                        'title'       => 'அசை பொருத்துக #' . ($mIdx + 1),
+                        'pairs'       => $selectedPairs,
+                        'explanation' => 'சொற்களும் அவற்றின் அசை வாய்பாடுகளும் சரியாகப் பொருந்தியுள்ளன.'
+                    ]
+                ];
+            }
+
+            $contentMatch = Content::create([
+                'name'         => 'அசை பொருத்துக - 50',
+                'title'        => 'அசை பொருத்துக - 50',
+                'text_content' => json_encode(['blocks' => $matchBlocks], JSON_UNESCAPED_UNICODE),
+                'is_active'    => true,
+            ]);
+
+            DB::table('content_chapters')->insert([
+                'chapter_id' => $asaiChapter->id,
+                'content_id' => $contentMatch->id,
+            ]);
+
+            // 7. 'அசை மின்னட்டை சவால் - 50' (Interactive Asai Flashcard Challenge)
+            Content::where('title', 'LIKE', '%அசை மின்னட்டை சவால் - 50%')
+                ->get()
+                ->each(function($oc) {
+                    DB::table('content_chapters')->where('content_id', $oc->id)->delete();
+                    $oc->delete();
+                });
+
+            $flashcardBlocks = [];
+            for ($fcIdx = 0; $fcIdx < 50; $fcIdx++) {
+                $syllableCount = ($fcIdx % 2 === 0) ? 2 : 1;
+                $fcWords = ($syllableCount === 2)
+                    ? 'கல்வி, அகரம், தாமரை, அணிமலர், கண்ணன், அழகு, காரி, அருவி, அம்மா, உலகம், பாரி, மணிமுடி, தம்பி, மனமே, பூமி, நெடுவழி, செல்வம், கனவு, தேனடை, சுடரொளி'
+                    : 'பூ, நாள், கால், தேன், வான், தீ, மகிழ், பசு, மழை, நிலா';
+
+                $flashcardBlocks[] = [
+                    'type' => 'activity',
+                    'data' => [
+                        'type'          => 'yappu_flashcard',
+                        'title'         => 'அசை மின்னட்டை #' . ($fcIdx + 1),
+                        'text'          => $fcWords,
+                        'syllableCount' => $syllableCount,
+                        'explanation'   => 'அசைகளைச் சரியாகக் கணித்து மின்னட்டைச் சவாலில் தேர்ச்சி பெற்றீர்கள்.'
+                    ]
+                ];
+            }
+
+            $contentFlashcard = Content::create([
+                'name'         => 'அசை மின்னட்டை சவால் - 50',
+                'title'        => 'அசை மின்னட்டை சவால் - 50',
+                'text_content' => json_encode(['blocks' => $flashcardBlocks], JSON_UNESCAPED_UNICODE),
+                'is_active'    => true,
+            ]);
+
+            DB::table('content_chapters')->insert([
+                'chapter_id' => $asaiChapter->id,
+                'content_id' => $contentFlashcard->id,
             ]);
         }
 
