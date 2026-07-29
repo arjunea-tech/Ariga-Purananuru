@@ -108,6 +108,18 @@
   <app-yappu-asai-detective [activity]="data" (answered)="onYappuSeerAnswered($event)">
   </app-yappu-asai-detective>
   }
+  @case ('yappu_thalai') {
+  <app-yappu-thalai [activity]="data" (answered)="onYappuSeerAnswered($event)">
+  </app-yappu-thalai>
+  }
+  @case ('yappu_kural_puzzle') {
+  <app-yappu-kural-puzzle [activity]="data" (answered)="onYappuSeerAnswered($event)">
+  </app-yappu-kural-puzzle>
+  }
+  @case ('yappu_eetru_seer') {
+  <app-yappu-eetru-seer [activity]="data" (answered)="onYappuEetruSeerAnswered($event)">
+  </app-yappu-eetru-seer>
+  }
   }
 </div>
 }

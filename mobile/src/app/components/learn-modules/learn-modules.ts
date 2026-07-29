@@ -304,6 +304,9 @@ export class LearnModulesComponent implements OnInit {
                             case 'true_false': title = 'சரி அல்லது தவறு'; break;
                             case 'yappu_asai_slice': title = 'அசை வெட்டு'; break;
                             case 'yappu_asai_detective': title = 'அசை பிழை திருத்துதல்'; break;
+                            case 'yappu_thalai': title = 'தளை விளையாட்டு'; break;
+                            case 'yappu_kural_puzzle': title = 'குறள் சீரமைப்பு'; break;
+                            case 'yappu_eetru_seer': title = 'சீர் கண்டறி'; break;
                             default: title = 'பயிற்சி விளையாட்டு'; break;
                           }
                         }
@@ -335,10 +338,13 @@ export class LearnModulesComponent implements OnInit {
                     case 'balloon_pop': title = 'பலூன் விளையாட்டு'; break;
                     case 'word_builder': title = 'வார்த்தை உருவாக்கு'; break;
                     case 'match': title = 'பொருத்துக'; break;
-                    case 'fill_blanks': title = 'கோடிிட்ட இடத்தை நிரப்புக'; break;
+                    case 'fill_blanks': title = 'கோடிட்ட இடத்தை நிரப்புக'; break;
                     case 'true_false': title = 'சரி அல்லது தவறு'; break;
                     case 'yappu_asai_slice': title = 'அசை வெட்டு'; break;
                     case 'yappu_asai_detective': title = 'அசை பிழை திருத்துதல்'; break;
+                    case 'yappu_thalai': title = 'தளை விளையாட்டு'; break;
+                    case 'yappu_kural_puzzle': title = 'குறள் சீரமைப்பு'; break;
+                    case 'yappu_eetru_seer': title = 'சீர் கண்டறி'; break;
                     default: title = 'பயிற்சி விளையாட்டு'; break;
                   }
                 }
@@ -369,16 +375,19 @@ export class LearnModulesComponent implements OnInit {
       let color = '#F59E0B'; // default warning/orange
 
       switch (act.type) {
-        case 'mcq': label = 'சரியான விடையைத் தேர்ந்தெடு'; icon = 'bi-ui-radios'; color = '#3B82F6'; break; // blue
-        case 'word_hunt': label = 'வார்த்தை தேடல்'; icon = 'bi-search'; color = '#10B981'; break; // emerald
-        case 'letter_basket': label = 'எழுத்து கூடை'; icon = 'bi-basket2-fill'; color = '#8B5CF6'; break; // purple
-        case 'balloon_pop': label = 'பலூன் விளையாட்டு'; icon = 'bi-balloon-fill'; color = '#EC4899'; break; // pink
-        case 'word_builder': label = 'வார்த்தை உருவாக்கு'; icon = 'bi-puzzle-fill'; color = '#F59E0B'; break; // amber
-        case 'match': label = 'பொருத்துக'; icon = 'bi-arrow-left-right'; color = '#6366F1'; break; // indigo
-        case 'fill_blanks': label = 'கோடிட்ட இடத்தை நிரப்புக'; icon = 'bi-input-cursor-text'; color = '#14B8A6'; break; // teal
-        case 'true_false': label = 'சரி அல்லது தவறு'; icon = 'bi-check-circle-fill'; color = '#F43F5E'; break; // rose
-        case 'yappu_asai_slice': label = 'அசை வெட்டு'; icon = 'bi-scissors'; color = '#4F46E5'; break; // indigo
-        case 'yappu_asai_detective': label = 'அசை பிழை திருத்துதல்'; icon = 'bi-search'; color = '#EA580C'; break; // orange
+        case 'mcq': label = 'சரியான விடையைத் தேர்ந்தெடு'; icon = 'bi-ui-radios'; color = '#3B82F6'; break;
+        case 'word_hunt': label = 'வார்த்தை தேடல்'; icon = 'bi-search'; color = '#10B981'; break;
+        case 'letter_basket': label = 'எழுத்து கூடை'; icon = 'bi-basket2-fill'; color = '#8B5CF6'; break;
+        case 'balloon_pop': label = 'பலூன் விளையாட்டு'; icon = 'bi-balloon-fill'; color = '#EC4899'; break;
+        case 'word_builder': label = 'வார்த்தை உருவாக்கு'; icon = 'bi-puzzle-fill'; color = '#F59E0B'; break;
+        case 'match': label = 'பொருத்துக'; icon = 'bi-arrow-left-right'; color = '#6366F1'; break;
+        case 'fill_blanks': label = 'கோடிட்ட இடத்தை நிரப்புக'; icon = 'bi-input-cursor-text'; color = '#14B8A6'; break;
+        case 'true_false': label = 'சரி அல்லது தவறு'; icon = 'bi-check-circle-fill'; color = '#F43F5E'; break;
+        case 'yappu_asai_slice': label = 'அசை வெட்டு'; icon = 'bi-scissors'; color = '#4F46E5'; break;
+        case 'yappu_asai_detective': label = 'அசை பிழை திருத்துதல்'; icon = 'bi-search'; color = '#EA580C'; break;
+        case 'yappu_thalai': label = 'தளை விளையாட்டு'; icon = 'bi-link-45deg'; color = '#0D9488'; break;
+        case 'yappu_kural_puzzle': label = 'குறள் சீரமைப்பு'; icon = 'bi-puzzle-fill'; color = '#7C3AED'; break;
+        case 'yappu_eetru_seer': label = 'சீர் கண்டறி'; icon = 'bi-music-note-beamed'; color = '#2563EB'; break;
       }
 
       if (!groupsMap.has(act.type)) {

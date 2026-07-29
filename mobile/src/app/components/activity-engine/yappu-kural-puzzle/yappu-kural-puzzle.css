@@ -1,0 +1,339 @@
+.puzzle-container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 4px 8px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #1e293b;
+}
+
+/* Header (Deprecated/Removed) */
+.game-header {
+  display: none;
+}
+
+/* Main Card */
+.game-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.chapter-badge {
+  display: inline-block;
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.instruction-text {
+  display: none;
+}
+
+/* Board & Slots */
+.board-container {
+  background: #f8fafc;
+  border: 2px dashed #cbd5e1;
+  border-radius: 14px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+}
+
+.board-container.board-correct {
+  border: 2px solid #10b981;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.2);
+  background: #ecfdf5;
+}
+
+.board-container.board-wrong {
+  border: 2px solid #ef4444;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.2);
+  background: #fef2f2;
+}
+
+.line-label {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 700;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.slots-row {
+  display: grid;
+  gap: 6px;
+}
+
+.line1-row {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.line2-row {
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 85%;
+}
+
+@media (max-width: 600px) {
+  .line1-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .line2-row {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 100%;
+  }
+}
+
+.slot-box {
+  background: #ffffff;
+  border: 2px dashed #cbd5e1;
+  border-radius: 10px;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 4px 6px;
+}
+
+.slot-box:hover {
+  border-color: #0284c7;
+  background: #f0f9ff;
+}
+
+.slot-box.filled {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  border: 2px solid #1d4ed8;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+}
+
+.slot-num {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 0.65rem;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.slot-box.filled .slot-num {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.slot-text {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* Pool Container */
+.pool-container {
+  margin-bottom: 12px;
+}
+
+.pool-label {
+  font-size: 0.75rem;
+  color: #475569;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.pool-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 44px;
+  align-items: center;
+}
+
+.pool-card-btn {
+  background: #f8fafc;
+  border: 2px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: #0f172a;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+.pool-card-btn:hover {
+  background: #e0f2fe;
+  border-color: #0284c7;
+  transform: translateY(-1px);
+  color: #0369a1;
+}
+
+.pool-empty-text {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* Controls */
+.controls-row {
+  display: flex;
+  gap: 8px;
+}
+
+.ctrl-btn {
+  flex: 1;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.reset-btn {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.reset-btn:hover:not([disabled]) {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.check-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.25);
+}
+
+.check-btn:hover:not([disabled]) {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+.ctrl-btn[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Feedback & Explanation */
+.feedback-box {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.wrong-box {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #b91c1c;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.retry-btn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.explanation-box {
+  margin-top: 14px;
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 14px;
+  border: 1px solid #a7f3d0;
+  animation: fadeIn 0.4s ease;
+}
+
+.completed-kural-preview {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 10px;
+  margin: 8px 0;
+  text-align: center;
+  border: 1px solid #e2e8f0;
+}
+
+.kural-line {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0284c7;
+  margin: 2px 0;
+}
+
+.kural-meaning {
+  color: #334155;
+  line-height: 1.5;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
+}
+
+.next-btn {
+  width: 100%;
+  padding: 10px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Completion Card */
+.completion-card {
+  text-align: center;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 30px 16px;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.trophy-icon {
+  font-size: 3rem;
+  margin-bottom: 8px;
+}
+
+.score-summary {
+  font-size: 1.05rem;
+  color: #475569;
+  margin: 12px 0;
+}
+
+.restart-btn {
+  padding: 10px 22px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

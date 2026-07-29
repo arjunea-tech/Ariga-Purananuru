@@ -1,0 +1,189 @@
+.eetru-container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 4px 8px;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #1e293b;
+}
+
+/* Header (Deprecated/Removed) */
+.game-header {
+  display: none;
+}
+
+/* Main Card */
+.game-card {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 14px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.instruction-badge {
+  display: none;
+}
+
+/* Seer Arena */
+.seer-arena {
+  margin-bottom: 12px;
+}
+
+.seer-display-card {
+  background: #f0fdf4;
+  border: 2px solid #a7f3d0;
+  border-radius: 14px;
+  padding: 12px 14px;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.06);
+}
+
+.kural-snippet {
+  font-size: 0.85rem;
+  color: #475569;
+  font-style: italic;
+  margin-bottom: 4px;
+}
+
+.seer-word {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #065f46;
+  letter-spacing: 0.5px;
+  margin: 4px 0;
+}
+
+.asai-breakdown {
+  display: inline-block;
+  background: #ffffff;
+  border: 1px solid #6ee7b7;
+  padding: 2px 10px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  color: #047857;
+}
+
+/* Options */
+.options-container {
+  margin-top: 10px;
+}
+
+.options-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 8px;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+@media (max-width: 500px) {
+  .options-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.option-btn {
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: #0f172a;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+}
+
+.opt-icon {
+  font-size: 1.2rem;
+}
+
+.opt-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.opt-asai {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.option-btn:hover:not([disabled]) {
+  background: #f0fdf4;
+  border-color: #10b981;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.12);
+}
+
+.option-btn.correct {
+  background: #ecfdf5 !important;
+  border-color: #10b981 !important;
+  color: #065f46 !important;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+}
+
+.option-btn.correct .opt-name,
+.option-btn.correct .opt-asai {
+  color: #065f46 !important;
+}
+
+.option-btn.wrong {
+  background: #fef2f2 !important;
+  border-color: #ef4444 !important;
+  color: #991b1b !important;
+}
+
+.option-btn.wrong .opt-name,
+.option-btn.wrong .opt-asai {
+  color: #991b1b !important;
+}
+
+/* Completion Card */
+.completion-card {
+  text-align: center;
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 30px 16px;
+  border: 1px solid #e2e8f0;
+  color: #0f172a;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.trophy-icon {
+  font-size: 3rem;
+  margin-bottom: 8px;
+}
+
+.score-summary {
+  font-size: 1.05rem;
+  color: #475569;
+  margin: 12px 0;
+}
+
+.restart-btn {
+  padding: 10px 22px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 12px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

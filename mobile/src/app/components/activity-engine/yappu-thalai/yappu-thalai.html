@@ -1,0 +1,96 @@
+<div class="thalai-container">
+  <!-- Main Game Card -->
+  <div class="game-card" *ngIf="!gameCompleted() && currentQuestion() as q">
+    
+    <!-- Bridge Arena -->
+    <div class="bridge-arena">
+      <!-- Nintra Seer Card -->
+      <div class="seer-card nintra-card">
+        <span class="card-label">நின்ற சீர்</span>
+        <h2 class="seer-word">{{ q.nintraSeer }}</h2>
+        <div class="asai-pills">
+          <span class="asai-tag">{{ q.nintraAsai }}</span>
+          <span class="vaibhadu-tag">{{ q.nintraType }}</span>
+        </div>
+        <div class="ending-highlight">
+          ஈற்றசை: <strong>{{ q.nintraEnding }}</strong>
+        </div>
+      </div>
+
+      <!-- Connecting Magnet Joint / Bridge -->
+      <div class="magnet-joint" [class.locked]="isCorrect() === true" [class.broken]="isCorrect() === false">
+        <div class="joint-icon">
+          <span *ngIf="isCorrect() === null">🔗</span>
+          <span *ngIf="isCorrect() === true">⚡</span>
+          <span *ngIf="isCorrect() === false">❌</span>
+        </div>
+        <div class="joint-line"></div>
+        <div class="joint-badge" *ngIf="isCorrect() === true">
+          {{ q.rule }}
+        </div>
+      </div>
+
+      <!-- Varum Seer Card -->
+      <div class="seer-card varum-card">
+        <span class="card-label">வரும் சீர்</span>
+        <h2 class="seer-word">{{ q.varumSeer }}</h2>
+        <div class="asai-pills">
+          <span class="asai-tag">{{ q.varumAsai }}</span>
+        </div>
+        <div class="ending-highlight">
+          முதலசை: <strong>{{ q.varumMuthalasai }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Question & Options -->
+    <div class="step-container">
+      <div class="step-header">
+        <h3 class="step-title">இரு சீர்களுக்கும் இடையே அமையும் தளையைக் கண்டறிக:</h3>
+      </div>
+
+      <div class="options-grid">
+        <button 
+          *ngFor="let opt of options()"
+          class="option-btn thalai-btn"
+          [class.selected]="selectedOption() === opt.thalaiName"
+          [class.correct]="selectedOption() === opt.thalaiName && isCorrect() === true"
+          [class.wrong]="selectedOption() === opt.thalaiName && isCorrect() === false"
+          [disabled]="isAnswered()"
+          (click)="selectOption(opt)">
+          <div class="opt-name">{{ opt.thalaiName }}</div>
+          <div class="opt-subrule">({{ opt.rule }})</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Explanation & Next Button Modal -->
+    <div class="explanation-box" *ngIf="showExplanation()">
+      <div class="exp-header" [class.success-header]="isCorrect()" [class.error-header]="!isCorrect()">
+        <span class="exp-icon">{{ isCorrect() ? '🎉 மிகச் சரி!' : '💡 தவறான விடை' }}</span>
+        <span class="exp-category">{{ q.category }}</span>
+      </div>
+      <p class="exp-body">{{ q.explanation }}</p>
+      
+      <button class="next-btn" (click)="nextQuestion()">
+        அடுத்த தளை (Next Word) ➡️
+      </button>
+    </div>
+
+  </div>
+
+  <!-- Game Completion Card -->
+  <div class="completion-card" *ngIf="gameCompleted()">
+    <div class="trophy-icon">🏆</div>
+    <h2>வாழ்த்துகள்! தளைப் பயிற்சி நிறைவடைந்தது</h2>
+    <p class="score-summary">
+      உங்கள் மதிப்பெண்: <strong>{{ score() }} / {{ total() }}</strong>
+    </p>
+    <div class="rewards">
+      <span class="reward-pill">🌟 தளை வல்லுநர்</span>
+    </div>
+    <button class="restart-btn" (click)="restartGame()">
+      🔄 மீண்டும் பயிற்சி செய்க
+    </button>
+  </div>
+</div>
