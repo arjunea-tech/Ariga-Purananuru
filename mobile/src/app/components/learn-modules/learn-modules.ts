@@ -292,7 +292,7 @@ export class LearnModulesComponent implements OnInit {
                 if (parsed.blocks) {
                   parsed.blocks.forEach((block: any, idx: number) => {
                     if (block.type === 'activity' && block.data) {
-                      const actId = block.data.activityId || block.data.activityReferenceId || block.id || `act_${chap.id}_${idx}`;
+                      const actId = block.data.activityId || block.data.activityReferenceId || block.id || `act_${chap.id}_${content.id || ''}_${block.data.type || ''}_${idx}`;
 
                       if (!activities.find(a => a.id === actId)) {
                         let title = block.data.title || block.data.question;
