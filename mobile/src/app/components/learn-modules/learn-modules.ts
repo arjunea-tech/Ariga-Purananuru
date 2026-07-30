@@ -5,6 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { of, Observable, switchMap } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { Browser } from '@capacitor/browser';
 
 import { AuthService } from '../../services/auth';
 
@@ -482,14 +483,23 @@ export class LearnModulesComponent implements OnInit {
     return documents;
   }
 
-  openPdf(url: string, fileName: string = 'document.pdf'): void {
-    const a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+  async openPdf(url: string, fileName: string = 'document.pdf') {
+    try {
+      let finalUrl = url;
+      if (finalUrl.toLowerCase().endsWith('.pdf') || finalUrl.includes('/raw/upload/') || finalUrl.includes('/image/upload/')) {
+        finalUrl = 'https://docs.google.com/viewer?embedded=true&url=' + encodeURIComponent(finalUrl);
+      }
+      await Browser.open({ url: finalUrl, presentationStyle: 'popover' });
+    } catch (e) {
+      // Fallback for web
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
   }
 
   getCategoryVideos(categoryId: string): any[] {

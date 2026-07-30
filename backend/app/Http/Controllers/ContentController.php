@@ -33,10 +33,7 @@ class ContentController extends Controller
         $originalName = $file->getClientOriginalName();
         $extension = strtolower($file->getClientOriginalExtension());
         
-        // Generate Unique ID (filename on server)
-        $uniqueId = uniqid() . '-' . time() . '.' . $extension;
-
-        // Determine subfolder by extension
+        // Determine subfolder by extension for Cloudinary organization
         $folder = match(true) {
             in_array($extension, ['jpg','jpeg','png','gif','webp','svg']) => 'images',
             in_array($extension, ['mp4','mov','avi','mkv','webm'])        => 'videos',
@@ -47,8 +44,28 @@ class ContentController extends Controller
             default                                                       => 'files',
         };
 
-        $path = $file->storeAs("contents/{$folder}", $uniqueId, 'public');
-        $url  = Storage::disk('public')->url($path);
+        // Determine resource type
+        $resourceType = match($folder) {
+            'images' => 'image',
+            'videos' => 'video',
+            default  => 'raw',
+        };
+
+        $options = [
+            'folder' => "contents/{$folder}",
+            'resource_type' => $resourceType
+        ];
+        
+        if ($resourceType === 'raw') {
+            // For raw files, explicitly append the extension to the public_id so Cloudinary URL contains it
+            $options['public_id'] = uniqid() . '.' . $extension;
+        }
+
+        // Upload to Cloudinary in a specific folder
+        $response = cloudinary()->uploadApi()->upload($file->getRealPath(), $options);
+
+        $url = $response['secure_url'];
+        $uniqueId = $url; // We store the full URL as unique_id to prevent DB changes and simplify frontend
 
         return response()->json([
             'url'           => $url,
@@ -59,7 +76,6 @@ class ContentController extends Controller
             'type'          => $folder,
         ]);
     }
-
     private function formatSizeUnits($bytes)
     {
         if ($bytes >= 1048576) {
