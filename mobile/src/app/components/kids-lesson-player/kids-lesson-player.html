@@ -1,13 +1,15 @@
 <div class="lesson-player w-100 h-100 lesson-bg-pattern d-flex flex-column position-fixed top-0 start-0 z-3 animate-slide-up overflow-hidden"
   [ngClass]="levelThemeClass()"
   [class.reading-step-active]="currentStep()?.type === 'reading'"
-  style="z-index: 1200 !important; height: 100dvh !important; width: 100vw !important;">
+  style="z-index: 1200 !important; height: 100dvh !important; width: 100% !important;">
   
 
 
   <!-- CENTER STAGE (Main Content Area) -->
   <main
-    class="flex-grow-1 overflow-y-auto d-flex flex-column align-items-center justify-content-start w-100 mx-auto"
+    class="flex-grow-1 d-flex flex-column align-items-center justify-content-start w-100 mx-auto"
+    [class.overflow-hidden]="currentStep()?.type === 'activity' || currentStep()?.type === 'practice' || currentStep()?.type === 'reading'"
+    [class.overflow-y-auto]="currentStep()?.type !== 'activity' && currentStep()?.type !== 'practice' && currentStep()?.type !== 'reading'"
     [class.reading-mode-main]="currentStep()?.type === 'reading'"
     [class.px-0]="currentStep()?.type === 'reading'"
     [class.px-2]="currentStep()?.type !== 'reading'"
@@ -285,23 +287,23 @@
           <div class="w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-start mx-auto p-0"
             style="max-width: 100%; width: 100%; min-height: 0;">
             <app-activity-renderer [activity]="step.data.data" [showFeedback]="true"
-              (answered)="activityAnswered.emit($event)" class="w-100 h-100"></app-activity-renderer>
+              (answered)="activityAnswered.emit($event)" class="w-100 h-100 flex-grow-1"></app-activity-renderer>
           </div>
         } @else {
-          <div class="w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-center mx-auto p-2"
-            style="max-width: 1000px; width: 100%;">
-            <div class="premium-card w-100 p-3 p-md-4 rounded-4 shadow-lg overflow-y-auto animate-pop-in" style="max-height: 72vh;">
+          <div class="w-100 flex-grow-1 d-flex flex-column align-items-stretch justify-content-center mx-auto p-1 p-md-2"
+            style="max-width: 1000px; width: 100%; min-height: 0;">
+            <div class="premium-card w-100 p-2 p-md-4 rounded-4 shadow-lg overflow-hidden animate-pop-in flex-grow-1 d-flex flex-column" style="max-height: 100%;">
               <app-activity-renderer [activity]="step.data.data" [showFeedback]="true"
-                (answered)="activityAnswered.emit($event)" class="w-100 h-100"></app-activity-renderer>
+                (answered)="activityAnswered.emit($event)" class="w-100 flex-grow-1 d-flex flex-column"></app-activity-renderer>
             </div>
           </div>
         }
       }
 
       @if (step.type === 'practice') {
-      <div class="w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-center mx-auto p-2"
-        style="max-width: 1000px; width: 100%;">
-        <div class="premium-card w-100 p-3 p-md-4 rounded-4 shadow-lg overflow-y-auto" style="max-height: 72vh;">
+      <div class="w-100 flex-grow-1 d-flex flex-column align-items-stretch justify-content-center mx-auto p-1 p-md-2"
+        style="max-width: 1000px; width: 100%; min-height: 0;">
+        <div class="premium-card w-100 p-2 p-md-4 rounded-4 shadow-lg overflow-hidden flex-grow-1 d-flex flex-column" style="max-height: 100%;">
           <!-- We pass the title or topic as practiceType and word as practiceContent -->
           <app-practice-engine 
             #practiceEngine
@@ -310,7 +312,7 @@
             [isGameMode]="true"
             [isEmbeddedInLesson]="true"
             (practiceCompleted)="activityAnswered.emit({isCorrect: true})" 
-            class="w-100 h-100"></app-practice-engine>
+            class="w-100 flex-grow-1 d-flex flex-column"></app-practice-engine>
         </div>
       </div>
       }
