@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnChanges, OnDestroy, S
 import { CommonModule } from '@angular/common';
 import { AudioService } from '../../../services/audio.service';
 import { Seer, SEERS_2, SEERS_3, ALL_SEERS, getSeersData } from '../yappu-seer-data';
+import { ActivityService } from '../../../services/activity.service';
 
 @Component({
   selector: 'app-yappu-seer-match',
@@ -24,8 +25,28 @@ export class YappuSeerMatchComponent implements OnInit, OnChanges, OnDestroy {
   matchMoves = signal<number>(0);
   matchWon = signal<boolean>(false);
 
+  private activityService = inject(ActivityService);
+  seerWords: Record<string, {word: string, hint: string}[]> = {};
+  isWordsLoading = signal<boolean>(true);
+
   ngOnInit(): void {
-    this.initGame();
+    this.loadWords();
+  }
+
+  loadWords(): void {
+    this.isWordsLoading.set(true);
+    this.activityService.getYappuSeerWords().subscribe({
+      next: (data) => {
+        this.seerWords = data;
+        this.isWordsLoading.set(false);
+        this.initGame();
+      },
+      error: (err) => {
+        console.error('Failed to load Seer words', err);
+        this.isWordsLoading.set(false);
+        this.initGame();
+      }
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -37,6 +58,8 @@ export class YappuSeerMatchComponent implements OnInit, OnChanges, OnDestroy {
   ngOnDestroy(): void {}
 
   initGame(): void {
+    if (this.isWordsLoading()) return;
+
     const rawLevel = this.activity?.level;
     const parsedLevel = (rawLevel !== undefined && rawLevel !== null && rawLevel !== '') ? Number(rawLevel) : 2;
     this.level.set(isNaN(parsedLevel) ? 2 : parsedLevel);
@@ -64,7 +87,13 @@ export class YappuSeerMatchComponent implements OnInit, OnChanges, OnDestroy {
     if (pool.length > 10) {
       pool = this.shuffle(pool).slice(0, 10);
     }
-    const nameCards = pool.map((s, i) => ({ id: `n${i}`, type: 'name', name: s.name, fruit: s.fruit, pattern: s.pattern, matchId: i }));
+    const nameCards = pool.map((s, i) => {
+      const wordList = this.seerWords[s.name] && this.seerWords[s.name].length > 0 
+        ? this.seerWords[s.name] 
+        : [{word: s.name, hint: s.mnemonic}];
+      const selectedWord = wordList[Math.floor(Math.random() * wordList.length)];
+      return { id: `n${i}`, type: 'name', name: s.name, fruit: s.fruit, pattern: s.pattern, word: selectedWord.word, hint: selectedWord.hint, matchId: i };
+    });
     const patternCards = pool.map((s, i) => ({ id: `p${i}`, type: 'pattern', name: s.name, fruit: s.fruit, pattern: s.pattern, matchId: i }));
 
     this.matchCards.set(this.shuffle([...nameCards, ...patternCards]));

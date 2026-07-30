@@ -17,6 +17,7 @@ use App\Http\Controllers\AITutorController;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\SupportTicketController;
 use App\Http\Controllers\PracticeWordController;
+use App\Http\Controllers\YappuSeerWordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +29,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/tenants/brand/{code}', [TenantController::class, 'getBranding']);
 Route::get('/practice-words', [PracticeWordController::class, 'index']);
 Route::get('/practice-words/random', [PracticeWordController::class, 'getRandom']);
+Route::get('/yappu-seer-words', [YappuSeerWordController::class, 'index']);
 
 /*
 |--------------------------------------------------------------------------

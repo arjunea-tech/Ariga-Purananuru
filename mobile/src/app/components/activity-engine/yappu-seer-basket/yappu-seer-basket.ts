@@ -3,9 +3,13 @@ import { CommonModule } from '@angular/common';
 import { AudioService } from '../../../services/audio.service';
 import { Seer, getSeersData } from '../yappu-seer-data';
 
+import { ActivityService } from '../../../services/activity.service';
+
 export interface FallingItem {
   id: number;
   seer: Seer;
+  word: string;
+  hint: string;
   yPosition: number;
   isCaught: boolean;
   basketType: string | null;
@@ -23,6 +27,10 @@ export class YappuSeerBasketComponent implements OnInit, OnChanges, OnDestroy {
   @Output() answered = new EventEmitter<{ isCorrect: boolean; score: number; total: number }>();
 
   private audioService = inject(AudioService);
+  private activityService = inject(ActivityService);
+
+  seerWords: Record<string, { word: string, hint: string }[]> = {};
+  isWordsLoading = signal<boolean>(true);
 
   level = signal<number>(0);
   score = signal<number>(0);
@@ -61,7 +69,24 @@ export class YappuSeerBasketComponent implements OnInit, OnChanges, OnDestroy {
   private tickRate = 30; // ms per tick
 
   ngOnInit(): void {
-    this.initGame();
+    this.loadWords();
+  }
+
+  loadWords(): void {
+    this.isWordsLoading.set(true);
+    this.activityService.getYappuSeerWords().subscribe({
+      next: (data) => {
+        this.seerWords = data;
+        this.isWordsLoading.set(false);
+        this.initGame();
+      },
+      error: (err) => {
+        console.error('Failed to load Seer words', err);
+        // Fallback or just set loading false
+        this.isWordsLoading.set(false);
+        this.initGame();
+      }
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -75,6 +100,8 @@ export class YappuSeerBasketComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   initGame(): void {
+    if (this.isWordsLoading()) return;
+
     this.stopGameLoop();
     const rawLevel = this.activity?.level;
     const parsedLevel = (rawLevel !== undefined && rawLevel !== null && rawLevel !== '') ? Number(rawLevel) : 0;
@@ -85,7 +112,7 @@ export class YappuSeerBasketComponent implements OnInit, OnChanges, OnDestroy {
     this.lives.set(3);
     this.isGameOver.set(false);
     this.gameWon.set(false);
-    this.fallSpeed = 0.9; // Faster starting speed (was 0.3)
+    this.fallSpeed = 0.4; // Faster starting speed (was 0.3)
 
     this.spawnNextItem();
     this.startGameLoop();
@@ -114,9 +141,18 @@ export class YappuSeerBasketComponent implements OnInit, OnChanges, OnDestroy {
 
     // Pick a random seer
     const q = pool[Math.floor(Math.random() * pool.length)];
+
+    // Pick a random word for this seer (assume API provides it)
+    const wordList = this.seerWords[q.name];
+    if (!wordList || wordList.length === 0) return; // Skip if no word found
+
+    const selectedWord = wordList[Math.floor(Math.random() * wordList.length)];
+
     this.currentItem.set({
       id: Date.now(),
       seer: q,
+      word: selectedWord.word,
+      hint: selectedWord.hint,
       yPosition: 0,
       isCaught: false,
       basketType: null

@@ -68,6 +68,7 @@ class DatabaseSeeder extends Seeder
             PracticeWordSeeder::class,
             EluthuActivitySeeder::class,
             YappuSeerActivitySeeder::class,
+            YappuSeerWordSeeder::class,
             
         ]);
     }

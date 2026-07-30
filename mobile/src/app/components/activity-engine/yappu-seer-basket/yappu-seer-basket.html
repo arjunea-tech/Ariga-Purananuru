@@ -48,8 +48,8 @@
              [ngStyle]="{'top': item.yPosition + '%', 'left': '50%', 'transform': 'translateX(-50%)'}">
           <div class="falling-item text-center shadow-lg" [class.wobble]="!item.isCaught">
             <div class="fruit-emoji animate-bounce">{{ item.seer.fruit }}</div>
-            <div class="seer-name fw-extrabold">{{ item.seer.name }}</div>
-            <div class="seer-pattern small text-muted fw-bold">{{ item.seer.mnemonic }}</div>
+            <div class="seer-name fw-extrabold">{{ item.word }}</div>
+            <div class="seer-pattern small text-muted fw-bold">{{ item.hint }}</div>
           </div>
         </div>
       }

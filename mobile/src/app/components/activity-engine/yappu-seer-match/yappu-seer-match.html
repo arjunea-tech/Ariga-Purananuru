@@ -33,7 +33,7 @@
 
       <div class="row g-2 justify-content-center">
         @for (card of matchCards(); track card.id; let idx = $index) {
-          <div class="col-3 col-sm-2 col-md-2">
+          <div class="col-4 col-sm-3 col-md-2">
             <button class="btn puzzle-card-item w-100 p-1 p-sm-2 p-md-3 rounded-4 border-2 shadow-xs d-flex flex-column align-items-center justify-content-center transition-all"
                     [class.flipped]="matchFlipped().includes(idx) || matchMatched().has(card.matchId)"
                     [class.matched]="matchMatched().has(card.matchId)"
@@ -44,17 +44,18 @@
               
               @if (matchFlipped().includes(idx) || matchMatched().has(card.matchId)) {
                 @if (card.type === 'name') {
-                  <div class="card-face d-flex flex-column align-items-center text-center">
-                    <span class="fs-4 mb-1 animate-bounce">{{ card.fruit }}</span>
-                    <span class="fw-extrabold text-purple-900" style="color: #581C87; font-size: clamp(0.75rem, 3vw, 1.1rem); line-height: 1.2;">{{ card.name }}</span>
+                  <div class="card-face d-flex flex-column align-items-center text-center w-100 px-1">
+                    <span class="fw-extrabold text-purple-900 mb-0 w-100" style="color: #581C87; font-size: clamp(0.7rem, 2.8vw, 1.1rem); line-height: 1.1; word-wrap: break-word; overflow-wrap: break-word; white-space: normal; hyphens: auto;">{{ card.word }}</span>
+                    <span class="small fw-bold text-muted w-100" style="font-size: clamp(0.55rem, 2vw, 0.75rem); word-wrap: break-word; overflow-wrap: break-word; white-space: normal; margin-top: 2px;">({{ card.hint }})</span>
                   </div>
                 } @else {
-                  <div class="card-face d-flex flex-column align-items-center">
-                    <div class="d-flex flex-wrap justify-content-center gap-1 mb-1">
+                  <div class="card-face d-flex flex-column align-items-center w-100 px-1">
+                    <span class="fw-bold text-dark mb-1 w-100" style="font-size: clamp(0.6rem, 2.2vw, 0.85rem); word-wrap: break-word; white-space: normal;">{{ card.name }}</span>
+                    <div class="d-flex flex-wrap justify-content-center gap-1 mb-1 w-100">
                       @for (asai of card.pattern; track $index) {
-                        <span class="badge rounded-pill text-white fw-bold px-1 py-1 px-sm-2"
+                        <span class="badge rounded-pill text-white fw-bold px-1 py-1"
                               [style.background]="asai === 'நேர்' ? '#4F46E5' : '#059669'"
-                              style="font-size: clamp(0.65rem, 2.5vw, 0.8rem);">
+                              style="font-size: clamp(0.5rem, 1.8vw, 0.7rem); line-height: 1;">
                           {{ asai }}
                         </span>
                       }

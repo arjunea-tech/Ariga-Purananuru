@@ -46,4 +46,8 @@ export class ActivityService {
   deleteActivity(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
+
+  getYappuSeerWords(): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/yappu-seer-words`);
+  }
 }
