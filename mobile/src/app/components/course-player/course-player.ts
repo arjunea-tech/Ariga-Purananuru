@@ -758,13 +758,14 @@ export class CoursePlayer implements OnInit, OnDestroy {
       //   });
       // }
 
-      if (content.attachments && content.attachments.length > 0) {
-        steps.push({
-          type: 'pdf',
-          title: content.title || content.name + ' - Document',
-          data: content.attachments
-        });
-      }
+      // Removed PDF step generation here as PDFs are now accessed via Documents tab
+      // if (content.attachments && content.attachments.length > 0) {
+      //   steps.push({
+      //     type: 'pdf',
+      //     title: content.title || content.name + ' - Document',
+      //     data: content.attachments
+      //   });
+      // }
 
       if (content.text_content) {
         let isJson = false;
@@ -796,15 +797,16 @@ export class CoursePlayer implements OnInit, OnDestroy {
           //   });
           // }
 
-          if (pdfBlocks.length > 0) {
-            pdfBlocks.forEach((block: any, idx: number) => {
-              steps.push({
-                type: 'pdf',
-                title: (content.title || content.name) + (pdfBlocks.length > 1 ? ` - Document ${idx + 1}` : ' - Document'),
-                data: block.data.url
-              });
-            });
-          }
+          // Removed PDF blocks step generation here
+          // if (pdfBlocks.length > 0) {
+          //   pdfBlocks.forEach((block: any, idx: number) => {
+          //     steps.push({
+          //       type: 'pdf',
+          //       title: (content.title || content.name) + (pdfBlocks.length > 1 ? ` - Document ${idx + 1}` : ' - Document'),
+          //       data: block.data.url
+          //     });
+          //   });
+          // }
 
           if (readingBlocks.length > 0) {
             let processedReadingBlocks: any[] = [];

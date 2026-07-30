@@ -37,6 +37,11 @@
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
   z-index: 99999;
+  overscroll-behavior: contain;
+}
+
+.modal-content-card {
+  overscroll-behavior: contain;
 }
 
 .avatar-wrapper {
@@ -133,4 +138,37 @@
 /* Badge showcase card */
 .badge-showcase-card {
   animation: pop-in 0.42s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Modal animations */
+@keyframes slide-up {
+  0% { transform: translateY(100%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+.animate-slide-up {
+  animation: slide-up 0.3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes fade-in {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.25s ease-out forwards;
+}
+
+@keyframes slide-down {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(100%); opacity: 0; }
+}
+.animate-slide-down {
+  animation: slide-down 0.25s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+
+@keyframes fade-out {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.animate-fade-out {
+  animation: fade-out 0.25s ease-out forwards;
 }

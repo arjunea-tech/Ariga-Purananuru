@@ -61,7 +61,7 @@ export class LearnModulesComponent implements OnInit {
   // Accordion & Stats Signals for Image 1 Layout
   expandedModuleId = signal<string | null>(null);
   expandedCategoryId = signal<string | null>(null);
-  selectedTabForModule = signal<'lesson' | 'game' | null>(null);
+  selectedTabForModule = signal<'lesson' | 'game' | 'video' | 'document' | null>(null);
   chapterCacheUpdated = signal<number>(0);
   doneCount = signal<number>(0);
   leftCount = signal<number>(0);
@@ -100,7 +100,7 @@ export class LearnModulesComponent implements OnInit {
           this.resolvePendingModule();
         }
         if (params['tab']) {
-          this.selectedTabForModule.set(params['tab'] as 'lesson' | 'game');
+          this.selectedTabForModule.set(params['tab'] as 'lesson' | 'game' | 'video' | 'document');
         } else {
           this.selectedTabForModule.set(null);
         }
@@ -236,7 +236,7 @@ export class LearnModulesComponent implements OnInit {
     }
   }
 
-  selectTab(tab: 'lesson' | 'game') {
+  selectTab(tab: 'lesson' | 'game' | 'video' | 'document') {
     this.router.navigate([], { relativeTo: this.route, queryParams: { tab }, queryParamsHandling: 'merge' });
     this.selectedTabForModule.set(tab);
     if (tab === 'game' && this.selectedModuleForDetails()) {
@@ -418,6 +418,114 @@ export class LearnModulesComponent implements OnInit {
         gameType: gameType
       }
     });
+  }
+
+  getCategoryDocuments(categoryId: string): any[] {
+    this.chapterCacheUpdated();
+    const mod = this.modules().find(m => m.id === categoryId);
+    if (!mod || !mod.chapters) return [];
+
+    const documents: any[] = [];
+    mod.chapters.forEach(chap => {
+      const cached = this.resolvedChaptersMap.get(chap.id);
+      if (cached && cached.contents) {
+        cached.contents.forEach((cont: any) => {
+          if (cont.attachments && cont.attachments.length > 0) {
+            cont.attachments.forEach((att: any) => {
+              let fileUrl = att.url || att;
+              if (fileUrl && fileUrl.startsWith('http://localhost/') && !fileUrl.includes(':8000')) {
+                fileUrl = fileUrl.replace('http://localhost/', `${environment.baseUrl}/`);
+              } else if (fileUrl && !fileUrl.startsWith('http') && !fileUrl.startsWith('data:')) {
+                fileUrl = `${environment.baseUrl}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+              }
+              documents.push({
+                chapterName: chap.name || 'அத்தியாயம்',
+                fileName: att.name || 'பாட புத்தகம் / ஆவணம்',
+                url: fileUrl
+              });
+            });
+          }
+          if (cont.text_content) {
+            try {
+              const parsed = JSON.parse(cont.text_content);
+              if (parsed.blocks) {
+                parsed.blocks.forEach((b: any) => {
+                  if (b.type === 'pdf' && b.data && b.data.url) {
+                    let fileUrl = b.data.url;
+                    if (fileUrl && fileUrl.startsWith('http://localhost/') && !fileUrl.includes(':8000')) {
+                      fileUrl = fileUrl.replace('http://localhost/', `${environment.baseUrl}/`);
+                    } else if (fileUrl && !fileUrl.startsWith('http') && !fileUrl.startsWith('data:')) {
+                      fileUrl = `${environment.baseUrl}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+                    }
+                    documents.push({
+                      chapterName: chap.name || 'அத்தியாயம்',
+                      fileName: b.data.title || 'பாட புத்தகம் (PDF)',
+                      url: fileUrl
+                    });
+                  }
+                });
+              }
+            } catch (e) {}
+          }
+        });
+      }
+    });
+    return documents;
+  }
+
+  openPdf(url: string, fileName: string = 'document.pdf'): void {
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
+
+  getCategoryVideos(categoryId: string): any[] {
+    this.chapterCacheUpdated();
+    const mod = this.modules().find(m => m.id === categoryId);
+    if (!mod || !mod.chapters) return [];
+
+    const videos: any[] = [];
+    mod.chapters.forEach(chap => {
+      const cached = this.resolvedChaptersMap.get(chap.id);
+      if (cached && cached.contents) {
+        cached.contents.forEach((cont: any) => {
+          if (cont.text_content) {
+            try {
+              const parsed = JSON.parse(cont.text_content);
+              if (parsed.blocks) {
+                parsed.blocks.forEach((b: any) => {
+                  if ((b.type === 'video' || b.type === 'embed' || b.type === 'youtube') && b.data) {
+                    let fileUrl = b.data.url || b.data.embed || b.data.source;
+                    if (fileUrl) {
+                      if (fileUrl.startsWith('http://localhost/') && !fileUrl.includes(':8000')) {
+                        fileUrl = fileUrl.replace('http://localhost/', `${environment.baseUrl}/`);
+                      } else if (!fileUrl.startsWith('http') && !fileUrl.startsWith('data:')) {
+                        fileUrl = `${environment.baseUrl}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+                      }
+                      videos.push({
+                        chapterName: chap.name || 'அத்தியாயம்',
+                        fileName: b.data.title || b.data.caption || 'காணொளி (Video)',
+                        url: fileUrl,
+                        type: b.type
+                      });
+                    }
+                  }
+                });
+              }
+            } catch (e) {}
+          }
+        });
+      }
+    });
+    return videos;
+  }
+
+  openVideo(url: string): void {
+    window.open(url, '_blank');
   }
 
   loadModules(): void {

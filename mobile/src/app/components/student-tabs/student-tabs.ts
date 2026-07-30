@@ -24,17 +24,23 @@ export class StudentTabsComponent {
   ];
 
   constructor() {
+    let previousUrl = '';
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
       const url = event.urlAfterRedirects || event.url;
-      if (url.includes('/learn')) this.activeTab.set('learn');
-      else if (url.includes('/games')) this.activeTab.set('games');
-      else if (url.includes('/progress')) this.activeTab.set('progress');
-      else if (url.includes('/profile')) this.activeTab.set('profile');
+      const urlWithoutParams = url.split('?')[0];
+
+      if (urlWithoutParams.includes('/learn')) this.activeTab.set('learn');
+      else if (urlWithoutParams.includes('/games')) this.activeTab.set('games');
+      else if (urlWithoutParams.includes('/progress')) this.activeTab.set('progress');
+      else if (urlWithoutParams.includes('/profile')) this.activeTab.set('profile');
       else this.activeTab.set('home');
 
-      this.scrollToTop();
+      if (previousUrl !== urlWithoutParams) {
+        this.scrollToTop();
+        previousUrl = urlWithoutParams;
+      }
     });
   }
 
@@ -114,7 +120,10 @@ export class StudentTabsComponent {
       }
 
       this.animationClass.set('');
-      setTimeout(() => this.animationClass.set(animationDir!), 10);
+      setTimeout(() => {
+        this.animationClass.set(animationDir!);
+        setTimeout(() => this.animationClass.set(''), 450);
+      }, 10);
 
       this.activeTab.set(tab.id);
       this.router.navigateByUrl(tab.route, { replaceUrl: true });

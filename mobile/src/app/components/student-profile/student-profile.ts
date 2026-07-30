@@ -131,6 +131,7 @@ export class StudentProfileComponent implements OnInit {
   ];
 
   activeModal = signal<'none' | 'personal_info' | 'certificates' | 'stats' | 'help'>('none');
+  isClosingModal = signal<boolean>(false);
 
   ngOnInit(): void {
     this.loadUserFromAuth();
@@ -616,7 +617,11 @@ export class StudentProfileComponent implements OnInit {
   }
 
   closeModal() {
-    this.router.navigate([], { relativeTo: this.route, queryParams: { modal: null }, queryParamsHandling: 'merge' });
+    this.isClosingModal.set(true);
+    setTimeout(() => {
+      this.isClosingModal.set(false);
+      this.router.navigate([], { relativeTo: this.route, queryParams: { modal: null }, queryParamsHandling: 'merge' });
+    }, 280);
   }
 
   logout() {

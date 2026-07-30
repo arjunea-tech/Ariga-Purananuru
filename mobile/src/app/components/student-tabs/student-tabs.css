@@ -118,8 +118,6 @@
 }
 
 .tab-content-area {
-  transform-style: preserve-3d;
-  backface-visibility: hidden;
 }
 
 @keyframes cubeFliplLeft {
@@ -128,7 +126,7 @@
     opacity: 0; 
   }
   100% { 
-    transform: translateZ(0) rotateY(0deg); 
+    transform: none; 
     opacity: 1; 
   }
 }
@@ -139,7 +137,7 @@
     opacity: 0; 
   }
   100% { 
-    transform: translateZ(0) rotateY(0deg); 
+    transform: none; 
     opacity: 1; 
   }
 }

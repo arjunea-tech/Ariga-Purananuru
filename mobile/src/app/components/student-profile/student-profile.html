@@ -140,8 +140,11 @@
 <!-- ============================================== -->
 <!-- MODALS OVERLAYS -->
 <!-- ============================================== -->
-<div *ngIf="activeModal() !== 'none'" class="modal-overlay d-flex align-items-end align-items-md-center justify-content-center" (click)="closeModal()">
-  <div class="modal-content-card bg-white w-100 rounded-top-4 rounded-md-4 shadow-lg animate-slide-up" style="max-width: 500px; max-height: 90vh; overflow-y: auto;" (click)="$event.stopPropagation()">
+<div *ngIf="activeModal() !== 'none'" class="modal-overlay d-flex align-items-end align-items-md-center justify-content-center" 
+     [ngClass]="{'animate-fade-in': !isClosingModal(), 'animate-fade-out': isClosingModal()}" (click)="closeModal()">
+  <div class="modal-content-card bg-white w-100 rounded-top-4 rounded-md-4 shadow-lg" 
+       [ngClass]="{'animate-slide-up': !isClosingModal(), 'animate-slide-down': isClosingModal()}"
+       style="max-width: 500px; max-height: 90vh; overflow-y: auto;" (click)="$event.stopPropagation()">
 
     <!-- Modal Header -->
     <div class="d-flex align-items-center justify-content-between p-3 border-bottom position-sticky top-0 bg-white z-3">
