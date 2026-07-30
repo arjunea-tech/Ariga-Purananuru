@@ -329,6 +329,7 @@ export class ActivityBlock {
             <option value="yappu_flashcard" ${tempData.type === 'yappu_flashcard' ? 'selected' : ''}>Yappu Flashcard (30s Speed Race)</option>
             <option value="yappu_seer_build" ${tempData.type === 'yappu_seer_build' ? 'selected' : ''}>Yappu Seer: சீர் கட்டமைப்பு (Pattern Builder)</option>
             <option value="yappu_seer_match" ${tempData.type === 'yappu_seer_match' ? 'selected' : ''}>Yappu Seer: ஜோடி பொருத்து (Match Pairs)</option>
+            <option value="yappu_seer_basket" ${tempData.type === 'yappu_seer_basket' ? 'selected' : ''}>சீர் கூடை (Seer Sorting Basket)</option>
             <option value="yappu_asai_slice" ${tempData.type === 'yappu_asai_slice' ? 'selected' : ''}>அசை வெட்டு (Asai Slicer Game)</option>
             <option value="yappu_asai_detective" ${tempData.type === 'yappu_asai_detective' ? 'selected' : ''}>அசை பிழை திருத்துதல் (Asai Error Detective)</option>
             <option value="yappu_thalai" ${tempData.type === 'yappu_thalai' ? 'selected' : ''}>தளைப் பாலம் (Thalai Magnet Bridge)</option>

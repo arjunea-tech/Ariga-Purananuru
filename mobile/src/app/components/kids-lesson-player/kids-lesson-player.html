@@ -280,7 +280,7 @@
       }
 
       @if (step.type === 'activity') {
-        @if (isBalloonPop(step)) {
+        @if (isFullScreenActivity(step)) {
           <div class="w-100 flex-grow-1 d-flex flex-column align-items-center justify-content-start mx-auto p-0"
             style="max-width: 100%; width: 100%; min-height: 0;">
             <app-activity-renderer [activity]="step.data.data" [showFeedback]="true"

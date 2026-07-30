@@ -501,9 +501,13 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
     type();
   }
 
-  isBalloonPop(step: any): boolean {
+  isFullScreenActivity(step: any): boolean {
     if (!step || step.type !== 'activity' || !step.data?.data) return false;
     const type = step.data.data.type || step.data.data.question_type || '';
-    return ['balloon_pop', 'balloon-pop', 'balloonpop'].includes(type.toLowerCase());
+    const t = type.toLowerCase();
+    return [
+      'balloon_pop', 'balloon-pop', 'balloonpop',
+      'yappu_seer_basket', 'yappu-seer-basket'
+    ].includes(t);
   }
 }

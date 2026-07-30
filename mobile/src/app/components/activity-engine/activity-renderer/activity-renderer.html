@@ -93,6 +93,10 @@
   <app-yappu-asai-detective [activity]="data" (answered)="onYappuSeerAnswered($event)">
   </app-yappu-asai-detective>
   }
+  @case ('yappu_seer_basket') {
+  <app-yappu-seer-basket [activity]="data" (answered)="onYappuSeerAnswered($event)" class="d-block h-100 w-100">
+  </app-yappu-seer-basket>
+  }
   @case ('eluthu_flashcard') {
   <app-eluthu-flashcard [activity]="data" (answered)="onEluthuFlashcardAnswered($event)">
   </app-eluthu-flashcard>
