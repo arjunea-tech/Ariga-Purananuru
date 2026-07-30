@@ -397,6 +397,7 @@ export class LearnModulesComponent implements OnInit {
         case 'yappu_eetru_seer': label = 'சீர் கண்டறி'; icon = 'bi-music-note-beamed'; color = '#2563EB'; break;
         case 'yappu_seer_build': label = 'அசைக்கல் கோபுரம்'; icon = 'bi-stack'; color = '#4F46E5'; break;
         case 'yappu_seer_match': label = 'சீர்ப் புதிர்'; icon = 'bi-grid-3x2-gap-fill'; color = '#9333EA'; break;
+        case 'yappu_seer_basket': label = 'சீர் கூடை'; icon = 'bi-basket2-fill'; color = '#D97706'; break;
       }
 
       if (!groupsMap.has(act.type)) {

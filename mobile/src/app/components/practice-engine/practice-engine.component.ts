@@ -318,10 +318,12 @@ export class PracticeEngineComponent implements OnInit {
 
       // Automatically fetch dynamic word from Database if step is input_word or word is unassigned
       if (this.step === 'input_word' || !this.interactiveWord) {
-        if (this.practiceType === 'eluthu') {
-          this.interactiveWord = this.getRandomTamilLetter();
-        } else {
-          this.fetchRandomWordFromDB();
+        if (this.playMode === 'practice') {
+          if (this.practiceType === 'eluthu') {
+            this.interactiveWord = this.getRandomTamilLetter();
+          } else {
+            this.fetchRandomWordFromDB();
+          }
         }
       }
     });
@@ -510,7 +512,10 @@ export class PracticeEngineComponent implements OnInit {
       } else {
         // Wrong split
         const cleanCorrectSplit = correctSplitRaw.replace(/\/+/g, '/');
-        this.showFeedback(`தவறு! சரியான பிரிப்பு: ${cleanCorrectSplit}`, 'error');
+        const explanationParts = this.interactiveAnalysis.word_analysis.map(w => {
+           return w.asai_groups.map(a => `${a.text} (${this.getAsaiExplanation(a.text)})`).join(' / ');
+        }).join(' / ');
+        this.showFeedback(`தவறான பிரிப்பு! சரியான விடை: ${cleanCorrectSplit}. (விதி: ${explanationParts})`, 'error');
       }
     }
   }
@@ -592,18 +597,24 @@ export class PracticeEngineComponent implements OnInit {
           this.interactiveSeerValidationResults = [];
           this.interactiveSeerOptions = this.interactiveAnalysis!.word_analysis.map(w => this.generateSeerOptions(w.seer_pattern, w.asai_groups.length));
           this.cdr.detectChanges();
-        }, 2000);
+        }, 1000);
       } else {
-        this.showFeedback('அற்புதம்! முழுமையாக முடித்துவிட்டீர்கள். 🌟', 'success');
+        this.showFeedback('வாழ்த்துகள்! நீங்கள் மிகச் சரியாகச் செய்துவிட்டீர்கள்! 🌟', 'success');
         setTimeout(() => {
           this.step = 'result';
           this.practiceCompleted.emit();
           this.cdr.detectChanges();
-        }, 2500);
+        }, 1200);
       }
     } else {
       this.showFeedback('சில தவறுகள் உள்ளன. மீண்டும் முயற்சிக்கவும்!', 'error');
     }
+  }
+
+  getSeerExplanation(wordObj: any): string {
+    if (!wordObj || !wordObj.asai_groups) return '';
+    const parts = wordObj.asai_groups.map((a: any) => a.type.replace('அசை', '')).join(' + ');
+    return `${parts} = ${wordObj.seer_pattern}`;
   }
 
   retryInteractiveAsai() {
@@ -687,14 +698,14 @@ export class PracticeEngineComponent implements OnInit {
           this.interactiveCurrentThalaiIndex = 0;
           this.interactiveThalaiValidationResults = [];
           this.cdr.detectChanges();
-        }, 2000);
+        }, 1000);
       } else {
-        this.showFeedback('அற்புதம்! முழுமையாக முடித்துவிட்டீர்கள். 🌟', 'success');
+        this.showFeedback('வாழ்த்துகள்! நீங்கள் மிகச் சரியாகச் செய்துவிட்டீர்கள்! 🌟', 'success');
         setTimeout(() => {
           this.step = 'result';
           this.practiceCompleted.emit();
           this.cdr.detectChanges();
-        }, 2500);
+        }, 1200);
       }
     } else {
       this.showFeedback('சில தவறுகள் உள்ளன. மீண்டும் முயற்சிக்கவும்!', 'error');
@@ -726,7 +737,7 @@ export class PracticeEngineComponent implements OnInit {
     if (isCorrect) {
       this.showFeedback('சரியான தளை!', 'success');
     } else {
-      this.showFeedback(`தவறு! சரியான தளை: ${currentThalai.thalai_type}`, 'error');
+      this.showFeedback(`தவறான விடை! சரியான தளை: ${currentThalai.thalai_type}. (விதி: ${currentThalai.first_seer_type} முன் ${currentThalai.second_word_first_asai} வந்தால் ${currentThalai.thalai_type} வரும்.)`, 'error');
     }
 
     this.interactiveCurrentThalaiIndex++;
@@ -735,14 +746,14 @@ export class PracticeEngineComponent implements OnInit {
       const allThalaiCorrect = this.interactiveThalaiValidationResults.every(r => r.isCorrect);
       this.allCorrect = allThalaiCorrect;
       if (allThalaiCorrect) {
-        this.showFeedback('அற்புதம்! முழுமையாக அலகிட்டு முடித்துவிட்டீர்கள். 🌟', 'success');
+        this.showFeedback('வாழ்த்துகள்! நீங்கள் மிகச் சரியாகச் செய்துவிட்டீர்கள்! 🌟', 'success');
         // Module completion is tracked server-side only — no localStorage caching
 
         setTimeout(() => {
           this.step = 'result';
           this.practiceCompleted.emit();
           this.cdr.detectChanges();
-        }, 2500);
+        }, 1200);
       } else {
         this.showFeedback('சில தவறுகள் உள்ளன. மீண்டும் தளைகளை முயற்சிக்கவும்.', 'error');
       }
@@ -842,7 +853,7 @@ export class PracticeEngineComponent implements OnInit {
     this.feedbackType = type;
     setTimeout(() => {
       this.feedbackMessage = null;
-    }, 4000);
+    }, type === 'error' ? 6000 : 4000);
   }
 
   private shuffleArray<T>(array: T[]): T[] {

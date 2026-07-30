@@ -34,41 +34,129 @@ class YappuSeerActivitySeeder extends Seeder
             ]
         ];
 
-        // 1. Create the Activity Record
-        $activity = Activity::updateOrCreate(
-            ['title' => 'யாப்பு சீர் விளையாட்டு'],
+        // 1. Create the Match Activity
+        $matchActivity = Activity::updateOrCreate(
+            ['title' => 'சீர்ப் புதிர்'],
             [
-                'type' => 'yappu_seer',
+                'type' => 'yappu_seer_match',
                 'data_json' => $payload
             ]
         );
 
-        // 2. Create the Editor.js Content Block referencing the Activity
-        $editorContent = [
-            'time' => time() * 1000,
-            'blocks' => [
-                [
-                    'id' => uniqid(),
-                    'type' => 'activity',
-                    'data' => [
-                        'type' => 'activity_reference',
-                        'activityReferenceId' => $activity->id
-                    ]
-                ]
-            ],
-            'version' => '2.28.2'
-        ];
-
-        // 3. Create the Content Record
-        Content::updateOrCreate(
-            ['name' => 'Yappu Seer Master Data'],
+        // 2. Create the Build Activity
+        $buildActivity = Activity::updateOrCreate(
+            ['title' => 'அசைக்கல் கோபுரம்'],
             [
-                'text_content' => json_encode($editorContent, JSON_UNESCAPED_UNICODE),
-                'is_active' => true,
-                'sort_order' => 0
+                'type' => 'yappu_seer_build',
+                'data_json' => $payload
             ]
         );
+
+        // 3. Create the Basket Activity
+        $basketActivity = Activity::updateOrCreate(
+            ['title' => 'சீர் கூடை'],
+            [
+                'type' => 'yappu_seer_basket',
+                'data_json' => $payload
+            ]
+        );
+
+        // 4. Find the 'சீர்' Chapter
+        $chapter = \App\Models\Chapter::where('name', 'LIKE', '%சீர்%')->first();
+        if (!$chapter) {
+            $chapter = \App\Models\Chapter::first();
+        }
+
+        // 5. Create the Content Record for Match
+        $matchContent = Content::updateOrCreate(
+            ['name' => 'சீர்ப் புதிர்'],
+            [
+                'title' => 'சீர்ப் புதிர்',
+                'text_content' => json_encode([
+                    'time' => time() * 1000,
+                    'blocks' => [
+                        [
+                            'id' => uniqid(),
+                            'type' => 'activity',
+                            'data' => [
+                                'type' => 'activity_reference',
+                                'activityReferenceId' => $matchActivity->id,
+                                'level' => 0 // Level 0 means All Seers
+                            ]
+                        ]
+                    ],
+                    'version' => '2.28.2'
+                ], JSON_UNESCAPED_UNICODE),
+                'is_active' => true,
+                'sort_order' => 10
+            ]
+        );
+
+        // 6. Create the Content Record for Build
+        $buildContent = Content::updateOrCreate(
+            ['name' => 'அசைக்கல் கோபுரம்'],
+            [
+                'title' => 'அசைக்கல் கோபுரம்',
+                'text_content' => json_encode([
+                    'time' => time() * 1000,
+                    'blocks' => [
+                        [
+                            'id' => uniqid(),
+                            'type' => 'activity',
+                            'data' => [
+                                'type' => 'activity_reference',
+                                'activityReferenceId' => $buildActivity->id,
+                                'level' => 0 // Level 0 means All Seers
+                            ]
+                        ]
+                    ],
+                    'version' => '2.28.2'
+                ], JSON_UNESCAPED_UNICODE),
+                'is_active' => true,
+                'sort_order' => 11
+            ]
+        );
+
+        // 7. Create the Content Record for Basket
+        $basketContent = Content::updateOrCreate(
+            ['name' => 'சீர் கூடை'],
+            [
+                'title' => 'சீர் கூடை',
+                'text_content' => json_encode([
+                    'time' => time() * 1000,
+                    'blocks' => [
+                        [
+                            'id' => uniqid(),
+                            'type' => 'activity',
+                            'data' => [
+                                'type' => 'activity_reference',
+                                'activityReferenceId' => $basketActivity->id,
+                                'level' => 0 // Level 0 means All Seers
+                            ]
+                        ]
+                    ],
+                    'version' => '2.28.2'
+                ], JSON_UNESCAPED_UNICODE),
+                'is_active' => true,
+                'sort_order' => 12
+            ]
+        );
+
+        // 8. Link to Chapter
+        if ($chapter) {
+            \Illuminate\Support\Facades\DB::table('content_chapters')->updateOrInsert(
+                ['content_id' => $matchContent->id, 'chapter_id' => $chapter->id]
+            );
+            \Illuminate\Support\Facades\DB::table('content_chapters')->updateOrInsert(
+                ['content_id' => $buildContent->id, 'chapter_id' => $chapter->id]
+            );
+            \Illuminate\Support\Facades\DB::table('content_chapters')->updateOrInsert(
+                ['content_id' => $basketContent->id, 'chapter_id' => $chapter->id]
+            );
+        }
+
+
         
-        $this->command->info('Yappu Seer dynamic content seeded successfully as Activity and Content!');
+        $this->command->info('Yappu Seer games seeded and mapped to chapter successfully!');
     }
 }

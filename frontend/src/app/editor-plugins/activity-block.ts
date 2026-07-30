@@ -28,6 +28,7 @@ import { renderYappuFlashcardForm } from './activity-block/forms/yappu-flashcard
 import { renderYappuSeerForm } from './activity-block/forms/yappu-seer';
 import { renderYappuAsaiSliceForm } from './activity-block/forms/yappu-asai-slice';
 import { renderYappuAsaiDetectiveForm } from './activity-block/forms/yappu-asai-detective';
+import { renderYappuSeerBasketForm } from './activity-block/forms/yappu-seer-basket';
 
 export class ActivityBlock {
   private data: any;
@@ -242,6 +243,7 @@ export class ActivityBlock {
       case 'yappu_seer_build':
       case 'yappu_seer_speed':
       case 'yappu_seer_match':
+      case 'yappu_seer_basket':
         typeLabel = type === 'yappu_seer' ? 'Yappu Seer Game (5-in-1)' : `Yappu Seer: ${type.replace('yappu_seer_', '').toUpperCase()}`;
         icon = 'bi-lightning-fill';
         details = `Question: "${this.data.question || ''}" | Level: ${this.data.level || 2}`;
@@ -327,6 +329,8 @@ export class ActivityBlock {
             <option value="yappu_flashcard" ${tempData.type === 'yappu_flashcard' ? 'selected' : ''}>Yappu Flashcard (30s Speed Race)</option>
             <option value="yappu_seer_build" ${tempData.type === 'yappu_seer_build' ? 'selected' : ''}>Yappu Seer: சீர் கட்டமைப்பு (Pattern Builder)</option>
             <option value="yappu_seer_match" ${tempData.type === 'yappu_seer_match' ? 'selected' : ''}>Yappu Seer: ஜோடி பொருத்து (Match Pairs)</option>
+            <option value="yappu_seer_basket" ${tempData.type === 'yappu_seer_basket' ? 'selected' : ''}>Yappu Seer: சீர் கூடை (Sorting Basket)</option>
+            <option value="yappu_thalai" ${tempData.type === 'yappu_thalai' ? 'selected' : ''}>Yappu Thalai: தளை விளையாட்டு</option>
             <option value="yappu_asai_slice" ${tempData.type === 'yappu_asai_slice' ? 'selected' : ''}>அசை வெட்டு (Asai Slicer Game)</option>
             <option value="yappu_asai_detective" ${tempData.type === 'yappu_asai_detective' ? 'selected' : ''}>அசை பிழை திருத்துதல் (Asai Error Detective)</option>
           </select>

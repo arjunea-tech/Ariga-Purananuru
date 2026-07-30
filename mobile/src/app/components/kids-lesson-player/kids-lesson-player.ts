@@ -1,5 +1,6 @@
 import { Component, input, Output, EventEmitter, OnInit, OnDestroy, signal, effect, computed, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivityRenderer } from '../activity-engine/activity-renderer/activity-renderer';
 import { PracticeEngineComponent } from '../practice-engine/practice-engine.component';
 import { AudioService } from '../../services/audio.service';
@@ -45,9 +46,23 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
   @Output() activityAnswered = new EventEmitter<any>();
   @Output() practiceCompleted = new EventEmitter<void>();
   @Output() continueFeedback = new EventEmitter<void>();
+  @Output() topicClick = new EventEmitter<string>();
+
+  onReadingContentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    const linkElement = target.closest('.topic-link');
+    if (linkElement) {
+      event.preventDefault();
+      const topic = linkElement.getAttribute('data-topic');
+      if (topic) {
+        this.topicClick.emit(topic);
+      }
+    }
+  }
 
   private audioService = inject(AudioService);
   private authService = inject(AuthService);
+  private sanitizer = inject(DomSanitizer);
 
   currentContentPage = signal<number>(0);
   typedContent = signal<string>('');
@@ -64,7 +79,7 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
     return null;
   });
 
-  rawReadingHtml = computed(() => {
+  rawReadingHtml = computed<SafeHtml | string>(() => {
     const step = this.currentStep();
     if (step && (step.type === 'reading' || step.type === 'remediation')) {
       if (step.data.isJson) {
@@ -137,13 +152,13 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
         };
 
         if (Array.isArray(pageData)) {
-          return pageData.map((b: any) => renderBlock(b)).join('');
+          return this.sanitizer.bypassSecurityTrustHtml(pageData.map((b: any) => renderBlock(b)).join(''));
         } else {
-          return renderBlock(pageData);
+          return this.sanitizer.bypassSecurityTrustHtml(renderBlock(pageData));
         }
       } else {
         const rawContent = (typeof step.data === 'string' ? step.data : (step.data.html || step.data.text || step.data.content || ''));
-        return `<div class="fw-bold text-start" style="font-size: clamp(1.1rem, 3.2vw, 1.4rem); line-height: 1.8; font-family: 'Nunito', 'Comic Sans MS', sans-serif;">${rawContent}</div>`;
+        return this.sanitizer.bypassSecurityTrustHtml(`<div class="fw-bold text-start" style="font-size: clamp(1.1rem, 3.2vw, 1.4rem); line-height: 1.8; font-family: 'Nunito', 'Comic Sans MS', sans-serif;">${rawContent}</div>`);
       }
     }
     return '';
@@ -501,9 +516,13 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
     type();
   }
 
-  isBalloonPop(step: any): boolean {
+  isFullScreenActivity(step: any): boolean {
     if (!step || step.type !== 'activity' || !step.data?.data) return false;
     const type = step.data.data.type || step.data.data.question_type || '';
-    return ['balloon_pop', 'balloon-pop', 'balloonpop'].includes(type.toLowerCase());
+    const t = type.toLowerCase();
+    return [
+      'balloon_pop', 'balloon-pop', 'balloonpop',
+      'yappu_seer_basket', 'yappu-seer-basket'
+    ].includes(t);
   }
 }

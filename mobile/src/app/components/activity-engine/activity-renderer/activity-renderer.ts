@@ -19,6 +19,7 @@ import { BalloonPopComponent, BalloonPopData } from '../balloon-pop/balloon-pop'
 import { WordBuilderComponent, WordBuilderData } from '../word-builder/word-builder';
 import { YappuFlashcardComponent } from '../yappu-flashcard/yappu-flashcard';
 import { YappuSeerBuildComponent } from '../yappu-seer-build/yappu-seer-build';
+import { YappuSeerBasketComponent } from '../yappu-seer-basket/yappu-seer-basket';
 import { YappuSeerMatchComponent } from '../yappu-seer-match/yappu-seer-match';
 import { YappuAsaiSliceComponent } from '../yappu-asai-slice/yappu-asai-slice';
 import { YappuAsaiDetectiveComponent } from '../yappu-asai-detective/yappu-asai-detective';
@@ -29,7 +30,7 @@ import { YappuKuralPuzzleComponent } from '../yappu-kural-puzzle/yappu-kural-puz
 import { YappuEetruSeerComponent } from '../yappu-eetru-seer/yappu-eetru-seer';
 
 export interface NormalizedActivity {
-  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard' | 'eluthu_flashcard' | 'yappu_seer' | 'yappu_seer_p2n' | 'yappu_seer_n2p' | 'yappu_seer_build' | 'yappu_seer_speed' | 'yappu_seer_match' | 'yappu_asai_slice' | 'yappu_asai_detective' | 'eluthu_detective' | 'yappu_thalai' | 'yappu_kural_puzzle' | 'yappu_eetru_seer';
+  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard' | 'eluthu_flashcard' | 'yappu_seer' | 'yappu_seer_p2n' | 'yappu_seer_n2p' | 'yappu_seer_build' | 'yappu_seer_basket' | 'yappu_seer_speed' | 'yappu_seer_match' | 'yappu_asai_slice' | 'yappu_asai_detective' | 'eluthu_detective' | 'yappu_thalai' | 'yappu_kural_puzzle' | 'yappu_eetru_seer';
   question?: string;
   text?: string;
   front?: string;
@@ -104,6 +105,7 @@ export interface NormalizedActivity {
     WordBuilderComponent,
     YappuFlashcardComponent,
     YappuSeerBuildComponent,
+    YappuSeerBasketComponent,
     YappuSeerMatchComponent,
     YappuAsaiSliceComponent,
     YappuAsaiDetectiveComponent,
@@ -240,6 +242,8 @@ export class ActivityRenderer implements OnChanges {
       type = 'yappu_seer_n2p';
     } else if (typeInput.toLowerCase() === 'yappu_seer_build') {
       type = 'yappu_seer_build';
+    } else if (typeInput.toLowerCase() === 'yappu_seer_basket') {
+      type = 'yappu_seer_basket';
     } else if (typeInput.toLowerCase() === 'yappu_seer_speed') {
       type = 'yappu_seer_speed';
     } else if (typeInput.toLowerCase() === 'yappu_seer_match') {

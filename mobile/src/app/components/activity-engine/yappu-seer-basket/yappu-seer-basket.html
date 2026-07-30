@@ -1,0 +1,81 @@
+<div class="basket-container h-100 d-flex flex-column p-2 p-md-3">
+  <!-- HEADER BAR -->
+  <div class="basket-header text-center mb-2 mb-md-3">
+    <div class="d-flex flex-wrap align-items-center justify-content-center gap-2 mb-2">
+      <span class="badge bg-warning-subtle text-warning-emphasis fw-bold rounded-pill px-3 py-1 text-wrap text-center shadow-sm" style="background: #FEF3C7; color: #D97706; max-width: 100%;">
+        🧺 சீர் கூடை (Seer Sorting Basket)
+      </span>
+      <span class="badge bg-light text-dark fw-bold border rounded-pill px-3 py-1 shadow-sm">
+        ⭐ Score: {{ score() }} / 10
+      </span>
+      <span class="badge bg-danger-subtle text-danger fw-bold border border-danger-subtle rounded-pill px-3 py-1 shadow-sm">
+        ❤️ Lives: {{ lives() }}
+      </span>
+    </div>
+  </div>
+
+  <!-- GAME OVER / WIN SCREEN -->
+  @if (isGameOver()) {
+    <div class="screen-play bg-white rounded-5 shadow-sm p-4 text-center position-relative border border-2 border-light mt-3 animate-fade-in flex-grow-1 d-flex flex-column justify-content-center">
+      <div>
+        @if (gameWon()) {
+          <i class="bi bi-trophy-fill display-1 text-warning mb-3 d-block animate-bounce"></i>
+          <h2 class="fw-extrabold text-success mb-2">அற்புதம்! (Awesome!)</h2>
+          <p class="text-secondary mb-4 fs-5">You successfully sorted all the Seers!</p>
+        } @else {
+          <i class="bi bi-emoji-frown-fill display-1 text-danger mb-3 d-block animate-bounce"></i>
+          <h2 class="fw-extrabold text-danger mb-2">முயற்சி செய்! (Try Again!)</h2>
+          <p class="text-secondary mb-4 fs-5">You ran out of lives.</p>
+        }
+        <button class="btn btn-primary rounded-pill px-4 py-2 fw-bold" (click)="restart()">
+          <i class="bi bi-arrow-clockwise me-2"></i> மீண்டும் விளையாடு (Play Again)
+        </button>
+      </div>
+    </div>
+  } @else {
+  <!-- GAMEPLAY AREA -->
+  <div class="screen-play bg-white rounded-5 shadow-sm p-2 p-md-3 position-relative border border-2 border-light overflow-hidden d-flex flex-column flex-grow-1 w-100 mx-auto" style="max-width: 800px;">
+    
+    <!-- FALLING AREA (SKY/TREES) -->
+    <div class="falling-area flex-grow-1 position-relative" [class.shake]="isWrong()">
+      <!-- Decorative clouds -->
+      <div class="cloud cloud-1">☁️</div>
+      <div class="cloud cloud-2">☁️</div>
+      
+      @if (currentItem(); as item) {
+        <div class="falling-item-wrapper" 
+             [class.caught]="item.isCaught"
+             [ngStyle]="{'top': item.yPosition + '%', 'left': '50%', 'transform': 'translateX(-50%)'}">
+          <div class="falling-item text-center shadow-lg" [class.wobble]="!item.isCaught">
+            <div class="fruit-emoji animate-bounce">{{ item.seer.fruit }}</div>
+            <div class="seer-name fw-extrabold">{{ item.seer.name }}</div>
+            <div class="seer-pattern small text-muted fw-bold">{{ item.seer.mnemonic }}</div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- BASKETS AREA -->
+    <div class="baskets-area mt-auto pt-3 border-top border-light position-relative" style="z-index: 10;">
+      <p class="text-center text-muted small fw-bold mb-2">Catch the fruit by tapping the correct basket!</p>
+      <div class="row g-2 justify-content-center">
+        @for (basket of visibleBaskets; track basket.id) {
+          <div [class]="visibleBaskets.length === 2 ? 'col-6' : 'col-3'">
+            <button class="basket-btn w-100 p-2 rounded-4 border-0 d-flex flex-column align-items-center justify-content-center transition-all"
+                    [style.background]="basket.color"
+                    [class.active]="currentItem()?.basketType === basket.id"
+                    (click)="catchItem(basket.id)">
+              <div class="basket-icon-wrapper mb-1">
+                <i class="bi {{basket.icon}} text-white"></i>
+              </div>
+              <span class="text-white fw-bold basket-label">{{ basket.name }}</span>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+  }
+
+</div>

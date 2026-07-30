@@ -1049,6 +1049,28 @@ export class CoursePlayer implements OnInit, OnDestroy {
   private activitySessionCorrect = 0;
   private activitySessionTotal = 0;
 
+  onTopicClick(topic: string) {
+    const structure = this.courseStructure();
+    if (!structure) return;
+
+    const topicMap: Record<string, string> = {
+      'eluthu': 'எழுத்து',
+      'asai': 'அசை',
+      'seer': 'சீர்',
+      'thalai': 'தளை'
+    };
+
+    const targetName = topicMap[topic];
+    if (targetName) {
+      const level = structure.levels.find(l => l.name === targetName || (l as any).topic === topic);
+      if (level && level.chapters && level.chapters.length > 0) {
+        const chapterId = level.chapters[0].id;
+        this.activeLevelId.set(level.id);
+        this.startLesson(chapterId);
+      }
+    }
+  }
+
   onActivityAnswered(event: any) {
     if (event && event.isCorrect !== undefined) {
       this.activityFeedbackState.set(event.isCorrect ? 'correct' : 'incorrect');

@@ -63,7 +63,7 @@ export class PracticeEngineComponent implements OnInit {
   interactiveSeerResults: (boolean | null)[] = [];
   interactiveSeerOptions: string[][] = []; // Dynamic options for Seer choices
 
-  sandboxTitle: string = 'வார்த்தையை உள்ளிடுக';
+  sandboxTitle: string = 'வார்த்தையை உள்ளிடுக எ.கா. அகரம்';
   sandboxDesc: string = 'கீழே வார்த்தையை தட்டச்சு செய்து, பிரித்து காண்க பட்டனை அழுத்துக!';
   sandboxPlaceholder: string = 'உதாரணம்: சீவகசிந்தாமணி';
 
