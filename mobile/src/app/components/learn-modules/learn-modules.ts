@@ -349,6 +349,10 @@ export class LearnModulesComponent implements OnInit {
                     case 'yappu_thalai': title = 'தளை விளையாட்டு'; break;
                     case 'yappu_kural_puzzle': title = 'குறள் சீரமைப்பு'; break;
                     case 'yappu_eetru_seer': title = 'சீர் கண்டறி'; break;
+                    case 'alahidu_fill_table': title = 'அலகிடும் அட்டவணை'; break;
+                    case 'alahidu_spot_error': title = 'அலகிடுதல் பிழை திருத்துதல்'; break;
+                    case 'alahidu_fix_thalai': title = 'தளை சீரமைப்பு'; break;
+                    case 'alahidu_true_false': title = 'சரியா தவறா'; break;
                     default: title = 'பயிற்சி விளையாட்டு'; break;
                   }
                 }
@@ -398,6 +402,10 @@ export class LearnModulesComponent implements OnInit {
         case 'yappu_seer_build': label = 'அசைக்கல் கோபுரம்'; icon = 'bi-stack'; color = '#4F46E5'; break;
         case 'yappu_seer_match': label = 'சீர்ப் புதிர்'; icon = 'bi-grid-3x2-gap-fill'; color = '#9333EA'; break;
         case 'yappu_seer_basket': label = 'சீர் கூடை'; icon = 'bi-basket2-fill'; color = '#D97706'; break;
+        case 'alahidu_fill_table': label = 'அலகிடும் அட்டவணை'; icon = 'bi-table'; color = '#0D9488'; break;
+        case 'alahidu_spot_error': label = 'அலகிடுதல் பிழை திருத்துதல்'; icon = 'bi-exclamation-triangle'; color = '#EA580C'; break;
+        case 'alahidu_fix_thalai': label = 'தளை சீரமைப்பு'; icon = 'bi-wrench-adjustable'; color = '#7C3AED'; break;
+        case 'alahidu_true_false': label = 'சரியா தவறா'; icon = 'bi-check-circle-fill'; color = '#F43F5E'; break;
       }
 
       if (!groupsMap.has(act.type)) {

@@ -117,6 +117,22 @@
   <app-yappu-eetru-seer [activity]="data" (answered)="onYappuEetruSeerAnswered($event)">
   </app-yappu-eetru-seer>
   }
+  @case ('alahidu_fill_table') {
+  <app-yappu-alahidu-fill-table [activity]="data" (answered)="onYappuSeerAnswered($event)">
+  </app-yappu-alahidu-fill-table>
+  }
+  @case ('alahidu_spot_error') {
+  <app-yappu-alahidu-spot-error [activity]="data" (answered)="onYappuSeerAnswered($event)">
+  </app-yappu-alahidu-spot-error>
+  }
+  @case ('alahidu_fix_thalai') {
+  <app-yappu-alahidu-fix-thalai [activity]="data" (answered)="onYappuSeerAnswered($event)">
+  </app-yappu-alahidu-fix-thalai>
+  }
+  @case ('alahidu_true_false') {
+  <app-yappu-alahidu-true-false [activity]="data" (answered)="onYappuSeerAnswered($event)">
+  </app-yappu-alahidu-true-false>
+  }
   }
 </div>
 }

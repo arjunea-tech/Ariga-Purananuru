@@ -30,6 +30,10 @@ import { renderYappuAsaiSliceForm } from './activity-block/forms/yappu-asai-slic
 import { renderYappuAsaiDetectiveForm } from './activity-block/forms/yappu-asai-detective';
 import { renderYappuThalaiForm } from './activity-block/forms/yappu-thalai';
 import { renderYappuKuralPuzzleForm } from './activity-block/forms/yappu-kural-puzzle';
+import { renderAlahiduFillTableForm } from './activity-block/forms/alahidu-fill-table';
+import { renderAlahiduSpotErrorForm } from './activity-block/forms/alahidu-spot-error';
+import { renderAlahiduFixThalaiForm } from './activity-block/forms/alahidu-fix-thalai';
+import { renderAlahiduTrueFalseForm } from './activity-block/forms/alahidu-true-false';
 
 export class ActivityBlock {
   private data: any;
@@ -121,7 +125,16 @@ export class ActivityBlock {
       // Yappu Asai activities
       challenges: data?.challenges || [],
       nerWords: data?.nerWords || [],
-      niraiWords: data?.niraiWords || []
+      niraiWords: data?.niraiWords || [],
+
+      // Alahiduthal activities
+      firstWord: data?.firstWord || '',
+      lastWord: data?.lastWord || '',
+      tableData: data?.tableData || [],
+      errorRowIndex: data?.errorRowIndex !== undefined ? data.errorRowIndex : 0,
+      rows: data?.rows || [],
+      isTrue: data?.isTrue !== undefined ? data.isTrue : true,
+      statement: data?.statement || ''
     };
     this.api = api;
     this.readOnly = readOnly;
@@ -258,6 +271,26 @@ export class ActivityBlock {
         icon = 'bi-search';
         details = `Challenges: ${this.data.challenges?.length || 0} சவால்கள்`;
         break;
+      case 'alahidu_fill_table':
+        typeLabel = 'अலகிடும் அட்டவணை (Fill Table)';
+        icon = 'bi-table';
+        details = `Question: "${this.data.question || ''}" | Rows: ${this.data.rows?.length || 0} | Options: ${this.data.options?.length || 0}`;
+        break;
+      case 'alahidu_spot_error':
+        typeLabel = 'பிழையைக் கண்டுபிடி (Spot Error)';
+        icon = 'bi-exclamation-triangle';
+        details = `Question: "${this.data.question || ''}" | Rows: ${this.data.tableData?.length || 0} | Error Row: ${this.data.errorRowIndex + 1}`;
+        break;
+      case 'alahidu_fix_thalai':
+        typeLabel = 'தளை சீரமைப்பு (Fix Thalai)';
+        icon = 'bi-wrench-adjustable';
+        details = `Words: ${this.data.firstWord} + [?] + ${this.data.lastWord} | Options: ${this.data.options?.length || 0}`;
+        break;
+      case 'alahidu_true_false':
+        typeLabel = 'சரியா தவறா (True or False)';
+        icon = 'bi-check-circle-fill';
+        details = `Statement: "${this.data.statement || ''}" | Answer: ${this.data.isTrue ? 'True' : 'False'}`;
+        break;
     }
     return { typeLabel, icon, details };
   }
@@ -333,7 +366,14 @@ export class ActivityBlock {
             <option value="yappu_asai_slice" ${tempData.type === 'yappu_asai_slice' ? 'selected' : ''}>அசை வெட்டு (Asai Slicer Game)</option>
             <option value="yappu_asai_detective" ${tempData.type === 'yappu_asai_detective' ? 'selected' : ''}>அசை பிழை திருத்துதல் (Asai Error Detective)</option>
             <option value="yappu_thalai" ${tempData.type === 'yappu_thalai' ? 'selected' : ''}>தளைப் பாலம் (Thalai Magnet Bridge)</option>
-            <option value="yappu_kural_puzzle" ${tempData.type === 'yappu_kural_puzzle' ? 'selected' : ''}>திருக்குறள் சீரமைக்கும் புதிர் (Kural Verse Puzzle)</option>
+            <option value="yappu_kural_puzzle" ${tempData.type === 'yappu_kural_puzzle' ? 'selected' : ''}>குறள் சீரமைக்க (Kural Puzzle)</option>
+            
+            <optgroup label="Alahiduthal (அலகிடுதல்) Interactive">
+              <option value="alahidu_fill_table" ${tempData.type === 'alahidu_fill_table' ? 'selected' : ''}>அலகிடும் அட்டவணையை நிரப்புக (Fill Table)</option>
+              <option value="alahidu_spot_error" ${tempData.type === 'alahidu_spot_error' ? 'selected' : ''}>பிழையைக் கண்டுபிடி (Spot Error)</option>
+              <option value="alahidu_fix_thalai" ${tempData.type === 'alahidu_fix_thalai' ? 'selected' : ''}>தளை தட்டாமல் சீரமைக்க (Fix Thalai)</option>
+              <option value="alahidu_true_false" ${tempData.type === 'alahidu_true_false' ? 'selected' : ''}>சரியா தவறா (True or False)</option>
+            </optgroup>
             <option value="yappu_eetru_seer" ${tempData.type === 'yappu_eetru_seer' ? 'selected' : ''}>ஈற்றுச்சீர் கண்டறிதல் (Eetru Seer Game)</option>
           </select>
           <div class="modal-form-container"></div>
@@ -402,6 +442,14 @@ export class ActivityBlock {
         renderYappuThalaiForm(formContainer, tempData, this.renderExplanationInput);
       } else if (type === 'yappu_kural_puzzle') {
         renderYappuKuralPuzzleForm(formContainer, tempData, this.renderExplanationInput);
+      } else if (type === 'alahidu_fill_table') {
+        renderAlahiduFillTableForm(formContainer, tempData, this.renderExplanationInput);
+      } else if (type === 'alahidu_spot_error') {
+        renderAlahiduSpotErrorForm(formContainer, tempData, this.renderExplanationInput);
+      } else if (type === 'alahidu_fix_thalai') {
+        renderAlahiduFixThalaiForm(formContainer, tempData, this.renderExplanationInput);
+      } else if (type === 'alahidu_true_false') {
+        renderAlahiduTrueFalseForm(formContainer, tempData, this.renderExplanationInput);
       }
     };
 

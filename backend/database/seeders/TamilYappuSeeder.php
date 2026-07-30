@@ -691,6 +691,7 @@ class TamilYappuSeeder extends Seeder
         'title' => 'அலகிடும் முறை',
         'reading_html' => '<h2 class="text-primary text-center mb-4">அலகிடும் முறை - படிநிலைகள்</h2><ol class="fs-5 text-dark mt-3 lh-lg"><li><strong>அடியிலுள்ள சொற்களைக் கண்டறிதல்</strong> – கொடுக்கப்பட்ட செய்யுளில் இடம்பெறும் ஒவ்வொரு அடியிலும் உள்ள சொற்களை வாசித்துக் கண்டறியவும்.</li><li><strong>எழுத்துக்களைக் குறில் / நெடில் / ஒற்று என அடையாளம் காணல்</strong> – ஒவ்வொரு சொல்லிலும் இடம்பெறும் எழுத்துக்களைக் குறிலா நெடிலா, ஒற்று வருகிறதா எனப் பார்க்கவும். (<a href="javascript:void(0)" class="topic-link text-decoration-none fw-bold text-primary" data-topic="eluthu">எழுத்து பற்றி அறிய</a>)</li><li><strong>அசை பிரித்தல்</strong> – ஒவ்வோர் எழுத்துத் தொகுதியையும் அசையாகப் பிரிக்கவும். அசைகளை நேர் அல்லது நிரை என்று குறிப்பிடவும். (<a href="javascript:void(0)" class="topic-link text-decoration-none fw-bold text-primary" data-topic="asai">அசை பற்றி அறிய</a>)</li><li><strong>சீர்ப் பெயரிடுதல்</strong> – சொல்லில் இடம்பெறும் அசைகளின் அடிப்படையில் சீர்களைக் குறிப்பிடவும். (<a href="javascript:void(0)" class="topic-link text-decoration-none fw-bold text-primary" data-topic="seer">சீர் பற்றி அறிய</a>)</li><li><strong>அடி முழுவதையும் சீர்களாகப் பிரித்து, மொத்த அடியின் யாப்பு வகையை (வெண்பா/ஆசிரியப்பா/கலிப்பா/வஞ்சிப்பா) உறுதி செய்தல்</strong> – சீர்களைப் பிரித்த பின்னர் தளை குறிப்பிடவும். (<a href="javascript:void(0)" class="topic-link text-decoration-none fw-bold text-primary" data-topic="thalai">தளை பற்றி அறிய</a>)</li></ol>',
         'practice_word' => 'அகழ்வாரைத்',
+        'activities' => []
       ],
     ],
   ],
@@ -799,6 +800,9 @@ class TamilYappuSeeder extends Seeder
                             'question' => $act['q'],
                             'items' => $act['items']
                         ];
+                    } else if (in_array($type, ['alahidu_fill_table', 'alahidu_spot_error', 'alahidu_fix_thalai', 'alahidu_true_false'])) {
+                        $dataJson = $act;
+                        unset($dataJson['type']);
                     }
 
                     $activity = Activity::create([

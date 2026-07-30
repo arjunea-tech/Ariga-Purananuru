@@ -3185,6 +3185,95 @@ class EluthuActivitySeeder extends Seeder
                 'chapter_id' => $thalaiChapter->id,
                 'content_id' => $content->id,
             ]);
+
+            // ==========================================
+            // 5. SEED ALAHIDUTHAL (அலகிடுதல் பயிற்சி)
+            // ==========================================
+            $alahiduthalChapter = Chapter::where('name', 'LIKE', '%அலகிடும்%')->first() ?? $thalaiChapter;
+
+            $alahiduActivities = [
+                'alahidu_fill_table' => [
+                    'title' => 'அலகிடும் அட்டவணையை நிரப்புக',
+                    'type' => 'alahidu_fill_table',
+                    'question' => 'கீழ்க்காணும் அலகிடும் அட்டவணையைச் சரியாக நிரப்புக:',
+                    'rows' => [
+                        [
+                            'word' => ['value' => 'அகழ்வாரைத்', 'isMissing' => false],
+                            'asai' => ['value' => 'நிரை / நேர் / நேர்', 'isMissing' => true],
+                            'seer' => ['value' => 'புளிமாங்காய்', 'isMissing' => false]
+                        ],
+                        [
+                            'word' => ['value' => 'தாங்கும்', 'isMissing' => false],
+                            'asai' => ['value' => 'நேர் / நேர்', 'isMissing' => false],
+                            'seer' => ['value' => 'தேமா', 'isMissing' => true]
+                        ]
+                    ],
+                    'options' => ['நேர் / நேர் / நேர்', 'தேமா', 'நிரை / நேர் / நேர்', 'புளிமா'],
+                    'explanation' => 'அகழ்வாரைத் (நிரை/நேர்/நேர் - புளிமாங்காய்). தாங்கும் (நேர்/நேர் - தேமா).'
+                ],
+                'alahidu_spot_error' => [
+                    'title' => 'பிழையைக் கண்டுபிடி',
+                    'type' => 'alahidu_spot_error',
+                    'question' => 'கீழ்க்காணும் அலகிடும் அட்டவணையில் எந்த வரியில் பிழை உள்ளது?',
+                    'tableData' => [
+                        ['word' => 'அகழ்வாரைத்', 'asai' => 'நிரை / நேர் / நேர்', 'seer' => 'புளிமாங்காய்'],
+                        ['word' => 'தாங்கும்', 'asai' => 'நேர் / நேர்', 'seer' => 'தேமா'],
+                        ['word' => 'நிலம்போலத்', 'asai' => 'நேர் / நேர் / நேர்', 'seer' => 'தேமாங்காய்']
+                    ],
+                    'errorRowIndex' => 2,
+                    'explanation' => '"நிலம்போலத்" என்பது நிரை/நேர்/நேர் (புளிமாங்காய்) என வர வேண்டும். நேர் எனத் தவறாக உள்ளது.'
+                ],
+                'alahidu_fix_thalai' => [
+                    'title' => 'தளை தட்டாமல் சீரமைக்க',
+                    'type' => 'alahidu_fix_thalai',
+                    'question' => 'தளை தட்டாமல் இருக்க நடுவில் எந்தச் சீர் வர வேண்டும்?',
+                    'firstWord' => 'கற்றதனால்',
+                    'lastWord' => 'பயனென்கொல்',
+                    'options' => [
+                        ['word' => 'ஆய', 'isCorrect' => true, 'explanation' => 'கற்றதனால் (காய்) + ஆய (நேர்) = வெண்சீர் வெண்டளை.'],
+                        ['word' => 'ஆகிய', 'isCorrect' => false, 'explanation' => 'கற்றதனால் (காய்) + ஆகிய (நிரை) = கலித்தளை. வெண்பாவில் வராது.']
+                    ]
+                ],
+                'alahidu_true_false' => [
+                    'title' => 'அலகிடுதல் - சரியா தவறா',
+                    'type' => 'alahidu_true_false',
+                    'question' => 'சரியா தவறா என கூறுக:',
+                    'statement' => 'ஒரு குறளின் ஈற்றுச்சீர் (கடைசி சீர்) நாள், மலர், காசு, பிறப்பு ஆகிய ஏதேனும் ஒரு வாய்ப்பாட்டில் தான் முடியும்.',
+                    'isTrue' => true,
+                    'explanation' => 'வெண்பாவின் ஈற்றுச்சீர் நாள், மலர், காசு, பிறப்பு என்னும் வாய்பாடுகளில் ஒன்றைக் கொண்டு முடிவது கட்டாயம்.'
+                ]
+            ];
+
+            // Delete old interactive contents for cleanup
+            Content::where('name', 'LIKE', '%அலகிடுதல் பயிற்சி%')
+                ->orWhere('name', 'LIKE', '%அலகிடும் அட்டவணை%')
+                ->orWhere('name', 'LIKE', '%பிழையைக் கண்டுபிடி%')
+                ->orWhere('name', 'LIKE', '%தளை தட்டாமல் சீரமைக்க%')
+                ->orWhere('name', 'LIKE', '%அலகிடுதல் - சரியா தவறா%')
+                ->get()
+                ->each(function($oc) {
+                    DB::table('content_chapters')->where('content_id', $oc->id)->delete();
+                    $oc->delete();
+                });
+
+            foreach ($alahiduActivities as $key => $actData) {
+                $block = [
+                    'type' => 'activity',
+                    'data' => $actData
+                ];
+
+                $content = Content::create([
+                    'name'         => $actData['title'],
+                    'title'        => $actData['title'],
+                    'text_content' => json_encode(['blocks' => [$block]], JSON_UNESCAPED_UNICODE),
+                    'is_active'    => true,
+                ]);
+
+                DB::table('content_chapters')->insert([
+                    'chapter_id' => $alahiduthalChapter->id,
+                    'content_id' => $content->id,
+                ]);
+            }
         }
     }
 }

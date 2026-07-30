@@ -28,9 +28,13 @@ import { EluthuDetectiveComponent } from '../eluthu-detective/eluthu-detective';
 import { YappuThalaiComponent } from '../yappu-thalai/yappu-thalai';
 import { YappuKuralPuzzleComponent } from '../yappu-kural-puzzle/yappu-kural-puzzle';
 import { YappuEetruSeerComponent } from '../yappu-eetru-seer/yappu-eetru-seer';
+import { YappuAlahiduFillTableComponent } from '../yappu-alahidu-fill-table/yappu-alahidu-fill-table';
+import { YappuAlahiduSpotErrorComponent } from '../yappu-alahidu-spot-error/yappu-alahidu-spot-error';
+import { YappuAlahiduFixThalaiComponent } from '../yappu-alahidu-fix-thalai/yappu-alahidu-fix-thalai';
+import { YappuAlahiduTrueFalseComponent } from '../yappu-alahidu-true-false/yappu-alahidu-true-false';
 
 export interface NormalizedActivity {
-  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard' | 'eluthu_flashcard' | 'yappu_seer' | 'yappu_seer_p2n' | 'yappu_seer_n2p' | 'yappu_seer_build' | 'yappu_seer_basket' | 'yappu_seer_speed' | 'yappu_seer_match' | 'yappu_asai_slice' | 'yappu_asai_detective' | 'eluthu_detective' | 'yappu_thalai' | 'yappu_kural_puzzle' | 'yappu_eetru_seer';
+  type: 'mcq' | 'fill_blanks' | 'flashcard' | 'match' | 'crossword' | 'word_arrange' | 'speaking' | 'role_play' | 'sequencing' | 'parts_of_speech' | 'mind_map' | 'writing' | 'odd_one_out' | 'word_hunt' | 'letter_basket' | 'balloon_pop' | 'word_builder' | 'yappu_flashcard' | 'eluthu_flashcard' | 'yappu_seer' | 'yappu_seer_p2n' | 'yappu_seer_n2p' | 'yappu_seer_build' | 'yappu_seer_basket' | 'yappu_seer_speed' | 'yappu_seer_match' | 'yappu_asai_slice' | 'yappu_asai_detective' | 'eluthu_detective' | 'yappu_thalai' | 'yappu_kural_puzzle' | 'yappu_eetru_seer' | 'alahidu_fill_table' | 'alahidu_spot_error' | 'alahidu_fix_thalai' | 'alahidu_true_false';
   question?: string;
   text?: string;
   front?: string;
@@ -79,6 +83,15 @@ export interface NormalizedActivity {
   nerWords?: string[];
   niraiWords?: string[];
   challenges?: any[];
+  
+  // Alahiduthal activity properties
+  rows?: any[];
+  tableData?: any[];
+  errorRowIndex?: number;
+  firstWord?: string;
+  lastWord?: string;
+  isTrue?: boolean;
+  statement?: string;
 }
 
 @Component({
@@ -113,7 +126,11 @@ export interface NormalizedActivity {
     EluthuDetectiveComponent,
     YappuThalaiComponent,
     YappuKuralPuzzleComponent,
-    YappuEetruSeerComponent
+    YappuEetruSeerComponent,
+    YappuAlahiduFillTableComponent,
+    YappuAlahiduSpotErrorComponent,
+    YappuAlahiduFixThalaiComponent,
+    YappuAlahiduTrueFalseComponent
   ],
   templateUrl: './activity-renderer.html',
   styleUrls: ['./activity-renderer.css']
@@ -260,6 +277,14 @@ export class ActivityRenderer implements OnChanges {
       type = 'yappu_kural_puzzle';
     } else if (['yappu_eetru_seer', 'yappu-eetru-seer', 'eetru_seer', 'eetru-seer'].includes(typeInput.toLowerCase())) {
       type = 'yappu_eetru_seer';
+    } else if (['alahidu_fill_table', 'alahidu-fill-table'].includes(typeInput.toLowerCase())) {
+      type = 'alahidu_fill_table';
+    } else if (['alahidu_spot_error', 'alahidu-spot-error'].includes(typeInput.toLowerCase())) {
+      type = 'alahidu_spot_error';
+    } else if (['alahidu_fix_thalai', 'alahidu-fix-thalai'].includes(typeInput.toLowerCase())) {
+      type = 'alahidu_fix_thalai';
+    } else if (['alahidu_true_false', 'alahidu-true-false'].includes(typeInput.toLowerCase())) {
+      type = 'alahidu_true_false';
     }
 
     // 2. Extract explanation & options
@@ -369,6 +394,23 @@ export class ActivityRenderer implements OnChanges {
       normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
       normalized.challenges = raw.challenges || additional.challenges || [];
       normalized.words = raw.words || additional.words || [];
+    } else if (type === 'alahidu_fill_table') {
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.rows = raw.rows || additional.rows || [];
+      normalized.options = raw.options || additional.options || [];
+    } else if (type === 'alahidu_spot_error') {
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.tableData = raw.tableData || additional.tableData || [];
+      normalized.errorRowIndex = raw.errorRowIndex !== undefined ? raw.errorRowIndex : (additional.errorRowIndex !== undefined ? additional.errorRowIndex : 0);
+    } else if (type === 'alahidu_fix_thalai') {
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.firstWord = raw.firstWord || additional.firstWord || '';
+      normalized.lastWord = raw.lastWord || additional.lastWord || '';
+      normalized.options = raw.options || additional.options || [];
+    } else if (type === 'alahidu_true_false') {
+      normalized.question = this.convertEditorJsToHtml(raw.question || raw.question_text || '');
+      normalized.statement = raw.statement || additional.statement || '';
+      normalized.isTrue = raw.isTrue !== undefined ? raw.isTrue : (additional.isTrue !== undefined ? additional.isTrue : true);
     }
 
     this.normalizedActivity.set(normalized);
