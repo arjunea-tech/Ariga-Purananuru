@@ -238,7 +238,7 @@
       <div *ngIf="step === 'input_word'" class="animate-slide-up w-100 d-flex flex-column align-items-center mt-2">
         <div class="text-center mb-4">
           <h2 class="text-dark fw-bold mb-2" style="font-size: 2.5rem; font-family: 'Fredoka', sans-serif;">
-            {{ playMode === 'explain' || practiceType === 'eluthu' ? 'வார்த்தையை உள்ளிடுக' : '/ குறியிட்டுப்
+            {{ playMode === 'explain' || practiceType === 'eluthu' ? 'வார்த்தையை உள்ளிடுக எ.கா. அகரம்' : '/ குறியிட்டுப்
             பிரிக்கவும்' }}
           </h2>
           <p class="text-secondary fs-4">
@@ -800,7 +800,8 @@
             practiceType === 'seer' ? 'சீர் விளக்கம்' : 'அசை விளக்கம்' }}</h2>
           <p class="text-secondary mb-1" style="font-size: clamp(0.8rem, 2.5vw, 1.1rem);">நீங்கள் உள்ளிட்ட வார்த்தை:
             <span class="fw-bold text-primary">{{
-              interactiveWord }}</span></p>
+              interactiveWord }}</span>
+          </p>
         </div>
 
         <!-- Results Container -->

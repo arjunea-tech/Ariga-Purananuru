@@ -71,7 +71,8 @@
       (nextStep)="nextLessonStep()"
       (prevStep)="prevLessonStep()"
       (activityAnswered)="onActivityAnswered($event)"
-      (continueFeedback)="continueFromFeedback()">
+      (continueFeedback)="continueFromFeedback()"
+      (topicClick)="onTopicClick($event)">
     </app-kids-lesson-player>
     } @else {
       <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center bg-dark text-white">
