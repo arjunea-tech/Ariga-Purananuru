@@ -9,11 +9,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement('ALTER TABLE contents MODIFY text_content LONGTEXT NULL');
+        Schema::table('contents', function (Blueprint $table) {
+            $table->longText('text_content')->nullable()->change();
+        });
     }
 
     public function down(): void
     {
-        DB::statement('ALTER TABLE contents MODIFY text_content TEXT NULL');
+        Schema::table('contents', function (Blueprint $table) {
+            $table->text('text_content')->nullable()->change();
+        });
     }
 };
