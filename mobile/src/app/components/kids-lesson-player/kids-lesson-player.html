@@ -166,7 +166,8 @@
         <button
           class="btn btn-danger btn-lg rounded-pill px-5 py-3 shadow-lg fw-bold d-flex align-items-center gap-3 border-bottom border-4 z-1"
           style="font-size: 1.25rem; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'"
-          onmouseout="this.style.transform='scale(1)'">
+          onmouseout="this.style.transform='scale(1)'"
+          (click)="openPdf(step.data)">
           <i class="bi bi-cloud-download-fill fs-3"></i> Open Document
         </button>
       </div>

@@ -24,6 +24,11 @@ class ContentAttachment extends Model
     {
         if (!$this->unique_id) return null;
         
+        // If unique_id is already a full Cloudinary URL, return it directly
+        if (str_starts_with($this->unique_id, 'http')) {
+            return $this->unique_id;
+        }
+        
         $extension = strtolower($this->file_extension);
         $folder = match(true) {
             in_array($extension, ['jpg','jpeg','png','gif','webp','svg']) => 'images',

@@ -7,7 +7,7 @@ import { AudioService } from '../../services/audio.service';
 import { AuthService } from '../../services/auth';
 import confetti from 'canvas-confetti';
 import { gsap } from 'gsap';
-
+import { Browser } from '@capacitor/browser';
 export interface LessonStep {
   type: 'intro' | 'video' | 'pdf' | 'reading' | 'practice' | 'activity' | 'assessment' | 'remediation';
   title: string;
@@ -56,6 +56,33 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
       const topic = linkElement.getAttribute('data-topic');
       if (topic) {
         this.topicClick.emit(topic);
+      }
+    }
+  }
+
+  async openPdf(pdfData: any) {
+    let pdfUrl = '';
+    if (typeof pdfData === 'string') {
+      pdfUrl = pdfData;
+    } else if (Array.isArray(pdfData) && pdfData.length > 0) {
+      pdfUrl = pdfData[0].url || pdfData[0].unique_id;
+    } else if (pdfData && pdfData.url) {
+      pdfUrl = pdfData.url;
+    }
+    
+    if (pdfUrl) {
+      if (pdfUrl.toLowerCase().endsWith('.pdf') || pdfUrl.includes('/raw/upload/') || pdfUrl.includes('/image/upload/')) {
+        pdfUrl = 'https://docs.google.com/viewer?embedded=true&url=' + encodeURIComponent(pdfUrl);
+      }
+      
+      // Ensure the URL has a protocol
+      if (!pdfUrl.startsWith('http')) {
+        pdfUrl = 'https://' + pdfUrl;
+      }
+      try {
+        await Browser.open({ url: pdfUrl });
+      } catch (e) {
+        window.open(pdfUrl, '_blank'); // Fallback
       }
     }
   }
