@@ -195,7 +195,24 @@ export class Content implements OnInit {
     const files = event.target.files as FileList;
     if (files && files.length > 0) {
       this.isUploading.set(true);
-      const uploadObservables = Array.from(files).map(file => 
+      const validFiles: File[] = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.size > 1048576) {
+          this.showFeedback('error', `File ${file.name} is larger than 1 MB and cannot be uploaded.`);
+        } else {
+          validFiles.push(file);
+        }
+      }
+
+      if (validFiles.length === 0) {
+        this.isUploading.set(false);
+        event.target.value = '';
+        return;
+      }
+
+      const uploadObservables = validFiles.map(file => 
         this.contentService.uploadFile(file).pipe(
           catchError(err => {
             console.error('Upload failed for', file.name, err);
@@ -207,9 +224,11 @@ export class Content implements OnInit {
 
       forkJoin(uploadObservables).subscribe(results => {
         const successfulUploads = results.filter(res => res !== null) as Attachment[];
-        this.attachmentsToSave.update(curr => [...curr, ...successfulUploads]);
+        if (successfulUploads.length > 0) {
+          this.attachmentsToSave.update(curr => [...curr, ...successfulUploads]);
+          this.showFeedback('success', 'Files uploaded successfully. You can now set alias names.');
+        }
         this.isUploading.set(false);
-        this.showFeedback('success', 'Files uploaded successfully. You can now set alias names.');
       });
     }
     event.target.value = '';

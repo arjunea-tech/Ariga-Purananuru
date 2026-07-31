@@ -8,6 +8,7 @@ import { AuthService } from '../../services/auth';
 import confetti from 'canvas-confetti';
 import { gsap } from 'gsap';
 import { Browser } from '@capacitor/browser';
+import { Capacitor } from '@capacitor/core';
 export interface LessonStep {
   type: 'intro' | 'video' | 'pdf' | 'reading' | 'practice' | 'activity' | 'assessment' | 'remediation';
   title: string;
@@ -71,18 +72,15 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
     }
     
     if (pdfUrl) {
-      if (pdfUrl.toLowerCase().endsWith('.pdf') || pdfUrl.includes('/raw/upload/') || pdfUrl.includes('/image/upload/')) {
-        pdfUrl = 'https://docs.google.com/viewer?embedded=true&url=' + encodeURIComponent(pdfUrl);
-      }
-      
-      // Ensure the URL has a protocol
-      if (!pdfUrl.startsWith('http')) {
-        pdfUrl = 'https://' + pdfUrl;
-      }
-      try {
-        await Browser.open({ url: pdfUrl });
-      } catch (e) {
-        window.open(pdfUrl, '_blank'); // Fallback
+      if (Capacitor.isNativePlatform()) {
+        window.open(pdfUrl, '_system');
+      } else {
+        const a = document.createElement('a');
+        a.href = pdfUrl;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
       }
     }
   }
