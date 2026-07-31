@@ -310,7 +310,7 @@
       <div class="w-100 flex-grow-1 d-flex flex-column align-items-stretch justify-content-center mx-auto p-1 p-md-2"
         style="max-width: 1000px; width: 100%; min-height: 0;">
         <div
-          class="premium-card w-100 p-2 p-md-4 rounded-4 shadow-lg overflow-hidden animate-pop-in flex-grow-1 d-flex flex-column"
+          class="premium-card w-100 p-2 p-md-4 rounded-4 shadow-lg overflow-y-auto animate-pop-in flex-grow-1 d-flex flex-column"
           style="max-height: 100%;">
           <app-activity-renderer [activity]="step.data.data" [showFeedback]="true"
             (answered)="activityAnswered.emit($event)"

@@ -37,6 +37,7 @@ export class YappuEetruSeerComponent implements OnInit, OnChanges {
   score = signal<number>(0);
   total = signal<number>(0);
   streak = signal<number>(0);
+  maxQuestions = signal<number>(5);
 
   currentQuestion = signal<EetruSeerItem | null>(null);
   selectedOption = signal<string | null>(null);
@@ -159,7 +160,9 @@ export class YappuEetruSeerComponent implements OnInit, OnChanges {
 
     const rawQuestions = this.activity?.questions || this.defaultDataset;
     // Shuffle questions randomly
-    const shuffled = [...rawQuestions].sort(() => Math.random() - 0.5);
+    const shuffled = [...rawQuestions]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, this.maxQuestions());
     this.shuffledQuestions.set(shuffled);
 
     this.loadQuestion();
@@ -170,6 +173,11 @@ export class YappuEetruSeerComponent implements OnInit, OnChanges {
     const questions = this.shuffledQuestions();
     if (this.currentIndex() >= questions.length) {
       this.gameCompleted.set(true);
+      this.answered.emit({
+        isCorrect: true, // Activity completed
+        score: this.score(),
+        total: this.total()
+      });
       return;
     }
 
@@ -203,16 +211,10 @@ export class YappuEetruSeerComponent implements OnInit, OnChanges {
       this.streak.set(0);
     }
 
-    this.answered.emit({
-      isCorrect: isRight,
-      score: this.score(),
-      total: this.total()
-    });
-
-    // Advance to next question automatically after 400ms flash
+    // Advance to next question automatically after 1200ms flash
     this.autoAdvanceTimer = setTimeout(() => {
       this.nextQuestion();
-    }, 400);
+    }, 1200);
   }
 
   nextQuestion(): void {

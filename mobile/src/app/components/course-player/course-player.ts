@@ -633,7 +633,21 @@ export class CoursePlayer implements OnInit, OnDestroy {
 
           steps = this.shuffleArray([...shuffledBasic, ...shuffledSpecial]);
         } else if (steps.length > 0) {
-          steps = this.shuffleArray(steps);
+          // Deduplicate specific multi-question yappu games to prevent repeating the same 5-question game
+          let seenGames = new Set<string>();
+          let dedupedSteps = [];
+          for (let step of steps) {
+            const type = step.data?.data?.type || '';
+            if (type.startsWith('yappu-')) {
+              if (!seenGames.has(type)) {
+                seenGames.add(type);
+                dedupedSteps.push(step);
+              }
+            } else {
+              dedupedSteps.push(step);
+            }
+          }
+          steps = this.shuffleArray(dedupedSteps);
           if (steps.length > 10) {
             steps = steps.slice(0, 10);
           }
@@ -897,7 +911,21 @@ export class CoursePlayer implements OnInit, OnDestroy {
 
               preparedBlocks = this.shuffleArray([...shuffledBasic, ...shuffledSpecial]);
             } else {
-              preparedBlocks = this.shuffleArray(activityBlocks);
+              // Deduplicate yappu multi-games to prevent repeating the same game back-to-back
+              let seenGames = new Set<string>();
+              let deduped = [];
+              for (let block of activityBlocks) {
+                const type = block.data?.type || '';
+                if (type.startsWith('yappu-')) {
+                  if (!seenGames.has(type)) {
+                    seenGames.add(type);
+                    deduped.push(block);
+                  }
+                } else {
+                  deduped.push(block);
+                }
+              }
+              preparedBlocks = this.shuffleArray(deduped);
               if (preparedBlocks.length > 10) {
                 preparedBlocks = preparedBlocks.slice(0, 10);
               }

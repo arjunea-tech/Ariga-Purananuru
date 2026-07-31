@@ -26,16 +26,18 @@
 .slot-neer {
   background: linear-gradient(135deg, #4F46E5, #3730A3) !important;
   color: #FFFFFF !important;
-  border: 3px solid #6366F1 !important;
-  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.35) !important;
+  border: 2px solid #312E81 !important;
+  box-shadow: 0 6px 0 #312E81, 0 6px 16px rgba(79, 70, 229, 0.35) !important;
+  border-style: solid !important;
   animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .slot-nirai {
   background: linear-gradient(135deg, #059669, #047857) !important;
   color: #FFFFFF !important;
-  border: 3px solid #10B981 !important;
-  box-shadow: 0 6px 16px rgba(5, 150, 105, 0.35) !important;
+  border: 2px solid #064E3B !important;
+  box-shadow: 0 6px 0 #064E3B, 0 6px 16px rgba(5, 150, 105, 0.35) !important;
+  border-style: solid !important;
   animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -250,7 +252,6 @@
 
 .asai-btn:active:not(:disabled) {
   transform: translateY(6px);
-  box-shadow: 0 2px 0 rgba(0,0,0,0.1);
 }
 
 .asai-btn:disabled {
@@ -261,29 +262,44 @@
 }
 
 .neer-btn {
-  background: #10b981;
+  background: linear-gradient(135deg, #4F46E5, #3730A3);
   color: #ffffff;
   border-radius: 16px;
-  border: 3px solid #059669;
-  box-shadow: 0 6px 0 #047857;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  border: 2px solid #312E81;
+  box-shadow: 0 8px 0 #312E81, 0 12px 10px rgba(0,0,0,0.2);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.neer-btn:active:not(:disabled) {
+  transform: translateY(8px);
+  box-shadow: 0 0px 0 #312E81, 0 4px 5px rgba(0,0,0,0.2);
 }
 
 .nirai-btn {
-  background: #f43f5e;
+  background: linear-gradient(135deg, #059669, #047857);
   color: #ffffff;
-  border-radius: 50%;
-  border: 3px solid #e11d48;
-  box-shadow: 0 6px 0 #be123c;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+  border-radius: 16px;
+  border: 2px solid #064E3B;
+  box-shadow: 0 8px 0 #064E3B, 0 12px 10px rgba(0,0,0,0.2);
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.nirai-btn:active:not(:disabled) {
+  transform: translateY(8px);
+  box-shadow: 0 0px 0 #064E3B, 0 4px 5px rgba(0,0,0,0.2);
 }
 
 .undo-btn {
   background: #ffffff;
   color: #475569;
   border-radius: 16px;
-  border: 3px solid #cbd5e1;
-  box-shadow: 0 6px 0 #94a3b8;
+  border: 2px solid #cbd5e1;
+  box-shadow: 0 6px 0 #94a3b8, 0 8px 6px rgba(0,0,0,0.1);
+}
+
+.undo-btn:active:not(:disabled) {
+  transform: translateY(6px);
+  box-shadow: 0 0px 0 #94a3b8, 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .asai-title {

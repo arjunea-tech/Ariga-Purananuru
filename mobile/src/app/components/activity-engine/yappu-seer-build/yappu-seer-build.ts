@@ -22,6 +22,10 @@ export class YappuSeerBuildComponent implements OnInit, OnChanges, OnDestroy {
   score = signal<number>(0);
   total = signal<number>(0);
 
+  questionsPlayed = signal<number>(0);
+  maxQuestions = signal<number>(5);
+  gameCompleted = signal<boolean>(false);
+
   builtPattern = signal<string[]>([]);
   buildResult = signal<'correct' | 'wrong' | null>(null);
 
@@ -66,6 +70,8 @@ export class YappuSeerBuildComponent implements OnInit, OnChanges, OnDestroy {
     this.level.set(isNaN(parsedLevel) ? 2 : parsedLevel);
     this.score.set(0);
     this.total.set(0);
+    this.questionsPlayed.set(0);
+    this.gameCompleted.set(false);
     this.nextQuestion();
   }
 
@@ -76,16 +82,31 @@ export class YappuSeerBuildComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   nextQuestion(): void {
+    if (this.questionsPlayed() >= this.maxQuestions()) {
+      this.gameCompleted.set(true);
+      this.answered.emit({
+        isCorrect: true,
+        score: this.score(),
+        total: this.total()
+      });
+      return;
+    }
+
     const pool = this.getPool();
     if (pool.length === 0) return;
 
+    // To ensure random but no-repeats, we could shuffle, but picking a random one works for now.
+    // Let's just pick a random one.
     const q = pool[Math.floor(Math.random() * pool.length)];
     this.question.set(q);
     
     // Pick a random word for this seer (assume API provides it)
     const wordList = this.seerWords[q.name];
     if (!wordList || wordList.length === 0) return; // Skip if no word found
-    const selectedWord = wordList[Math.floor(Math.random() * wordList.length)];
+    
+    // Shuffle words inside the wordList so we get variety
+    const shuffledWords = [...wordList].sort(() => 0.5 - Math.random());
+    const selectedWord = shuffledWords[0];
     this.currentWord.set(selectedWord);
 
     this.builtPattern.set([]);
@@ -107,21 +128,18 @@ export class YappuSeerBuildComponent implements OnInit, OnChanges, OnDestroy {
 
       if (correct) {
         this.score.update(s => s + 1);
+        this.questionsPlayed.update(q => q + 1);
         this.audioService.playSuccess();
       } else {
         this.audioService.playError();
       }
 
-      this.answered.emit({
-        isCorrect: correct,
-        score: this.score(),
-        total: this.total()
-      });
-
       setTimeout(() => {
         if (!correct) {
           this.builtPattern.set([]);
           this.buildResult.set(null);
+        } else {
+          this.nextQuestion();
         }
       }, 1600);
     }

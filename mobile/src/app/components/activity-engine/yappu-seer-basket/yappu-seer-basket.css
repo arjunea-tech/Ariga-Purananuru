@@ -8,8 +8,18 @@
   position: relative;
   width: 100%;
   overflow: hidden;
-  background: linear-gradient(180deg, #38BDF8 0%, #3B82F6 100%);
   border-radius: 1rem;
+}
+.sky-gradient {
+  background: linear-gradient(180deg, #38BDF8 0%, #60A5FA 70%, #93C5FD 100%);
+  z-index: 0;
+}
+.grass-floor {
+  height: 25%;
+  background: linear-gradient(180deg, #4ADE80 0%, #16A34A 10%, #15803D 100%);
+  border-top: 4px solid #22C55E;
+  border-radius: 100% 100% 0 0 / 20px 20px 0 0;
+  z-index: 1;
 }
 
 /* DECORATIVE CLOUDS */
@@ -44,12 +54,13 @@
 .falling-item-wrapper {
   position: absolute;
   z-index: 10;
-  transition: top 0.03s linear, left 0.3s ease-out, transform 0.3s ease-out, opacity 0.3s;
+  transition: top 0.03s linear, left 0.3s ease-out, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
 }
 
 .falling-item-wrapper.caught {
   opacity: 0;
-  transform: translateX(-50%) scale(0.3) !important;
+  transform: translateX(-50%) scale(0.1) translateY(100px) !important;
+  filter: drop-shadow(0 0 20px #4ADE80);
 }
 
 /* FALLING ITEM */
@@ -84,46 +95,82 @@
   color: #1E293B;
 }
 
-/* ARCADE BUTTONS */
-.basket-btn {
-  position: relative;
-  overflow: hidden;
-  border-bottom: 6px solid rgba(0,0,0,0.25) !important;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-  transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 14px 8px !important;
-  margin-bottom: 6px;
+/* 3D BASKETS */
+.baskets-area {
+  background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.9) 100%);
 }
 
-.basket-btn::after {
-  content: '';
+.basket-btn {
+  cursor: pointer;
+  padding-top: 20px;
+}
+.basket-btn:focus { outline: none; }
+
+.basket-3d {
+  width: 80px;
+  height: 70px;
+  border-radius: 20px 20px 40px 40px;
+  position: relative;
+  box-shadow: inset 0 -15px 20px rgba(0,0,0,0.3), 0 10px 15px rgba(0,0,0,0.2);
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: bottom center;
+}
+
+.basket-btn:active .basket-3d, .basket-btn.active .basket-3d {
+  transform: scaleY(0.85) translateY(10px);
+  box-shadow: inset 0 -10px 15px rgba(0,0,0,0.3), 0 5px 8px rgba(0,0,0,0.1);
+}
+
+.basket-rim {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.3) 0%, transparent 50%);
+  top: -10px;
+  left: -5%;
+  width: 110%;
+  height: 20px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border: 4px solid rgba(0,0,0,0.15);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.basket-inner {
+  position: absolute;
+  top: -4px;
+  left: 2%;
+  width: 96%;
+  height: 18px;
+  background: rgba(0,0,0,0.35);
+  border-radius: 50%;
+  box-shadow: inset 0 5px 10px rgba(0,0,0,0.5);
+  overflow: visible;
+}
+
+.basket-icon {
+  position: absolute;
+  top: -10px;
+  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.4));
+}
+
+/* PLUS ONE POPUP */
+.plus-one-popup {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #FBBF24;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3), 0 0 10px #F59E0B;
+  animation: floatUp 0.8s ease-out forwards;
+  z-index: 20;
   pointer-events: none;
 }
 
-.basket-btn:hover {
-  filter: brightness(1.1);
-}
-
-.basket-btn:active, .basket-btn.active {
-  transform: translateY(6px);
-  border-bottom-width: 0px !important;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  filter: brightness(0.9);
-}
-
-.basket-icon-wrapper i {
-  font-size: 2.2rem;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-}
-
-.basket-label {
-  font-size: 0.8rem !important;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+@keyframes floatUp {
+  0% { opacity: 0; transform: translate(-50%, 10px) scale(0.5); }
+  20% { opacity: 1; transform: translate(-50%, -10px) scale(1.2); }
+  80% { opacity: 1; transform: translate(-50%, -30px) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -40px) scale(1); }
 }
 
 /* ANIMATIONS */
@@ -160,14 +207,18 @@
 @media (max-width: 576px) {
   .basket-btn {
     padding: 8px 4px !important;
-    border-bottom-width: 4px !important;
-  }
-  .basket-icon-wrapper i {
-    font-size: 1.6rem;
   }
   .basket-label {
     font-size: 0.65rem !important;
     letter-spacing: 0px;
+  }
+  .basket-3d {
+    width: 60px;
+    height: 55px;
+  }
+  .basket-icon {
+    font-size: 1.5rem !important;
+    top: -5px;
   }
   .fruit-emoji {
     font-size: 2.8rem;

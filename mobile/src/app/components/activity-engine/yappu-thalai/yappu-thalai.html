@@ -1,11 +1,23 @@
-<div class="thalai-container">
+<div class="thalai-container p-2 p-md-3">
+  <!-- HEADER BAR -->
+  <div class="text-center mb-3">
+    <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
+      <span class="badge bg-primary-subtle text-primary fw-bold rounded-pill px-3 py-2 text-wrap text-center shadow-sm" style="font-size: 0.95rem;">
+        🔗 தளை இணைப்பு (Thalai Linker)
+      </span>
+      <span class="badge bg-warning-subtle text-warning-emphasis fw-bold rounded-pill px-3 py-2 shadow-sm" style="font-size: 0.95rem;">
+        🎯 Progress: {{ (currentIndex() + 1 > maxQuestions()) ? maxQuestions() : (currentIndex() + 1) }} / {{ maxQuestions() }}
+      </span>
+    </div>
+  </div>
+
   <!-- Main Game Card -->
   <div class="game-card" *ngIf="!gameCompleted() && currentQuestion() as q">
     
     <!-- Bridge Arena -->
     <div class="bridge-arena">
       <!-- Nintra Seer Card -->
-      <div class="seer-card nintra-card">
+      <div class="seer-card nintra-card" [class.snap-correct]="isCorrect() === true" [class.snap-wrong]="isCorrect() === false">
         <span class="card-label">நின்ற சீர்</span>
         <h2 class="seer-word">{{ q.nintraSeer }}</h2>
         <div class="asai-pills">
@@ -31,7 +43,7 @@
       </div>
 
       <!-- Varum Seer Card -->
-      <div class="seer-card varum-card">
+      <div class="seer-card varum-card" [class.snap-correct]="isCorrect() === true" [class.snap-wrong]="isCorrect() === false">
         <span class="card-label">வரும் சீர்</span>
         <h2 class="seer-word">{{ q.varumSeer }}</h2>
         <div class="asai-pills">

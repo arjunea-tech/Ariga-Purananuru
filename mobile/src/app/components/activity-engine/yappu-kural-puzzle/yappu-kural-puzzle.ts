@@ -35,6 +35,7 @@ export class YappuKuralPuzzleComponent implements OnInit, OnChanges {
   score = signal<number>(0);
   total = signal<number>(0);
   streak = signal<number>(0);
+  maxQuestions = signal<number>(5);
 
   currentKural = signal<KuralItem | null>(null);
   
@@ -112,7 +113,9 @@ export class YappuKuralPuzzleComponent implements OnInit, OnChanges {
     this.gameCompleted.set(false);
 
     const rawKurals = this.activity?.kurals || this.defaultDataset;
-    const shuffled = [...rawKurals].sort(() => Math.random() - 0.5);
+    const shuffled = [...rawKurals]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, this.maxQuestions());
     this.shuffledKurals.set(shuffled);
 
     this.loadKural();
@@ -122,6 +125,11 @@ export class YappuKuralPuzzleComponent implements OnInit, OnChanges {
     const kurals = this.shuffledKurals();
     if (this.currentIndex() >= kurals.length) {
       this.gameCompleted.set(true);
+      this.answered.emit({
+        isCorrect: true, // Activity completed
+        score: this.score(),
+        total: this.total()
+      });
       return;
     }
 
@@ -217,12 +225,6 @@ export class YappuKuralPuzzleComponent implements OnInit, OnChanges {
       this.audioService.playError();
       this.streak.set(0);
     }
-
-    this.answered.emit({
-      isCorrect: isRight,
-      score: this.score(),
-      total: this.total()
-    });
   }
 
   nextKural(): void {

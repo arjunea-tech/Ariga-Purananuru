@@ -38,6 +38,10 @@
     
     <!-- FALLING AREA (SKY/TREES) -->
     <div class="falling-area flex-grow-1 position-relative" [class.shake]="isWrong()">
+      <!-- Background elements -->
+      <div class="sky-gradient position-absolute top-0 start-0 w-100 h-100"></div>
+      <div class="grass-floor position-absolute bottom-0 start-0 w-100"></div>
+
       <!-- Decorative clouds -->
       <div class="cloud cloud-1">☁️</div>
       <div class="cloud cloud-2">☁️</div>
@@ -56,19 +60,29 @@
     </div>
 
     <!-- BASKETS AREA -->
-    <div class="baskets-area mt-auto pt-3 border-top border-light position-relative" style="z-index: 10;">
-      <p class="text-center text-muted small fw-bold mb-2">Catch the fruit by tapping the correct basket!</p>
-      <div class="row g-2 justify-content-center">
+    <div class="baskets-area mt-auto pt-2 pb-3 position-relative" style="z-index: 10;">
+      <p class="text-center text-dark fw-extrabold mb-3" style="text-shadow: 0 1px 3px rgba(255,255,255,0.8); font-size: 1.1rem;">Catch the fruit by tapping the correct basket!</p>
+      <div class="row g-3 justify-content-center px-2">
         @for (basket of visibleBaskets; track basket.id) {
-          <div [class]="visibleBaskets.length === 2 ? 'col-6' : 'col-3'">
-            <button class="basket-btn w-100 p-2 rounded-4 border-0 d-flex flex-column align-items-center justify-content-center transition-all"
-                    [style.background]="basket.color"
+          <div class="position-relative" [class]="visibleBaskets.length === 2 ? 'col-6' : 'col-3'">
+            
+            @if (showPlusOne() === basket.id) {
+              <div class="plus-one-popup">+1 ⭐</div>
+            }
+
+            <button class="basket-btn w-100 position-relative border-0 bg-transparent d-flex flex-column align-items-center justify-content-center transition-all"
                     [class.active]="currentItem()?.basketType === basket.id"
                     (click)="catchItem(basket.id)">
-              <div class="basket-icon-wrapper mb-1">
-                <i class="bi {{basket.icon}} text-white"></i>
+              
+              <!-- 3D Basket Shape -->
+              <div class="basket-3d" [style.background]="basket.color">
+                <div class="basket-rim"></div>
+                <div class="basket-inner d-flex align-items-center justify-content-center">
+                  <i class="bi {{basket.icon}} text-white basket-icon" style="font-size: 2rem;"></i>
+                </div>
               </div>
-              <span class="text-white fw-bold basket-label">{{ basket.name }}</span>
+
+              <span class="fw-bold basket-label mt-2 px-3 py-1 rounded-pill shadow-sm" [style.color]="basket.color" style="background: rgba(255,255,255,0.9); border: 2px solid currentColor;">{{ basket.name }}</span>
             </button>
           </div>
         }

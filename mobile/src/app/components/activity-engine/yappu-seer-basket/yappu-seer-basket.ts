@@ -39,6 +39,7 @@ export class YappuSeerBasketComponent implements OnInit, OnChanges, OnDestroy {
   isGameOver = signal<boolean>(false);
   gameWon = signal<boolean>(false);
   isWrong = signal<boolean>(false);
+  showPlusOne = signal<string | null>(null);
 
   currentItem = signal<FallingItem | null>(null);
 
@@ -210,6 +211,8 @@ export class YappuSeerBasketComponent implements OnInit, OnChanges, OnDestroy {
       // Correct!
       this.score.update(s => s + 1);
       this.audioService.playSuccess();
+      this.showPlusOne.set(basketId);
+      setTimeout(() => this.showPlusOne.set(null), 800);
 
       // Speed up slightly to make it challenging
       this.fallSpeed = Math.min(this.fallSpeed + 0.15, 1.5);

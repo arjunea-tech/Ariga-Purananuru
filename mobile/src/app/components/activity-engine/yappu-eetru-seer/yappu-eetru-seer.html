@@ -1,4 +1,16 @@
-<div class="eetru-container">
+<div class="eetru-container p-2 p-md-3">
+  <!-- HEADER BAR -->
+  <div class="text-center mb-3">
+    <div class="d-flex flex-wrap align-items-center justify-content-center gap-2">
+      <span class="badge bg-primary-subtle text-primary fw-bold rounded-pill px-3 py-2 text-wrap text-center shadow-sm" style="font-size: 0.95rem;">
+        🌱 ஈற்றுச்சீர் வாய்ப்பாடு (Final Word Formula)
+      </span>
+      <span class="badge bg-warning-subtle text-warning-emphasis fw-bold rounded-pill px-3 py-2 shadow-sm" style="font-size: 0.95rem;">
+        🎯 Progress: {{ (currentIndex() + 1 > maxQuestions()) ? maxQuestions() : (currentIndex() + 1) }} / {{ maxQuestions() }}
+      </span>
+    </div>
+  </div>
+
   <!-- Game Play Card -->
   <div class="game-card" *ngIf="!gameCompleted() && currentQuestion() as q">
 
@@ -24,8 +36,8 @@
         <button 
           *ngFor="let opt of allFormulaOptions"
           class="option-btn"
-          [class.correct]="isAnswered() && opt.vaibaadu === q.vaibaadu"
-          [class.wrong]="isAnswered() && selectedOption() === opt.vaibaadu && opt.vaibaadu !== q.vaibaadu"
+          [class.magic-bloom]="isAnswered() && opt.vaibaadu === q.vaibaadu"
+          [class.wobble-wrong]="isAnswered() && selectedOption() === opt.vaibaadu && opt.vaibaadu !== q.vaibaadu"
           [disabled]="isAnswered()"
           (click)="selectOption(opt)"
         >

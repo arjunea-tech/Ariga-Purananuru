@@ -46,16 +46,28 @@
   text-align: center;
   position: relative;
   transition: all 0.3s ease;
+  z-index: 1;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
 .nintra-card {
-  background: #eff6ff;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
   border-color: #93c5fd;
 }
 
 .varum-card {
-  background: #faf5ff;
+  background: linear-gradient(135deg, #faf5ff, #f3e8ff);
   border-color: #d8b4fe;
+}
+
+/* Animations for Snap and Repel */
+.snap-correct {
+  animation: magnetSnap 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  z-index: 5;
+}
+
+.snap-wrong {
+  animation: repelShake 0.4s ease-in-out forwards;
 }
 
 .card-label {
@@ -142,8 +154,9 @@
   border-style: solid;
   border-color: #059669;
   color: white;
-  box-shadow: 0 0 14px rgba(16, 185, 129, 0.4);
-  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.8), inset 0 2px 4px rgba(255,255,255,0.5);
+  transform: scale(1.2);
+  animation: sparkGlow 0.5s ease-out;
 }
 
 .magnet-joint.broken .joint-icon {
@@ -192,21 +205,22 @@
 }
 
 .option-btn {
-  background: #f8fafc;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  padding: 10px 12px;
+  background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
+  border: 2px solid #cbd5e1;
+  border-radius: 16px;
+  padding: 14px 12px;
   color: #0f172a;
   font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.1s, box-shadow 0.1s;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
+  box-shadow: 0 6px 0 #94a3b8, 0 8px 10px rgba(0,0,0,0.1);
 }
 
 .opt-name {
@@ -222,33 +236,36 @@
 }
 
 .option-btn:hover:not([disabled]) {
-  background: #eff6ff;
-  border-color: #3b82f6;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 10px rgba(59, 130, 246, 0.12);
+  filter: brightness(1.05);
+}
+
+.option-btn:active:not([disabled]) {
+  transform: translateY(6px);
+  box-shadow: 0 0px 0 #94a3b8, 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .option-btn.correct {
-  background: #ecfdf5 !important;
-  border-color: #10b981 !important;
-  color: #065f46 !important;
-  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+  background: linear-gradient(180deg, #10b981 0%, #059669 100%) !important;
+  border-color: #047857 !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 0 #064e3b, 0 8px 10px rgba(0,0,0,0.2);
 }
 
 .option-btn.correct .opt-name,
 .option-btn.correct .opt-subrule {
-  color: #065f46 !important;
+  color: #ffffff !important;
 }
 
 .option-btn.wrong {
-  background: #fef2f2 !important;
-  border-color: #ef4444 !important;
-  color: #991b1b !important;
+  background: linear-gradient(180deg, #ef4444 0%, #dc2626 100%) !important;
+  border-color: #b91c1c !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 0 #7f1d1d, 0 8px 10px rgba(0,0,0,0.2);
 }
 
 .option-btn.wrong .opt-name,
 .option-btn.wrong .opt-subrule {
-  color: #991b1b !important;
+  color: #ffffff !important;
 }
 
 /* Completion Card */
@@ -288,4 +305,38 @@
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes magnetSnap {
+  0% { transform: translateX(0); }
+  40% { transform: scale(1.05); }
+  100% { transform: scale(1) translateX(calc(var(--snap-dir, 1) * 8%)); box-shadow: 0 0 15px rgba(255,255,255,0.8); }
+}
+
+.nintra-card.snap-correct {
+  --snap-dir: 1;
+}
+
+.varum-card.snap-correct {
+  --snap-dir: -1;
+}
+
+@keyframes repelShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(calc(var(--snap-dir, 1) * -8%)) rotate(calc(var(--snap-dir, 1) * -3deg)); }
+  75% { transform: translateX(calc(var(--snap-dir, 1) * -4%)) rotate(calc(var(--snap-dir, 1) * 3deg)); }
+}
+
+.nintra-card.snap-wrong {
+  --snap-dir: 1;
+}
+
+.varum-card.snap-wrong {
+  --snap-dir: -1;
+}
+
+@keyframes sparkGlow {
+  0% { box-shadow: 0 0 0px rgba(16, 185, 129, 0); transform: scale(1); }
+  50% { box-shadow: 0 0 30px rgba(16, 185, 129, 1); transform: scale(1.3); }
+  100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.8); transform: scale(1.2); }
 }
