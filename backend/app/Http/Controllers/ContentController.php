@@ -61,11 +61,18 @@ class ContentController extends Controller
             $options['public_id'] = uniqid() . '.' . $extension;
         }
 
-        // Upload to Cloudinary in a specific folder
-        $response = cloudinary()->uploadApi()->upload($file->getRealPath(), $options);
-
-        $url = $response['secure_url'];
-        $uniqueId = $url; // We store the full URL as unique_id to prevent DB changes and simplify frontend
+        // Attempt to upload to Cloudinary
+        try {
+            $response = cloudinary()->uploadApi()->upload($file->getRealPath(), $options);
+            $url = $response['secure_url'];
+            $uniqueId = $url; // We store the full URL as unique_id
+        } catch (\Exception $e) {
+            // Fallback to local storage if Cloudinary fails (e.g. SSL cert error in local dev)
+            $uniqueId = uniqid();
+            $fileName = $uniqueId . '.' . $extension;
+            $file->storeAs("contents/{$folder}", $fileName, 'public');
+            $url = asset("storage/contents/{$folder}/{$fileName}");
+        }
 
         return response()->json([
             'url'           => $url,

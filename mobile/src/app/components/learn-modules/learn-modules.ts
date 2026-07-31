@@ -6,6 +6,7 @@ import { of, Observable, switchMap } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Browser } from '@capacitor/browser';
+import { Capacitor } from '@capacitor/core';
 
 import { AuthService } from '../../services/auth';
 
@@ -443,10 +444,16 @@ export class LearnModulesComponent implements OnInit {
           if (cont.attachments && cont.attachments.length > 0) {
             cont.attachments.forEach((att: any) => {
               let fileUrl = att.url || att;
-              if (fileUrl && fileUrl.startsWith('http://localhost/') && !fileUrl.includes(':8000')) {
-                fileUrl = fileUrl.replace('http://localhost/', `${environment.baseUrl}/`);
-              } else if (fileUrl && !fileUrl.startsWith('http') && !fileUrl.startsWith('data:')) {
-                fileUrl = `${environment.baseUrl}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+              if (fileUrl) {
+                if (Capacitor.getPlatform() === 'android') {
+                  fileUrl = fileUrl.replace('http://localhost:8000', 'http://10.0.2.2:8000');
+                  fileUrl = fileUrl.replace('http://127.0.0.1:8000', 'http://10.0.2.2:8000');
+                }
+                if (fileUrl.startsWith('http://localhost/') && !fileUrl.includes(':8000')) {
+                  fileUrl = fileUrl.replace('http://localhost/', `${environment.baseUrl}/`);
+                } else if (!fileUrl.startsWith('http') && !fileUrl.startsWith('data:')) {
+                  fileUrl = `${environment.baseUrl}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+                }
               }
               documents.push({
                 chapterName: chap.name || 'அத்தியாயம்',
@@ -462,10 +469,16 @@ export class LearnModulesComponent implements OnInit {
                 parsed.blocks.forEach((b: any) => {
                   if (b.type === 'pdf' && b.data && b.data.url) {
                     let fileUrl = b.data.url;
-                    if (fileUrl && fileUrl.startsWith('http://localhost/') && !fileUrl.includes(':8000')) {
-                      fileUrl = fileUrl.replace('http://localhost/', `${environment.baseUrl}/`);
-                    } else if (fileUrl && !fileUrl.startsWith('http') && !fileUrl.startsWith('data:')) {
-                      fileUrl = `${environment.baseUrl}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+                    if (fileUrl) {
+                      if (Capacitor.getPlatform() === 'android') {
+                        fileUrl = fileUrl.replace('http://localhost:8000', 'http://10.0.2.2:8000');
+                        fileUrl = fileUrl.replace('http://127.0.0.1:8000', 'http://10.0.2.2:8000');
+                      }
+                      if (fileUrl.startsWith('http://localhost/') && !fileUrl.includes(':8000')) {
+                        fileUrl = fileUrl.replace('http://localhost/', `${environment.baseUrl}/`);
+                      } else if (!fileUrl.startsWith('http') && !fileUrl.startsWith('data:')) {
+                        fileUrl = `${environment.baseUrl}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+                      }
                     }
                     documents.push({
                       chapterName: chap.name || 'அத்தியாயம்',
@@ -484,14 +497,9 @@ export class LearnModulesComponent implements OnInit {
   }
 
   async openPdf(url: string, fileName: string = 'document.pdf') {
-    try {
-      let finalUrl = url;
-      if (finalUrl.toLowerCase().endsWith('.pdf') || finalUrl.includes('/raw/upload/') || finalUrl.includes('/image/upload/')) {
-        finalUrl = 'https://docs.google.com/viewer?embedded=true&url=' + encodeURIComponent(finalUrl);
-      }
-      await Browser.open({ url: finalUrl, presentationStyle: 'popover' });
-    } catch (e) {
-      // Fallback for web
+    if (Capacitor.isNativePlatform()) {
+      window.open(url, '_system');
+    } else {
       const a = document.createElement('a');
       a.href = url;
       a.target = '_blank';
