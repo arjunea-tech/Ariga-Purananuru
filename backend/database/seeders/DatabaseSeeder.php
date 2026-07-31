@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@ariga.local'],
             [
                 'username' => 'superadmin',
-                'name' => 'Global Administrator',
+                'name' => 'Super Admin',
                 'password' => Hash::make('admin123'),
                 'role' => 'super_admin',
                 'tenant_id' => null,
@@ -42,11 +42,11 @@ class DatabaseSeeder extends Seeder
 
         // 4. Seed Staff (School Coordinator)
         User::updateOrCreate(
-            ['email' => 'manager@ariga.school'],
+            ['email' => 'staff@ariga.school'],
             [
-                'username' => 'coordinator',
-                'name' => 'School Coordinator',
-                'password' => Hash::make('admin123'),
+                'username' => 'staff',
+                'name' => 'Staff',
+                'password' => Hash::make('test123'),
                 'role' => 'staff',
                 'tenant_id' => $tenant->id,
             ]

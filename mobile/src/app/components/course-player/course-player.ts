@@ -738,6 +738,8 @@ export class CoursePlayer implements OnInit, OnDestroy {
 
   generateLessonSequence(contents: Content[], chapterAssessments: any[], chapterInfo?: any) {
     const steps: LessonStep[] = [];
+    console.log('Generating sequence. currentView:', this.currentView());
+    console.log('Contents count:', contents.length);
 
     // Step 1: Chapter Intro (Skipped to go directly to content as requested)
 
@@ -881,7 +883,8 @@ export class CoursePlayer implements OnInit, OnDestroy {
           }
           */
 
-          if (activityBlocks.length > 0) {
+
+          if (activityBlocks.length > 0 && this.currentView() !== 'content') {
             let preparedBlocks = [];
 
             // Check if this is the Eluthu module (which has 50 questions)
@@ -914,9 +917,10 @@ export class CoursePlayer implements OnInit, OnDestroy {
                 data: block
               });
             });
+            console.log('Pushed activity blocks:', preparedBlocks.length);
           }
 
-          if (assessmentBlocks.length > 0) {
+          if (assessmentBlocks.length > 0 && this.currentView() !== 'content') {
             assessmentBlocks.forEach((block: any, idx: number) => {
               steps.push({
                 type: 'assessment',
@@ -958,7 +962,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
         }
       }
 
-      if (content.assessments && content.assessments.length > 0) {
+      if (content.assessments && content.assessments.length > 0 && this.currentView() !== 'content') {
         steps.push({
           type: 'assessment',
           title: content.title || content.name + ' - Quiz',
@@ -967,7 +971,8 @@ export class CoursePlayer implements OnInit, OnDestroy {
       }
     });
 
-    if (chapterAssessments.length > 0) {
+
+    if (chapterAssessments.length > 0 && this.currentView() !== 'content') {
       steps.push({
         type: 'assessment',
         title: 'Chapter Quiz',

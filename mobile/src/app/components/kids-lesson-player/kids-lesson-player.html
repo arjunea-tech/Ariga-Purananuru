@@ -28,8 +28,8 @@
       } @else {
       <div class="my-auto d-flex flex-column align-items-center justify-content-center text-center p-4">
         <div class="mb-4" style="font-size: 5rem; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));">🗺️</div>
-        <h3 class="fw-bold text-dark mb-2">No Activities Yet!</h3>
-        <p class="text-secondary max-w-sm mb-4">This chapter doesn't have any lessons or activities mapped to it yet.</p>
+        <h3 class="fw-bold text-dark mb-2">{{ isGameMode() ? 'No Activities Yet!' : 'No Content Yet!' }}</h3>
+        <p class="text-secondary max-w-sm mb-4">{{ isGameMode() ? 'This chapter doesn\'t have any activities mapped to it yet.' : 'This chapter doesn\'t have any reading lessons mapped to it yet.' }}</p>
         <button class="btn btn-warning rounded-pill px-4 py-2 fw-bold text-dark border border-2 border-white shadow hover-lift pe-auto" (click)="quit.emit()">
           <i class="bi bi-arrow-left-circle-fill me-2"></i> Back to Map
         </button>
@@ -292,7 +292,7 @@
             style="max-width: 1000px; width: 100%;">
             <div class="premium-card w-100 p-3 p-md-4 rounded-4 shadow-lg overflow-y-auto animate-pop-in" style="max-height: 72vh;">
               <app-activity-renderer [activity]="step.data.data" [showFeedback]="true"
-                (answered)="activityAnswered.emit($event)" class="w-100 h-100"></app-activity-renderer>
+                (answered)="activityAnswered.emit($event)" class="w-100 d-flex flex-column"></app-activity-renderer>
             </div>
           </div>
         }

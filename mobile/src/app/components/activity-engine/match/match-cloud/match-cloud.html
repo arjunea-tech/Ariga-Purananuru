@@ -1,10 +1,10 @@
 <!-- CLOUD THEME LAYOUT -->
 <div class="sky-board p-2 p-md-3 position-relative overflow-hidden mb-2 w-100">
-  <div class="row g-3 position-relative z-index-1 mt-0">
+  <div class="d-flex flex-row w-100 gap-2 gap-md-3 position-relative z-index-1 mt-0">
     <!-- No Divider, organic floating layout -->
 
     <!-- Left Column (Source Words inside Big Cloud) -->
-    <div class="col-12 col-md-6 d-flex flex-column align-items-center">
+    <div class="d-flex flex-column align-items-center flex-fill w-50">
       <div class="big-cloud-wrapper">
         <div class="big-cloud-container">
           @for (item of leftItems; track item.id; let idx = $index) {
@@ -39,7 +39,7 @@
     </div>
 
     <!-- Right Column (Target Words/Images inside Big Cloud) -->
-    <div class="col-12 col-md-6 d-flex flex-column align-items-center">
+    <div class="d-flex flex-column align-items-center flex-fill w-50">
       <div class="big-cloud-wrapper">
         <div class="big-cloud-container">
           @for (item of rightItems; track item.id) {

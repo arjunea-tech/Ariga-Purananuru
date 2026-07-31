@@ -10,12 +10,12 @@
   height: 100%;
   min-height: 520px;
   background: linear-gradient(180deg, #0284c7 0%, #38bdf8 35%, #818cf8 70%, #c084fc 100%);
-  border-radius: 0;
+  border-radius: 24px;
   overflow: hidden;
   font-family: 'Fredoka', 'Outfit', 'Nunito', 'Segoe UI', sans-serif;
   user-select: none;
   border: none;
-  box-shadow: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
 /* --- Atmosphere & Clouds --- */
@@ -458,7 +458,8 @@
   text-align: center;
   border: 3px solid rgba(255, 255, 255, 0.85);
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
+  max-height: 100%;
 }
 
 .badge-tag {

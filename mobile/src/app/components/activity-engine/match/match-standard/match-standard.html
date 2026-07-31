@@ -1,8 +1,8 @@
 <!-- STANDARD THEME LAYOUT -->
 <div class="standard-board p-4 rounded-4 bg-light border border-light-subtle mb-3">
-  <div class="row g-4">
+  <div class="d-flex flex-row w-100 gap-2 gap-md-3">
     <!-- Left Column -->
-    <div class="col-12 col-md-6 d-flex flex-column gap-3">
+    <div class="d-flex flex-column gap-3 w-50">
       <span class="text-uppercase fw-bold text-secondary pb-2 border-bottom border-secondary border-opacity-10 text-center" style="font-size: 0.8rem; letter-spacing: 0.08em;">
         Left Column
       </span>
@@ -20,13 +20,13 @@
           (dragstart)="onDragStart($event, item)"
           (click)="selectLeft(item)">
           
-          <div class="d-flex align-items-center gap-2">
+          <div class="d-flex align-items-center gap-2 flex-grow-1">
             @if (enableAudio && !isItemMatched(item.id)) {
-              <button type="button" class="btn-speaker-mini" (click)="speak(item.text); $event.stopPropagation();">
+              <button type="button" class="btn-speaker-mini flex-shrink-0" (click)="speak(item.text); $event.stopPropagation();">
                 <i class="bi bi-volume-up-fill text-primary"></i>
               </button>
             }
-            <span class="fw-bold">{{ item.text }}</span>
+            <span class="fw-bold text-wrap" style="min-width: 0; flex: 1; word-break: break-word;">{{ item.text }}</span>
           </div>
           
           @if (isItemMatched(item.id)) {
@@ -37,7 +37,7 @@
     </div>
 
     <!-- Right Column -->
-    <div class="col-12 col-md-6 d-flex flex-column gap-3">
+    <div class="d-flex flex-column gap-3 w-50">
       <span class="text-uppercase fw-bold text-secondary pb-2 border-bottom border-secondary border-opacity-10 text-center" style="font-size: 0.8rem; letter-spacing: 0.08em;">
         Right Column
       </span>
@@ -54,11 +54,11 @@
           (drop)="onDrop($event, item)"
           (click)="selectRight(item)">
           
-          <div class="d-flex align-items-center justify-content-center w-100">
+          <div class="d-flex align-items-center justify-content-center flex-grow-1">
             @if (item.rightImage) {
-              <img [src]="item.rightImage" alt="Match Target" class="standard-match-image" />
+              <img [src]="item.rightImage" alt="Match Target" class="standard-match-image flex-shrink-0" />
             } @else {
-              <span class="fw-bold">{{ item.text }}</span>
+              <span class="fw-bold text-wrap text-center" style="min-width: 0; flex: 1; word-break: break-word;">{{ item.text }}</span>
             }
           </div>
           

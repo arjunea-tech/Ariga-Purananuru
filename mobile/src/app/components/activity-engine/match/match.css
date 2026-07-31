@@ -346,3 +346,63 @@
     font-size: 0.7rem !important;
   }
 }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   MOBILE PORTRAIT/GENERAL OPTIMIZATIONS (WIDTH <= 768px)
+   ────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .standard-board {
+    padding: 1rem 0.5rem !important;
+  }
+  .standard-card {
+    padding: 0.5rem 0.5rem !important;
+    min-height: 2.5rem !important;
+    font-size: 0.75rem !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+  }
+  .standard-card > div {
+    min-width: 0;
+    flex: 1;
+  }
+  .standard-card .d-flex.align-items-center.gap-2 {
+    gap: 0.25rem !important;
+    flex-wrap: wrap !important;
+    justify-content: center;
+  }
+  .standard-card span.fw-bold {
+    white-space: normal !important;
+    display: inline-block;
+    max-width: 100%;
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
+    hyphens: auto;
+  }
+  .standard-match-image {
+    max-height: 50px !important;
+  }
+  
+  .big-cloud-container {
+    padding: 1rem 0.5rem !important;
+    gap: 0.5rem !important;
+  }
+  .word-bubble {
+    padding: 0.5rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    min-height: 2.5rem !important;
+    max-width: 95%;
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
+    white-space: normal !important;
+    text-align: center;
+    hyphens: auto;
+  }
+  .cloud-match-image {
+    max-height: 45px !important;
+  }
+  
+  .column-header {
+    font-size: 0.75rem !important;
+  }
+}

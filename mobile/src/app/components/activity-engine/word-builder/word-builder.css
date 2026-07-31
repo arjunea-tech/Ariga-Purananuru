@@ -1,6 +1,14 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex: 1;
+}
+
 .word-builder-activity {
   background: #ffffff;
   transition: all 0.3s ease;
+  flex: 1;
 }
 
 /* Challenge Row Styling */
