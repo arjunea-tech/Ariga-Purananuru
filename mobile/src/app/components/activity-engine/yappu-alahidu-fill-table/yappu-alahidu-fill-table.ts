@@ -1,6 +1,22 @@
 import { Component, Input, Output, EventEmitter, OnInit, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AudioService } from '../../../services/audio.service';
+import { ActivityService } from '../../../services/activity.service';
+
+const VAIPAADU_ASAI_MAP: Record<string, string> = {
+  'தேமா': 'நேர் / நேர்',
+  'புளிமா': 'நிரை / நேர்',
+  'கருவிளம்': 'நிரை / நிரை',
+  'கூவிளம்': 'நேர் / நிரை',
+  'தேமாங்காய்': 'நேர் / நேர் / நேர்',
+  'புளிமாங்காய்': 'நிரை / நேர் / நேர்',
+  'கருவிளங்காய்': 'நிரை / நிரை / நேர்',
+  'கூவிளங்காய்': 'நேர் / நிரை / நேர்',
+  'தேமாங்கனி': 'நேர் / நேர் / நிரை',
+  'புளிமாங்கனி': 'நிரை / நேர் / நிரை',
+  'கருவிளங்கனி': 'நிரை / நிரை / நிரை',
+  'கூவிளங்கனி': 'நேர் / நிரை / நிரை'
+};
 
 export interface FillTableCell {
   value: string;
@@ -20,176 +36,334 @@ export interface FillTableRow {
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="fill-table-container py-4">
-      <!-- Question -->
-      <h3 class="text-center mb-4 text-primary fw-bold" [innerHTML]="activity.question"></h3>
+    <div class="magic-orchard-container py-4 overflow-hidden position-relative" style="background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); min-height: 100%;">
       
-      <p class="text-muted mb-4 fs-6 text-center">காலி இடங்களை நிரப்பக் கீழே உள்ள விருப்பங்களைத் தேர்ந்தெடுக்கவும்.</p>
+      <!-- Header -->
+      <div class="position-relative z-1">
+        <h3 class="text-center mb-2 text-primary fw-bold" style="font-family: 'Nunito', sans-serif;">{{ activityData?.question || 'கீழ்க்காணும் அலகிடும் அட்டவணையை நிரப்புக:' }}</h3>
+        <p class="text-muted mb-4 fs-6 text-center fw-bold px-2">சீர், அசை, வாய்ப்பாடு ஆகியவற்றைச் சரியாகப் பொருத்துக!</p>
 
-      <!-- Table -->
-      <div class="table-responsive rounded-4 shadow-sm border overflow-hidden mx-auto mb-4" style="max-width: 700px;">
-        <table class="table table-bordered mb-0 text-center align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>சீர் (வார்த்தை)</th>
-              <th>அசைப் பிரிப்பு</th>
-              <th>வாய்ப்பாடு</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let row of tableRows(); let rIdx = index">
-              <!-- Word -->
-              <td>
-                <span *ngIf="!row.word.isMissing" class="fw-bold fs-5">{{ row.word.value }}</span>
-                <div *ngIf="row.word.isMissing" class="missing-cell" 
-                     [ngClass]="getCellClass(rIdx, 'word')" (click)="setActiveCell(rIdx, 'word')">
-                  {{ row.word.userAnswer || '?' }}
-                </div>
-              </td>
-              <!-- Asai -->
-              <td>
-                <span *ngIf="!row.asai.isMissing" class="text-muted">{{ row.asai.value }}</span>
-                <div *ngIf="row.asai.isMissing" class="missing-cell" 
-                     [ngClass]="getCellClass(rIdx, 'asai')" (click)="setActiveCell(rIdx, 'asai')">
-                  {{ row.asai.userAnswer || '?' }}
-                </div>
-              </td>
-              <!-- Seer -->
-              <td>
-                <span *ngIf="!row.seer.isMissing" class="text-primary">{{ row.seer.value }}</span>
-                <div *ngIf="row.seer.isMissing" class="missing-cell" 
-                     [ngClass]="getCellClass(rIdx, 'seer')" (click)="setActiveCell(rIdx, 'seer')">
-                  {{ row.seer.userAnswer || '?' }}
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        <!-- Puzzle Flow Area -->
+        <div class="d-flex flex-column gap-3 mx-auto mb-5 px-2" style="max-width: 800px;">
+          
+          <!-- Each Row is a Card -->
+          <div class="premium-card p-2 p-md-3 rounded-4 shadow-sm border bg-white d-flex flex-row align-items-center justify-content-between gap-1 gap-md-3 animate-pop-in" 
+               *ngFor="let row of tableRows(); let rIdx = index" [style.animationDelay]="rIdx * 0.1 + 's'"
+               style="border: 2px solid #e2e8f0 !important; width: 100%;">
+            
+            <!-- Word (சீர்) -->
+            <div class="flow-item d-flex flex-column align-items-center flex-grow-1" style="flex-basis: 30%;">
+               <span class="text-secondary fw-bold mb-1 header-label">சீர்</span>
+               <div class="slot-container w-100 d-flex justify-content-center">
+                  <span *ngIf="!row.word.isMissing" class="filled-box bg-light text-dark">{{ row.word.value }}</span>
+                  <div *ngIf="row.word.isMissing" class="magic-slot"
+                       [ngClass]="getCellClass(rIdx, 'word')" (click)="setActiveCell(rIdx, 'word')">
+                     {{ row.word.userAnswer || '?' }}
+                  </div>
+               </div>
+            </div>
 
-      <!-- Options Pool -->
-      <div class="options-pool d-flex flex-wrap justify-content-center gap-2 mx-auto" style="max-width: 700px;" *ngIf="!isVerified()">
-        <button *ngFor="let opt of activity.options"
-                class="btn btn-outline-secondary rounded-pill px-4 fw-bold transition-all shadow-sm"
-                [disabled]="isOptionUsed(opt)"
-                (click)="fillActiveCell(opt)">
-          {{ opt }}
-        </button>
-      </div>
+            <!-- Arrow -->
+            <div class="text-primary flow-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
 
-      <!-- Action Button -->
-      <div class="text-center mt-4" *ngIf="allFilled() && !isVerified()">
-        <button class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm" (click)="verifyAnswer()">
-          <i class="bi bi-check-all me-2"></i> சரிபார்
-        </button>
-      </div>
+            <!-- Asai (அசை) -->
+            <div class="flow-item d-flex flex-column align-items-center flex-grow-1" style="flex-basis: 35%;">
+               <span class="text-secondary fw-bold mb-1 header-label">அசைப் பிரிப்பு</span>
+               <div class="slot-container w-100 d-flex justify-content-center">
+                  <span *ngIf="!row.asai.isMissing" class="filled-box bg-light text-dark">{{ row.asai.value }}</span>
+                  <div *ngIf="row.asai.isMissing" class="magic-slot"
+                       [ngClass]="getCellClass(rIdx, 'asai')" (click)="setActiveCell(rIdx, 'asai')">
+                     {{ row.asai.userAnswer || '?' }}
+                  </div>
+               </div>
+            </div>
 
-      <!-- Feedback -->
-      <div *ngIf="isVerified()" class="mt-4 animate-slide-up text-center">
-        <div class="alert shadow-sm border-0 d-inline-block text-start" 
-             [ngClass]="isCorrect() ? 'alert-success bg-success text-white' : 'alert-danger bg-danger text-white'"
-             style="max-width: 600px;">
-          <h4 class="alert-heading mb-2 fw-bold">
-            <i class="bi" [ngClass]="isCorrect() ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
-            {{ isCorrect() ? 'சரியான விடை!' : 'தவறான விடை!' }}
-          </h4>
-          <p class="mb-0 fs-6" *ngIf="activity.explanation">{{ activity.explanation }}</p>
+            <!-- Arrow -->
+            <div class="text-success flow-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
+
+            <!-- Seer (வாய்ப்பாடு) -->
+            <div class="flow-item d-flex flex-column align-items-center flex-grow-1" style="flex-basis: 30%;">
+               <span class="text-secondary fw-bold mb-1 header-label">வாய்ப்பாடு</span>
+               <div class="slot-container w-100 d-flex justify-content-center">
+                  <span *ngIf="!row.seer.isMissing" class="filled-box bg-light text-primary">{{ row.seer.value }}</span>
+                  <div *ngIf="row.seer.isMissing" class="magic-slot"
+                       [ngClass]="getCellClass(rIdx, 'seer')" (click)="setActiveCell(rIdx, 'seer')">
+                     {{ row.seer.userAnswer || '?' }}
+                  </div>
+               </div>
+            </div>
+
+          </div>
         </div>
-        <div class="mt-3" *ngIf="!isCorrect()">
-          <button class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm" (click)="retry()">
-            <i class="bi bi-arrow-counterclockwise me-2"></i> மீண்டும் முயற்சி செய்
+
+        <!-- Options Pool -->
+        <div class="basket-container mx-auto position-relative mt-2 p-3 p-md-4 rounded-4 shadow-sm bg-white border" style="max-width: 650px;" *ngIf="!isVerified()">
+          <h5 class="text-center text-dark fw-bold mb-3">விருப்பங்கள் (Options) 🧩</h5>
+          <div class="d-flex flex-wrap justify-content-center gap-2 gap-md-3">
+            <button *ngFor="let opt of options()"
+                    class="btn-magic-item fw-bold transition-all shadow-sm"
+                    [disabled]="isOptionUsed(opt)"
+                    (click)="fillActiveCell(opt)">
+              {{ opt }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="text-center mt-4 position-relative z-1" *ngIf="allFilled() && !isVerified()">
+          <button class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm hover-lift" (click)="verifyAnswer()">
+            <i class="bi bi-check-all me-2"></i> சரிபார் (Verify)
           </button>
+        </div>
+
+        <!-- Feedback -->
+        <div *ngIf="isVerified()" class="mt-4 animate-slide-up text-center px-3">
+          <div class="alert shadow-sm border-0 d-inline-block text-start rounded-4" 
+               [ngClass]="isCorrect() ? 'bg-success text-white' : 'bg-danger text-white'"
+               style="max-width: 600px;">
+            <h4 class="alert-heading mb-2 fw-bold d-flex align-items-center gap-2">
+              <i class="bi" style="font-size: 1.5rem;" [ngClass]="isCorrect() ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
+              {{ isCorrect() ? 'சரியான விடை!' : 'தவறான விடை!' }}
+            </h4>
+            <p class="mb-0 fs-6" *ngIf="explanation()">{{ explanation() }}</p>
+          </div>
+          <div class="mt-3" *ngIf="!isCorrect()">
+            <button class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm hover-lift" (click)="retry()">
+              <i class="bi bi-arrow-counterclockwise me-2"></i> மீண்டும் முயற்சி செய்
+            </button>
+          </div>
         </div>
       </div>
     </div>
   `,
   styles: [`
-    .missing-cell {
-      display: inline-block;
-      min-width: 80px;
-      min-height: 30px;
-      padding: 4px 12px;
-      border: 2px dashed #ccc;
-      border-radius: 8px;
+    .filled-box {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      min-height: 35px;
+      padding: 4px 6px;
+      border-radius: 6px;
+      font-weight: 800;
+      font-size: clamp(0.75rem, 3vw, 1rem);
+      border: 1px solid #e2e8f0;
+      text-align: center;
+      word-break: break-word;
+      line-height: 1.2;
+    }
+
+    /* Slots */
+    .magic-slot {
+      background: #f8fafc;
+      border: 2px dashed #94a3b8;
+      border-radius: 6px;
+      width: 100%;
+      min-height: 35px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 6px;
+      font-weight: 800;
+      color: #475569;
       cursor: pointer;
       transition: all 0.2s;
-      background: #f8f9fa;
+      text-align: center;
+      word-break: break-word;
+      font-size: clamp(0.75rem, 3vw, 1rem);
+      line-height: 1.2;
     }
-    .missing-cell.active-cell {
-      border-color: var(--bs-primary);
-      background: rgba(13, 110, 253, 0.1);
-      box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+    
+    .header-label {
+      font-size: clamp(0.6rem, 2.5vw, 0.85rem);
     }
-    .missing-cell.filled-cell {
-      border-style: solid;
-      border-color: var(--bs-secondary);
+    .flow-arrow {
+      font-size: clamp(1rem, 4vw, 1.5rem);
+    }
+    .magic-slot.active-cell {
+      background: #eff6ff;
+      border: 2px solid #3b82f6;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+      transform: scale(1.05);
+      color: #1d4ed8;
+      z-index: 10;
+    }
+    .magic-slot.filled-cell {
       background: #fff;
-      color: var(--bs-secondary);
-      font-weight: bold;
+      border-style: solid;
+      border-color: #3b82f6;
+      color: #1e40af;
     }
-    .missing-cell.correct-cell {
-      border-color: var(--bs-success);
-      background: rgba(25, 135, 84, 0.1);
-      color: var(--bs-success);
+    .magic-slot.correct-cell {
+      background: #dcfce7;
+      border-color: #22c55e;
+      border-style: solid;
+      color: #166534;
+      animation: pulse-success 0.5s ease-in-out;
     }
-    .missing-cell.wrong-cell {
-      border-color: var(--bs-danger);
-      background: rgba(220, 53, 69, 0.1);
-      color: var(--bs-danger);
+    .magic-slot.wrong-cell {
+      background: #fee2e2;
+      border-color: #ef4444;
+      border-style: solid;
+      color: #991b1b;
+      animation: shake 0.4s ease-in-out;
     }
-    .options-pool button:not(:disabled):hover {
+
+    /* Options Item */
+    .btn-magic-item {
+      background: #fff;
+      border: 2px solid #cbd5e1;
+      border-radius: 12px;
+      padding: 8px 16px;
+      color: #334155;
+      font-size: clamp(0.9rem, 2vw, 1.1rem);
+      cursor: pointer;
+    }
+    .btn-magic-item:not(:disabled):hover {
       transform: translateY(-2px);
-      background-color: var(--bs-primary);
-      color: white;
-      border-color: var(--bs-primary);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      border-color: #3b82f6;
+      color: #1d4ed8;
+    }
+    .btn-magic-item:not(:disabled):active {
+      transform: translateY(1px);
+    }
+    .btn-magic-item:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: #f1f5f9;
+    }
+
+    .hover-lift { transition: transform 0.2s; }
+    .hover-lift:hover { transform: translateY(-2px); }
+
+    /* Animations */
+    .animate-pop-in { animation: popIn 0.4s ease-out both; }
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .animate-slide-up { animation: slideUp 0.4s ease-out forwards; }
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+    @keyframes pulse-success {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); box-shadow: 0 0 20px #48bb78; }
+      100% { transform: scale(1); }
+    }
   `]
 })
 export class YappuAlahiduFillTableComponent implements OnInit {
-  @Input() activity: any;
-  @Output() answered = new EventEmitter<{ isCorrect: boolean; score: number; total: number }>();
+  _activity: any;
+  @Input() set activity(val: any) {
+    this._activity = val;
+    this.fetchRandomWords();
+  }
   
+  get activityData() {
+    return this._activity;
+  }
+
+  @Output() answered = new EventEmitter<{ isCorrect: boolean; score: number; total: number }>();
+
   private audioService = inject(AudioService);
+  private activityService = inject(ActivityService);
 
   tableRows = signal<FillTableRow[]>([]);
   activeRow = signal<number | null>(null);
-  activeCol = signal<'word'|'asai'|'seer' | null>(null);
-  
+  activeCol = signal<'word' | 'asai' | 'seer' | null>(null);
+
   isVerified = signal<boolean>(false);
   isCorrect = signal<boolean>(false);
+  options = signal<string[]>([]);
+  explanation = signal<string>('');
 
   ngOnInit() {
-    if (!this.activity || !this.activity.rows || this.activity.rows.length === 0) {
-      this.activity = {
-        question: 'அலகிடும் அட்டவணையை நிரப்புக:',
-        rows: [
-          {
-            word: { value: 'அகழ்வாரைத்', isMissing: false },
-            asai: { value: 'நிரை / நேர் / நேர்', isMissing: true },
-            seer: { value: 'புளிமாங்காய்', isMissing: false }
-          },
-          {
-            word: { value: 'தாங்கும்', isMissing: false },
-            asai: { value: 'நேர் / நேர்', isMissing: false },
-            seer: { value: 'தேமா', isMissing: true }
-          }
-        ],
-        options: ['நேர் / நேர் / நேர்', 'தேமா', 'நிரை / நேர் / நேர்', 'புளிமா'],
-        explanation: 'அகழ்வாரைத் என்பது நிரை/நேர்/நேர். தாங்கும் என்பது தேமா.'
-      };
+    if (!this._activity) {
+      this._activity = { question: 'அலகிடும் அட்டவணையை நிரப்புக:' };
     }
-    
-    // Deep clone rows to avoid modifying input directly
-    this.tableRows.set(JSON.parse(JSON.stringify(this.activity.rows)));
+  }
+
+  fetchRandomWords() {
+    this.isVerified.set(false);
+    this.isCorrect.set(false);
+    this.tableRows.set([]);
+    this.options.set([]);
+    this.explanation.set('');
+
+    this.activityService.getYappuSeerWords().subscribe({
+      next: (res: any) => {
+        if (res) {
+          // res is grouped by seer_name: { "தேமா": [{word, hint}], "புளிமா": ... }
+          let allWords: any[] = [];
+          Object.keys(res).forEach(seer => {
+            if (Array.isArray(res[seer])) {
+              res[seer].forEach((item: any) => {
+                allWords.push({ word: item.word, hint: item.hint, seer_name: seer });
+              });
+            }
+          });
+
+          if (allWords.length > 0) {
+            const shuffled = allWords.sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, 2);
+            const distractors = shuffled.slice(2, 6);
+            this.generatePuzzle(selected, distractors);
+          }
+        }
+      },
+      error: () => console.error('Failed to fetch words')
+    });
+  }
+
+  generatePuzzle(words: any[], distractors: any[]) {
+    const newRows: FillTableRow[] = [];
+    const newOptions: string[] = [];
+    let explText = '';
+
+    words.forEach((w) => {
+      const seer = w.seer_name;
+      const asai = VAIPAADU_ASAI_MAP[seer] || w.hint; // Fallback to hint if not in map
+      
+      const r = Math.random();
+      const hideWord = r < 0.33;
+      const hideAsai = r >= 0.33 && r < 0.66;
+      const hideSeer = r >= 0.66;
+
+      if (hideWord) newOptions.push(w.word);
+      if (hideAsai) newOptions.push(asai);
+      if (hideSeer) newOptions.push(seer);
+
+      newRows.push({
+        word: { value: w.word, isMissing: hideWord },
+        asai: { value: asai, isMissing: hideAsai },
+        seer: { value: seer, isMissing: hideSeer }
+      });
+      
+      explText += `${w.word} என்பது ${asai} (${seer}). `;
+    });
+
+    // Add 2 distractors to make it tricky
+    if (distractors.length > 0) {
+       newOptions.push(distractors[0].seer_name);
+       newOptions.push(VAIPAADU_ASAI_MAP[distractors[1]?.seer_name] || distractors[1]?.hint);
+    }
+
+    this.options.set(newOptions.sort(() => 0.5 - Math.random()));
+    this.explanation.set(explText.trim());
+    this.tableRows.set(newRows);
     this.findNextEmptyCell();
   }
 
-  setActiveCell(rIdx: number, col: 'word'|'asai'|'seer') {
+
+  setActiveCell(rIdx: number, col: 'word' | 'asai' | 'seer') {
     if (this.isVerified()) return;
     this.activeRow.set(rIdx);
     this.activeCol.set(col);
@@ -243,7 +417,7 @@ export class YappuAlahiduFillTableComponent implements OnInit {
     return true;
   }
 
-  getCellClass(rIdx: number, col: 'word'|'asai'|'seer'): string {
+  getCellClass(rIdx: number, col: 'word' | 'asai' | 'seer'): string {
     const cell = this.tableRows()[rIdx][col];
     if (this.isVerified()) {
       return cell.isCorrect ? 'correct-cell' : 'wrong-cell';
@@ -256,7 +430,7 @@ export class YappuAlahiduFillTableComponent implements OnInit {
   verifyAnswer() {
     let allCorrect = true;
     const rows = this.tableRows();
-    
+
     rows.forEach(r => {
       if (r.word.isMissing) { r.word.isCorrect = (r.word.userAnswer === r.word.value); if (!r.word.isCorrect) allCorrect = false; }
       if (r.asai.isMissing) { r.asai.isCorrect = (r.asai.userAnswer === r.asai.value); if (!r.asai.isCorrect) allCorrect = false; }
@@ -271,7 +445,7 @@ export class YappuAlahiduFillTableComponent implements OnInit {
       this.audioService.playSuccess();
       setTimeout(() => {
         this.answered.emit({ isCorrect: true, score: 1, total: 1 });
-      }, 3500);
+      }, 1000);
     } else {
       this.audioService.playError();
     }
