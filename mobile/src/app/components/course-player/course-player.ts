@@ -694,6 +694,9 @@ export class CoursePlayer implements OnInit, OnDestroy {
           if (this.currentView() === 'content') {
             chContents = chContents.filter((c: any) => {
               const titleLower = (c.title || c.name || '').toLowerCase();
+              if (titleLower.includes('பாடம்') || titleLower.includes('lesson') || titleLower.includes('concept')) {
+                return true;
+              }
               return !titleLower.includes('பயிற்சி') && !titleLower.includes('practice') && !titleLower.includes('activity');
             });
           }
@@ -713,6 +716,9 @@ export class CoursePlayer implements OnInit, OnDestroy {
         if (this.currentView() === 'content') {
           contents = contents.filter((c: any) => {
             const titleLower = (c.title || c.name || '').toLowerCase();
+            if (titleLower.includes('பாடம்') || titleLower.includes('lesson') || titleLower.includes('concept')) {
+              return true;
+            }
             return !titleLower.includes('பயிற்சி') && !titleLower.includes('practice') && !titleLower.includes('activity');
           });
         }
