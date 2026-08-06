@@ -35,9 +35,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   return next(clonedReq).pipe(
     catchError((error: any) => {
       if (error instanceof HttpErrorResponse && error.status === 401) {
-        // Clear session and redirect to login on 401 Unauthorized
+        // Clear session and redirect to login on 401 Unauthorized (unless user is on root Landing Page)
         authService.clearSession();
-        router.navigate(['/login']);
+        const currentUrl = router.url || window.location.pathname;
+        if (currentUrl !== '/' && currentUrl !== '' && !currentUrl.startsWith('/login')) {
+          router.navigate(['/login']);
+        }
       }
       return throwError(() => error);
     })
