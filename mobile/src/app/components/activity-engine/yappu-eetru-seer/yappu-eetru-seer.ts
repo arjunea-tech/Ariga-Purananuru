@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { AudioService } from '../../../services/audio.service';
 
 export interface EetruSeerItem {
@@ -22,7 +22,7 @@ export interface EetruOption {
 @Component({
   selector: 'app-yappu-eetru-seer',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './yappu-eetru-seer.html',
   styleUrls: ['./yappu-eetru-seer.css']
 })

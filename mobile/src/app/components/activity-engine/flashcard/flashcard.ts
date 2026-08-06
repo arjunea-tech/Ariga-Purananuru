@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 export interface FlashcardData {
   id?: number;
@@ -12,7 +12,7 @@ export interface FlashcardData {
 @Component({
   selector: 'app-activity-flashcard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './flashcard.html',
   styleUrls: ['./flashcard.css']
 })

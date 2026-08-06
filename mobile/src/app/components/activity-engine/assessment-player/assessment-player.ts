@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ActivityRenderer, NormalizedActivity } from '../activity-renderer/activity-renderer';
@@ -30,7 +30,7 @@ interface AssessmentData {
 @Component({
   selector: 'app-assessment-player',
   standalone: true,
-  imports: [CommonModule, RouterModule, ActivityRenderer],
+  imports: [RouterModule, ActivityRenderer],
   templateUrl: './assessment-player.html',
   styleUrls: ['./assessment-player.css']
 })

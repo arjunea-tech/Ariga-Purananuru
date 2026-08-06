@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 export interface TaggingPart {
   word: string;
@@ -25,7 +25,7 @@ interface WordChip {
 @Component({
   selector: 'app-activity-parts-of-speech',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './parts-of-speech.html',
   styleUrls: ['./parts-of-speech.css']
 })

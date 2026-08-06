@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnChanges, OnDestroy, SimpleChanges, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 export interface Balloon {
   id: string;
@@ -82,7 +82,7 @@ const LEVEL3_NIRAI = [
 @Component({
   selector: 'app-activity-balloon-pop',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './balloon-pop.html',
   styleUrls: ['./balloon-pop.css']
 })

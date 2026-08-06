@@ -23,9 +23,9 @@ export interface FillTableRow {
     <div class="fill-table-container py-4">
       <!-- Question -->
       <h3 class="text-center mb-4 text-primary fw-bold" [innerHTML]="activity.question"></h3>
-      
+    
       <p class="text-muted mb-4 fs-6 text-center">காலி இடங்களை நிரப்பக் கீழே உள்ள விருப்பங்களைத் தேர்ந்தெடுக்கவும்.</p>
-
+    
       <!-- Table -->
       <div class="table-responsive rounded-4 shadow-sm border overflow-hidden mx-auto mb-4" style="max-width: 700px;">
         <table class="table table-bordered mb-0 text-center align-middle">
@@ -37,72 +37,98 @@ export interface FillTableRow {
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let row of tableRows(); let rIdx = index">
-              <!-- Word -->
-              <td>
-                <span *ngIf="!row.word.isMissing" class="fw-bold fs-5">{{ row.word.value }}</span>
-                <div *ngIf="row.word.isMissing" class="missing-cell" 
-                     [ngClass]="getCellClass(rIdx, 'word')" (click)="setActiveCell(rIdx, 'word')">
-                  {{ row.word.userAnswer || '?' }}
-                </div>
-              </td>
-              <!-- Asai -->
-              <td>
-                <span *ngIf="!row.asai.isMissing" class="text-muted">{{ row.asai.value }}</span>
-                <div *ngIf="row.asai.isMissing" class="missing-cell" 
-                     [ngClass]="getCellClass(rIdx, 'asai')" (click)="setActiveCell(rIdx, 'asai')">
-                  {{ row.asai.userAnswer || '?' }}
-                </div>
-              </td>
-              <!-- Seer -->
-              <td>
-                <span *ngIf="!row.seer.isMissing" class="text-primary">{{ row.seer.value }}</span>
-                <div *ngIf="row.seer.isMissing" class="missing-cell" 
-                     [ngClass]="getCellClass(rIdx, 'seer')" (click)="setActiveCell(rIdx, 'seer')">
-                  {{ row.seer.userAnswer || '?' }}
-                </div>
-              </td>
-            </tr>
+            @for (row of tableRows(); track row; let rIdx = $index) {
+              <tr>
+                <!-- Word -->
+                <td>
+                  @if (!row.word.isMissing) {
+                    <span class="fw-bold fs-5">{{ row.word.value }}</span>
+                  }
+                  @if (row.word.isMissing) {
+                    <div class="missing-cell"
+                      [ngClass]="getCellClass(rIdx, 'word')" (click)="setActiveCell(rIdx, 'word')">
+                      {{ row.word.userAnswer || '?' }}
+                    </div>
+                  }
+                </td>
+                <!-- Asai -->
+                <td>
+                  @if (!row.asai.isMissing) {
+                    <span class="text-muted">{{ row.asai.value }}</span>
+                  }
+                  @if (row.asai.isMissing) {
+                    <div class="missing-cell"
+                      [ngClass]="getCellClass(rIdx, 'asai')" (click)="setActiveCell(rIdx, 'asai')">
+                      {{ row.asai.userAnswer || '?' }}
+                    </div>
+                  }
+                </td>
+                <!-- Seer -->
+                <td>
+                  @if (!row.seer.isMissing) {
+                    <span class="text-primary">{{ row.seer.value }}</span>
+                  }
+                  @if (row.seer.isMissing) {
+                    <div class="missing-cell"
+                      [ngClass]="getCellClass(rIdx, 'seer')" (click)="setActiveCell(rIdx, 'seer')">
+                      {{ row.seer.userAnswer || '?' }}
+                    </div>
+                  }
+                </td>
+              </tr>
+            }
           </tbody>
         </table>
       </div>
-
+    
       <!-- Options Pool -->
-      <div class="options-pool d-flex flex-wrap justify-content-center gap-2 mx-auto" style="max-width: 700px;" *ngIf="!isVerified()">
-        <button *ngFor="let opt of activity.options"
-                class="btn btn-outline-secondary rounded-pill px-4 fw-bold transition-all shadow-sm"
-                [disabled]="isOptionUsed(opt)"
-                (click)="fillActiveCell(opt)">
-          {{ opt }}
-        </button>
-      </div>
-
-      <!-- Action Button -->
-      <div class="text-center mt-4" *ngIf="allFilled() && !isVerified()">
-        <button class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm" (click)="verifyAnswer()">
-          <i class="bi bi-check-all me-2"></i> சரிபார்
-        </button>
-      </div>
-
-      <!-- Feedback -->
-      <div *ngIf="isVerified()" class="mt-4 animate-slide-up text-center">
-        <div class="alert shadow-sm border-0 d-inline-block text-start" 
-             [ngClass]="isCorrect() ? 'alert-success bg-success text-white' : 'alert-danger bg-danger text-white'"
-             style="max-width: 600px;">
-          <h4 class="alert-heading mb-2 fw-bold">
-            <i class="bi" [ngClass]="isCorrect() ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
-            {{ isCorrect() ? 'சரியான விடை!' : 'தவறான விடை!' }}
-          </h4>
-          <p class="mb-0 fs-6" *ngIf="activity.explanation">{{ activity.explanation }}</p>
+      @if (!isVerified()) {
+        <div class="options-pool d-flex flex-wrap justify-content-center gap-2 mx-auto" style="max-width: 700px;">
+          @for (opt of activity.options; track opt) {
+            <button
+              class="btn btn-outline-secondary rounded-pill px-4 fw-bold transition-all shadow-sm"
+              [disabled]="isOptionUsed(opt)"
+              (click)="fillActiveCell(opt)">
+              {{ opt }}
+            </button>
+          }
         </div>
-        <div class="mt-3" *ngIf="!isCorrect()">
-          <button class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm" (click)="retry()">
-            <i class="bi bi-arrow-counterclockwise me-2"></i> மீண்டும் முயற்சி செய்
+      }
+    
+      <!-- Action Button -->
+      @if (allFilled() && !isVerified()) {
+        <div class="text-center mt-4">
+          <button class="btn btn-primary rounded-pill px-5 fw-bold shadow-sm" (click)="verifyAnswer()">
+            <i class="bi bi-check-all me-2"></i> சரிபார்
           </button>
         </div>
-      </div>
+      }
+    
+      <!-- Feedback -->
+      @if (isVerified()) {
+        <div class="mt-4 animate-slide-up text-center">
+          <div class="alert shadow-sm border-0 d-inline-block text-start"
+            [ngClass]="isCorrect() ? 'alert-success bg-success text-white' : 'alert-danger bg-danger text-white'"
+            style="max-width: 600px;">
+            <h4 class="alert-heading mb-2 fw-bold">
+              <i class="bi" [ngClass]="isCorrect() ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
+              {{ isCorrect() ? 'சரியான விடை!' : 'தவறான விடை!' }}
+            </h4>
+            @if (activity.explanation) {
+              <p class="mb-0 fs-6">{{ activity.explanation }}</p>
+            }
+          </div>
+          @if (!isCorrect()) {
+            <div class="mt-3">
+              <button class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm" (click)="retry()">
+                <i class="bi bi-arrow-counterclockwise me-2"></i> மீண்டும் முயற்சி செய்
+              </button>
+            </div>
+          }
+        </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .missing-cell {
       display: inline-block;

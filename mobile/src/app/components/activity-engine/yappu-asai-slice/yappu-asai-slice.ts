@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { TamilNLPService } from '../../../services/tamil-nlp.service';
 import { AudioService } from '../../../services/audio.service';
 import { HttpClient } from '@angular/common/http';
@@ -23,7 +23,7 @@ export interface SliceSegment {
 @Component({
   selector: 'app-yappu-asai-slice',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './yappu-asai-slice.html',
   styleUrls: ['./yappu-asai-slice.css']
 })

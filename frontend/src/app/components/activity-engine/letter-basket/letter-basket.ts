@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 export interface BasketItem {
   id: string;
@@ -64,7 +64,7 @@ const DYNAMIC_OTTRU = [
 @Component({
   selector: 'app-activity-letter-basket',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './letter-basket.html',
   styleUrls: ['./letter-basket.css']
 })

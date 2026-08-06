@@ -10,35 +10,41 @@ import { AudioService } from '../../../services/audio.service';
     <div class="true-false-container text-center py-4">
       <!-- Question -->
       <h3 class="mb-4 text-primary fw-bold" [innerHTML]="activity.question"></h3>
-      
+    
       <!-- Statement Box -->
       <div class="statement-box bg-light border rounded-4 p-4 mb-4 shadow-sm mx-auto" style="max-width: 500px;">
         <p class="fs-5 mb-0 text-dark">{{ activity.statement }}</p>
       </div>
-
+    
       <!-- Action Buttons -->
-      <div class="d-flex justify-content-center gap-4 mt-4" *ngIf="!isVerified()">
-        <button class="btn btn-lg btn-success rounded-pill px-5 fw-bold shadow-sm" (click)="verifyAnswer(true)">
-          <i class="bi bi-check-circle me-2"></i> சரி (True)
-        </button>
-        <button class="btn btn-lg btn-danger rounded-pill px-5 fw-bold shadow-sm" (click)="verifyAnswer(false)">
-          <i class="bi bi-x-circle me-2"></i> தவறு (False)
-        </button>
-      </div>
-
-      <!-- Feedback -->
-      <div *ngIf="isVerified()" class="mt-4 animate-slide-up">
-        <div class="alert shadow-sm border-0" 
-             [ngClass]="isCorrect() ? 'alert-success bg-success text-white' : 'alert-danger bg-danger text-white'">
-          <h4 class="alert-heading mb-2 fw-bold">
-            <i class="bi" [ngClass]="isCorrect() ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
-            {{ isCorrect() ? 'சரியான விடை!' : 'தவறான விடை!' }}
-          </h4>
-          <p class="mb-0 fs-6" *ngIf="activity.explanation">{{ activity.explanation }}</p>
+      @if (!isVerified()) {
+        <div class="d-flex justify-content-center gap-4 mt-4">
+          <button class="btn btn-lg btn-success rounded-pill px-5 fw-bold shadow-sm" (click)="verifyAnswer(true)">
+            <i class="bi bi-check-circle me-2"></i> சரி (True)
+          </button>
+          <button class="btn btn-lg btn-danger rounded-pill px-5 fw-bold shadow-sm" (click)="verifyAnswer(false)">
+            <i class="bi bi-x-circle me-2"></i> தவறு (False)
+          </button>
         </div>
-      </div>
+      }
+    
+      <!-- Feedback -->
+      @if (isVerified()) {
+        <div class="mt-4 animate-slide-up">
+          <div class="alert shadow-sm border-0"
+            [ngClass]="isCorrect() ? 'alert-success bg-success text-white' : 'alert-danger bg-danger text-white'">
+            <h4 class="alert-heading mb-2 fw-bold">
+              <i class="bi" [ngClass]="isCorrect() ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
+              {{ isCorrect() ? 'சரியான விடை!' : 'தவறான விடை!' }}
+            </h4>
+            @if (activity.explanation) {
+              <p class="mb-0 fs-6">{{ activity.explanation }}</p>
+            }
+          </div>
+        </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .statement-box {
       border: 2px solid var(--bs-primary) !important;

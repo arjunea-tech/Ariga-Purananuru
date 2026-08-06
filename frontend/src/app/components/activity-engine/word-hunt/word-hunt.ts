@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 export interface HuntBox {
   text: string;
@@ -22,7 +22,7 @@ const OTTRU_LETTERS = ['க்', 'ங்', 'ச்', 'ஞ்', 'ட்', 'ண்
 @Component({
   selector: 'app-activity-word-hunt',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './word-hunt.html',
   styleUrls: ['./word-hunt.css']
 })

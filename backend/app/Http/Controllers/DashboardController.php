@@ -19,24 +19,37 @@ class DashboardController extends Controller
 
         // 1. Overall Completion Progress
         $allowedCourseIds = [];
-        if ($user->role === 'student' && $user->tenant_id) {
-            $today = now()->toDateString();
-            $allowedCourseIds = DB::table('property_packages')
-                ->join('properties', 'property_packages.property_id', '=', 'properties.id')
-                ->where('properties.tenant_id', $user->tenant_id)
-                ->where('property_packages.is_active', true)
-                ->whereNotNull('property_packages.course_id')
-                ->where(function ($q) use ($today) {
-                    $q->whereNull('property_packages.start_date')
-                      ->orWhere('property_packages.start_date', '<=', $today);
-                })
-                ->where(function ($q) use ($today) {
-                    $q->whereNull('property_packages.end_date')
-                      ->orWhere('property_packages.end_date', '>=', $today);
-                })
-                ->distinct('property_packages.course_id')
-                ->pluck('property_packages.course_id')
+        if ($user->role === 'student') {
+            $b2bCourseIds = [];
+            if ($user->tenant_id) {
+                // B2B: Get courses assigned to the tenant's property
+                $today = now()->toDateString();
+                $b2bCourseIds = DB::table('property_packages')
+                    ->join('properties', 'property_packages.property_id', '=', 'properties.id')
+                    ->where('properties.tenant_id', $user->tenant_id)
+                    ->where('property_packages.is_active', true)
+                    ->whereNotNull('property_packages.course_id')
+                    ->where(function ($q) use ($today) {
+                        $q->whereNull('property_packages.start_date')
+                          ->orWhere('property_packages.start_date', '<=', $today);
+                    })
+                    ->where(function ($q) use ($today) {
+                        $q->whereNull('property_packages.end_date')
+                          ->orWhere('property_packages.end_date', '>=', $today);
+                    })
+                    ->distinct('property_packages.course_id')
+                    ->pluck('property_packages.course_id')
+                    ->toArray();
+            }
+            
+            // B2C: Get courses the user has successfully purchased
+            $b2cCourseIds = DB::table('user_purchases')
+                ->where('user_id', $user->id)
+                ->where('status', 'successful')
+                ->pluck('course_id')
                 ->toArray();
+                
+            $allowedCourseIds = array_unique(array_merge($b2bCourseIds, $b2cCourseIds));
         }
 
         $totalChaptersQuery = DB::table('chapters');
@@ -116,24 +129,12 @@ class DashboardController extends Controller
         // 5. Course-by-course progressions
         $courseProgressions = [];
         $coursesQuery = \App\Models\Course::where('is_active', true);
-        if ($user->role === 'student' && $user->tenant_id) {
-            $today = now()->toDateString();
-            $coursesQuery->whereIn('id', function ($query) use ($user, $today) {
-                $query->select('property_packages.course_id')
-                    ->from('property_packages')
-                    ->join('properties', 'property_packages.property_id', '=', 'properties.id')
-                    ->where('properties.tenant_id', $user->tenant_id)
-                    ->where('property_packages.is_active', true)
-                    ->whereNotNull('property_packages.course_id')
-                    ->where(function ($q) use ($today) {
-                        $q->whereNull('property_packages.start_date')
-                          ->orWhere('property_packages.start_date', '<=', $today);
-                    })
-                    ->where(function ($q) use ($today) {
-                        $q->whereNull('property_packages.end_date')
-                          ->orWhere('property_packages.end_date', '>=', $today);
-                    });
-            });
+        if ($user->role === 'student') {
+            if (empty($allowedCourseIds)) {
+                $coursesQuery->whereRaw('1 = 0'); // No allowed courses
+            } else {
+                $coursesQuery->whereIn('id', $allowedCourseIds);
+            }
         }
         $courses = $coursesQuery->get();
 
@@ -218,6 +219,9 @@ class DashboardController extends Controller
             
         if (!empty($allowedCourseIds)) {
             $levelsQuery->whereIn('course_package_levels.course_id', $allowedCourseIds);
+        } else if ($user->role === 'student') {
+            // If student has no allowed courses, return no levels
+            $levelsQuery->whereRaw('1 = 0');
         }
         
         $levels = $levelsQuery->select('levels.id', 'levels.name', 'levels.code', 'levels.sort_order', 'course_package_levels.course_id')
@@ -225,14 +229,6 @@ class DashboardController extends Controller
             ->orderBy('levels.sort_order', 'asc')
             ->orderBy('levels.id', 'asc')
             ->get();
-
-        if ($levels->isEmpty()) {
-            $levels = DB::table('levels')
-                ->where('is_active', true)
-                ->select('id', 'name', 'code', 'sort_order', DB::raw('null as course_id'))
-                ->orderBy('sort_order', 'asc')
-                ->get();
-        }
 
         $levelIds = $levels->pluck('id')->toArray();
         $totalLvlChapsList = [];

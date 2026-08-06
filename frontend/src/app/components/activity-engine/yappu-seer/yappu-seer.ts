@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, OnDestroy, SimpleChanges, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { AudioService } from '../../../services/audio.service';
 
 // ─── Data Layer ───────────────────────────────────────────────
@@ -36,7 +36,7 @@ export const ALL_SEERS = [...SEERS_2, ...SEERS_3];
 @Component({
   selector: 'app-yappu-seer',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './yappu-seer.html',
   styleUrls: ['./yappu-seer.css']
 })

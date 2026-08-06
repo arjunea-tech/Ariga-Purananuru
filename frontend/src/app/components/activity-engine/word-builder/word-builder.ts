@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { TamilNLPService } from '../../../services/tamil-nlp.service';
 
 export interface WordBuilderData {
@@ -69,7 +69,7 @@ const TAMIL_CONFUSABLES: { [key: string]: string[] } = {
 @Component({
   selector: 'app-activity-word-builder',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './word-builder.html',
   styleUrls: ['./word-builder.css']
 })

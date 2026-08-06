@@ -8,7 +8,7 @@ import { AudioService } from '../../../services/audio.service';
   imports: [CommonModule],
   template: `
     <div class="magic-forest-container d-flex flex-column align-items-center position-relative w-100" style="flex: 1; min-height: 100%;">
-      
+    
       <!-- Hanging Wooden Signpost (Question) -->
       <div class="wooden-signpost-wrapper mt-3 z-2">
         <div class="signpost-chain left-chain"></div>
@@ -18,14 +18,14 @@ import { AudioService } from '../../../services/audio.service';
           <p class="fs-6 mb-0 text-white fw-bold text-shadow-dark">{{ activity.statement }}</p>
         </div>
       </div>
-
+    
       <!-- Forest Floor & Doors Area -->
       <div class="doors-area w-100 d-flex flex-column justify-content-end align-items-center flex-grow-1 position-relative z-1 pb-4">
-        
+    
         <div class="d-flex justify-content-center align-items-end gap-3 gap-md-5 w-100 px-3 z-1">
           <!-- True Door (Green) -->
           <div class="magic-door-container" (click)="verifyAnswer(true)">
-            <div class="magic-door green-door shadow-lg" 
+            <div class="magic-door green-door shadow-lg"
                  [ngClass]="{
                    'door-open': isVerified() && selectedDoor() === true && isCorrect(),
                    'door-shake': isVerified() && selectedDoor() === true && !isCorrect(),
@@ -37,7 +37,7 @@ import { AudioService } from '../../../services/audio.service';
               <span class="door-text text-success fw-bold">சரி<br><small>True</small></span>
             </div>
           </div>
-
+    
           <!-- False Door (Red) -->
           <div class="magic-door-container" (click)="verifyAnswer(false)">
             <div class="magic-door red-door shadow-lg"
@@ -53,9 +53,9 @@ import { AudioService } from '../../../services/audio.service';
             </div>
           </div>
         </div>
-
+    
         <!-- The Rabbit Mascot -->
-        <div class="rabbit-mascot position-absolute z-2" 
+        <div class="rabbit-mascot position-absolute z-2"
              [ngClass]="{
                'rabbit-jump-left': isVerified() && selectedDoor() === true && isCorrect(),
                'rabbit-jump-right': isVerified() && selectedDoor() === false && isCorrect(),
@@ -64,19 +64,23 @@ import { AudioService } from '../../../services/audio.service';
           🐇
         </div>
       </div>
-
+    
       <!-- Magical Scroll Feedback -->
-      <div *ngIf="isVerified()" class="magical-scroll-wrapper position-absolute bottom-0 w-100 p-2 p-md-3 z-3 animate-slide-up">
-        <div class="magical-scroll text-center p-2 p-md-3 shadow-lg mx-auto" style="max-width: 500px;" [ngClass]="isCorrect() ? 'scroll-success' : 'scroll-error'">
-          <h5 class="mb-1 fw-bold text-dark">
-            <i class="bi" [ngClass]="isCorrect() ? 'bi-stars text-success' : 'bi-exclamation-triangle-fill text-danger'"></i>
-            {{ isCorrect() ? 'சரியான விடை!' : 'ஐயையோ! தவறான விடை!' }}
-          </h5>
-          <p class="mb-0 fs-7 text-dark fw-bold" style="font-size: 0.9rem;" *ngIf="activity.explanation">{{ activity.explanation }}</p>
+      @if (isVerified()) {
+        <div class="magical-scroll-wrapper position-absolute bottom-0 w-100 p-2 p-md-3 z-3 animate-slide-up">
+          <div class="magical-scroll text-center p-2 p-md-3 shadow-lg mx-auto" style="max-width: 500px;" [ngClass]="isCorrect() ? 'scroll-success' : 'scroll-error'">
+            <h5 class="mb-1 fw-bold text-dark">
+              <i class="bi" [ngClass]="isCorrect() ? 'bi-stars text-success' : 'bi-exclamation-triangle-fill text-danger'"></i>
+              {{ isCorrect() ? 'சரியான விடை!' : 'ஐயையோ! தவறான விடை!' }}
+            </h5>
+            @if (activity.explanation) {
+              <p class="mb-0 fs-7 text-dark fw-bold" style="font-size: 0.9rem;">{{ activity.explanation }}</p>
+            }
+          </div>
         </div>
-      </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     :host {
       display: flex;

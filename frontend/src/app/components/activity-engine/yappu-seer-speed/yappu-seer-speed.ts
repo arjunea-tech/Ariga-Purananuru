@@ -1,12 +1,12 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, OnDestroy, SimpleChanges, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { AudioService } from '../../../services/audio.service';
 import { Seer, SEERS_2, SEERS_3, ALL_SEERS } from '../yappu-seer/yappu-seer';
 
 @Component({
   selector: 'app-yappu-seer-speed',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './yappu-seer-speed.html',
   styleUrls: ['./yappu-seer-speed.css']
 })

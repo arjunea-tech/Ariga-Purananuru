@@ -37,105 +37,125 @@ export interface FillTableRow {
   imports: [CommonModule],
   template: `
     <div class="magic-orchard-container py-4 overflow-hidden position-relative" style="background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%); min-height: 100%;">
-      
+    
       <!-- Header -->
       <div class="position-relative z-1">
         <h3 class="text-center mb-2 text-primary fw-bold" style="font-family: 'Nunito', sans-serif;">{{ activityData?.question || 'கீழ்க்காணும் அலகிடும் அட்டவணையை நிரப்புக:' }}</h3>
         <p class="text-muted mb-4 fs-6 text-center fw-bold px-2">சீர், அசை, வாய்ப்பாடு ஆகியவற்றைச் சரியாகப் பொருத்துக!</p>
-
+    
         <!-- Puzzle Flow Area -->
         <div class="d-flex flex-column gap-3 mx-auto mb-5 px-2" style="max-width: 800px;">
-          
+    
           <!-- Each Row is a Card -->
-          <div class="premium-card p-2 p-md-3 rounded-4 shadow-sm border bg-white d-flex flex-row align-items-center justify-content-between gap-1 gap-md-3 animate-pop-in" 
-               *ngFor="let row of tableRows(); let rIdx = index" [style.animationDelay]="rIdx * 0.1 + 's'"
-               style="border: 2px solid #e2e8f0 !important; width: 100%;">
-            
-            <!-- Word (சீர்) -->
-            <div class="flow-item d-flex flex-column align-items-center flex-grow-1" style="flex-basis: 30%;">
-               <span class="text-secondary fw-bold mb-1 header-label">சீர்</span>
-               <div class="slot-container w-100 d-flex justify-content-center">
-                  <span *ngIf="!row.word.isMissing" class="filled-box bg-light text-dark">{{ row.word.value }}</span>
-                  <div *ngIf="row.word.isMissing" class="magic-slot"
-                       [ngClass]="getCellClass(rIdx, 'word')" (click)="setActiveCell(rIdx, 'word')">
-                     {{ row.word.userAnswer || '?' }}
-                  </div>
-               </div>
+          @for (row of tableRows(); track row; let rIdx = $index) {
+            <div class="premium-card p-2 p-md-3 rounded-4 shadow-sm border bg-white d-flex flex-row align-items-center justify-content-between gap-1 gap-md-3 animate-pop-in"
+              [style.animationDelay]="rIdx * 0.1 + 's'"
+              style="border: 2px solid #e2e8f0 !important; width: 100%;">
+              <!-- Word (சீர்) -->
+              <div class="flow-item d-flex flex-column align-items-center flex-grow-1" style="flex-basis: 30%;">
+                <span class="text-secondary fw-bold mb-1 header-label">சீர்</span>
+                <div class="slot-container w-100 d-flex justify-content-center">
+                  @if (!row.word.isMissing) {
+                    <span class="filled-box bg-light text-dark">{{ row.word.value }}</span>
+                  }
+                  @if (row.word.isMissing) {
+                    <div class="magic-slot"
+                      [ngClass]="getCellClass(rIdx, 'word')" (click)="setActiveCell(rIdx, 'word')">
+                      {{ row.word.userAnswer || '?' }}
+                    </div>
+                  }
+                </div>
+              </div>
+              <!-- Arrow -->
+              <div class="text-primary flow-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
+              <!-- Asai (அசை) -->
+              <div class="flow-item d-flex flex-column align-items-center flex-grow-1" style="flex-basis: 35%;">
+                <span class="text-secondary fw-bold mb-1 header-label">அசைப் பிரிப்பு</span>
+                <div class="slot-container w-100 d-flex justify-content-center">
+                  @if (!row.asai.isMissing) {
+                    <span class="filled-box bg-light text-dark">{{ row.asai.value }}</span>
+                  }
+                  @if (row.asai.isMissing) {
+                    <div class="magic-slot"
+                      [ngClass]="getCellClass(rIdx, 'asai')" (click)="setActiveCell(rIdx, 'asai')">
+                      {{ row.asai.userAnswer || '?' }}
+                    </div>
+                  }
+                </div>
+              </div>
+              <!-- Arrow -->
+              <div class="text-success flow-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
+              <!-- Seer (வாய்ப்பாடு) -->
+              <div class="flow-item d-flex flex-column align-items-center flex-grow-1" style="flex-basis: 30%;">
+                <span class="text-secondary fw-bold mb-1 header-label">வாய்ப்பாடு</span>
+                <div class="slot-container w-100 d-flex justify-content-center">
+                  @if (!row.seer.isMissing) {
+                    <span class="filled-box bg-light text-primary">{{ row.seer.value }}</span>
+                  }
+                  @if (row.seer.isMissing) {
+                    <div class="magic-slot"
+                      [ngClass]="getCellClass(rIdx, 'seer')" (click)="setActiveCell(rIdx, 'seer')">
+                      {{ row.seer.userAnswer || '?' }}
+                    </div>
+                  }
+                </div>
+              </div>
             </div>
-
-            <!-- Arrow -->
-            <div class="text-primary flow-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
-
-            <!-- Asai (அசை) -->
-            <div class="flow-item d-flex flex-column align-items-center flex-grow-1" style="flex-basis: 35%;">
-               <span class="text-secondary fw-bold mb-1 header-label">அசைப் பிரிப்பு</span>
-               <div class="slot-container w-100 d-flex justify-content-center">
-                  <span *ngIf="!row.asai.isMissing" class="filled-box bg-light text-dark">{{ row.asai.value }}</span>
-                  <div *ngIf="row.asai.isMissing" class="magic-slot"
-                       [ngClass]="getCellClass(rIdx, 'asai')" (click)="setActiveCell(rIdx, 'asai')">
-                     {{ row.asai.userAnswer || '?' }}
-                  </div>
-               </div>
-            </div>
-
-            <!-- Arrow -->
-            <div class="text-success flow-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
-
-            <!-- Seer (வாய்ப்பாடு) -->
-            <div class="flow-item d-flex flex-column align-items-center flex-grow-1" style="flex-basis: 30%;">
-               <span class="text-secondary fw-bold mb-1 header-label">வாய்ப்பாடு</span>
-               <div class="slot-container w-100 d-flex justify-content-center">
-                  <span *ngIf="!row.seer.isMissing" class="filled-box bg-light text-primary">{{ row.seer.value }}</span>
-                  <div *ngIf="row.seer.isMissing" class="magic-slot"
-                       [ngClass]="getCellClass(rIdx, 'seer')" (click)="setActiveCell(rIdx, 'seer')">
-                     {{ row.seer.userAnswer || '?' }}
-                  </div>
-               </div>
-            </div>
-
-          </div>
+          }
         </div>
-
+    
         <!-- Options Pool -->
-        <div class="basket-container mx-auto position-relative mt-2 p-3 p-md-4 rounded-4 shadow-sm bg-white border" style="max-width: 650px;" *ngIf="!isVerified()">
-          <h5 class="text-center text-dark fw-bold mb-3">விருப்பங்கள் (Options) 🧩</h5>
-          <div class="d-flex flex-wrap justify-content-center gap-2 gap-md-3">
-            <button *ngFor="let opt of options()"
-                    class="btn-magic-item fw-bold transition-all shadow-sm"
-                    [disabled]="isOptionUsed(opt)"
-                    (click)="fillActiveCell(opt)">
-              {{ opt }}
-            </button>
+        @if (!isVerified()) {
+          <div class="basket-container mx-auto position-relative mt-2 p-3 p-md-4 rounded-4 shadow-sm bg-white border" style="max-width: 650px;">
+            <h5 class="text-center text-dark fw-bold mb-3">விருப்பங்கள் (Options) 🧩</h5>
+            <div class="d-flex flex-wrap justify-content-center gap-2 gap-md-3">
+              @for (opt of options(); track opt) {
+                <button
+                  class="btn-magic-item fw-bold transition-all shadow-sm"
+                  [disabled]="isOptionUsed(opt)"
+                  (click)="fillActiveCell(opt)">
+                  {{ opt }}
+                </button>
+              }
+            </div>
           </div>
-        </div>
-
+        }
+    
         <!-- Action Button -->
-        <div class="text-center mt-4 position-relative z-1" *ngIf="allFilled() && !isVerified()">
-          <button class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm hover-lift" (click)="verifyAnswer()">
-            <i class="bi bi-check-all me-2"></i> சரிபார் (Verify)
-          </button>
-        </div>
-
-        <!-- Feedback -->
-        <div *ngIf="isVerified()" class="mt-4 animate-slide-up text-center px-3">
-          <div class="alert shadow-sm border-0 d-inline-block text-start rounded-4" 
-               [ngClass]="isCorrect() ? 'bg-success text-white' : 'bg-danger text-white'"
-               style="max-width: 600px;">
-            <h4 class="alert-heading mb-2 fw-bold d-flex align-items-center gap-2">
-              <i class="bi" style="font-size: 1.5rem;" [ngClass]="isCorrect() ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
-              {{ isCorrect() ? 'சரியான விடை!' : 'தவறான விடை!' }}
-            </h4>
-            <p class="mb-0 fs-6" *ngIf="explanation()">{{ explanation() }}</p>
-          </div>
-          <div class="mt-3" *ngIf="!isCorrect()">
-            <button class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm hover-lift" (click)="retry()">
-              <i class="bi bi-arrow-counterclockwise me-2"></i> மீண்டும் முயற்சி செய்
+        @if (allFilled() && !isVerified()) {
+          <div class="text-center mt-4 position-relative z-1">
+            <button class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm hover-lift" (click)="verifyAnswer()">
+              <i class="bi bi-check-all me-2"></i> சரிபார் (Verify)
             </button>
           </div>
-        </div>
+        }
+    
+        <!-- Feedback -->
+        @if (isVerified()) {
+          <div class="mt-4 animate-slide-up text-center px-3">
+            <div class="alert shadow-sm border-0 d-inline-block text-start rounded-4"
+              [ngClass]="isCorrect() ? 'bg-success text-white' : 'bg-danger text-white'"
+              style="max-width: 600px;">
+              <h4 class="alert-heading mb-2 fw-bold d-flex align-items-center gap-2">
+                <i class="bi" style="font-size: 1.5rem;" [ngClass]="isCorrect() ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
+                {{ isCorrect() ? 'சரியான விடை!' : 'தவறான விடை!' }}
+              </h4>
+              @if (explanation()) {
+                <p class="mb-0 fs-6">{{ explanation() }}</p>
+              }
+            </div>
+            @if (!isCorrect()) {
+              <div class="mt-3">
+                <button class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm hover-lift" (click)="retry()">
+                  <i class="bi bi-arrow-counterclockwise me-2"></i> மீண்டும் முயற்சி செய்
+                </button>
+              </div>
+            }
+          </div>
+        }
       </div>
     </div>
-  `,
+    `,
   styles: [`
     .filled-box {
       display: inline-flex;

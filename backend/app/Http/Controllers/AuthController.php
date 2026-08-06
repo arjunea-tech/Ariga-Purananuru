@@ -28,12 +28,12 @@ class AuthController extends Controller
         if (!empty($validated['tenant_code'])) {
             $tenant = Tenant::where('tenant_code', $validated['tenant_code'])->first();
         } else {
-            // Automatically resolve tenant based on logged-in user or first active tenant
+            // Automatically resolve tenant based on logged-in user or fallback to PUBLIC
             $currentUser = $request->user();
             if ($currentUser && $currentUser->tenant_id) {
                 $tenant = Tenant::find($currentUser->tenant_id);
             } else {
-                $tenant = Tenant::where('is_active', true)->first();
+                $tenant = Tenant::where('tenant_code', 'PUBLIC')->first();
             }
         }
 

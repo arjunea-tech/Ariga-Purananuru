@@ -30,7 +30,7 @@ export interface AlahiduRow {
   imports: [CommonModule],
   template: `
     <div class="detective-container py-4 overflow-hidden position-relative" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100%;">
-      
+    
       <!-- Header -->
       <div class="position-relative z-1">
         <h3 class="text-center mb-2 text-primary fw-bold" style="font-family: 'Nunito', sans-serif;">
@@ -38,79 +38,84 @@ export interface AlahiduRow {
           <span [innerHTML]="activityData?.question || 'கீழ்க்காணும் அலகிடும் அட்டவணையில் எந்த வரியில் பிழை உள்ளது?'"></span>
         </h3>
         <p class="text-muted mb-4 fs-6 text-center fw-bold px-2">சரியானவற்றை விட்டுவிட்டு, தவறான வரியைத் தேர்ந்தெடுக்கவும்!</p>
-
+    
         <!-- Case Files Area -->
         <div class="d-flex flex-column gap-3 mx-auto mb-5 px-2" style="max-width: 800px;">
-          
+    
           <!-- Each Row is a Case File -->
-          <div class="premium-card position-relative p-2 p-md-3 rounded-4 shadow-sm border bg-white d-flex flex-row align-items-center justify-content-between gap-1 gap-md-3 animate-pop-in cursor-pointer transition-all" 
-               *ngFor="let row of tableData(); let i = index" [style.animationDelay]="i * 0.1 + 's'"
-               (click)="selectRow(i)"
+          @for (row of tableData(); track row; let i = $index) {
+            <div class="premium-card position-relative p-2 p-md-3 rounded-4 shadow-sm border bg-white d-flex flex-row align-items-center justify-content-between gap-1 gap-md-3 animate-pop-in cursor-pointer transition-all"
+              [style.animationDelay]="i * 0.1 + 's'"
+              (click)="selectRow(i)"
                [ngClass]="{
                  'border-primary shadow-lg scale-up': selectedRow() === i && !isVerified(),
                  'border-success bg-success-subtle': isVerified() && i === errorRowIndex() && isCorrect(),
                  'border-danger bg-danger-subtle': isVerified() && selectedRow() === i && !isCorrect(),
                  'opacity-50 grayscale': isVerified() && i !== errorRowIndex() && selectedRow() !== i
                }"
-               style="border-width: 3px !important; width: 100%;">
-            
-            <!-- Word (சீர்) -->
-            <div class="flow-item d-flex flex-column align-items-center flex-grow-1" style="flex-basis: 30%;">
-               <span class="text-secondary fw-bold mb-1 header-label">சீர்</span>
-               <div class="filled-box bg-light text-dark w-100">{{ row.word }}</div>
+              style="border-width: 3px !important; width: 100%;">
+              <!-- Word (சீர்) -->
+              <div class="flow-item d-flex flex-column align-items-center flex-grow-1" style="flex-basis: 30%;">
+                <span class="text-secondary fw-bold mb-1 header-label">சீர்</span>
+                <div class="filled-box bg-light text-dark w-100">{{ row.word }}</div>
+              </div>
+              <!-- Arrow -->
+              <div class="text-primary flow-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
+              <!-- Asai (அசை) -->
+              <div class="flow-item d-flex flex-column align-items-center flex-grow-1" style="flex-basis: 35%;">
+                <span class="text-secondary fw-bold mb-1 header-label">அசைப் பிரிப்பு</span>
+                <div class="filled-box bg-light text-dark w-100">{{ row.asai }}</div>
+              </div>
+              <!-- Arrow -->
+              <div class="text-success flow-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
+              <!-- Seer (வாய்ப்பாடு) -->
+              <div class="flow-item d-flex flex-column align-items-center flex-grow-1" style="flex-basis: 30%;">
+                <span class="text-secondary fw-bold mb-1 header-label">வாய்ப்பாடு</span>
+                <div class="filled-box bg-light text-primary w-100">{{ row.seer }}</div>
+              </div>
+              <!-- Detective Stamps -->
+              @if (isVerified() && i === errorRowIndex() && isCorrect()) {
+                <div class="position-absolute stamp stamp-correct">
+                  DETECTED
+                </div>
+              }
+              @if (isVerified() && selectedRow() === i && !isCorrect()) {
+                <div class="position-absolute stamp stamp-wrong">
+                  WRONG
+                </div>
+              }
             </div>
-
-            <!-- Arrow -->
-            <div class="text-primary flow-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
-
-            <!-- Asai (அசை) -->
-            <div class="flow-item d-flex flex-column align-items-center flex-grow-1" style="flex-basis: 35%;">
-               <span class="text-secondary fw-bold mb-1 header-label">அசைப் பிரிப்பு</span>
-               <div class="filled-box bg-light text-dark w-100">{{ row.asai }}</div>
-            </div>
-
-            <!-- Arrow -->
-            <div class="text-success flow-arrow"><i class="bi bi-arrow-right-circle-fill"></i></div>
-
-            <!-- Seer (வாய்ப்பாடு) -->
-            <div class="flow-item d-flex flex-column align-items-center flex-grow-1" style="flex-basis: 30%;">
-               <span class="text-secondary fw-bold mb-1 header-label">வாய்ப்பாடு</span>
-               <div class="filled-box bg-light text-primary w-100">{{ row.seer }}</div>
-            </div>
-
-            <!-- Detective Stamps -->
-            <div *ngIf="isVerified() && i === errorRowIndex() && isCorrect()" class="position-absolute stamp stamp-correct">
-               DETECTED
-            </div>
-            <div *ngIf="isVerified() && selectedRow() === i && !isCorrect()" class="position-absolute stamp stamp-wrong">
-               WRONG
-            </div>
-
-          </div>
+          }
         </div>
-
+    
         <!-- Action Button -->
-        <div class="text-center mt-4 position-relative z-1" *ngIf="selectedRow() !== null && !isVerified()">
-          <button class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" (click)="verifyAnswer()">
-            <i class="bi bi-check2-circle me-2"></i> சரிபார்
-          </button>
-        </div>
-
-        <!-- Feedback -->
-        <div *ngIf="isVerified()" class="mt-4 animate-slide-up text-center px-3 position-relative z-1">
-          <div class="alert shadow-sm border-0 d-inline-block text-start rounded-4" 
-               [ngClass]="isCorrect() ? 'bg-success text-white' : 'bg-danger text-white'"
-               style="max-width: 600px;">
-            <h4 class="alert-heading mb-2 fw-bold d-flex align-items-center gap-2">
-              <i class="bi" style="font-size: 1.5rem;" [ngClass]="isCorrect() ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
-              {{ isCorrect() ? 'சரியான விடை!' : 'தவறான விடை!' }}
-            </h4>
-            <p class="mb-0 fs-6" *ngIf="explanation()">{{ explanation() }}</p>
+        @if (selectedRow() !== null && !isVerified()) {
+          <div class="text-center mt-4 position-relative z-1">
+            <button class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" (click)="verifyAnswer()">
+              <i class="bi bi-check2-circle me-2"></i> சரிபார்
+            </button>
           </div>
-        </div>
+        }
+    
+        <!-- Feedback -->
+        @if (isVerified()) {
+          <div class="mt-4 animate-slide-up text-center px-3 position-relative z-1">
+            <div class="alert shadow-sm border-0 d-inline-block text-start rounded-4"
+              [ngClass]="isCorrect() ? 'bg-success text-white' : 'bg-danger text-white'"
+              style="max-width: 600px;">
+              <h4 class="alert-heading mb-2 fw-bold d-flex align-items-center gap-2">
+                <i class="bi" style="font-size: 1.5rem;" [ngClass]="isCorrect() ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
+                {{ isCorrect() ? 'சரியான விடை!' : 'தவறான விடை!' }}
+              </h4>
+              @if (explanation()) {
+                <p class="mb-0 fs-6">{{ explanation() }}</p>
+              }
+            </div>
+          </div>
+        }
       </div>
     </div>
-  `,
+    `,
   styles: [`
     .filled-box {
       display: inline-flex;

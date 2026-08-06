@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, signal, inject, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
@@ -20,7 +20,7 @@ export interface DynamicModuleItem {
 @Component({
   selector: 'app-kids-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './kids-dashboard.html',
   styleUrls: ['./kids-dashboard.css']
 })

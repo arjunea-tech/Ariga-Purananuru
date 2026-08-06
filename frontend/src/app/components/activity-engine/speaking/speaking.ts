@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, signal, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 export interface SpeakingData {
   id?: number;
@@ -12,7 +12,7 @@ export interface SpeakingData {
 @Component({
   selector: 'app-activity-speaking',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './speaking.html',
   styleUrls: ['./speaking.css']
 })

@@ -12,100 +12,111 @@
   </div>
 
   <!-- Main Game Board -->
-  <div class="game-card" *ngIf="!gameCompleted() && currentKural() as k">
-    <div class="chapter-badge" *ngIf="k.chapter">
-      📖 {{ k.chapter }} <span *ngIf="k.kuralNo">(குறள் #{{ k.kuralNo }})</span>
-    </div>
-
+  @if (!gameCompleted() && currentKural(); as k) {
+    <div class="game-card">
+      @if (k.chapter) {
+        <div class="chapter-badge">
+          📖 {{ k.chapter }} @if (k.kuralNo) {
+          <span>(குறள் #{{ k.kuralNo }})</span>
+        }
+      </div>
+    }
     <!-- Slot Target Board (Line 1 & Line 2) -->
     <div class="board-container" [class.board-correct]="isCorrect() === true" [class.board-wrong]="isCorrect() === false">
       <!-- Line 1: 4 Slots -->
       <div class="line-label">முதல் அடி (4 சீர்கள்):</div>
       <div class="slots-row line1-row">
-        <div 
-          *ngFor="let slot of slots().slice(0, 4); let i = index"
-          class="slot-box"
-          [class.filled]="slot !== null"
-          (click)="removeSlotCard(i)">
-          <span class="slot-num">{{ i + 1 }}</span>
-          <span class="slot-text" *ngIf="slot">{{ slot.text }}</span>
-        </div>
+        @for (slot of slots().slice(0, 4); track slot; let i = $index) {
+          <div
+            class="slot-box"
+            [class.filled]="slot !== null"
+            (click)="removeSlotCard(i)">
+            <span class="slot-num">{{ i + 1 }}</span>
+            @if (slot) {
+              <span class="slot-text">{{ slot.text }}</span>
+            }
+          </div>
+        }
       </div>
-
       <!-- Line 2: 3 Slots -->
       <div class="line-label mt-3">இரண்டாம் அடி (3 சீர்கள்):</div>
       <div class="slots-row line2-row">
-        <div 
-          *ngFor="let slot of slots().slice(4, 7); let i = index"
-          class="slot-box"
-          [class.filled]="slot !== null"
-          (click)="removeSlotCard(i + 4)">
-          <span class="slot-num">{{ i + 5 }}</span>
-          <span class="slot-text" *ngIf="slot">{{ slot.text }}</span>
-        </div>
+        @for (slot of slots().slice(4, 7); track slot; let i = $index) {
+          <div
+            class="slot-box"
+            [class.filled]="slot !== null"
+            (click)="removeSlotCard(i + 4)">
+            <span class="slot-num">{{ i + 5 }}</span>
+            @if (slot) {
+              <span class="slot-text">{{ slot.text }}</span>
+            }
+          </div>
+        }
       </div>
     </div>
-
     <!-- Pool of Jumbled Cards -->
     <div class="pool-container">
       <div class="pool-label">கலைந்துள்ள சீர்கள் (Tap to place):</div>
       <div class="pool-grid">
-        <button 
-          *ngFor="let card of poolCards()"
-          class="pool-card-btn"
-          (click)="selectPoolCard(card)">
-          <span class="card-text">{{ card.text }}</span>
-        </button>
-        <div class="pool-empty-text" *ngIf="poolCards().length === 0">
-          ✨ அனைத்து சீர்களும் பலகையில் பொருத்தப்பட்டுவிட்டன!
-        </div>
+        @for (card of poolCards(); track card) {
+          <button
+            class="pool-card-btn"
+            (click)="selectPoolCard(card)">
+            <span class="card-text">{{ card.text }}</span>
+          </button>
+        }
+        @if (poolCards().length === 0) {
+          <div class="pool-empty-text">
+            ✨ அனைத்து சீர்களும் பலகையில் பொருத்தப்பட்டுவிட்டன!
+          </div>
+        }
       </div>
     </div>
-
     <!-- Controls -->
     <div class="controls-row">
       <button class="ctrl-btn reset-btn" (click)="resetBoard()" [disabled]="isVerified()">
         🔄 மீண்டும் அமை
       </button>
-
-      <button 
-        class="ctrl-btn check-btn" 
+      <button
+        class="ctrl-btn check-btn"
         [disabled]="poolCards().length > 0 || isVerified()"
         (click)="verifyKural()">
         ✅ சரிபார் (Check Kural)
       </button>
     </div>
-
     <!-- Wrong Feedback -->
-    <div class="feedback-box wrong-box" *ngIf="isVerified() && isCorrect() === false">
-      ❌ தவறான வரிசை! மீண்டும் சீர்களை மாற்றி அமைக்க முயற்சிக்கவும்.
-      <button class="retry-btn" (click)="resetBoard(); isVerified.set(false)">
-        🔄 மீண்டும் முயற்சி செய்
-      </button>
-    </div>
-
+    @if (isVerified() && isCorrect() === false) {
+      <div class="feedback-box wrong-box">
+        ❌ தவறான வரிசை! மீண்டும் சீர்களை மாற்றி அமைக்க முயற்சிக்கவும்.
+        <button class="retry-btn" (click)="resetBoard(); isVerified.set(false)">
+          🔄 மீண்டும் முயற்சி செய்
+        </button>
+      </div>
+    }
     <!-- Meaning & Success Modal -->
-    <div class="explanation-box" *ngIf="showMeaningModal()">
-      <div class="exp-header success-header">
-        <span class="exp-icon">🎉 மிகச் சரி! திருக்குறள் சீரமைக்கப்பட்டது!</span>
+    @if (showMeaningModal()) {
+      <div class="explanation-box">
+        <div class="exp-header success-header">
+          <span class="exp-icon">🎉 மிகச் சரி! திருக்குறள் சீரமைக்கப்பட்டது!</span>
+        </div>
+        <div class="completed-kural-preview">
+          <div class="kural-line">{{ k.line1.join(' ') }}</div>
+          <div class="kural-line">{{ k.line2.join(' ') }}</div>
+        </div>
+        <div class="kural-meaning">
+          <strong>பொருள்:</strong> {{ k.meaning }}
+        </div>
+        <button class="next-btn" (click)="nextKural()">
+          அடுத்த குறள் (Next Kural) ➡️
+        </button>
       </div>
-      <div class="completed-kural-preview">
-        <div class="kural-line">{{ k.line1.join(' ') }}</div>
-        <div class="kural-line">{{ k.line2.join(' ') }}</div>
-      </div>
-      <div class="kural-meaning">
-        <strong>பொருள்:</strong> {{ k.meaning }}
-      </div>
-      
-      <button class="next-btn" (click)="nextKural()">
-        அடுத்த குறள் (Next Kural) ➡️
-      </button>
-    </div>
-
+    }
   </div>
+}
 
-  <!-- Game Completion Card -->
-  <div class="completion-card" *ngIf="gameCompleted()">
+<!-- Game Completion Card -->
+@if (gameCompleted()) {
+  <div class="completion-card">
     <div class="trophy-icon">🏆</div>
     <h2>வாழ்த்துகள்! திருக்குறள் சீரமைப்புப் பயிற்சி நிறைவடைந்தது</h2>
     <p class="score-summary">
@@ -118,4 +129,5 @@
       🔄 மீண்டும் பயிற்சி செய்க
     </button>
   </div>
+}
 </div>

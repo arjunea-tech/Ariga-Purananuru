@@ -11,10 +11,15 @@ class Course extends Model
         'name',
         'description',
         'is_active',
+        'price',
+        'original_price',
+        'cover_image',
+        'tags',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'tags' => 'array',
     ];
 
     /**

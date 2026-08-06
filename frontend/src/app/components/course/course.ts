@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { TranslateModule } from '@ngx-translate/core';
 import { CourseService, CourseData } from '../../services/course';
 import { NotificationService } from '../../services/notification.service';
@@ -15,14 +15,13 @@ import {
   selector: 'app-course',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     McvInputField,
     McvTextArea,
     McvToggleField,
     TranslateModule,
     RouterModule
-  ],
+],
   templateUrl: './course.html',
   styleUrls: ['./course.css'],
 })

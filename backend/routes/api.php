@@ -31,6 +31,20 @@ Route::get('/practice-words', [PracticeWordController::class, 'index']);
 Route::get('/practice-words/random', [PracticeWordController::class, 'getRandom']);
 Route::get('/yappu-seer-words', [YappuSeerWordController::class, 'index']);
 
+// Public B2C Store
+Route::get('store/courses', [CourseController::class, 'getStorefront']);
+Route::get('courses/{course}/player-structure', [CourseController::class, 'getPlayerStructure']);
+
+Route::get('/test-db', function() {
+    return [
+        'connection' => config('database.default'),
+        'database' => config('database.connections.' . config('database.default')),
+        'courses_count' => \App\Models\Course::count(),
+        'courses' => \App\Models\Course::all(),
+    ];
+});
+
+
 /*
 |--------------------------------------------------------------------------
 | Protected & Tenant-Scoped Routes
@@ -88,6 +102,7 @@ Route::middleware(['auth:sanctum', 'identify.tenant'])->group(function () {
      */
     Route::middleware(['role:super_admin,admin,staff'])->group(function () {
         Route::post('courses', [CourseController::class, 'store']);
+        Route::post('courses/upload-cover', [CourseController::class, 'uploadCoverImage']);
         Route::put('courses/{course}', [CourseController::class, 'update']);
         Route::delete('courses/{course}', [CourseController::class, 'destroy']);
         Route::post('users/import', [AuthController::class, 'batchImport']);
@@ -137,7 +152,10 @@ Route::middleware(['auth:sanctum', 'identify.tenant'])->group(function () {
     // Course player structure is read-only for players
     Route::get('courses', [CourseController::class, 'index']);
     Route::get('courses/{course}', [CourseController::class, 'show']);
-    Route::get('courses/{course}/player-structure', [CourseController::class, 'getPlayerStructure']);
+
+    // B2C Payments
+    Route::post('payment/order', [\App\Http\Controllers\PaymentController::class, 'createOrder']);
+    Route::post('payment/verify', [\App\Http\Controllers\PaymentController::class, 'verifyPayment']);
 
     Route::get('levels', [LevelController::class, 'index']);
     Route::get('levels/{level}', [LevelController::class, 'show']);

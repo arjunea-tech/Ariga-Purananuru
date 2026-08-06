@@ -15,76 +15,90 @@ export interface ThalaiOption {
   imports: [CommonModule],
   template: `
     <div class="fix-thalai-container py-4 text-center overflow-hidden position-relative d-flex flex-column h-100" style="background: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 40%, #3b82f6 100%); flex: 1; min-height: 100%;">
-      
+    
       <!-- Header -->
       <div class="position-relative z-1 mb-4">
         <h3 class="mb-2 text-primary fw-bold bg-white d-inline-block px-4 py-2 rounded-pill shadow-sm" style="font-family: 'Nunito', sans-serif;" [innerHTML]="activityData?.question || 'தளை தட்டாமல் சீரமைக்க:'"></h3>
         <p class="text-white mt-3 fs-6 fw-bold text-shadow">தளை தட்டாமல் இருக்க சரியான மரப்பலகையைத் தேர்ந்தெடுத்து பாலத்தை இணைக்கவும்! 🌉</p>
       </div>
-
+    
       <!-- Bridge Display -->
       <div class="bridge-container position-relative mx-auto mb-5 p-2 px-md-4" style="max-width: 750px;">
         <div class="d-flex flex-nowrap justify-content-center align-items-stretch gap-1 gap-md-3 position-relative z-1 w-100">
-            
-            <!-- Left Cliff (First Word) -->
+    
+          <!-- Left Cliff (First Word) -->
           <div class="cliff-block px-0 py-3 shadow-lg d-flex flex-column align-items-center justify-content-center">
             <span class="fw-bold text-white text-center cliff-text w-100 px-1">{{ activityData?.firstWord }}</span>
           </div>
-          
+    
           <!-- Missing Link (Gap) -->
           <div class="bridge-gap px-1 py-2 px-md-3 d-flex flex-column align-items-center justify-content-center position-relative">
             <!-- Ropes -->
             <div class="bridge-rope top-rope"></div>
             <div class="bridge-rope bottom-rope"></div>
-            
+    
             <div class="plank-placeholder w-100 h-100 d-flex align-items-center justify-content-center z-1"
-                 [ngClass]="selectedOption() !== null ? 'plank active-plank shadow-lg' : 'border-dashed-light'">
+              [ngClass]="selectedOption() !== null ? 'plank active-plank shadow-lg' : 'border-dashed-light'">
               <span class="fw-bold text-center plank-text" [ngClass]="selectedOption() !== null ? 'text-white' : 'text-light'">
-                <i class="bi bi-question-circle fs-3 d-block mb-1" *ngIf="selectedOption() === null"></i>
+                @if (selectedOption() === null) {
+                  <i class="bi bi-question-circle fs-3 d-block mb-1"></i>
+                }
                 {{ selectedOption() !== null ? activityData?.options[selectedOption()!].word : 'விடுபட்ட பலகை' }}
               </span>
             </div>
           </div>
-          
+    
           <!-- Right Cliff (Last Word) -->
-          <div class="cliff-block px-0 py-3 shadow-lg d-flex flex-column align-items-center justify-content-center" *ngIf="activityData?.lastWord">
-            <span class="fw-bold text-white text-center cliff-text w-100 px-1">{{ activityData?.lastWord }}</span>
-            <div class="walker-icon position-absolute" *ngIf="isVerified() && isCorrect()"><i class="bi bi-person-walking"></i></div>
+          @if (activityData?.lastWord) {
+            <div class="cliff-block px-0 py-3 shadow-lg d-flex flex-column align-items-center justify-content-center">
+              <span class="fw-bold text-white text-center cliff-text w-100 px-1">{{ activityData?.lastWord }}</span>
+              @if (isVerified() && isCorrect()) {
+                <div class="walker-icon position-absolute"><i class="bi bi-person-walking"></i></div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    
+      <!-- Options Pool -->
+      @if (!isVerified()) {
+        <div class="options-grid d-flex flex-wrap justify-content-center gap-2 gap-md-3 mt-4">
+          @for (opt of activityData?.options; track opt; let i = $index) {
+            <button
+              class="plank option-plank rounded-3 px-3 px-md-4 py-2 py-md-3 fw-bold transition-all shadow-sm d-flex flex-column align-items-center"
+              [class.selected-plank]="selectedOption() === i"
+              (click)="selectOption(i)">
+              <span class="plank-text">{{ opt.word }}</span>
+            </button>
+          }
+        </div>
+      }
+    
+      <!-- Action Button -->
+      @if (selectedOption() !== null && !isVerified()) {
+        <div class="mt-4">
+          <button class="btn btn-warning btn-lg rounded-pill px-5 fw-bold shadow-lg" style="transition: transform 0.2s; border: 2px solid #fff;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" (click)="verifyAnswer()">
+            <i class="bi bi-hammer me-2"></i> பாலத்தை இணை! (Verify)
+          </button>
+        </div>
+      }
+    
+      <!-- Feedback -->
+      @if (isVerified()) {
+        <div class="mt-4 animate-slide-up text-center position-relative z-1 mb-5 pb-5">
+          <div class="alert shadow rounded-4 p-4 text-start d-inline-block w-100"
+            [ngClass]="isCorrect() ? 'alert-success' : 'alert-danger'"
+            style="max-width: 600px;">
+            <h4 class="alert-heading mb-2 fw-bold d-flex align-items-center gap-2">
+              <i class="bi" style="font-size: 1.5rem;" [ngClass]="isCorrect() ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
+              {{ isCorrect() ? 'சரியான விடை!' : 'தவறான விடை!' }}
+            </h4>
+            <p class="mb-0 fs-6">{{ activityData?.options[selectedOption()!].explanation }}</p>
           </div>
         </div>
-      </div>
-
-      <!-- Options Pool -->
-      <div class="options-grid d-flex flex-wrap justify-content-center gap-2 gap-md-3 mt-4" *ngIf="!isVerified()">
-        <button *ngFor="let opt of activityData?.options; let i = index"
-                class="plank option-plank rounded-3 px-3 px-md-4 py-2 py-md-3 fw-bold transition-all shadow-sm d-flex flex-column align-items-center"
-                [class.selected-plank]="selectedOption() === i"
-                (click)="selectOption(i)">
-          <span class="plank-text">{{ opt.word }}</span>
-        </button>
-      </div>
-
-      <!-- Action Button -->
-      <div class="mt-4" *ngIf="selectedOption() !== null && !isVerified()">
-        <button class="btn btn-warning btn-lg rounded-pill px-5 fw-bold shadow-lg" style="transition: transform 0.2s; border: 2px solid #fff;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" (click)="verifyAnswer()">
-          <i class="bi bi-hammer me-2"></i> பாலத்தை இணை! (Verify)
-        </button>
-      </div>
-
-      <!-- Feedback -->
-      <div *ngIf="isVerified()" class="mt-4 animate-slide-up text-center position-relative z-1 mb-5 pb-5">
-        <div class="alert shadow rounded-4 p-4 text-start d-inline-block w-100"
-             [ngClass]="isCorrect() ? 'alert-success' : 'alert-danger'"
-             style="max-width: 600px;">
-          <h4 class="alert-heading mb-2 fw-bold d-flex align-items-center gap-2">
-            <i class="bi" style="font-size: 1.5rem;" [ngClass]="isCorrect() ? 'bi-check-circle-fill' : 'bi-x-circle-fill'"></i>
-            {{ isCorrect() ? 'சரியான விடை!' : 'தவறான விடை!' }}
-          </h4>
-          <p class="mb-0 fs-6">{{ activityData?.options[selectedOption()!].explanation }}</p>
-        </div>
-      </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     :host {
       display: flex;

@@ -19,21 +19,32 @@ class CourseController extends Controller
         // Tenant-scoped filtering for students
         if ($user && $user->role === 'student' && $user->tenant_id) {
             $today = now()->toDateString();
-            $query->whereIn('id', function ($q) use ($user, $today) {
-                $q->select('property_packages.course_id')
-                    ->from('property_packages')
-                    ->join('properties', 'property_packages.property_id', '=', 'properties.id')
-                    ->where('properties.tenant_id', $user->tenant_id)
-                    ->where('property_packages.is_active', true)
-                    ->whereNotNull('property_packages.course_id')
-                    ->where(function ($q2) use ($today) {
-                        $q2->whereNull('property_packages.start_date')
-                           ->orWhere('property_packages.start_date', '<=', $today);
-                    })
-                    ->where(function ($q2) use ($today) {
-                        $q2->whereNull('property_packages.end_date')
-                           ->orWhere('property_packages.end_date', '>=', $today);
-                    });
+            
+            $query->where(function ($queryBuilder) use ($user, $today) {
+                // 1. Courses they have access to via their tenant/school
+                $queryBuilder->whereIn('id', function ($q) use ($user, $today) {
+                    $q->select('property_packages.course_id')
+                        ->from('property_packages')
+                        ->join('properties', 'property_packages.property_id', '=', 'properties.id')
+                        ->where('properties.tenant_id', $user->tenant_id)
+                        ->where('property_packages.is_active', true)
+                        ->whereNotNull('property_packages.course_id')
+                        ->where(function ($q2) use ($today) {
+                            $q2->whereNull('property_packages.start_date')
+                               ->orWhere('property_packages.start_date', '<=', $today);
+                        })
+                        ->where(function ($q2) use ($today) {
+                            $q2->whereNull('property_packages.end_date')
+                               ->orWhere('property_packages.end_date', '>=', $today);
+                        });
+                })
+                // 2. Courses they have explicitly purchased (B2C)
+                ->orWhereIn('id', function ($q) use ($user) {
+                    $q->select('course_id')
+                        ->from('user_purchases')
+                        ->where('user_id', $user->id)
+                        ->where('status', 'successful');
+                });
             });
         }
 
@@ -67,6 +78,10 @@ class CourseController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
+            'price' => 'nullable|numeric|min:0',
+            'original_price' => 'nullable|numeric|min:0',
+            'cover_image' => 'nullable|string',
+            'tags' => 'nullable|array',
         ]);
 
         $course = Course::create($validated);
@@ -85,6 +100,10 @@ class CourseController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_active' => 'boolean',
+            'price' => 'nullable|numeric|min:0',
+            'original_price' => 'nullable|numeric|min:0',
+            'cover_image' => 'nullable|string',
+            'tags' => 'nullable|array',
         ]);
 
         $course->update($validated);
@@ -96,6 +115,20 @@ class CourseController extends Controller
     {
         $course->delete();
         return response()->noContent();
+    }
+
+    public function uploadCoverImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+        ]);
+
+        if ($request->file('image')) {
+            $path = $request->file('image')->store('courses/covers', 'public');
+            return response()->json(['url' => asset('storage/' . $path)]);
+        }
+
+        return response()->json(['message' => 'Image upload failed'], 400);
     }
     public function getPlayerStructure(\Illuminate\Http\Request $request, Course $course)
     {
@@ -147,5 +180,30 @@ class CourseController extends Controller
         $structureArray['learning_mode'] = $mode;
 
         return response()->json($structureArray);
+    }
+
+    public function getStorefront(Request $request)
+    {
+        $user = auth('sanctum')->user();
+        
+        $purchasedCourseIds = [];
+        if ($user) {
+            $purchasedCourseIds = \Illuminate\Support\Facades\DB::table('user_purchases')
+                ->where('user_id', $user->id)
+                ->where('status', 'successful')
+                ->pluck('course_id')
+                ->toArray();
+        }
+
+        $courses = Course::where('is_active', true)
+            ->whereNotIn('id', $purchasedCourseIds)
+            ->get()
+            ->map(function ($course) {
+                // Add a default price of 500 for the store if it doesn't exist in DB
+                $course->price = $course->price ?? 500;
+                return $course;
+            });
+
+        return response()->json($courses);
     }
 }

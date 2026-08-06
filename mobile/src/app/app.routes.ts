@@ -33,6 +33,15 @@ export const routes: Routes = [
   // Public Login route
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   
+  // Public Signup route
+  { path: 'signup', loadComponent: () => import('./components/signup/signup').then(m => m.SignupComponent), canActivate: [guestGuard] },
+  
+  // Public Store Landing Page
+  { path: 'public-store', loadComponent: () => import('./components/store/store').then(m => m.StoreComponent) },
+  
+  // Public Course Details
+  { path: 'public-course-details/:id', loadComponent: () => import('./components/course-details/course-details').then(m => m.CourseDetails) },
+  
   // 📱 Mobile Native 5-Tab Navigation Shell
   {
     path: 'tabs',
@@ -44,6 +53,7 @@ export const routes: Routes = [
       { path: 'learn', component: LearnModulesComponent },
       { path: 'games', component: GamesHubComponent },
       { path: 'progress', component: StudentProgressComponent },
+      { path: 'store', loadComponent: () => import('./components/store/store').then(m => m.StoreComponent) },
       { path: 'profile', component: StudentProfileComponent }
     ]
   },

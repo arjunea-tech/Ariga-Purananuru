@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { CoursePackageLevelService } from '../../services/course-package-level';
@@ -12,7 +12,7 @@ import { NotificationService } from '../../services/notification.service';
 @Component({
   selector: 'app-course-package-level',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule],
+  imports: [FormsModule, TranslateModule],
   templateUrl: './course-package-level.html',
   styleUrls: ['./course-package-level.css'],
 })

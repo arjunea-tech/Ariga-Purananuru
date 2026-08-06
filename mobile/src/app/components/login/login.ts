@@ -1,6 +1,6 @@
 import { environment } from '../../../environments/environment';
 import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -10,7 +10,7 @@ import { AuthService } from '../../services/auth';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslateModule, RouterModule],
+  imports: [ReactiveFormsModule, TranslateModule, RouterModule],
   templateUrl: './login.html',
   styleUrls: ['./login.css'],
 })

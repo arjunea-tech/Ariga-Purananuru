@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 export interface ShuffledItem {
   id: string;
@@ -17,7 +17,7 @@ export interface MatchedPair {
 @Component({
   selector: 'app-match-cloud',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './match-cloud.html',
   styleUrls: ['./match-cloud.css']
 })

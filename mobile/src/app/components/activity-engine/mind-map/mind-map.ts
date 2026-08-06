@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 
 export interface MindMapNode {
@@ -29,7 +29,7 @@ interface WorkingNode {
 @Component({
   selector: 'app-activity-mind-map',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './mind-map.html',
   styleUrls: ['./mind-map.css']
 })

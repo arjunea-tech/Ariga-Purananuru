@@ -1,6 +1,6 @@
 import { environment } from '../../../environments/environment';
 import { Component, OnInit, signal, computed, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth';
@@ -33,7 +33,7 @@ interface StudentProgressStats {
 @Component({
   selector: 'app-student-progress',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './student-progress.html',
   styleUrls: ['./student-progress.css']
 })

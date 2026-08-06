@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal, HostListener, computed } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { TranslateModule } from '@ngx-translate/core';
 import { ChapterService, ChapterData } from '../../services/chapter';
 import { LevelService, LevelData } from '../../services/level';
@@ -19,12 +19,11 @@ import {
   selector: 'app-chapter',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     McvInputField,
     McvToggleField,
     TranslateModule
-  ],
+],
   templateUrl: './chapter.html',
   styleUrls: ['./chapter.css'],
 })

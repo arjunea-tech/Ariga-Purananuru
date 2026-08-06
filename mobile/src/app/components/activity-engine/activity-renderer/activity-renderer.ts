@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MCQComponent, MCQData } from '../mcq/mcq';
 import { FillBlanksComponent, FillBlanksData } from '../fill-blanks/fill-blanks';
 import { FlashcardComponent, FlashcardData } from '../flashcard/flashcard';
@@ -98,7 +98,6 @@ export interface NormalizedActivity {
   selector: 'app-activity-renderer',
   standalone: true,
   imports: [
-    CommonModule,
     MCQComponent,
     FillBlanksComponent,
     FlashcardComponent,
@@ -131,7 +130,7 @@ export interface NormalizedActivity {
     YappuAlahiduSpotErrorComponent,
     YappuAlahiduFixThalaiComponent,
     YappuAlahiduTrueFalseComponent
-  ],
+],
   templateUrl: './activity-renderer.html',
   styleUrls: ['./activity-renderer.css']
 })

@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, signal, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 export interface CrosswordWord {
   word: string;
@@ -43,7 +43,7 @@ interface ClueDisplay {
 @Component({
   selector: 'app-activity-crossword',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './crossword.html',
   styleUrls: ['./crossword.css']
 })

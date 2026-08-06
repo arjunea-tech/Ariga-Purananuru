@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, signal, OnChanges, SimpleChanges } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 export interface MCQOption {
   id: number;
@@ -18,7 +18,7 @@ export interface MCQData {
 @Component({
   selector: 'app-activity-mcq',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './mcq.html',
   styleUrls: ['./mcq.css']
 })

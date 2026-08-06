@@ -1,5 +1,5 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { Router, RouterOutlet, RouterLink, RouterLinkActive, NavigationEnd } from '@angular/router';
 import { Location } from '@angular/common';
 import { filter } from 'rxjs/operators';
@@ -28,9 +28,13 @@ import {
   selector: 'app-root',
   standalone: true,
   imports: [
-    CommonModule, RouterOutlet, RouterLink, RouterLinkActive, TranslateModule, 
-    IonApp, IonRouterOutlet
-  ],
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive,
+    TranslateModule,
+    IonApp,
+    IonRouterOutlet
+],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })

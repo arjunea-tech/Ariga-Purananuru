@@ -5,20 +5,24 @@
       <i class="bi bi-search me-1"></i>
       <span>அசை பிழை திருத்துதல் (Asai Detective)</span>
     </div>
-    
+
     <div class="stats-pills">
       <div class="stat-pill score">
         <i class="bi bi-star-fill text-warning me-1"></i>
         <span>{{ score() }}</span>
       </div>
-      <div class="stat-pill progress-pill" *ngIf="challenges().length > 0">
-        <i class="bi bi-card-checklist me-1"></i>
-        <span>{{ currentIndex() + 1 }} / {{ challenges().length }}</span>
-      </div>
-      <div class="stat-pill streak" *ngIf="streak() > 0">
-        <i class="bi bi-lightning-charge-fill me-1"></i>
-        <span>{{ streak() }} 🔥</span>
-      </div>
+      @if (challenges().length > 0) {
+        <div class="stat-pill progress-pill">
+          <i class="bi bi-card-checklist me-1"></i>
+          <span>{{ currentIndex() + 1 }} / {{ challenges().length }}</span>
+        </div>
+      }
+      @if (streak() > 0) {
+        <div class="stat-pill streak">
+          <i class="bi bi-lightning-charge-fill me-1"></i>
+          <span>{{ streak() }} 🔥</span>
+        </div>
+      }
     </div>
   </div>
 
@@ -31,57 +35,61 @@
   </div>
 
   <!-- Target Word Hero Card -->
-  <div class="word-hero-card" *ngIf="currentChallenge() as challenge">
-    <div class="word-badge">🔍 சவால் சொல் (Target Word)</div>
-    <div class="hero-word">{{ challenge.word }}</div>
-  </div>
+  @if (currentChallenge(); as challenge) {
+    <div class="word-hero-card">
+      <div class="word-badge">🔍 சவால் சொல் (Target Word)</div>
+      <div class="hero-word">{{ challenge.word }}</div>
+    </div>
+  }
 
   <!-- Options Selector Grid (Card Style with A, B, C, D Badges) -->
-  <div class="options-container" *ngIf="currentChallenge() as challenge">
-    <button 
-      *ngFor="let opt of challenge.options; let idx = index"
-      class="option-card hover-lift"
-      [class.selected]="challenge.selectedOptionIndex === idx"
-      [class.correct]="challenge.isAnswered && opt.isCorrect"
-      [class.incorrect]="challenge.isAnswered && challenge.selectedOptionIndex === idx && !opt.isCorrect"
-      [disabled]="challenge.isAnswered"
-      (click)="selectOption(idx)">
-      
-      <div class="option-badge">
-        {{ idx === 0 ? 'A' : (idx === 1 ? 'B' : (idx === 2 ? 'C' : 'D')) }}
-      </div>
-
-      <div class="option-content">
-        <span class="option-split-text">{{ opt.label }}</span>
-        
-        <i class="bi status-icon" 
-          *ngIf="challenge.isAnswered"
-          [class.bi-check-circle-fill]="opt.isCorrect"
-          [class.bi-x-circle-fill]="challenge.selectedOptionIndex === idx && !opt.isCorrect"
-          [class.text-success]="opt.isCorrect"
-          [class.text-danger]="challenge.selectedOptionIndex === idx && !opt.isCorrect">
-        </i>
-      </div>
-    </button>
-  </div>
+  @if (currentChallenge(); as challenge) {
+    <div class="options-container">
+      @for (opt of challenge.options; track opt; let idx = $index) {
+        <button
+          class="option-card hover-lift"
+          [class.selected]="challenge.selectedOptionIndex === idx"
+          [class.correct]="challenge.isAnswered && opt.isCorrect"
+          [class.incorrect]="challenge.isAnswered && challenge.selectedOptionIndex === idx && !opt.isCorrect"
+          [disabled]="challenge.isAnswered"
+          (click)="selectOption(idx)">
+          <div class="option-badge">
+            {{ idx === 0 ? 'A' : (idx === 1 ? 'B' : (idx === 2 ? 'C' : 'D')) }}
+          </div>
+          <div class="option-content">
+            <span class="option-split-text">{{ opt.label }}</span>
+            @if (challenge.isAnswered) {
+              <i class="bi status-icon"
+                [class.bi-check-circle-fill]="opt.isCorrect"
+                [class.bi-x-circle-fill]="challenge.selectedOptionIndex === idx && !opt.isCorrect"
+                [class.text-success]="opt.isCorrect"
+                [class.text-danger]="challenge.selectedOptionIndex === idx && !opt.isCorrect">
+              </i>
+            }
+          </div>
+        </button>
+      }
+    </div>
+  }
 
   <!-- Explanation & Feedback Alert Card -->
-  <div class="feedback-card mt-4" *ngIf="currentChallenge()?.isAnswered">
-    <div class="alert-box" [class.alert-success-box]="currentChallenge()?.isCorrect" [class.alert-danger-box]="!currentChallenge()?.isCorrect">
-      <h5 class="alert-heading mb-2">
-        <i class="bi" [class.bi-check-circle-fill]="currentChallenge()?.isCorrect" [class.bi-exclamation-octagon-fill]="!currentChallenge()?.isCorrect"></i>
-        {{ currentChallenge()?.isCorrect ? 'அற்புதம்! சரியான அசை பிரிப்பைக் கண்டுபிடித்துவிட்டீர்கள்!' : 'பிழையான விடை!' }}
-      </h5>
-      <p class="explanation-text mb-0">
-        {{ currentChallenge()?.explanation }}
-      </p>
+  @if (currentChallenge()?.isAnswered) {
+    <div class="feedback-card mt-4">
+      <div class="alert-box" [class.alert-success-box]="currentChallenge()?.isCorrect" [class.alert-danger-box]="!currentChallenge()?.isCorrect">
+        <h5 class="alert-heading mb-2">
+          <i class="bi" [class.bi-check-circle-fill]="currentChallenge()?.isCorrect" [class.bi-exclamation-octagon-fill]="!currentChallenge()?.isCorrect"></i>
+          {{ currentChallenge()?.isCorrect ? 'அற்புதம்! சரியான அசை பிரிப்பைக் கண்டுபிடித்துவிட்டீர்கள்!' : 'பிழையான விடை!' }}
+        </h5>
+        <p class="explanation-text mb-0">
+          {{ currentChallenge()?.explanation }}
+        </p>
+      </div>
+      <!-- Next Question Button -->
+      <div class="next-action text-center mt-3">
+        <button class="btn btn-next hover-lift" (click)="nextChallenge()">
+          <span>அடுத்த வினா 🚀</span>
+        </button>
+      </div>
     </div>
-
-    <!-- Next Question Button -->
-    <div class="next-action text-center mt-3">
-      <button class="btn btn-next hover-lift" (click)="nextChallenge()">
-        <span>அடுத்த வினா 🚀</span>
-      </button>
-    </div>
-  </div>
+  }
 </div>

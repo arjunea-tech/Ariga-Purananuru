@@ -1,10 +1,10 @@
 <div class="container py-4">
   <div class="row justify-content-center">
     <div class="col-12 col-xl-8">
-      
+
       <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
         <div class="card-body p-4 p-sm-5">
-          
+
           <div class="d-flex align-items-center gap-3 mb-4">
             <div class="bg-primary bg-opacity-10 rounded-3 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 56px; height: 56px;">
               <i class="bi bi-cloud-arrow-up text-primary fs-3"></i>
@@ -27,7 +27,7 @@
           <div class="mb-4">
             <div class="border border-2 border-secondary border-opacity-25 rounded-4 p-5 text-center position-relative" style="border-style: dashed !important; background-color: rgba(0,0,0,0.02);">
               <i class="bi bi-file-earmark-arrow-up text-secondary opacity-50 display-4 mb-3 d-block"></i>
-              
+
               <div class="d-flex justify-content-center">
                 <label for="file-upload" class="btn btn-outline-primary fw-medium px-4 position-relative" style="cursor: pointer;">
                   <span>Select a JSON file</span>
@@ -35,30 +35,38 @@
                 </label>
               </div>
               <p class="small text-secondary mt-3 mb-0">Only Sangam Schema JSON files supported</p>
-              
-              <div *ngIf="selectedFile" class="mt-4">
-                <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 fs-6 fw-medium d-inline-flex align-items-center gap-2">
-                  <i class="bi bi-check-circle-fill"></i>
-                  Selected: {{selectedFile.name}}
-                </span>
-              </div>
+
+              @if (selectedFile) {
+                <div class="mt-4">
+                  <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3 py-2 fs-6 fw-medium d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Selected: {{selectedFile.name}}
+                  </span>
+                </div>
+              }
             </div>
           </div>
 
           <button (click)="uploadData()" [disabled]="!selectedFile || loading"
             class="btn w-100 fw-bold py-3 rounded-3 shadow-sm d-flex justify-content-center align-items-center gap-2 transition-all"
             [ngClass]="{'btn-warning text-dark': uploadMode === 'qa', 'btn-primary text-white': uploadMode === 'poem'}">
-            <span *ngIf="!loading">Upload and Index Dataset</span>
-            <div *ngIf="loading" class="d-flex align-items-center gap-2">
-              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-              Indexing...
-            </div>
+            @if (!loading) {
+              <span>Upload and Index Dataset</span>
+            }
+            @if (loading) {
+              <div class="d-flex align-items-center gap-2">
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                Indexing...
+              </div>
+            }
           </button>
 
-          <div *ngIf="message" class="alert mt-4 mb-0 d-flex align-items-center gap-2 shadow-sm border-0" [ngClass]="isError ? 'alert-danger' : 'alert-success bg-success bg-opacity-10 text-success'" role="alert">
-            <i class="bi fs-5" [ngClass]="isError ? 'bi-exclamation-triangle-fill text-danger' : 'bi-check-circle-fill text-success'"></i>
-            <div class="fw-medium">{{message}}</div>
-          </div>
+          @if (message) {
+            <div class="alert mt-4 mb-0 d-flex align-items-center gap-2 shadow-sm border-0" [ngClass]="isError ? 'alert-danger' : 'alert-success bg-success bg-opacity-10 text-success'" role="alert">
+              <i class="bi fs-5" [ngClass]="isError ? 'bi-exclamation-triangle-fill text-danger' : 'bi-check-circle-fill text-success'"></i>
+              <div class="fw-medium">{{message}}</div>
+            </div>
+          }
 
         </div>
       </div>

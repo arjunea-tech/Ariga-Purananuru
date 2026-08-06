@@ -20,6 +20,7 @@ export class StudentTabsComponent {
     { id: 'learn', label: 'Learn', icon: 'bi-book-half', route: '/tabs/learn', color: '#10B981' }, /* Emerald Green */
     { id: 'games', label: 'Practice', icon: 'bi-controller', route: '/tabs/games', color: '#F59E0B' }, /* Bright Amber/Orange */
     { id: 'progress', label: 'Progress', icon: 'bi-bar-chart-line-fill', route: '/tabs/progress', color: '#8B5CF6' }, /* Soft Purple */
+    { id: 'store', label: 'Store', icon: 'bi-shop', route: '/tabs/store', color: '#6366F1' }, /* Indigo */
     { id: 'profile', label: 'Profile', icon: 'bi-person-circle', route: '/tabs/profile', color: '#F43F5E' } /* Bright Rose */
   ];
 
@@ -34,6 +35,7 @@ export class StudentTabsComponent {
       if (urlWithoutParams.includes('/learn')) this.activeTab.set('learn');
       else if (urlWithoutParams.includes('/games')) this.activeTab.set('games');
       else if (urlWithoutParams.includes('/progress')) this.activeTab.set('progress');
+      else if (urlWithoutParams.includes('/store')) this.activeTab.set('store');
       else if (urlWithoutParams.includes('/profile')) this.activeTab.set('profile');
       else this.activeTab.set('home');
 
@@ -86,7 +88,7 @@ export class StudentTabsComponent {
 
     // Detect horizontal swipes only if horizontal displacement is greater than vertical
     if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 60) {
-      const order = ['home', 'learn', 'games', 'progress', 'profile'];
+      const order = ['home', 'learn', 'games', 'progress', 'store', 'profile'];
       const currentIdx = order.findIndex(id => id.toLowerCase() === this.activeTab().toLowerCase());
 
       if (diffX < 0) {
@@ -113,7 +115,7 @@ export class StudentTabsComponent {
       
       // Determine animation direction if not provided by swipe
       if (!animationDir) {
-        const order = ['home', 'learn', 'games', 'progress', 'profile'];
+        const order = ['home', 'learn', 'games', 'progress', 'store', 'profile'];
         const currentIdx = order.findIndex(id => id.toLowerCase() === this.activeTab().toLowerCase());
         const targetIdx = order.findIndex(id => id.toLowerCase() === tab.id.toLowerCase());
         animationDir = targetIdx > currentIdx ? 'slide-left' : 'slide-right';

@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { AudioService } from '../../../services/audio.service';
 
 export interface EluthuDetectiveChallenge {
@@ -18,7 +18,7 @@ export interface EluthuDetectiveChallenge {
 @Component({
   selector: 'app-eluthu-detective',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './eluthu-detective.html',
   styleUrls: ['./eluthu-detective.css']
 })

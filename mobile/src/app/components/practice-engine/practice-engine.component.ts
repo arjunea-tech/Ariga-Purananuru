@@ -291,7 +291,7 @@ export class PracticeEngineComponent implements OnInit {
         else if (detectedMod === 'seer') this.activeTab = 'seer';
         else if (detectedMod === 'thalai') this.activeTab = 'thalai';
         else if (detectedMod === 'alagidhal') this.activeTab = 'alahidu';
-        else this.activeTab = 'eluthu';
+        else this.activeTab = 'empty';
         this.practiceType = this.activeTab;
       } else {
         // When All Modules is selected, pick activeTab dynamically based on game type
@@ -302,7 +302,7 @@ export class PracticeEngineComponent implements OnInit {
         } else if (mode === 'mistake' || mode === 'speed') {
           this.activeTab = 'seer';
         } else {
-          this.activeTab = 'eluthu';
+          this.activeTab = 'empty';
         }
         this.practiceType = this.activeTab;
       }

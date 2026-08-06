@@ -73,6 +73,10 @@ export class StudentProgressComponent implements OnInit {
     this.router.navigate(['/tabs/home']);
   }
 
+  goToStore(): void {
+    this.router.navigate(['/tabs/store']);
+  }
+
   loadingMyProgress = signal<boolean>(true);
 
   // Dynamic Progress Signals

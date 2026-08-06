@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 export interface WordArrangeData {
   type: string;
@@ -11,7 +11,7 @@ export interface WordArrangeData {
 @Component({
   selector: 'app-activity-word-arrange',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './word-arrange.html',
   styleUrls: ['./word-arrange.css']
 })

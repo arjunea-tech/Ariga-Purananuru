@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { TranslateModule } from '@ngx-translate/core';
 import { LearningModeService, LearningModeData } from '../../services/learning-mode';
 import { NotificationService } from '../../services/notification.service';
@@ -14,13 +14,12 @@ import {
   selector: 'app-learning-mode',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     McvInputField,
     McvTextArea,
     McvToggleField,
     TranslateModule
-  ],
+],
   templateUrl: './learning-mode.html',
   styleUrls: ['./learning-mode.css'],
 })

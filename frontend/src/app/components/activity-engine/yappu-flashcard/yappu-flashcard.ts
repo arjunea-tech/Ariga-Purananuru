@@ -1,11 +1,11 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { TamilNLPService } from '../../../services/tamil-nlp.service';
 
 @Component({
   selector: 'app-yappu-flashcard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './yappu-flashcard.html',
   styleUrls: ['./yappu-flashcard.css']
 })

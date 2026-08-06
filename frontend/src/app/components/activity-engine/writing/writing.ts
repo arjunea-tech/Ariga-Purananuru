@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal, computed } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 
 export interface WritingData {
@@ -16,7 +16,7 @@ export interface WritingData {
 @Component({
   selector: 'app-activity-writing',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
   templateUrl: './writing.html',
   styleUrls: ['./writing.css']
 })

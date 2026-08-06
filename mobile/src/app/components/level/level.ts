@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+
 import { TranslateModule } from '@ngx-translate/core';
 import { LevelService, LevelData } from '../../services/level';
 import { NotificationService } from '../../services/notification.service';
@@ -15,13 +15,12 @@ import {
   selector: 'app-level',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     McvInputField,
     McvTextArea,
     McvToggleField,
     TranslateModule
-  ],
+],
   templateUrl: './level.html',
   styleUrls: ['./level.css'],
 })

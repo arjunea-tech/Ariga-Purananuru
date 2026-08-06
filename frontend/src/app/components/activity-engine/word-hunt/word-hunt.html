@@ -4,10 +4,10 @@
   </div>
 
   <!-- Dynamic grid columns using css variable -->
-  <div class="hunt-grid w-100 mb-4" 
-       [style.grid-template-columns]="'repeat(' + (activity?.gridSize || 2) + ', 1fr)'">
+  <div class="hunt-grid w-100 mb-4"
+    [style.grid-template-columns]="'repeat(' + (activity?.gridSize || 2) + ', 1fr)'">
     @for (box of dynamicBoxes(); track $index; let idx = $index) {
-      <button 
+      <button
         type="button"
         class="hunt-cell d-flex align-items-center justify-content-center rounded-4 border font-bold"
         [class.selected]="selectedIndices().has(idx)"
@@ -17,14 +17,16 @@
         [disabled]="showFeedback && hasSubmitted()"
         (click)="toggleSelect(idx)">
         <span class="cell-text">{{ box.text }}</span>
-        
-        <div class="cell-feedback" *ngIf="showFeedback && hasSubmitted()">
-          @if (box.isCorrect) {
-            <i class="bi bi-check-circle-fill text-success fs-5"></i>
-          } @else if (selectedIndices().has(idx)) {
-            <i class="bi bi-x-circle-fill text-danger fs-5"></i>
-          }
-        </div>
+
+        @if (showFeedback && hasSubmitted()) {
+          <div class="cell-feedback">
+            @if (box.isCorrect) {
+              <i class="bi bi-check-circle-fill text-success fs-5"></i>
+            } @else if (selectedIndices().has(idx)) {
+              <i class="bi bi-x-circle-fill text-danger fs-5"></i>
+            }
+          </div>
+        }
       </button>
     }
   </div>
@@ -32,8 +34,8 @@
   <div class="word-hunt-actions w-100 d-flex flex-column gap-3">
     <div class="w-100 d-flex justify-content-center gap-3">
       @if (!hasSubmitted()) {
-        <button 
-          type="button" 
+        <button
+          type="button"
           class="btn btn-primary btn-lg rounded-pill px-5 py-3 shadow border-0 text-white font-semibold flex-grow-1"
           style="transition: all 0.3s ease; background: linear-gradient(135deg, #3b82f6, #2563eb);"
           [disabled]="selectedIndices().size === 0"
@@ -41,8 +43,8 @@
           Check Answer
         </button>
       } @else {
-        <button 
-          type="button" 
+        <button
+          type="button"
           class="btn btn-outline-secondary btn-lg rounded-pill px-5 py-3 flex-grow-1"
           (click)="reset()">
           Retry

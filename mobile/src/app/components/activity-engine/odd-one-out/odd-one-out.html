@@ -3,65 +3,67 @@
   <div class="mb-4 text-center">
     <div class="d-flex align-items-center justify-content-center mb-3 flex-wrap gap-2">
       @if (activity?.audioUrl) {
-      <button type="button"
-        class="btn btn-primary d-flex align-items-center gap-2 rounded-pill px-4 py-2 border-0 shadow-sm text-white font-semibold"
-        style="transition: all 0.3s ease; background: linear-gradient(135deg, #6366f1, #3b82f6); font-size: 0.85rem;"
-        [class.opacity-75]="isPlaying()" (click)="playAudio()">
-        @if (isPlaying()) {
-        <span class="spinner-grow spinner-grow-sm text-white" role="status" aria-hidden="true"
-          style="width: 0.8rem; height: 0.8rem;"></span>
-        <span>Playing...</span>
-        } @else {
-        <i class="bi bi-volume-up-fill text-white fs-6"></i>
-        <span>Listen Audio</span>
-        }
-      </button>
+        <button type="button"
+          class="btn btn-primary d-flex align-items-center gap-2 rounded-pill px-4 py-2 border-0 shadow-sm text-white font-semibold"
+          style="transition: all 0.3s ease; background: linear-gradient(135deg, #6366f1, #3b82f6); font-size: 0.85rem;"
+          [class.opacity-75]="isPlaying()" (click)="playAudio()">
+          @if (isPlaying()) {
+            <span class="spinner-grow spinner-grow-sm text-white" role="status" aria-hidden="true"
+            style="width: 0.8rem; height: 0.8rem;"></span>
+            <span>Playing...</span>
+          } @else {
+            <i class="bi bi-volume-up-fill text-white fs-6"></i>
+            <span>Listen Audio</span>
+          }
+        </button>
       }
     </div>
     <h3 class="fw-bold text-dark m-0 mt-2 fs-3"
       style="line-height: 1.5; text-shadow: 0px 4px 10px rgba(255,255,255,0.8), 0px 8px 30px rgba(255,255,255,0.9);"
-      [innerHTML]="activity?.question"></h3>
+    [innerHTML]="activity?.question"></h3>
   </div>
 
   <div class="odd-cards-grid w-100 mb-2">
     @for (option of activity?.options; track option.id; let idx = $index) {
-    <button type="button"
-      class="odd-card-btn d-flex flex-column align-items-center justify-content-center border rounded-4 p-4 position-relative"
-      [class.selected]="selectedOptionId() === option.id"
-      [class.correct]="showFeedback && hasSubmitted() && option.isCorrect"
-      [class.incorrect]="showFeedback && hasSubmitted() && selectedOptionId() === option.id && !option.isCorrect"
-      [class.shake]="showFeedback && hasSubmitted() && selectedOptionId() === option.id && !option.isCorrect"
-      [class.bounce]="showFeedback && hasSubmitted() && option.isCorrect && selectedOptionId() === option.id"
-      [disabled]="showFeedback && hasSubmitted()" (click)="selectOption(option)">
+      <button type="button"
+        class="odd-card-btn d-flex flex-column align-items-center justify-content-center border rounded-4 p-4 position-relative"
+        [class.selected]="selectedOptionId() === option.id"
+        [class.correct]="showFeedback && hasSubmitted() && option.isCorrect"
+        [class.incorrect]="showFeedback && hasSubmitted() && selectedOptionId() === option.id && !option.isCorrect"
+        [class.shake]="showFeedback && hasSubmitted() && selectedOptionId() === option.id && !option.isCorrect"
+        [class.bounce]="showFeedback && hasSubmitted() && option.isCorrect && selectedOptionId() === option.id"
+        [disabled]="showFeedback && hasSubmitted()" (click)="selectOption(option)">
 
-      <!-- Letter indicator badge on top-left -->
-      <span
-        class="odd-card-badge position-absolute top-0 start-0 m-2 badge rounded-pill bg-light text-secondary border">
-        {{ getLetter(idx) }}
-      </span>
+        <!-- Letter indicator badge on top-left -->
+        <span
+          class="odd-card-badge position-absolute top-0 start-0 m-2 badge rounded-pill bg-light text-secondary border">
+          {{ getLetter(idx) }}
+        </span>
 
-      <!-- State Icon top-right -->
-      <div class="position-absolute top-0 end-0 m-2 fs-5" *ngIf="showFeedback && hasSubmitted()">
-        @if (option.isCorrect) {
-        <i class="bi bi-check-circle-fill text-success"></i>
-        } @else if (selectedOptionId() === option.id) {
-        <i class="bi bi-x-circle-fill text-danger"></i>
+        <!-- State Icon top-right -->
+        @if (showFeedback && hasSubmitted()) {
+          <div class="position-absolute top-0 end-0 m-2 fs-5">
+            @if (option.isCorrect) {
+              <i class="bi bi-check-circle-fill text-success"></i>
+            } @else if (selectedOptionId() === option.id) {
+              <i class="bi bi-x-circle-fill text-danger"></i>
+            }
+          </div>
         }
-      </div>
 
-      <span class="odd-card-text fw-bold text-dark mb-0">{{ option.text }}</span>
-    </button>
+        <span class="odd-card-text fw-bold text-dark mb-0">{{ option.text }}</span>
+      </button>
     }
   </div>
 
   <!-- Expandable Explanation Block -->
   @if (showFeedback && hasSubmitted() && activity && activity.explanation) {
-  <div class="animate-fade-in mt-4 rounded-3 p-4 bg-warning bg-opacity-10 border-start border-4 border-warning w-100">
-    <div class="d-flex align-items-center gap-2 fw-bold text-warning mb-2" style="font-size: 0.9rem;">
-      <i class="bi bi-info-circle-fill"></i>
-      <span>Explanation</span>
+    <div class="animate-fade-in mt-4 rounded-3 p-4 bg-warning bg-opacity-10 border-start border-4 border-warning w-100">
+      <div class="d-flex align-items-center gap-2 fw-bold text-warning mb-2" style="font-size: 0.9rem;">
+        <i class="bi bi-info-circle-fill"></i>
+        <span>Explanation</span>
+      </div>
+      <p class="m-0" style="color: #451a03; font-size: 0.925rem; line-height: 1.5;">{{ activity.explanation }}</p>
     </div>
-    <p class="m-0" style="color: #451a03; font-size: 0.925rem; line-height: 1.5;">{{ activity.explanation }}</p>
-  </div>
   }
 </div>

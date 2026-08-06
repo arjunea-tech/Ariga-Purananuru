@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, OnChanges, SimpleChanges, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 export interface DialogueLine {
   role: 'system' | 'student';
@@ -27,7 +27,7 @@ interface RenderedBubble {
 @Component({
   selector: 'app-activity-role-play',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './role-play.html',
   styleUrls: ['./role-play.css']
 })

@@ -252,26 +252,35 @@
         <div class="card border-0 shadow-sm p-3 mb-3">
           <h2 class="h6 fw-bold text-dark mb-3">Modules Progress</h2>
           
-          <div class="d-flex flex-column gap-3">
-            @for (mod of moduleProgressList(); track mod.id) {
-              <div [class.opacity-50]="!mod.isUnlocked">
-                <div class="d-flex align-items-center justify-content-between mb-1">
-                  <span class="small fw-bold text-dark d-flex align-items-center gap-2">
-                    <span class="module-mini-dot" [style.background]="mod.color"></span>
-                    {{ mod.nameTa }} @if (mod.nameEn) { ({{ mod.nameEn }}) }
-                  </span>
-                  <span class="small fw-bold" [style.color]="mod.isUnlocked ? mod.color : '#64748b'">
-                    {{ mod.isUnlocked ? (mod.percentage + '%') : 'Locked' }}
-                  </span>
+          @if (moduleProgressList().length === 0) {
+            <div class="text-center py-4 px-2">
+              <i class="bi bi-cart-x fs-1 text-muted mb-2 d-block"></i>
+              <h6 class="fw-bold text-secondary">No Courses Enrolled</h6>
+              <p class="small text-muted mb-3">You haven't bought any courses yet. Visit the store to unlock your learning journey!</p>
+              <button class="btn btn-sm btn-primary rounded-pill px-3" (click)="goToStore()">Browse Store</button>
+            </div>
+          } @else {
+            <div class="d-flex flex-column gap-3">
+              @for (mod of moduleProgressList(); track mod.id) {
+                <div [class.opacity-50]="!mod.isUnlocked">
+                  <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="small fw-bold text-dark d-flex align-items-center gap-2">
+                      <span class="module-mini-dot" [style.background]="mod.color"></span>
+                      {{ mod.nameTa }} @if (mod.nameEn) { ({{ mod.nameEn }}) }
+                    </span>
+                    <span class="small fw-bold" [style.color]="mod.isUnlocked ? mod.color : '#64748b'">
+                      {{ mod.isUnlocked ? (mod.percentage + '%') : 'Locked' }}
+                    </span>
+                  </div>
+                  <div class="progress" style="height: 6px;">
+                    <div class="progress-bar rounded-pill transition-all"
+                         [style.width.%]="mod.percentage"
+                         [style.background]="mod.isUnlocked ? mod.color : '#cbd5e1'"></div>
+                  </div>
                 </div>
-                <div class="progress" style="height: 6px;">
-                  <div class="progress-bar rounded-pill transition-all"
-                       [style.width.%]="mod.percentage"
-                       [style.background]="mod.isUnlocked ? mod.color : '#cbd5e1'"></div>
-                </div>
-              </div>
-            }
-          </div>
+              }
+            </div>
+          }
         </div>
 
         <!-- Weekly Activity Bar Chart Section -->

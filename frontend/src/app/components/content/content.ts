@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, HostListener, computed, Pipe, PipeTransform } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { DomSanitizer } from '@angular/platform-browser';
-import { CommonModule } from '@angular/common';
+
 import { TranslateModule } from '@ngx-translate/core';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -38,7 +38,6 @@ import {
   selector: 'app-content',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     FormsModule,
     McvInputField,
@@ -46,7 +45,7 @@ import {
     TranslateModule,
     SafeHtmlPipe,
     ActivityRenderer
-  ],
+],
   templateUrl: './content.html',
   styleUrls: ['./content.css'],
 })

@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { AudioService } from '../../../services/audio.service';
 
 export interface KuralItem {
@@ -20,7 +20,7 @@ export interface SeerCard {
 @Component({
   selector: 'app-yappu-kural-puzzle',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './yappu-kural-puzzle.html',
   styleUrls: ['./yappu-kural-puzzle.css']
 })

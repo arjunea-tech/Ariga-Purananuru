@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { TamilNLPService } from '../../../services/tamil-nlp.service';
 import { AudioService } from '../../../services/audio.service';
 
@@ -32,7 +32,7 @@ export interface DetectiveChallenge {
 @Component({
   selector: 'app-yappu-asai-detective',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './yappu-asai-detective.html',
   styleUrls: ['./yappu-asai-detective.css']
 })

@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 export interface OddOption {
   id: number;
@@ -18,7 +18,7 @@ export interface OddOneOutData {
 @Component({
   selector: 'app-activity-odd-one-out',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './odd-one-out.html',
   styleUrls: ['./odd-one-out.css']
 })

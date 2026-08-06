@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatchCloudComponent } from './match-cloud/match-cloud';
 import { MatchStandardComponent } from './match-standard/match-standard';
 
@@ -35,7 +35,7 @@ interface MatchedPair {
 @Component({
   selector: 'app-activity-match',
   standalone: true,
-  imports: [CommonModule, MatchCloudComponent, MatchStandardComponent],
+  imports: [MatchCloudComponent, MatchStandardComponent],
   templateUrl: './match.html',
   styleUrls: ['./match.css']
 })

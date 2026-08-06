@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 
 export interface SequencingData {
   id?: number;
@@ -16,7 +16,7 @@ interface RenderedEvent {
 @Component({
   selector: 'app-activity-sequencing',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './sequencing.html',
   styleUrls: ['./sequencing.css']
 })

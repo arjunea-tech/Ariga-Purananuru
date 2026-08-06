@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { AudioService } from '../../../services/audio.service';
 
 export interface ThalaiItem {
@@ -25,7 +25,7 @@ export interface ThalaiOption {
 @Component({
   selector: 'app-yappu-thalai',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './yappu-thalai.html',
   styleUrls: ['./yappu-thalai.css']
 })

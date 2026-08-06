@@ -1,5 +1,5 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, OnDestroy, SimpleChanges, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { AudioService } from '../../../services/audio.service';
 import { Seer, SEERS_2, SEERS_3, ALL_SEERS, getSeersData } from '../yappu-seer-data';
 import { ActivityService } from '../../../services/activity.service';
@@ -7,7 +7,7 @@ import { ActivityService } from '../../../services/activity.service';
 @Component({
   selector: 'app-yappu-seer-match',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './yappu-seer-match.html',
   styleUrls: ['./yappu-seer-match.css']
 })

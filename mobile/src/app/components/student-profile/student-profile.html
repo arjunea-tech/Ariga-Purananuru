@@ -3,9 +3,9 @@
   <header class="page-header pink-theme">
     <div class="header-content d-flex align-items-center justify-content-between w-100">
       <div class="d-flex align-items-center gap-2 flex-grow-1" style="min-width: 0;">
-        <button class="btn p-0 border-0 flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center shadow-sm" 
-                style="width: 38px; height: 38px; background: rgba(190, 24, 93, 0.1); color: #BE185D;" 
-                (click)="goBackToHome()">
+        <button class="btn p-0 border-0 flex-shrink-0 rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+          style="width: 38px; height: 38px; background: rgba(190, 24, 93, 0.1); color: #BE185D;"
+          (click)="goBackToHome()">
           <i class="bi bi-chevron-left" style="font-size: 1.2rem; stroke-width: 2px;"></i>
         </button>
         <h1 class="page-title text-truncate mb-0" style="font-size: 1.15rem; flex: 1; min-width: 0;">
@@ -29,756 +29,733 @@
   }
 
   @if (!isLoading()) {
-  <div class="container-fluid px-3 py-3">
+    <div class="container-fluid px-3 py-3">
 
-    <!-- User Avatar & Identity Card -->
-    <div class="user-card card border-0 shadow-sm p-3 mb-3 text-center">
-      <div class="mx-auto mb-2 position-relative d-inline-block">
-        @if (userAvatar()) {
-          <img [src]="userAvatar()" alt="User Avatar" class="rounded-circle shadow-sm border border-3 border-light bg-light" style="width: 85px; height: 85px; object-fit: contain;">
-        } @else {
-          <div class="rounded-circle shadow-sm border border-3 border-light bg-light d-flex align-items-center justify-content-center fw-bold" style="width: 85px; height: 85px; font-size: 3rem; color: #BE185D;">
-            {{ (userName() || 'S').charAt(0).toUpperCase() }}
-          </div>
-        }
-        <button class="btn btn-primary rounded-circle position-absolute bottom-0 end-0 p-1 shadow-sm d-flex align-items-center justify-content-center"
-                style="width: 28px; height: 28px; border: 2px solid white;" (click)="onMenuClick({id: 'personal_info'})" title="Edit Profile">
-          <i class="bi bi-pencil-fill" style="font-size: 0.7rem;"></i>
-        </button>
-      </div>
-      <h2 class="h5 fw-bold text-dark mb-1">{{ userName() || 'மாணவர்' }}</h2>
-      <p class="small text-muted mb-2">{{ userRole() }}</p>
-
-      @if (xpPoints() > 0) {
-        <div class="xp-badge bg-warning-subtle text-warning-emphasis d-inline-flex align-items-center gap-1 mx-auto px-3 py-1 rounded-pill fw-bold small">
-          <span>⭐ {{ xpPoints() | number }} XP</span>
-        </div>
-      } @else {
-        <div class="xp-badge bg-light text-muted d-inline-flex align-items-center gap-1 mx-auto px-3 py-1 rounded-pill fw-semibold small">
-          <span>⭐ 0 XP — Start learning!</span>
-        </div>
-      }
-    </div>
-
-    <!-- Achievements Section — only earned badges -->
-    <div class="card border-0 shadow-sm p-3 mb-3">
-      <div class="d-flex align-items-center justify-content-between mb-3">
-        <h3 class="h6 fw-bold text-dark mb-0">Achievements</h3>
-        <span class="small text-muted">{{ earnedBadges().length }} Earned</span>
-      </div>
-
-      @if (earnedBadges().length > 0) {
-        <div class="achievements-row d-flex align-items-center gap-2 overflow-x-auto pb-1">
-          @for (ach of earnedBadges(); track ach.name) {
-            <div class="achievement-chip d-flex flex-column align-items-center text-center p-2 rounded-3 cursor-pointer hover-lift transition-all"
-                 [style.background-color]="ach.bg + '18'"
-                 (click)="openBadgeModal(ach)"
-                 title="Click to view achievement details!">
-              <span class="fs-4 mb-1 animate-bounce">{{ ach.icon }}</span>
-              <span class="chip-title fw-semibold text-dark">{{ ach.name }}</span>
+      <!-- User Avatar & Identity Card -->
+      <div class="user-card card border-0 shadow-sm p-3 mb-3 text-center">
+        <div class="mx-auto mb-2 position-relative d-inline-block">
+          @if (userAvatar()) {
+            <img [src]="userAvatar()" alt="User Avatar" class="rounded-circle shadow-sm border border-3 border-light bg-light" style="width: 85px; height: 85px; object-fit: contain;">
+          } @else {
+            <div class="rounded-circle shadow-sm border border-3 border-light bg-light d-flex align-items-center justify-content-center fw-bold" style="width: 85px; height: 85px; font-size: 3rem; color: #BE185D;">
+              {{ (userName() || 'S').charAt(0).toUpperCase() }}
             </div>
           }
-        </div>
-      } @else {
-        <div class="text-center py-3">
-          <i class="bi bi-trophy text-muted" style="font-size: 2.5rem; opacity: 0.3;"></i>
-          <p class="small text-muted mt-2 mb-0">Complete chapters to earn badges!</p>
-        </div>
-      }
-    </div>
-
-    <!-- Quick Stats Row -->
-    <div class="card border-0 shadow-sm p-3 mb-3">
-      <h3 class="h6 fw-bold text-dark mb-3">Quick Stats</h3>
-      <div class="row g-2 text-center">
-        <div class="col-4">
-          <div class="bg-primary bg-opacity-10 rounded-3 p-2">
-            <div class="fw-bold text-primary fs-5">{{ streakDays() }}</div>
-            <div class="small text-muted" style="font-size: 0.7rem;">🔥 Streak</div>
-          </div>
-        </div>
-        <div class="col-4">
-          <div class="bg-success bg-opacity-10 rounded-3 p-2">
-            <div class="fw-bold text-success fs-5">{{ completionPercentage() }}%</div>
-            <div class="small text-muted" style="font-size: 0.7rem;">📚 Done</div>
-          </div>
-        </div>
-        <div class="col-4">
-          <div class="bg-warning bg-opacity-10 rounded-3 p-2">
-            <div class="fw-bold text-warning fs-5">{{ accuracyPercentage() }}%</div>
-            <div class="small text-muted" style="font-size: 0.7rem;">🎯 Accuracy</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Navigation Options Menu -->
-    <div class="card border-0 shadow-sm overflow-hidden mb-4">
-      <div class="list-group list-group-flush">
-        @for (item of menuItems; track item.title) {
-          <button (click)="onMenuClick(item)" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3 px-3 border-bottom-0 border-top-0 cursor-pointer">
-            <div class="d-flex align-items-center gap-3">
-              <i class="bi fs-5 text-primary" [ngClass]="item.icon"></i>
-              <span class="fw-semibold text-dark">{{ item.title }}</span>
-            </div>
-            <i class="bi bi-chevron-right text-muted small"></i>
+          <button class="btn btn-primary rounded-circle position-absolute bottom-0 end-0 p-1 shadow-sm d-flex align-items-center justify-content-center"
+            style="width: 28px; height: 28px; border: 2px solid white;" (click)="onMenuClick({id: 'personal_info'})" title="Edit Profile">
+            <i class="bi bi-pencil-fill" style="font-size: 0.7rem;"></i>
           </button>
+        </div>
+        <h2 class="h5 fw-bold text-dark mb-1">{{ userName() || 'மாணவர்' }}</h2>
+        <p class="small text-muted mb-2">{{ userRole() }}</p>
+
+        @if (xpPoints() > 0) {
+          <div class="xp-badge bg-warning-subtle text-warning-emphasis d-inline-flex align-items-center gap-1 mx-auto px-3 py-1 rounded-pill fw-bold small">
+            <span>⭐ {{ xpPoints() | number }} XP</span>
+          </div>
+        } @else {
+          <div class="xp-badge bg-light text-muted d-inline-flex align-items-center gap-1 mx-auto px-3 py-1 rounded-pill fw-semibold small">
+            <span>⭐ 0 XP — Start learning!</span>
+          </div>
         }
       </div>
-    </div>
 
-    <!-- Logout Button -->
-    <button class="btn btn-outline-danger w-100 rounded-pill py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2 mb-4"
-            (click)="logout()">
-      <i class="bi bi-box-arrow-right"></i>
-      <span>Log Out</span>
-    </button>
-
-  </div>
-  }
-
-<!-- ============================================== -->
-<!-- MODALS OVERLAYS -->
-<!-- ============================================== -->
-<div *ngIf="activeModal() !== 'none'" class="modal-overlay d-flex align-items-end align-items-md-center justify-content-center" 
-     [ngClass]="{'animate-fade-in': !isClosingModal(), 'animate-fade-out': isClosingModal()}" (click)="closeModal()">
-  <div class="modal-content-card bg-white w-100 rounded-top-4 rounded-md-4 shadow-lg" 
-       [ngClass]="{'animate-slide-up': !isClosingModal(), 'animate-slide-down': isClosingModal()}"
-       style="max-width: 500px; max-height: 90vh; overflow-y: auto;" (click)="$event.stopPropagation()">
-
-    <!-- Modal Header -->
-    <div class="d-flex align-items-center justify-content-between p-3 border-bottom position-sticky top-0 bg-white z-3">
-      <h5 class="fw-bold mb-0 text-dark">
-        <i *ngIf="activeModal() === 'personal_info'" class="bi bi-person-badge text-primary me-2"></i>
-        <i *ngIf="activeModal() === 'certificates'" class="bi bi-award text-warning me-2"></i>
-        <i *ngIf="activeModal() === 'stats'" class="bi bi-graph-up text-success me-2"></i>
-        <i *ngIf="activeModal() === 'help'" class="bi bi-question-circle text-info me-2"></i>
-        {{ activeModal() === 'personal_info' ? 'Personal Info' : (activeModal() === 'certificates' ? 'My Certificates' : (activeModal() === 'stats' ? 'My Statistics' : 'Help & Support')) }}
-      </h5>
-      <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" (click)="closeModal()" style="width: 36px; height: 36px;">
-        <i class="bi bi-x-lg"></i>
-      </button>
-    </div>
-
-    <!-- Modal Body -->
-    <div class="p-4">
-
-      <!-- PERSONAL INFO MODAL -->
-      <div *ngIf="activeModal() === 'personal_info'">
-
-        <!-- Alert messages -->
-        <div *ngIf="profileSuccessMsg()" class="alert alert-success rounded-4 p-3 mb-3 small fw-bold text-center border-0 shadow-sm">
-          <i class="bi bi-check-circle-fill me-1 fs-6"></i> {{ profileSuccessMsg() }}
-        </div>
-        <div *ngIf="profileErrorMsg()" class="alert alert-danger rounded-4 p-3 mb-3 small fw-bold text-center border-0 shadow-sm">
-          <i class="bi bi-exclamation-triangle-fill me-1 fs-6"></i> {{ profileErrorMsg() }}
+      <!-- Achievements Section — only earned badges -->
+      <div class="card border-0 shadow-sm p-3 mb-3">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h3 class="h6 fw-bold text-dark mb-0">Achievements</h3>
+          <span class="small text-muted">{{ earnedBadges().length }} Earned</span>
         </div>
 
-        <!-- READ-ONLY VIEW -->
-        <div *ngIf="!isEditingProfile()">
-          <div class="text-center mb-4">
-            <div class="d-inline-block position-relative">
-              @if (userAvatar()) {
-                <img [src]="userAvatar()" alt="User Avatar" class="shadow-sm border border-4 border-white bg-light" style="width: 95px; height: 95px; object-fit: contain; border-radius: 50%;">
-              } @else {
-                <div class="shadow-sm border border-4 border-white bg-light d-flex align-items-center justify-content-center fw-bold" style="width: 95px; height: 95px; font-size: 3.5rem; border-radius: 50%; color: #BE185D;">
-                  {{ (userName() || 'S').charAt(0).toUpperCase() }}
-                </div>
-              }
-              <button class="btn btn-primary rounded-circle position-absolute bottom-0 end-0 p-1 shadow-sm d-flex align-items-center justify-content-center"
-                      style="width: 30px; height: 30px; border: 2px solid white;" (click)="toggleEditMode()" title="Edit Profile">
-                <i class="bi bi-pencil-fill" style="font-size: 0.75rem;"></i>
-              </button>
-            </div>
+        @if (earnedBadges().length > 0) {
+          <div class="achievements-row d-flex align-items-center gap-2 overflow-x-auto pb-1">
+            @for (ach of earnedBadges(); track ach.name) {
+              <div class="achievement-chip d-flex flex-column align-items-center text-center p-2 rounded-3 cursor-pointer hover-lift transition-all"
+                [style.background-color]="ach.bg + '18'"
+                (click)="openBadgeModal(ach)"
+                title="Click to view achievement details!">
+                <span class="fs-4 mb-1 animate-bounce">{{ ach.icon }}</span>
+                <span class="chip-title fw-semibold text-dark">{{ ach.name }}</span>
+              </div>
+            }
           </div>
-
-          <div class="mb-3">
-            <label class="small text-muted fw-bold mb-1 ms-1">Full Name</label>
-            <div class="p-3 bg-light rounded-3 fw-semibold text-dark border d-flex align-items-center justify-content-between">
-              <span>{{ userName() || '—' }}</span>
-              <i class="bi bi-person text-secondary"></i>
-            </div>
+        } @else {
+          <div class="text-center py-3">
+            <i class="bi bi-trophy text-muted" style="font-size: 2.5rem; opacity: 0.3;"></i>
+            <p class="small text-muted mt-2 mb-0">Complete chapters to earn badges!</p>
           </div>
-          <div class="mb-3">
-            <label class="small text-muted fw-bold mb-1 ms-1">Email Address</label>
-            <div class="p-3 bg-light rounded-3 fw-semibold text-dark border d-flex align-items-center justify-content-between">
-              <span>{{ userEmail() || '—' }}</span>
-              <i class="bi bi-envelope text-secondary"></i>
-            </div>
-          </div>
-          <div class="mb-4">
-            <label class="small text-muted fw-bold mb-1 ms-1">Organization / School</label>
-            <div class="p-3 bg-light rounded-3 fw-semibold text-dark border d-flex align-items-center justify-content-between">
-              <span>{{ studentOrg() || 'Ariga Public School' }}</span>
-              <i class="bi bi-building text-secondary"></i>
-            </div>
-          </div>
-
-          <div class="d-flex gap-2">
-            <button class="btn btn-primary rounded-pill py-2.5 fw-bold flex-grow-1 shadow-sm" (click)="toggleEditMode()">
-              <i class="bi bi-pencil-square me-1"></i> Edit Profile
-            </button>
-            <button class="btn btn-outline-secondary rounded-pill py-2.5 px-4 fw-bold" (click)="closeModal()">
-              Close
-            </button>
-          </div>
-        </div>
-
-        <!-- EDITABLE FORM -->
-        <div *ngIf="isEditingProfile()">
-          
-          <!-- Avatar Picker Header -->
-          <div class="text-center mb-3">
-            <div class="d-inline-block position-relative mb-2">
-              @if (editAvatar()) {
-                <img [src]="editAvatar()" alt="Avatar Preview" class="rounded-circle shadow-sm border border-4 border-primary bg-light" style="width: 95px; height: 95px; object-fit: contain;">
-              } @else {
-                <div class="rounded-circle shadow-sm border border-4 border-primary bg-light d-flex align-items-center justify-content-center fw-bold" style="width: 95px; height: 95px; font-size: 3.5rem; color: #BE185D;">
-                  {{ (editName() || userName() || 'S').charAt(0).toUpperCase() }}
-                </div>
-              }
-              <button type="button" class="btn btn-dark rounded-circle position-absolute bottom-0 end-0 p-1 shadow-sm d-flex align-items-center justify-content-center"
-                      style="width: 32px; height: 32px; border: 2px solid white;" (click)="avatarFileInput.click()" title="Upload Custom Photo">
-                <i class="bi bi-camera-fill" style="font-size: 0.85rem;"></i>
-              </button>
-            </div>
-            <input type="file" accept="image/*" (change)="onAvatarFileSelected($event)" #avatarFileInput class="d-none">
-            <div>
-              <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold small shadow-sm" (click)="avatarFileInput.click()">
-                <i class="bi bi-upload me-1"></i> Upload Custom Photo
-              </button>
-            </div>
-          </div>
-
-          <!-- Preset Avatar Picker -->
-          <div class="mb-3 p-2 bg-light rounded-3 border text-center">
-            <label class="small text-muted fw-bold mb-2 d-block">Or Choose a Student Avatar</label>
-            <div class="d-flex justify-content-center gap-2 flex-wrap">
-              @for (av of presetAvatars; track av.id) {
-                <button type="button" class="btn p-1 rounded-circle border border-2 transition-all shadow-sm"
-                        [class.border-primary]="editAvatar() === av.url"
-                        [class.border-transparent]="editAvatar() !== av.url"
-                        [style.transform]="editAvatar() === av.url ? 'scale(1.1)' : 'scale(1)'"
-                        (click)="selectPresetAvatar(av.url)" [title]="av.name">
-                  <img [src]="av.url" [alt]="av.name" class="rounded-circle bg-white" style="width: 42px; height: 42px; object-fit: contain;" />
-                </button>
-              }
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label class="small text-muted fw-bold mb-1 ms-1">Full Name <span class="text-danger">*</span></label>
-            <input type="text" [ngModel]="editName()" (ngModelChange)="editName.set($event)" class="form-control p-3 rounded-3 fw-semibold text-dark border" placeholder="Enter full name" />
-          </div>
-          <div class="mb-3">
-            <label class="small text-muted fw-bold mb-1 ms-1">Email Address</label>
-            <input type="email" [ngModel]="editEmail()" (ngModelChange)="editEmail.set($event)" class="form-control p-3 rounded-3 fw-semibold text-dark border" placeholder="Enter email address" />
-          </div>
-          <div class="mb-4">
-            <label class="small text-muted fw-bold mb-1 ms-1">Organization / School</label>
-            <input type="text" [value]="studentOrg() || 'Ariga Public School'" disabled class="form-control p-3 rounded-3 fw-semibold text-muted bg-light border" />
-          </div>
-
-          <div class="d-flex flex-column gap-2">
-            <button class="btn btn-primary rounded-pill py-2.5 fw-bold w-100 shadow-sm d-flex align-items-center justify-content-center gap-2"
-                    (click)="saveProfile()" [disabled]="isSavingProfile()">
-              <span *ngIf="isSavingProfile()" class="spinner-border spinner-border-sm" role="status"></span>
-              <span>{{ isSavingProfile() ? 'Saving Changes...' : 'Save Changes' }}</span>
-            </button>
-            <button class="btn btn-light rounded-pill py-2 w-100 fw-bold text-muted" (click)="cancelEditProfile()">
-              Cancel
-            </button>
-          </div>
-        </div>
-
+        }
       </div>
 
-      <!-- CERTIFICATES MODAL -->
-      <div *ngIf="activeModal() === 'certificates'">
+      <!-- Quick Stats Row -->
+      <div class="card border-0 shadow-sm p-3 mb-3">
+        <h3 class="h6 fw-bold text-dark mb-3">Quick Stats</h3>
+        <div class="row g-2 text-center">
+          <div class="col-4">
+            <div class="bg-primary bg-opacity-10 rounded-3 p-2">
+              <div class="fw-bold text-primary fs-5">{{ streakDays() }}</div>
+              <div class="small text-muted" style="font-size: 0.7rem;">🔥 Streak</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="bg-success bg-opacity-10 rounded-3 p-2">
+              <div class="fw-bold text-success fs-5">{{ completionPercentage() }}%</div>
+              <div class="small text-muted" style="font-size: 0.7rem;">📚 Done</div>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="bg-warning bg-opacity-10 rounded-3 p-2">
+              <div class="fw-bold text-warning fs-5">{{ accuracyPercentage() }}%</div>
+              <div class="small text-muted" style="font-size: 0.7rem;">🎯 Accuracy</div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        <!-- Certificate View State -->
-        @if (selectedCertCourseId() === null) {
-          <!-- List of Courses (Card Format) -->
-          <div class="mb-3">
-            <h6 class="fw-bold text-dark mb-3">My Certificates</h6>
-            <div class="d-flex flex-column gap-3">
-              @for (course of enrolledCourses(); track course.id; let idx = $index) {
-                <div class="card border-0 rounded-4 p-4 cursor-pointer hover-lift transition-all position-relative overflow-hidden"
+      <!-- Navigation Options Menu -->
+      <div class="card border-0 shadow-sm overflow-hidden mb-4">
+        <div class="list-group list-group-flush">
+          @for (item of menuItems; track item.title) {
+            <button (click)="onMenuClick(item)" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between py-3 px-3 border-bottom-0 border-top-0 cursor-pointer">
+              <div class="d-flex align-items-center gap-3">
+                <i class="bi fs-5 text-primary" [ngClass]="item.icon"></i>
+                <span class="fw-semibold text-dark">{{ item.title }}</span>
+              </div>
+              <i class="bi bi-chevron-right text-muted small"></i>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Logout Button -->
+      <button class="btn btn-outline-danger w-100 rounded-pill py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2 mb-4"
+        (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Log Out</span>
+      </button>
+
+    </div>
+  }
+
+  <!-- ============================================== -->
+  <!-- MODALS OVERLAYS -->
+  <!-- ============================================== -->
+  @if (activeModal() !== 'none') {
+    <div class="modal-overlay d-flex align-items-end align-items-md-center justify-content-center"
+      [ngClass]="{'animate-fade-in': !isClosingModal(), 'animate-fade-out': isClosingModal()}" (click)="closeModal()">
+      <div class="modal-content-card bg-white w-100 rounded-top-4 rounded-md-4 shadow-lg"
+        [ngClass]="{'animate-slide-up': !isClosingModal(), 'animate-slide-down': isClosingModal()}"
+        style="max-width: 500px; max-height: 90vh; overflow-y: auto;" (click)="$event.stopPropagation()">
+        <!-- Modal Header -->
+        <div class="d-flex align-items-center justify-content-between p-3 border-bottom position-sticky top-0 bg-white z-3">
+          <h5 class="fw-bold mb-0 text-dark">
+            @if (activeModal() === 'personal_info') {
+              <i class="bi bi-person-badge text-primary me-2"></i>
+            }
+            @if (activeModal() === 'certificates') {
+              <i class="bi bi-award text-warning me-2"></i>
+            }
+            @if (activeModal() === 'stats') {
+              <i class="bi bi-graph-up text-success me-2"></i>
+            }
+            @if (activeModal() === 'help') {
+              <i class="bi bi-question-circle text-info me-2"></i>
+            }
+            {{ activeModal() === 'personal_info' ? 'Personal Info' : (activeModal() === 'certificates' ? 'My Certificates' : (activeModal() === 'stats' ? 'My Statistics' : 'Help & Support')) }}
+          </h5>
+          <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" (click)="closeModal()" style="width: 36px; height: 36px;">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+        <!-- Modal Body -->
+        <div class="p-4">
+          <!-- PERSONAL INFO MODAL -->
+          @if (activeModal() === 'personal_info') {
+            <div>
+              <!-- Alert messages -->
+              @if (profileSuccessMsg()) {
+                <div class="alert alert-success rounded-4 p-3 mb-3 small fw-bold text-center border-0 shadow-sm">
+                  <i class="bi bi-check-circle-fill me-1 fs-6"></i> {{ profileSuccessMsg() }}
+                </div>
+              }
+              @if (profileErrorMsg()) {
+                <div class="alert alert-danger rounded-4 p-3 mb-3 small fw-bold text-center border-0 shadow-sm">
+                  <i class="bi bi-exclamation-triangle-fill me-1 fs-6"></i> {{ profileErrorMsg() }}
+                </div>
+              }
+              <!-- READ-ONLY VIEW -->
+              @if (!isEditingProfile()) {
+                <div>
+                  <div class="text-center mb-4">
+                    <div class="d-inline-block position-relative">
+                      @if (userAvatar()) {
+                        <img [src]="userAvatar()" alt="User Avatar" class="shadow-sm border border-4 border-white bg-light" style="width: 95px; height: 95px; object-fit: contain; border-radius: 50%;">
+                      } @else {
+                        <div class="shadow-sm border border-4 border-white bg-light d-flex align-items-center justify-content-center fw-bold" style="width: 95px; height: 95px; font-size: 3.5rem; border-radius: 50%; color: #BE185D;">
+                          {{ (userName() || 'S').charAt(0).toUpperCase() }}
+                        </div>
+                      }
+                      <button class="btn btn-primary rounded-circle position-absolute bottom-0 end-0 p-1 shadow-sm d-flex align-items-center justify-content-center"
+                        style="width: 30px; height: 30px; border: 2px solid white;" (click)="toggleEditMode()" title="Edit Profile">
+                        <i class="bi bi-pencil-fill" style="font-size: 0.75rem;"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="small text-muted fw-bold mb-1 ms-1">Full Name</label>
+                    <div class="p-3 bg-light rounded-3 fw-semibold text-dark border d-flex align-items-center justify-content-between">
+                      <span>{{ userName() || '—' }}</span>
+                      <i class="bi bi-person text-secondary"></i>
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="small text-muted fw-bold mb-1 ms-1">Email Address</label>
+                    <div class="p-3 bg-light rounded-3 fw-semibold text-dark border d-flex align-items-center justify-content-between">
+                      <span>{{ userEmail() || '—' }}</span>
+                      <i class="bi bi-envelope text-secondary"></i>
+                    </div>
+                  </div>
+                  <div class="mb-4">
+                    <label class="small text-muted fw-bold mb-1 ms-1">Organization / School</label>
+                    <div class="p-3 bg-light rounded-3 fw-semibold text-dark border d-flex align-items-center justify-content-between">
+                      <span>{{ studentOrg() || 'Ariga Public School' }}</span>
+                      <i class="bi bi-building text-secondary"></i>
+                    </div>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-primary rounded-pill py-2.5 fw-bold flex-grow-1 shadow-sm" (click)="toggleEditMode()">
+                      <i class="bi bi-pencil-square me-1"></i> Edit Profile
+                    </button>
+                    <button class="btn btn-outline-secondary rounded-pill py-2.5 px-4 fw-bold" (click)="closeModal()">
+                      Close
+                    </button>
+                  </div>
+                </div>
+              }
+              <!-- EDITABLE FORM -->
+              @if (isEditingProfile()) {
+                <div>
+                  <!-- Avatar Picker Header -->
+                  <div class="text-center mb-3">
+                    <div class="d-inline-block position-relative mb-2">
+                      @if (editAvatar()) {
+                        <img [src]="editAvatar()" alt="Avatar Preview" class="rounded-circle shadow-sm border border-4 border-primary bg-light" style="width: 95px; height: 95px; object-fit: contain;">
+                      } @else {
+                        <div class="rounded-circle shadow-sm border border-4 border-primary bg-light d-flex align-items-center justify-content-center fw-bold" style="width: 95px; height: 95px; font-size: 3.5rem; color: #BE185D;">
+                          {{ (editName() || userName() || 'S').charAt(0).toUpperCase() }}
+                        </div>
+                      }
+                      <button type="button" class="btn btn-dark rounded-circle position-absolute bottom-0 end-0 p-1 shadow-sm d-flex align-items-center justify-content-center"
+                        style="width: 32px; height: 32px; border: 2px solid white;" (click)="avatarFileInput.click()" title="Upload Custom Photo">
+                        <i class="bi bi-camera-fill" style="font-size: 0.85rem;"></i>
+                      </button>
+                    </div>
+                    <input type="file" accept="image/*" (change)="onAvatarFileSelected($event)" #avatarFileInput class="d-none">
+                    <div>
+                      <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold small shadow-sm" (click)="avatarFileInput.click()">
+                        <i class="bi bi-upload me-1"></i> Upload Custom Photo
+                      </button>
+                    </div>
+                  </div>
+                  <!-- Preset Avatar Picker -->
+                  <div class="mb-3 p-2 bg-light rounded-3 border text-center">
+                    <label class="small text-muted fw-bold mb-2 d-block">Or Choose a Student Avatar</label>
+                    <div class="d-flex justify-content-center gap-2 flex-wrap">
+                      @for (av of presetAvatars; track av.id) {
+                        <button type="button" class="btn p-1 rounded-circle border border-2 transition-all shadow-sm"
+                          [class.border-primary]="editAvatar() === av.url"
+                          [class.border-transparent]="editAvatar() !== av.url"
+                          [style.transform]="editAvatar() === av.url ? 'scale(1.1)' : 'scale(1)'"
+                          (click)="selectPresetAvatar(av.url)" [title]="av.name">
+                          <img [src]="av.url" [alt]="av.name" class="rounded-circle bg-white" style="width: 42px; height: 42px; object-fit: contain;" />
+                        </button>
+                      }
+                    </div>
+                  </div>
+                  <div class="mb-3">
+                    <label class="small text-muted fw-bold mb-1 ms-1">Full Name <span class="text-danger">*</span></label>
+                    <input type="text" [ngModel]="editName()" (ngModelChange)="editName.set($event)" class="form-control p-3 rounded-3 fw-semibold text-dark border" placeholder="Enter full name" />
+                  </div>
+                  <div class="mb-3">
+                    <label class="small text-muted fw-bold mb-1 ms-1">Email Address</label>
+                    <input type="email" [ngModel]="editEmail()" (ngModelChange)="editEmail.set($event)" class="form-control p-3 rounded-3 fw-semibold text-dark border" placeholder="Enter email address" />
+                  </div>
+                  <div class="mb-4">
+                    <label class="small text-muted fw-bold mb-1 ms-1">Organization / School</label>
+                    <input type="text" [value]="studentOrg() || 'Ariga Public School'" disabled class="form-control p-3 rounded-3 fw-semibold text-muted bg-light border" />
+                  </div>
+                  <div class="d-flex flex-column gap-2">
+                    <button class="btn btn-primary rounded-pill py-2.5 fw-bold w-100 shadow-sm d-flex align-items-center justify-content-center gap-2"
+                      (click)="saveProfile()" [disabled]="isSavingProfile()">
+                      @if (isSavingProfile()) {
+                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                      }
+                      <span>{{ isSavingProfile() ? 'Saving Changes...' : 'Save Changes' }}</span>
+                    </button>
+                    <button class="btn btn-light rounded-pill py-2 w-100 fw-bold text-muted" (click)="cancelEditProfile()">
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+          <!-- CERTIFICATES MODAL -->
+          @if (activeModal() === 'certificates') {
+            <div>
+              <!-- Certificate View State -->
+              @if (selectedCertCourseId() === null) {
+                <!-- List of Courses (Card Format) -->
+                <div class="mb-3">
+                  <h6 class="fw-bold text-dark mb-3">My Certificates</h6>
+                  <div class="d-flex flex-column gap-3">
+                    @for (course of enrolledCourses(); track course.id; let idx = $index) {
+                      <div class="card border-0 rounded-4 p-4 cursor-pointer hover-lift transition-all position-relative overflow-hidden"
                      [ngStyle]="{
                        'background': idx % 3 === 0 ? 'linear-gradient(135deg, #F0FDF4 0%, #DCFCE7 100%)' : (idx % 3 === 1 ? 'linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%)' : 'linear-gradient(135deg, #FFF0F3 0%, #FFE4E6 100%)'),
                        'box-shadow': '0 8px 20px rgba(0,0,0,0.06)'
                      }"
-                     (click)="selectCertCourse(course.id)">
-                  <div class="d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-3">
-                      <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-white shadow-sm"
+                        (click)="selectCertCourse(course.id)">
+                        <div class="d-flex align-items-center justify-content-between">
+                          <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 text-white shadow-sm"
                            [ngStyle]="{
                              'background': course.completion === 100 ? 'linear-gradient(135deg, #34D399, #059669)' : 'linear-gradient(135deg, #94A3B8, #475569)',
                              'width': '52px', 'height': '52px'
                            }">
-                        <i class="bi fs-3" [class.bi-patch-check-fill]="course.completion === 100" [class.bi-shield-lock-fill]="course.completion < 100"></i>
+                              <i class="bi fs-3" [class.bi-patch-check-fill]="course.completion === 100" [class.bi-shield-lock-fill]="course.completion < 100"></i>
+                            </div>
+                            <div>
+                              <h2 class="fw-extrabold mb-0 text-dark" style="font-size: 1.1rem; line-height: 1.3;">
+                                {{ course.name }}
+                              </h2>
+                              <span class="small" [class.text-success]="course.completion === 100" [class.text-muted]="course.completion < 100">
+                                {{ course.completion === 100 ? '100% முடிந்தது' : course.completion + '% முடிந்தது' }}
+                              </span>
+                            </div>
+                          </div>
+                          <div class="d-flex flex-column align-items-end gap-1">
+                            @if (course.completion === 100) {
+                              <i class="bi bi-chevron-right text-success"></i>
+                            } @else {
+                              <i class="bi bi-lock-fill text-secondary"></i>
+                            }
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <h2 class="fw-extrabold mb-0 text-dark" style="font-size: 1.1rem; line-height: 1.3;">
-                          {{ course.name }}
-                        </h2>
-                        <span class="small" [class.text-success]="course.completion === 100" [class.text-muted]="course.completion < 100">
-                          {{ course.completion === 100 ? '100% முடிந்தது' : course.completion + '% முடிந்தது' }}
-                        </span>
+                    }
+                  </div>
+                </div>
+              } @else {
+                <!-- Single Certificate Detail View -->
+                <div class="mb-3">
+                  <button class="btn btn-sm btn-light border rounded-pill fw-semibold mb-3 d-flex align-items-center shadow-sm text-dark"
+                    (click)="selectedCertCourseId.set(null)">
+                    <i class="bi bi-arrow-left me-2"></i> பின்செல் (Back)
+                  </button>
+                </div>
+                <!-- Per-Course Certificate Content -->
+                @let cert = selectedCertCourse;
+                @if (cert) {
+                  <!-- Locked Status View -->
+                  @if (cert.completion < 100 && !showCertPreview()) {
+                    <div class="text-center py-4 bg-light rounded-4 border">
+                      <div class="position-relative d-inline-block mb-3">
+                        <i class="bi bi-shield-lock-fill text-secondary" style="font-size: 3.5rem;"></i>
+                      </div>
+                      <h5 class="fw-bold text-dark mb-1">Certificate Locked</h5>
+                      <p class="text-secondary small mb-3">You have completed <strong>{{ cert.completion }}%</strong> of <em>{{ cert.name }}</em>. Reach 100% to earn your verified certificate!</p>
+                      <div class="progress mb-4 rounded-pill bg-light border mx-auto" style="height: 12px; max-width: 320px;">
+                        <div class="progress-bar bg-warning rounded-pill" [style.width.%]="cert.completion"></div>
+                      </div>
+                      <button class="btn btn-outline-primary rounded-pill px-4 py-2 fw-bold shadow-sm" (click)="toggleCertPreview()">
+                        <i class="bi bi-eye-fill me-1"></i> Preview Certificate Format
+                      </button>
+                    </div>
+                  }
+                  <!-- Certificate Card (Unlocked or Preview) -->
+                  @if (cert.completion >= 100 || showCertPreview()) {
+                    <div class="animate-pop-in">
+                      @if (showCertPreview() && cert.completion < 100) {
+                        <div class="alert alert-warning rounded-4 p-2 mb-3 small fw-bold text-center d-flex align-items-center justify-content-between">
+                          <span><i class="bi bi-info-circle-fill me-1"></i> Format Preview Only (Download Locked)</span>
+                          <button class="btn btn-sm btn-dark rounded-pill px-2 py-0" (click)="toggleCertPreview()">Back</button>
+                        </div>
+                      }
+                      <!-- Certificate Frame -->
+                      <div class="official-certificate-card p-4 rounded-4 text-center position-relative overflow-hidden shadow-lg border border-3 border-warning"
+                        (contextmenu)="$event.preventDefault()"
+                        style="background: linear-gradient(135deg,#FFFDF5,#FFF); color:#1E293B; min-height:340px; border-color:#F59E0B !important; user-select:none; -webkit-user-select:none;">
+                        <!-- Watermark if preview -->
+                        @if (cert.completion < 100) {
+                          <div class="position-absolute top-50 start-50 translate-middle w-100 text-center pe-none"
+                            style="z-index:10; transform:translate(-50%,-50%) rotate(-25deg); opacity:0.14;">
+                            <span class="fs-1 fw-extrabold text-danger text-uppercase border border-4 border-danger px-4 py-2 rounded-4">PREVIEW · NOT VALID</span>
+                          </div>
+                        }
+                        <!-- Corner emojis -->
+                        <div class="position-absolute top-0 start-0 p-3" style="font-size:1.4rem;">🌟</div>
+                        <div class="position-absolute top-0 end-0 p-3" style="font-size:1.4rem;">🎉</div>
+                        <div class="position-absolute bottom-0 start-0 p-3" style="font-size:1.4rem;">🎈</div>
+                        <div class="position-absolute bottom-0 end-0 p-3" style="font-size:1.4rem;">⭐</div>
+                        <div class="h-100 w-100 border border-2 rounded-4 p-3 d-flex flex-column align-items-center justify-content-between shadow-sm"
+                          style="border-color:#FCD34D !important; background:rgba(255,255,255,0.9);">
+                          <div class="d-flex flex-column align-items-center">
+                            <img src="assets/images/mascot.png" alt="Mascot" class="rounded-circle shadow-sm mb-2" style="width:50px;height:50px;object-fit:contain;">
+                            <div class="badge bg-warning bg-opacity-25 text-warning-emphasis px-3 py-1 rounded-pill fw-bold text-uppercase small border border-warning border-opacity-50 mb-2">
+                              🏆 சான்றிதழ் · Official Certificate
+                            </div>
+                            <h4 class="fw-bold mb-1 text-primary" style="font-family:'Comic Sans MS','Nunito',sans-serif;">நிறைவு சான்றிதழ்</h4>
+                            <p class="small text-muted mb-0">சான்றளிக்கப்படுவது என்னவென்றால்</p>
+                          </div>
+                          <div class="my-3 w-100 text-center">
+                            <h2 class="fw-extrabold mb-1" style="color:#4C1D95; font-family:'Comic Sans MS','Nunito',serif; font-size:clamp(1.4rem,5vw,2rem);">
+                              {{ userName() || 'மாணவர் பெயர்' }}
+                            </h2>
+                            <div class="mx-auto bg-warning rounded-pill" style="height:3px;width:130px;"></div>
+                            <p class="small text-muted mt-2 mb-0">வெற்றிகரமாக இப்பாடத்திட்டத்தை நிறைவு செய்துள்ளார்</p>
+                          </div>
+                          <div class="mb-3 text-center">
+                            <h5 class="fw-bold text-success mb-1">{{ cert.name }}</h5>
+                            <span class="badge bg-light text-secondary border px-3 py-1 rounded-pill small fw-semibold">{{ studentOrg() || 'Ariga Public School' }}</span>
+                          </div>
+                          <div class="d-flex align-items-center justify-content-between w-100 pt-3 border-top" style="border-color:#E2E8F0 !important;">
+                            <div class="text-start">
+                              <span class="d-block text-muted" style="font-size:0.65rem;font-weight:700;">வழங்கப்பட்ட நாள்</span>
+                              <span class="fw-bold text-dark small">{{ cert.certDate }}</span>
+                            </div>
+                            <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center shadow" style="width:46px;height:46px;border:3px double #fff;">
+                              <i class="bi bi-star-fill text-white fs-4"></i>
+                            </div>
+                            <div class="text-end">
+                              <span class="d-block text-muted" style="font-size:0.65rem;font-weight:700;">சரிபார்க்கப்பட்ட எண்</span>
+                              <span class="fw-bold text-primary small">#YAP-{{ cert.certId }}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Download Button -->
+                      <div class="mt-3">
+                        @if (cert.completion >= 100) {
+                          <button class="btn btn-primary rounded-pill py-2 fw-bold w-100 shadow-sm d-flex align-items-center justify-content-center gap-2" (click)="downloadPDFCertificate()">
+                            <i class="bi bi-file-earmark-pdf-fill fs-5"></i> Download PDF Certificate
+                          </button>
+                        } @else {
+                          <button class="btn btn-secondary rounded-pill py-2 fw-bold w-100 shadow-sm d-flex align-items-center justify-content-center gap-2 opacity-75" (click)="downloadPDFCertificate()">
+                            <i class="bi bi-lock-fill"></i> Download Locked (Complete 100%)
+                          </button>
+                        }
                       </div>
                     </div>
-                    <div class="d-flex flex-column align-items-end gap-1">
-                      @if (course.completion === 100) {
-                        <i class="bi bi-chevron-right text-success"></i>
-                      } @else {
-                        <i class="bi bi-lock-fill text-secondary"></i>
+                  }
+                }
+                } <!-- Close the @else block -->
+              </div>
+            }
+            <!-- STATS MODAL -->
+            @if (activeModal() === 'stats') {
+              <div>
+                <!-- Course Selector Pills (shows when >1 course) -->
+                @if (enrolledCourses().length > 1) {
+                  <div class="mb-3">
+                    <p class="small text-muted fw-bold mb-2">Course Statistics:</p>
+                    <div class="d-flex gap-2 flex-wrap mb-1">
+                      <button class="btn btn-sm rounded-pill fw-semibold border"
+                        [class.btn-success]="selectedStatsCourseId() === 'all'"
+                        [class.btn-light]="selectedStatsCourseId() !== 'all'"
+                      (click)="selectStatsCourse('all')">📊 Overall</button>
+                      @for (course of enrolledCourses(); track course.id) {
+                        <button class="btn btn-sm rounded-pill fw-semibold border"
+                          [class.btn-primary]="selectedStatsCourseId() === course.id"
+                          [class.btn-light]="selectedStatsCourseId() !== course.id"
+                          (click)="selectStatsCourse(course.id)">
+                          {{ course.name }}
+                        </button>
                       }
                     </div>
                   </div>
-                </div>
-              }
-            </div>
-          </div>
-        } @else {
-          <!-- Single Certificate Detail View -->
-          <div class="mb-3">
-            <button class="btn btn-sm btn-light border rounded-pill fw-semibold mb-3 d-flex align-items-center shadow-sm text-dark"
-                    (click)="selectedCertCourseId.set(null)">
-              <i class="bi bi-arrow-left me-2"></i> பின்செல் (Back)
-            </button>
-          </div>
-
-          <!-- Per-Course Certificate Content -->
-          @let cert = selectedCertCourse;
-          @if (cert) {
-
-            <!-- Locked Status View -->
-            <div *ngIf="cert.completion < 100 && !showCertPreview()" class="text-center py-4 bg-light rounded-4 border">
-              <div class="position-relative d-inline-block mb-3">
-                <i class="bi bi-shield-lock-fill text-secondary" style="font-size: 3.5rem;"></i>
-              </div>
-              <h5 class="fw-bold text-dark mb-1">Certificate Locked</h5>
-              <p class="text-secondary small mb-3">You have completed <strong>{{ cert.completion }}%</strong> of <em>{{ cert.name }}</em>. Reach 100% to earn your verified certificate!</p>
-
-            <div class="progress mb-4 rounded-pill bg-light border mx-auto" style="height: 12px; max-width: 320px;">
-              <div class="progress-bar bg-warning rounded-pill" [style.width.%]="cert.completion"></div>
-            </div>
-
-            <button class="btn btn-outline-primary rounded-pill px-4 py-2 fw-bold shadow-sm" (click)="toggleCertPreview()">
-              <i class="bi bi-eye-fill me-1"></i> Preview Certificate Format
-            </button>
-          </div>
-
-          <!-- Certificate Card (Unlocked or Preview) -->
-          <div *ngIf="cert.completion >= 100 || showCertPreview()" class="animate-pop-in">
-
-            <div *ngIf="showCertPreview() && cert.completion < 100" class="alert alert-warning rounded-4 p-2 mb-3 small fw-bold text-center d-flex align-items-center justify-content-between">
-              <span><i class="bi bi-info-circle-fill me-1"></i> Format Preview Only (Download Locked)</span>
-              <button class="btn btn-sm btn-dark rounded-pill px-2 py-0" (click)="toggleCertPreview()">Back</button>
-            </div>
-
-            <!-- Certificate Frame -->
-            <div class="official-certificate-card p-4 rounded-4 text-center position-relative overflow-hidden shadow-lg border border-3 border-warning"
-                 (contextmenu)="$event.preventDefault()"
-                 style="background: linear-gradient(135deg,#FFFDF5,#FFF); color:#1E293B; min-height:340px; border-color:#F59E0B !important; user-select:none; -webkit-user-select:none;">
-
-              <!-- Watermark if preview -->
-              <div *ngIf="cert.completion < 100" class="position-absolute top-50 start-50 translate-middle w-100 text-center pe-none"
-                   style="z-index:10; transform:translate(-50%,-50%) rotate(-25deg); opacity:0.14;">
-                <span class="fs-1 fw-extrabold text-danger text-uppercase border border-4 border-danger px-4 py-2 rounded-4">PREVIEW · NOT VALID</span>
-              </div>
-
-              <!-- Corner emojis -->
-              <div class="position-absolute top-0 start-0 p-3" style="font-size:1.4rem;">🌟</div>
-              <div class="position-absolute top-0 end-0 p-3" style="font-size:1.4rem;">🎉</div>
-              <div class="position-absolute bottom-0 start-0 p-3" style="font-size:1.4rem;">🎈</div>
-              <div class="position-absolute bottom-0 end-0 p-3" style="font-size:1.4rem;">⭐</div>
-
-              <div class="h-100 w-100 border border-2 rounded-4 p-3 d-flex flex-column align-items-center justify-content-between shadow-sm"
-                   style="border-color:#FCD34D !important; background:rgba(255,255,255,0.9);">
-
-                <div class="d-flex flex-column align-items-center">
-                  <img src="assets/images/mascot.png" alt="Mascot" class="rounded-circle shadow-sm mb-2" style="width:50px;height:50px;object-fit:contain;">
-                  <div class="badge bg-warning bg-opacity-25 text-warning-emphasis px-3 py-1 rounded-pill fw-bold text-uppercase small border border-warning border-opacity-50 mb-2">
-                    🏆 சான்றிதழ் · Official Certificate
+                  <hr class="my-2">
+                }
+                <!-- Stats Content for selected course (or combined 'Overall') -->
+                @if (enrolledCourses().length > 0) {
+                  @let statsCourse = selectedStatsCourse;
+                  @let showOverall = selectedStatsCourseId() === 'all';
+                  <div class="row g-3 mb-4">
+                    <div class="col-6">
+                      <div class="bg-light border rounded-4 p-3 text-center h-100">
+                        <i class="bi bi-bullseye text-primary fs-3 mb-1"></i>
+                        <h3 class="fw-bold text-dark mb-0">{{ showOverall ? accuracyPercentage() : (statsCourse?.accuracy ?? 0) }}%</h3>
+                        <span class="small text-secondary fw-semibold">Accuracy</span>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="bg-light border rounded-4 p-3 text-center h-100">
+                        <i class="bi bi-lightning-charge-fill text-warning fs-3 mb-1"></i>
+                        <h3 class="fw-bold text-dark mb-0">{{ showOverall ? streakDays() : (statsCourse?.streakDays ?? 0) }} <span class="fs-6 text-muted">Days</span></h3>
+                        <span class="small text-secondary fw-semibold">Current Streak</span>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="bg-light border rounded-4 p-3 text-center h-100">
+                        <i class="bi bi-check2-circle text-success fs-3 mb-1"></i>
+                        <h3 class="fw-bold text-dark mb-0">{{ showOverall ? correctAnswers() : (statsCourse?.correctAnswers ?? 0) }}</h3>
+                        <span class="small text-secondary fw-semibold">✔️ Correct</span>
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="bg-light border rounded-4 p-3 text-center h-100">
+                        <i class="bi bi-x-circle text-danger fs-3 mb-1"></i>
+                        <h3 class="fw-bold text-dark mb-0">{{ showOverall ? wrongAnswers() : (statsCourse?.wrongAnswers ?? 0) }}</h3>
+                        <span class="small text-secondary fw-semibold">❌ Wrong</span>
+                      </div>
+                    </div>
                   </div>
-                  <h4 class="fw-bold mb-1 text-primary" style="font-family:'Comic Sans MS','Nunito',sans-serif;">நிறைவு சான்றிதழ்</h4>
-                  <p class="small text-muted mb-0">சான்றளிக்கப்படுவது என்னவென்றால்</p>
-                </div>
-
-                <div class="my-3 w-100 text-center">
-                  <h2 class="fw-extrabold mb-1" style="color:#4C1D95; font-family:'Comic Sans MS','Nunito',serif; font-size:clamp(1.4rem,5vw,2rem);">
-                    {{ userName() || 'மாணவர் பெயர்' }}
-                  </h2>
-                  <div class="mx-auto bg-warning rounded-pill" style="height:3px;width:130px;"></div>
-                  <p class="small text-muted mt-2 mb-0">வெற்றிகரமாக இப்பாடத்திட்டத்தை நிறைவு செய்துள்ளார்</p>
-                </div>
-
-                <div class="mb-3 text-center">
-                  <h5 class="fw-bold text-success mb-1">{{ cert.name }}</h5>
-                  <span class="badge bg-light text-secondary border px-3 py-1 rounded-pill small fw-semibold">{{ studentOrg() || 'Ariga Public School' }}</span>
-                </div>
-
-                <div class="d-flex align-items-center justify-content-between w-100 pt-3 border-top" style="border-color:#E2E8F0 !important;">
-                  <div class="text-start">
-                    <span class="d-block text-muted" style="font-size:0.65rem;font-weight:700;">வழங்கப்பட்ட நாள்</span>
-                    <span class="fw-bold text-dark small">{{ cert.certDate }}</span>
-                  </div>
-                  <div class="bg-warning text-dark rounded-circle d-flex align-items-center justify-content-center shadow" style="width:46px;height:46px;border:3px double #fff;">
-                    <i class="bi bi-star-fill text-white fs-4"></i>
-                  </div>
-                  <div class="text-end">
-                    <span class="d-block text-muted" style="font-size:0.65rem;font-weight:700;">சரிபார்க்கப்பட்ட எண்</span>
-                    <span class="fw-bold text-primary small">#YAP-{{ cert.certId }}</span>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            <!-- Download Button -->
-            <div class="mt-3">
-              @if (cert.completion >= 100) {
-                <button class="btn btn-primary rounded-pill py-2 fw-bold w-100 shadow-sm d-flex align-items-center justify-content-center gap-2" (click)="downloadPDFCertificate()">
-                  <i class="bi bi-file-earmark-pdf-fill fs-5"></i> Download PDF Certificate
-                </button>
-              } @else {
-                <button class="btn btn-secondary rounded-pill py-2 fw-bold w-100 shadow-sm d-flex align-items-center justify-content-center gap-2 opacity-75" (click)="downloadPDFCertificate()">
-                  <i class="bi bi-lock-fill"></i> Download Locked (Complete 100%)
-                </button>
-              }
-            </div>
-
-          </div>
-        }
-        } <!-- Close the @else block -->
-
-      </div>
-
-      <!-- STATS MODAL -->
-      <div *ngIf="activeModal() === 'stats'">
-
-        <!-- Course Selector Pills (shows when >1 course) -->
-        @if (enrolledCourses().length > 1) {
-          <div class="mb-3">
-            <p class="small text-muted fw-bold mb-2">Course Statistics:</p>
-            <div class="d-flex gap-2 flex-wrap mb-1">
-              <button class="btn btn-sm rounded-pill fw-semibold border"
-                      [class.btn-success]="selectedStatsCourseId() === 'all'"
-                      [class.btn-light]="selectedStatsCourseId() !== 'all'"
-                      (click)="selectStatsCourse('all')">📊 Overall</button>
-              @for (course of enrolledCourses(); track course.id) {
-                <button class="btn btn-sm rounded-pill fw-semibold border"
-                        [class.btn-primary]="selectedStatsCourseId() === course.id"
-                        [class.btn-light]="selectedStatsCourseId() !== course.id"
-                        (click)="selectStatsCourse(course.id)">
-                  {{ course.name }}
-                </button>
-              }
-            </div>
-          </div>
-          <hr class="my-2">
-        }
-
-        <!-- Stats Content for selected course (or combined 'Overall') -->
-        @if (enrolledCourses().length > 0) {
-          @let statsCourse = selectedStatsCourse;
-          @let showOverall = selectedStatsCourseId() === 'all';
-
-          <div class="row g-3 mb-4">
-            <div class="col-6">
-              <div class="bg-light border rounded-4 p-3 text-center h-100">
-                <i class="bi bi-bullseye text-primary fs-3 mb-1"></i>
-                <h3 class="fw-bold text-dark mb-0">{{ showOverall ? accuracyPercentage() : (statsCourse?.accuracy ?? 0) }}%</h3>
-                <span class="small text-secondary fw-semibold">Accuracy</span>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="bg-light border rounded-4 p-3 text-center h-100">
-                <i class="bi bi-lightning-charge-fill text-warning fs-3 mb-1"></i>
-                <h3 class="fw-bold text-dark mb-0">{{ showOverall ? streakDays() : (statsCourse?.streakDays ?? 0) }} <span class="fs-6 text-muted">Days</span></h3>
-                <span class="small text-secondary fw-semibold">Current Streak</span>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="bg-light border rounded-4 p-3 text-center h-100">
-                <i class="bi bi-check2-circle text-success fs-3 mb-1"></i>
-                <h3 class="fw-bold text-dark mb-0">{{ showOverall ? correctAnswers() : (statsCourse?.correctAnswers ?? 0) }}</h3>
-                <span class="small text-secondary fw-semibold">✔️ Correct</span>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="bg-light border rounded-4 p-3 text-center h-100">
-                <i class="bi bi-x-circle text-danger fs-3 mb-1"></i>
-                <h3 class="fw-bold text-dark mb-0">{{ showOverall ? wrongAnswers() : (statsCourse?.wrongAnswers ?? 0) }}</h3>
-                <span class="small text-secondary fw-semibold">❌ Wrong</span>
-              </div>
-            </div>
-          </div>
-
-          @let totalQ = showOverall ? questionsAnswered() : (statsCourse?.questionsAnswered ?? 0);
-          @if (totalQ > 0) {
-            <div class="mb-4 bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 p-3 rounded-4 text-center">
-              <i class="bi bi-check-circle-fill fs-4 mb-2"></i>
-              <h6 class="fw-bold mb-1">Total Questions Answered</h6>
-              <h2 class="fw-bold mb-0">{{ totalQ }}</h2>
-              <small class="text-muted">
-                {{ showOverall ? correctAnswers() : (statsCourse?.correctAnswers ?? 0) }} Correct ·
-                {{ showOverall ? wrongAnswers() : (statsCourse?.wrongAnswers ?? 0) }} Wrong
-              </small>
-            </div>
-          } @else {
-            <div class="mb-4 bg-light text-muted border rounded-4 p-3 text-center">
-              <i class="bi bi-journal-text fs-4 mb-2"></i>
-              <p class="fw-semibold mb-0">No quiz activity yet. Start a chapter to see stats!</p>
-            </div>
-          }
-
-          <!-- Skill Mastery bars -->
-          @let masteryList = showOverall ? skillMastery() : (statsCourse?.skillMastery ?? []);
-          @if (masteryList.length > 0) {
-            <h6 class="fw-bold text-dark mb-3">Skill Mastery (திறன் அறிக்கை)</h6>
-            <div class="skills-list">
-              @for (skill of masteryList; track skill.topic) {
-                <div class="mb-3">
-                  <div class="d-flex justify-content-between mb-1">
-                    <span class="fw-semibold text-dark">{{ skill.topic }}</span>
-                    <span class="fw-bold" [style.color]="skill.color">{{ skill.mastery }}%</span>
-                  </div>
-                  <div class="progress rounded-pill bg-light border" style="height: 12px;">
-                    <div class="progress-bar rounded-pill" [style.width.%]="skill.mastery" [style.background-color]="skill.color"></div>
-                  </div>
-                </div>
-              }
-            </div>
-          }
-
-          <!-- Per-course completion summary (shown in Overall view) -->
-          @if (showOverall && enrolledCourses().length > 1) {
-            <h6 class="fw-bold text-dark mt-4 mb-3">📚 Course Progress</h6>
-            @for (c of enrolledCourses(); track c.id) {
-              <div class="mb-3">
-                <div class="d-flex justify-content-between mb-1">
-                  <span class="fw-semibold text-dark small">{{ c.name }}</span>
-                  <span class="fw-bold text-primary small">{{ c.completion }}%</span>
-                </div>
-                <div class="progress rounded-pill bg-light border" style="height: 10px;">
-                  <div class="progress-bar rounded-pill bg-primary" [style.width.%]="c.completion"></div>
-                </div>
+                  @let totalQ = showOverall ? questionsAnswered() : (statsCourse?.questionsAnswered ?? 0);
+                  @if (totalQ > 0) {
+                    <div class="mb-4 bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 p-3 rounded-4 text-center">
+                      <i class="bi bi-check-circle-fill fs-4 mb-2"></i>
+                      <h6 class="fw-bold mb-1">Total Questions Answered</h6>
+                      <h2 class="fw-bold mb-0">{{ totalQ }}</h2>
+                      <small class="text-muted">
+                        {{ showOverall ? correctAnswers() : (statsCourse?.correctAnswers ?? 0) }} Correct ·
+                        {{ showOverall ? wrongAnswers() : (statsCourse?.wrongAnswers ?? 0) }} Wrong
+                      </small>
+                    </div>
+                  } @else {
+                    <div class="mb-4 bg-light text-muted border rounded-4 p-3 text-center">
+                      <i class="bi bi-journal-text fs-4 mb-2"></i>
+                      <p class="fw-semibold mb-0">No quiz activity yet. Start a chapter to see stats!</p>
+                    </div>
+                  }
+                  <!-- Skill Mastery bars -->
+                  @let masteryList = showOverall ? skillMastery() : (statsCourse?.skillMastery ?? []);
+                  @if (masteryList.length > 0) {
+                    <h6 class="fw-bold text-dark mb-3">Skill Mastery (திறன் அறிக்கை)</h6>
+                    <div class="skills-list">
+                      @for (skill of masteryList; track skill.topic) {
+                        <div class="mb-3">
+                          <div class="d-flex justify-content-between mb-1">
+                            <span class="fw-semibold text-dark">{{ skill.topic }}</span>
+                            <span class="fw-bold" [style.color]="skill.color">{{ skill.mastery }}%</span>
+                          </div>
+                          <div class="progress rounded-pill bg-light border" style="height: 12px;">
+                            <div class="progress-bar rounded-pill" [style.width.%]="skill.mastery" [style.background-color]="skill.color"></div>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                  <!-- Per-course completion summary (shown in Overall view) -->
+                  @if (showOverall && enrolledCourses().length > 1) {
+                    <h6 class="fw-bold text-dark mt-4 mb-3">📚 Course Progress</h6>
+                    @for (c of enrolledCourses(); track c.id) {
+                      <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                          <span class="fw-semibold text-dark small">{{ c.name }}</span>
+                          <span class="fw-bold text-primary small">{{ c.completion }}%</span>
+                        </div>
+                        <div class="progress rounded-pill bg-light border" style="height: 10px;">
+                          <div class="progress-bar rounded-pill bg-primary" [style.width.%]="c.completion"></div>
+                        </div>
+                      </div>
+                    }
+                  }
+                }
               </div>
             }
-          }
-
-        }
-      </div>
-
-      <!-- HELP & SUPPORT MODAL -->
-      <div *ngIf="activeModal() === 'help'">
-        
-        <!-- Toggle Header -->
-        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
-          <h5 class="fw-bold text-dark mb-0">
-            <i class="bi bi-question-circle text-primary me-2"></i> 
-            {{ isViewingTickets() ? 'My Support Tickets' : 'Need Help?' }}
-          </h5>
-          <button class="btn btn-sm btn-outline-secondary rounded-pill fw-semibold" (click)="toggleTicketView()">
-            <i class="bi" [class.bi-list-ul]="!isViewingTickets()" [class.bi-plus-lg]="isViewingTickets()"></i> 
-            {{ isViewingTickets() ? 'New Ticket' : 'View My Tickets' }}
-          </button>
-        </div>
-
-        @if (ticketSuccessMsg()) {
-          <div class="alert alert-success rounded-4 border-0 d-flex align-items-center shadow-sm">
-            <i class="bi bi-check-circle-fill fs-4 me-3"></i> {{ ticketSuccessMsg() }}
-          </div>
-        }
-
-        @if (ticketErrorMsg()) {
-          <div class="alert alert-danger rounded-4 border-0 d-flex align-items-center shadow-sm">
-            <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i> {{ ticketErrorMsg() }}
-          </div>
-        }
-
-        <!-- SUBMIT TICKET FORM -->
-        @if (!isViewingTickets()) {
-          <div class="bg-light p-4 rounded-4 border">
-            <p class="text-secondary small mb-4">If you face any issues or need guidance on learning, submit a ticket below and our admins will help you!</p>
-            
-            <div class="mb-3">
-              <label class="form-label small fw-bold text-dark">Subject <span class="text-danger">*</span></label>
-              <input type="text" class="form-control form-control-lg rounded-pill fs-6" 
-                     placeholder="E.g., App is crashing on level 2" 
-                     [ngModel]="ticketSubject()" (ngModelChange)="ticketSubject.set($event)">
-            </div>
-            
-            <div class="row g-3 mb-3">
-              <div class="col-md-6">
-                <label class="form-label small fw-bold text-dark">Category</label>
-                <select class="form-select form-select-lg rounded-pill fs-6" 
-                        [ngModel]="ticketCategory()" (ngModelChange)="ticketCategory.set($event)">
-                  <option value="general">General Inquiry</option>
-                  <option value="technical">Technical Issue / Bug</option>
-                  <option value="content">Course Content / Error</option>
-                  <option value="billing">Billing / Account</option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label small fw-bold text-dark">Priority</label>
-                <select class="form-select form-select-lg rounded-pill fs-6" 
-                        [ngModel]="ticketPriority()" (ngModelChange)="ticketPriority.set($event)">
-                  <option value="low">Low (Not urgent)</option>
-                  <option value="normal">Normal</option>
-                  <option value="high">High (Needs quick fix)</option>
-                  <option value="urgent">Urgent (Blocking my progress)</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="mb-4">
-              <label class="form-label small fw-bold text-dark">Describe your issue <span class="text-danger">*</span></label>
-              <textarea class="form-control rounded-4 p-3" rows="4" 
-                        placeholder="Please provide details about the issue..."
+            <!-- HELP & SUPPORT MODAL -->
+            @if (activeModal() === 'help') {
+              <div>
+                <!-- Toggle Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom">
+                  <h5 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-question-circle text-primary me-2"></i>
+                    {{ isViewingTickets() ? 'My Support Tickets' : 'Need Help?' }}
+                  </h5>
+                  <button class="btn btn-sm btn-outline-secondary rounded-pill fw-semibold" (click)="toggleTicketView()">
+                    <i class="bi" [class.bi-list-ul]="!isViewingTickets()" [class.bi-plus-lg]="isViewingTickets()"></i>
+                    {{ isViewingTickets() ? 'New Ticket' : 'View My Tickets' }}
+                  </button>
+                </div>
+                @if (ticketSuccessMsg()) {
+                  <div class="alert alert-success rounded-4 border-0 d-flex align-items-center shadow-sm">
+                    <i class="bi bi-check-circle-fill fs-4 me-3"></i> {{ ticketSuccessMsg() }}
+                  </div>
+                }
+                @if (ticketErrorMsg()) {
+                  <div class="alert alert-danger rounded-4 border-0 d-flex align-items-center shadow-sm">
+                    <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i> {{ ticketErrorMsg() }}
+                  </div>
+                }
+                <!-- SUBMIT TICKET FORM -->
+                @if (!isViewingTickets()) {
+                  <div class="bg-light p-4 rounded-4 border">
+                    <p class="text-secondary small mb-4">If you face any issues or need guidance on learning, submit a ticket below and our admins will help you!</p>
+                    <div class="mb-3">
+                      <label class="form-label small fw-bold text-dark">Subject <span class="text-danger">*</span></label>
+                      <input type="text" class="form-control form-control-lg rounded-pill fs-6"
+                        placeholder="E.g., App is crashing on level 2"
+                        [ngModel]="ticketSubject()" (ngModelChange)="ticketSubject.set($event)">
+                      </div>
+                      <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                          <label class="form-label small fw-bold text-dark">Category</label>
+                          <select class="form-select form-select-lg rounded-pill fs-6"
+                            [ngModel]="ticketCategory()" (ngModelChange)="ticketCategory.set($event)">
+                            <option value="general">General Inquiry</option>
+                            <option value="technical">Technical Issue / Bug</option>
+                            <option value="content">Course Content / Error</option>
+                            <option value="billing">Billing / Account</option>
+                          </select>
+                        </div>
+                        <div class="col-md-6">
+                          <label class="form-label small fw-bold text-dark">Priority</label>
+                          <select class="form-select form-select-lg rounded-pill fs-6"
+                            [ngModel]="ticketPriority()" (ngModelChange)="ticketPriority.set($event)">
+                            <option value="low">Low (Not urgent)</option>
+                            <option value="normal">Normal</option>
+                            <option value="high">High (Needs quick fix)</option>
+                            <option value="urgent">Urgent (Blocking my progress)</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="mb-4">
+                        <label class="form-label small fw-bold text-dark">Describe your issue <span class="text-danger">*</span></label>
+                        <textarea class="form-control rounded-4 p-3" rows="4"
+                          placeholder="Please provide details about the issue..."
                         [ngModel]="ticketMessage()" (ngModelChange)="ticketMessage.set($event)"></textarea>
-            </div>
-
-            <button class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm d-flex justify-content-center align-items-center gap-2" 
-                    [disabled]="isSubmittingTicket()" (click)="submitTicket()">
-              @if (isSubmittingTicket()) {
-                <span class="spinner-border spinner-border-sm"></span> Submitting...
-              } @else {
-                <i class="bi bi-send-fill"></i> Submit Ticket
-              }
-            </button>
-          </div>
-        }
-
-        <!-- VIEW MY TICKETS -->
-        @if (isViewingTickets()) {
-          @if (supportTickets().length === 0) {
-            <div class="text-center py-5 text-muted">
-              <i class="bi bi-inbox fs-1 mb-2"></i>
-              <p>You haven't submitted any tickets yet.</p>
-              <button class="btn btn-outline-primary rounded-pill btn-sm mt-2 fw-semibold" (click)="toggleTicketView()">Submit your first ticket</button>
-            </div>
-          } @else {
-            <div class="d-flex flex-column gap-3">
-              @for (ticket of supportTickets(); track ticket.id) {
-                <div class="card border rounded-4 shadow-sm">
-                  <div class="card-header bg-white border-bottom-0 pt-3 pb-0 d-flex justify-content-between align-items-start">
-                    <h6 class="fw-bold text-dark mb-0">{{ ticket.subject }}</h6>
-                    <span class="badge rounded-pill ms-2"
+                      </div>
+                      <button class="btn btn-primary w-100 rounded-pill py-2 fw-bold shadow-sm d-flex justify-content-center align-items-center gap-2"
+                        [disabled]="isSubmittingTicket()" (click)="submitTicket()">
+                        @if (isSubmittingTicket()) {
+                          <span class="spinner-border spinner-border-sm"></span> Submitting...
+                        } @else {
+                          <i class="bi bi-send-fill"></i> Submit Ticket
+                        }
+                      </button>
+                    </div>
+                  }
+                  <!-- VIEW MY TICKETS -->
+                  @if (isViewingTickets()) {
+                    @if (supportTickets().length === 0) {
+                      <div class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-1 mb-2"></i>
+                        <p>You haven't submitted any tickets yet.</p>
+                        <button class="btn btn-outline-primary rounded-pill btn-sm mt-2 fw-semibold" (click)="toggleTicketView()">Submit your first ticket</button>
+                      </div>
+                    } @else {
+                      <div class="d-flex flex-column gap-3">
+                        @for (ticket of supportTickets(); track ticket.id) {
+                          <div class="card border rounded-4 shadow-sm">
+                            <div class="card-header bg-white border-bottom-0 pt-3 pb-0 d-flex justify-content-between align-items-start">
+                              <h6 class="fw-bold text-dark mb-0">{{ ticket.subject }}</h6>
+                              <span class="badge rounded-pill ms-2"
                           [ngClass]="{
                             'bg-warning text-dark': ticket.status === 'open',
                             'bg-info': ticket.status === 'in_progress',
                             'bg-success': ticket.status === 'resolved',
                             'bg-secondary': ticket.status === 'closed'
                           }">
-                      {{ ticket.status | uppercase }}
-                    </span>
-                  </div>
-                  <div class="card-body py-2">
-                    <div class="d-flex gap-2 mb-2">
-                      <span class="badge bg-light text-secondary border small"><i class="bi bi-tag-fill me-1"></i>{{ ticket.category }}</span>
-                      <span class="badge bg-light text-secondary border small"><i class="bi bi-flag-fill me-1"></i>{{ ticket.priority }}</span>
-                      <span class="small text-muted ms-auto"><i class="bi bi-clock me-1"></i>{{ ticket.created_at | date:'shortDate' }}</span>
-                    </div>
-                  </div>
-                  @if (ticket.admin_reply) {
-                    <div class="card-footer bg-light rounded-bottom-4 border-top">
-                      <div class="d-flex gap-2">
-                        <i class="bi bi-person-fill-check text-success fs-5"></i>
-                        <div>
-                          <p class="small fw-bold text-success mb-1">Admin Reply <span class="text-muted fw-normal">({{ ticket.replied_at | date:'shortDate' }})</span>:</p>
-                          <p class="small text-dark mb-0">{{ ticket.admin_reply }}</p>
-                        </div>
+                                {{ ticket.status | uppercase }}
+                              </span>
+                            </div>
+                            <div class="card-body py-2">
+                              <div class="d-flex gap-2 mb-2">
+                                <span class="badge bg-light text-secondary border small"><i class="bi bi-tag-fill me-1"></i>{{ ticket.category }}</span>
+                                <span class="badge bg-light text-secondary border small"><i class="bi bi-flag-fill me-1"></i>{{ ticket.priority }}</span>
+                                <span class="small text-muted ms-auto"><i class="bi bi-clock me-1"></i>{{ ticket.created_at | date:'shortDate' }}</span>
+                              </div>
+                            </div>
+                            @if (ticket.admin_reply) {
+                              <div class="card-footer bg-light rounded-bottom-4 border-top">
+                                <div class="d-flex gap-2">
+                                  <i class="bi bi-person-fill-check text-success fs-5"></i>
+                                  <div>
+                                    <p class="small fw-bold text-success mb-1">Admin Reply <span class="text-muted fw-normal">({{ ticket.replied_at | date:'shortDate' }})</span>:</p>
+                                    <p class="small text-dark mb-0">{{ ticket.admin_reply }}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        }
                       </div>
-                    </div>
+                    }
                   }
                 </div>
               }
             </div>
-          }
-        }
-      </div>
+          </div>
+        </div>
+      }
+
+      <!-- ============================================== -->
+      <!-- ANIMATED ACHIEVEMENT BADGE SHOWCASE MODAL -->
+      <!-- ============================================== -->
+      @if (showBadgeModal() && selectedBadge()) {
+        <div
+          class="modal-overlay d-flex align-items-center justify-content-center p-3"
+          style="z-index: 1060 !important;"
+          (click)="closeBadgeModal()">
+          <div class="badge-showcase-card bg-white rounded-5 shadow-lg p-4 text-center position-relative overflow-hidden border border-3 border-warning animate-pop-in"
+            style="max-width: 380px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.35) !important;"
+            (click)="$event.stopPropagation()">
+            <!-- Radial glow background -->
+            <div class="position-absolute top-0 start-0 w-100 h-100 pe-none"
+              [style.background]="'radial-gradient(circle at 50% 20%, ' + (selectedBadge()?.bg || '#6366f1') + '25 0%, transparent 70%)'"
+            style="z-index: 0;"></div>
+            <!-- Close Button -->
+            <button class="btn btn-light rounded-circle position-absolute top-0 end-0 m-3 p-0 d-flex align-items-center justify-content-center shadow-sm"
+              style="width: 36px; height: 36px; z-index: 5;"
+              (click)="closeBadgeModal()">
+              <i class="bi bi-x-lg small"></i>
+            </button>
+            <!-- Animated Icon with pulsing halos -->
+            <div class="position-relative d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 130px; height: 130px; z-index: 2;">
+              <div class="position-absolute rounded-circle"
+                [style.background-color]="(selectedBadge()?.bg || '#6366f1') + '20'"
+              style="width: 130px; height: 130px; animation: pulse 2s ease-in-out infinite;"></div>
+              <div class="position-absolute rounded-circle"
+                [style.background-color]="(selectedBadge()?.bg || '#6366f1') + '30'"
+              style="width: 100px; height: 100px; animation: pulse 2s ease-in-out infinite 0.5s;"></div>
+              <div class="rounded-circle d-flex align-items-center justify-content-center shadow position-relative"
+                [style.background-color]="(selectedBadge()?.bg || '#6366f1') + '22'"
+                style="width: 78px; height: 78px; border: 3px solid rgba(255,255,255,0.6);">
+                <span style="font-size: 2.8rem; line-height: 1; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.2)); animation: bounce-in 0.6s cubic-bezier(0.34,1.56,0.64,1);">
+                  {{ selectedBadge()?.icon }}
+                </span>
+              </div>
+            </div>
+            <!-- ACHIEVEMENT UNLOCKED chip -->
+            <div class="d-inline-flex align-items-center gap-1 badge bg-success-subtle text-success border border-success border-opacity-25 px-3 py-1 rounded-pill fw-bold small mb-2 shadow-sm"
+              style="z-index: 2; position: relative; letter-spacing: 0.05em;">
+              <i class="bi bi-patch-check-fill"></i> ACHIEVEMENT UNLOCKED
+            </div>
+            <!-- Badge Name -->
+            <h3 class="fw-extrabold text-dark mb-1 mt-1 position-relative" style="z-index: 2; font-size: 1.5rem;">
+              {{ selectedBadge()?.name }}
+            </h3>
+            <!-- Description -->
+            <p class="text-secondary mb-3 px-1 position-relative" style="z-index: 2; font-size: 0.88rem; line-height: 1.5;">
+              {{ selectedBadge()?.description }}
+            </p>
+            <!-- XP Reward Bar -->
+            <div class="rounded-4 p-3 mb-4 d-flex align-items-center justify-content-center gap-3 position-relative"
+              style="z-index: 2; background: linear-gradient(135deg, #FEF3C7, #FDE68A); border: 1px solid #FCD34D;">
+              <span style="font-size: 2rem;">🌟</span>
+              <div class="text-start">
+                <span class="d-block text-uppercase fw-bold text-amber-700" style="font-size: 0.62rem; letter-spacing: 0.08em; color: #92400E;">XP EARNED</span>
+                <span class="fw-extrabold" style="font-size: 1.5rem; color: #78350F;">+{{ selectedBadge()?.xp || 100 }} XP</span>
+              </div>
+            </div>
+            <!-- CTA Button -->
+            <button class="btn fw-bold rounded-pill w-100 py-2 position-relative"
+              style="z-index: 2; background: linear-gradient(135deg, #F59E0B, #FBBF24); color: #1C1917; font-size: 1rem; box-shadow: 0 4px 16px rgba(245,158,11,0.4);"
+              (click)="closeBadgeModal()">
+              Awesome! 🎉
+            </button>
+          </div>
+        </div>
+      }
 
     </div>
-  </div>
-</div>
-
-<!-- ============================================== -->
-<!-- ANIMATED ACHIEVEMENT BADGE SHOWCASE MODAL -->
-<!-- ============================================== -->
-<div *ngIf="showBadgeModal() && selectedBadge()"
-     class="modal-overlay d-flex align-items-center justify-content-center p-3"
-     style="z-index: 1060 !important;"
-     (click)="closeBadgeModal()">
-  <div class="badge-showcase-card bg-white rounded-5 shadow-lg p-4 text-center position-relative overflow-hidden border border-3 border-warning animate-pop-in"
-       style="max-width: 380px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.35) !important;"
-       (click)="$event.stopPropagation()">
-
-    <!-- Radial glow background -->
-    <div class="position-absolute top-0 start-0 w-100 h-100 pe-none"
-         [style.background]="'radial-gradient(circle at 50% 20%, ' + (selectedBadge()?.bg || '#6366f1') + '25 0%, transparent 70%)'"
-         style="z-index: 0;"></div>
-
-    <!-- Close Button -->
-    <button class="btn btn-light rounded-circle position-absolute top-0 end-0 m-3 p-0 d-flex align-items-center justify-content-center shadow-sm"
-            style="width: 36px; height: 36px; z-index: 5;"
-            (click)="closeBadgeModal()">
-      <i class="bi bi-x-lg small"></i>
-    </button>
-
-    <!-- Animated Icon with pulsing halos -->
-    <div class="position-relative d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 130px; height: 130px; z-index: 2;">
-      <div class="position-absolute rounded-circle"
-           [style.background-color]="(selectedBadge()?.bg || '#6366f1') + '20'"
-           style="width: 130px; height: 130px; animation: pulse 2s ease-in-out infinite;"></div>
-      <div class="position-absolute rounded-circle"
-           [style.background-color]="(selectedBadge()?.bg || '#6366f1') + '30'"
-           style="width: 100px; height: 100px; animation: pulse 2s ease-in-out infinite 0.5s;"></div>
-      <div class="rounded-circle d-flex align-items-center justify-content-center shadow position-relative"
-           [style.background-color]="(selectedBadge()?.bg || '#6366f1') + '22'"
-           style="width: 78px; height: 78px; border: 3px solid rgba(255,255,255,0.6);">
-        <span style="font-size: 2.8rem; line-height: 1; filter: drop-shadow(0 6px 12px rgba(0,0,0,0.2)); animation: bounce-in 0.6s cubic-bezier(0.34,1.56,0.64,1);">
-          {{ selectedBadge()?.icon }}
-        </span>
-      </div>
-    </div>
-
-    <!-- ACHIEVEMENT UNLOCKED chip -->
-    <div class="d-inline-flex align-items-center gap-1 badge bg-success-subtle text-success border border-success border-opacity-25 px-3 py-1 rounded-pill fw-bold small mb-2 shadow-sm"
-         style="z-index: 2; position: relative; letter-spacing: 0.05em;">
-      <i class="bi bi-patch-check-fill"></i> ACHIEVEMENT UNLOCKED
-    </div>
-
-    <!-- Badge Name -->
-    <h3 class="fw-extrabold text-dark mb-1 mt-1 position-relative" style="z-index: 2; font-size: 1.5rem;">
-      {{ selectedBadge()?.name }}
-    </h3>
-
-    <!-- Description -->
-    <p class="text-secondary mb-3 px-1 position-relative" style="z-index: 2; font-size: 0.88rem; line-height: 1.5;">
-      {{ selectedBadge()?.description }}
-    </p>
-
-    <!-- XP Reward Bar -->
-    <div class="rounded-4 p-3 mb-4 d-flex align-items-center justify-content-center gap-3 position-relative"
-         style="z-index: 2; background: linear-gradient(135deg, #FEF3C7, #FDE68A); border: 1px solid #FCD34D;">
-      <span style="font-size: 2rem;">🌟</span>
-      <div class="text-start">
-        <span class="d-block text-uppercase fw-bold text-amber-700" style="font-size: 0.62rem; letter-spacing: 0.08em; color: #92400E;">XP EARNED</span>
-        <span class="fw-extrabold" style="font-size: 1.5rem; color: #78350F;">+{{ selectedBadge()?.xp || 100 }} XP</span>
-      </div>
-    </div>
-
-    <!-- CTA Button -->
-    <button class="btn fw-bold rounded-pill w-100 py-2 position-relative"
-            style="z-index: 2; background: linear-gradient(135deg, #F59E0B, #FBBF24); color: #1C1917; font-size: 1rem; box-shadow: 0 4px 16px rgba(245,158,11,0.4);"
-            (click)="closeBadgeModal()">
-      Awesome! 🎉
-    </button>
-
-  </div>
-</div>
-
-  </div>

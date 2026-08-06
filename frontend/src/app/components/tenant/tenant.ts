@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal, ChangeDetectorRef, ViewChild, ElementRef } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
 import { TenantService, TenantData } from '../../services/tenant';
@@ -16,7 +16,6 @@ import {
   selector: 'app-tenant',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     McvInputField,
     McvPhoneField,
@@ -24,7 +23,7 @@ import {
     McvTextArea,
     McvToggleField,
     TranslateModule
-  ],
+],
   templateUrl: './tenant.html',
   styleUrls: ['./tenant.css'],
 })

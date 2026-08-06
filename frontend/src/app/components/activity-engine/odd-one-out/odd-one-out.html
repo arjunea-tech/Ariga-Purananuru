@@ -2,11 +2,11 @@
   <div class="mb-4 text-center">
     <div class="d-flex align-items-center justify-content-center mb-3 flex-wrap gap-2">
       @if (activity?.audioUrl) {
-        <button type="button" 
-                class="btn btn-primary d-flex align-items-center gap-2 rounded-pill px-4 py-2 border-0 shadow-sm text-white font-semibold"
-                style="transition: all 0.3s ease; background: linear-gradient(135deg, #6366f1, #3b82f6); font-size: 0.85rem;"
-                [class.opacity-75]="isPlaying()"
-                (click)="playAudio()">
+        <button type="button"
+          class="btn btn-primary d-flex align-items-center gap-2 rounded-pill px-4 py-2 border-0 shadow-sm text-white font-semibold"
+          style="transition: all 0.3s ease; background: linear-gradient(135deg, #6366f1, #3b82f6); font-size: 0.85rem;"
+          [class.opacity-75]="isPlaying()"
+          (click)="playAudio()">
           @if (isPlaying()) {
             <span class="spinner-grow spinner-grow-sm text-white" role="status" aria-hidden="true" style="width: 0.8rem; height: 0.8rem;"></span>
             <span>Playing...</span>
@@ -22,7 +22,7 @@
 
   <div class="odd-cards-grid w-100 mb-2">
     @for (option of activity?.options; track option.id; let idx = $index) {
-      <button 
+      <button
         type="button"
         class="odd-card-btn d-flex flex-column align-items-center justify-content-center border rounded-4 p-4 position-relative"
         [class.selected]="selectedOptionId() === option.id"
@@ -32,20 +32,22 @@
         [class.bounce]="showFeedback && hasSubmitted() && option.isCorrect && selectedOptionId() === option.id"
         [disabled]="showFeedback && hasSubmitted()"
         (click)="selectOption(option)">
-        
+
         <!-- Letter indicator badge on top-left -->
         <span class="odd-card-badge position-absolute top-0 start-0 m-2 badge rounded-pill bg-light text-secondary border">
           {{ getLetter(idx) }}
         </span>
 
         <!-- State Icon top-right -->
-        <div class="position-absolute top-0 end-0 m-2 fs-5" *ngIf="showFeedback && hasSubmitted()">
-          @if (option.isCorrect) {
-            <i class="bi bi-check-circle-fill text-success"></i>
-          } @else if (selectedOptionId() === option.id) {
-            <i class="bi bi-x-circle-fill text-danger"></i>
-          }
-        </div>
+        @if (showFeedback && hasSubmitted()) {
+          <div class="position-absolute top-0 end-0 m-2 fs-5">
+            @if (option.isCorrect) {
+              <i class="bi bi-check-circle-fill text-success"></i>
+            } @else if (selectedOptionId() === option.id) {
+              <i class="bi bi-x-circle-fill text-danger"></i>
+            }
+          </div>
+        }
 
         <span class="odd-card-text fw-bold text-dark mb-0">{{ option.text }}</span>
       </button>

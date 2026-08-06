@@ -40,6 +40,10 @@ export class Course implements OnInit {
   constructor() {
     this.courseForm = this.fb.group({
       name: ['', Validators.required],
+      price: [500, [Validators.required, Validators.min(0)]],
+      original_price: [null, [Validators.min(0)]],
+      tags: [''],
+      cover_image: [null],
       description: [''],
       is_active: [true],
     });
@@ -68,7 +72,11 @@ export class Course implements OnInit {
       return;
     }
 
-    const courseData: CourseData = this.courseForm.value;
+    const formValue = this.courseForm.value;
+    const courseData: CourseData = {
+      ...formValue,
+      tags: formValue.tags ? formValue.tags.split(',').map((t: string) => t.trim()).filter((t: string) => t) : []
+    };
 
     if (this.isEditMode()) {
       const id = this.currentCourseId();
@@ -99,6 +107,10 @@ export class Course implements OnInit {
     this.currentCourseId.set(course.id!);
     this.courseForm.patchValue({
       name: course.name,
+      price: course.price ?? 500,
+      original_price: course.original_price,
+      tags: course.tags ? course.tags.join(', ') : '',
+      cover_image: course.cover_image,
       description: course.description,
       is_active: course.is_active,
     });
@@ -119,7 +131,7 @@ export class Course implements OnInit {
   }
 
   resetForm(): void {
-    this.courseForm.reset({ is_active: true });
+    this.courseForm.reset({ is_active: true, price: 500, tags: '' });
     this.isEditMode.set(false);
     this.currentCourseId.set(null);
   }
@@ -129,7 +141,23 @@ export class Course implements OnInit {
     this.isFormVisible.set(false);
   }
 
-  private showFeedback(type: 'success' | 'error', text: string): void {
-    this.notificationService.show(type, text);
+  private showFeedback(type: 'success' | 'error', message: string): void {
+    this.notificationService.show(type, message);
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.courseService.uploadCover(file).subscribe({
+        next: (res) => {
+          this.courseForm.patchValue({ cover_image: res.url });
+          this.showFeedback('success', 'Image uploaded successfully');
+        },
+        error: (err) => {
+          this.showFeedback('error', 'Image upload failed');
+          console.error(err);
+        }
+      });
+    }
   }
 }
