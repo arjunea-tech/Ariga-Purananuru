@@ -69,6 +69,7 @@ class DatabaseSeeder extends Seeder
             EluthuActivitySeeder::class,
             YappuSeerActivitySeeder::class,
             YappuSeerWordSeeder::class,
+            GlobalTenantSeeder::class,
             
         ]);
     }
