@@ -80,12 +80,14 @@
       </div>
 
       <div class="header-right-actions">
-        <button class="icon-circle-btn" title="Notifications">
+        <button class="icon-circle-btn" title="Notifications" (click)="goToAnnouncements()">
           <i class="bi bi-bell"></i>
-          <span class="notification-dot"></span>
+          @if (announcements().length > 0) {
+            <span class="notification-dot"></span>
+          }
         </button>
 
-        <button class="icon-circle-btn" title="Settings">
+        <button class="icon-circle-btn" title="Settings" (click)="setActiveView('profile')">
           <i class="bi bi-gear"></i>
         </button>
 
@@ -832,7 +834,62 @@
       </div>
       }
 
+      <!-- Dynamic Announcements Pop Up Modal -->
+  @if (showAnnouncementsModal()) {
+    <div class="custom-modal-overlay animate-fade-in" (click)="closeAnnouncements()">
+      <div class="custom-modal-content animate-scale-up" (click)="$event.stopPropagation()">
+        
+        <div class="modal-header-section d-flex justify-content-between align-items-center mb-4">
+          <div class="d-flex align-items-center gap-2">
+            <span class="fs-4">📢</span>
+            <h3 class="fw-bold mb-0 text-dark" style="font-size: 1.25rem;">அறிவிப்புகள் (Announcements)</h3>
+          </div>
+          <button class="btn-close-custom" (click)="closeAnnouncements()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+
+        <div class="modal-body-section" style="max-height: 400px; overflow-y: auto;">
+          @if (loadingAnnouncements()) {
+            <div class="text-center py-5">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+              <p class="text-muted mt-3 mb-0">அறிவிப்புகளைத் திரட்டுகிறது...</p>
+            </div>
+          } @else {
+            @if (announcements().length > 0) {
+              <div class="d-flex flex-column gap-3">
+                @for (item of announcements(); track item.id) {
+                  <div class="p-3 border rounded-3 text-start bg-white shadow-xs">
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                      <span class="badge bg-primary-subtle text-primary rounded-pill px-2.5 py-1 fw-semibold" style="font-size: 0.75rem;">
+                        <i class="bi bi-calendar-event me-1"></i> {{ item.created_at | date:'medium' }}
+                      </span>
+                    </div>
+                    <h4 class="fw-bold mb-2 text-dark" style="font-size: 1rem; line-height: 1.2;">
+                      {{ item.title }}
+                    </h4>
+                    <p class="text-secondary mb-0 small" style="white-space: pre-wrap; line-height: 1.4;">
+                      {{ item.message }}
+                    </p>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="text-center py-5 text-muted">
+                <span style="font-size: 3rem;">📭</span>
+                <h4 class="fw-bold mt-3 mb-1 text-dark">அறிவிப்புகள் எதுவும் இல்லை</h4>
+                <p class="small mb-0">தற்போது புதிய அறிவிப்புகள் எதுவும் இல்லை.</p>
+              </div>
+            }
+          }
+        </div>
+
+      </div>
     </div>
+  }
+</div>
   </main>
 
 </div>

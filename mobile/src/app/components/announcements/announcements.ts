@@ -39,6 +39,7 @@ export class Announcements implements OnInit {
   announcementForm: FormGroup;
   isSubmitting = signal<boolean>(false);
   showForm = signal<boolean>(false);
+  editingAnnouncement = signal<Announcement | null>(null);
 
   constructor() {
     this.announcementForm = this.fb.group({
@@ -114,18 +115,52 @@ export class Announcements implements OnInit {
       payload.tenant_id = Number(payload.tenant_id);
     }
 
-    this.http.post<Announcement>(`${environment.apiUrl}/announcements`, payload, { headers }).subscribe({
-      next: (newAnnouncement) => {
-        this.announcements.update(list => [newAnnouncement, ...list]);
-        this.announcementForm.reset({ target_roles: [], tenant_id: 'global' });
-        this.showForm.set(false);
-        this.isSubmitting.set(false);
-      },
-      error: () => {
-        this.error.set('Failed to publish announcement.');
-        this.isSubmitting.set(false);
-      }
+    const editMode = this.editingAnnouncement();
+    if (editMode) {
+      this.http.put<Announcement>(`${environment.apiUrl}/announcements/${editMode.id}`, payload, { headers }).subscribe({
+        next: (updatedAnn) => {
+          this.announcements.update(list => list.map(a => a.id === editMode.id ? { ...a, ...updatedAnn } : a));
+          this.announcementForm.reset({ target_roles: [], tenant_id: 'global' });
+          this.editingAnnouncement.set(null);
+          this.showForm.set(false);
+          this.isSubmitting.set(false);
+        },
+        error: () => {
+          this.error.set('Failed to update announcement.');
+          this.isSubmitting.set(false);
+        }
+      });
+    } else {
+      this.http.post<Announcement>(`${environment.apiUrl}/announcements`, payload, { headers }).subscribe({
+        next: (newAnnouncement) => {
+          this.announcements.update(list => [newAnnouncement, ...list]);
+          this.announcementForm.reset({ target_roles: [], tenant_id: 'global' });
+          this.showForm.set(false);
+          this.isSubmitting.set(false);
+        },
+        error: () => {
+          this.error.set('Failed to publish announcement.');
+          this.isSubmitting.set(false);
+        }
+      });
+    }
+  }
+
+  editAnnouncement(announcement: Announcement): void {
+    this.editingAnnouncement.set(announcement);
+    this.announcementForm.patchValue({
+      title: announcement.title,
+      message: announcement.message,
+      target_roles: announcement.target_roles || [],
+      tenant_id: announcement.tenant_id === null ? 'global' : announcement.tenant_id.toString()
     });
+    this.showForm.set(true);
+  }
+
+  cancelForm(): void {
+    this.announcementForm.reset({ target_roles: [], tenant_id: 'global' });
+    this.editingAnnouncement.set(null);
+    this.showForm.set(false);
   }
 
   deleteAnnouncement(id: number): void {

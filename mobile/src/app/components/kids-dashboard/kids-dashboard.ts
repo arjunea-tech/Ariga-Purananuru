@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, signal, inject, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { environment } from '../../../environments/environment';
@@ -20,7 +21,7 @@ export interface DynamicModuleItem {
 @Component({
   selector: 'app-kids-dashboard',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './kids-dashboard.html',
   styleUrls: ['./kids-dashboard.css']
 })
@@ -97,6 +98,7 @@ export class KidsDashboard implements OnInit, OnDestroy {
     this.updateTimeGreeting();
     this.loadUserData();
     this.fetchCoursesAndProgress();
+    this.fetchAnnouncements();
   }
 
   fetchCoursesAndProgress(): void {
@@ -325,6 +327,37 @@ export class KidsDashboard implements OnInit, OnDestroy {
 
   closeAttachments(): void {
     this.showAttachmentsModal.set(false);
+  }
+
+  showAnnouncementsModal = signal<boolean>(false);
+  announcements = signal<any[]>([]);
+  loadingAnnouncements = signal<boolean>(false);
+  announcementsCount = signal<number>(0);
+
+  fetchAnnouncements(): void {
+    this.loadingAnnouncements.set(true);
+    const token = this.authService.getToken();
+    const headers = token ? new HttpHeaders({ 'Authorization': `Bearer ${token}` }) : undefined;
+    this.http.get<any[]>(`${environment.apiUrl}/announcements`, { headers }).subscribe({
+      next: (data) => {
+        this.announcements.set(data || []);
+        this.announcementsCount.set((data || []).length);
+        this.loadingAnnouncements.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load announcements', err);
+        this.loadingAnnouncements.set(false);
+      }
+    });
+  }
+
+  openAnnouncements(): void {
+    this.showAnnouncementsModal.set(true);
+    this.fetchAnnouncements();
+  }
+
+  closeAnnouncements(): void {
+    this.showAnnouncementsModal.set(false);
   }
 
   openPdf(url: string): void {

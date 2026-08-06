@@ -23,12 +23,12 @@
           </select>
         </div>
       }
-      @if (authService.hasRole(['super_admin', 'admin'])) {
-        <button class="btn btn-primary shadow-sm rounded-3 fw-semibold px-4 text-nowrap" (click)="showForm.set(!showForm())">
-          <i class="bi" [ngClass]="showForm() ? 'bi-x-lg' : 'bi-plus-lg'"></i> 
-          {{ showForm() ? 'Cancel' : 'New Announcement' }}
-        </button>
-      }
+        @if (authService.hasRole(['super_admin', 'admin'])) {
+          <button class="btn btn-primary shadow-sm rounded-3 fw-semibold px-4 text-nowrap" (click)="showForm() ? cancelForm() : showForm.set(true)">
+            <i class="bi" [ngClass]="showForm() ? 'bi-x-lg' : 'bi-plus-lg'"></i> 
+            {{ showForm() ? 'Cancel' : 'New Announcement' }}
+          </button>
+        }
     </div>
   </div>
 
@@ -42,7 +42,7 @@
   @if (showForm() && authService.hasRole(['super_admin', 'admin'])) {
     <div class="card border-0 shadow-sm rounded-4 mb-4">
       <div class="card-body p-4">
-        <h5 class="fw-bold mb-3">Create New Announcement</h5>
+        <h5 class="fw-bold mb-3">{{ editingAnnouncement() ? 'Edit Announcement' : 'Create New Announcement' }}</h5>
         <form [formGroup]="announcementForm" (ngSubmit)="submitAnnouncement()">
           <div class="mb-3">
             <label class="form-label fw-semibold small text-secondary">Title</label>
@@ -77,12 +77,12 @@
           }
 
           <div class="d-flex flex-column flex-sm-row justify-content-end gap-2">
-            <button type="button" class="btn btn-light fw-semibold w-100 w-sm-auto" (click)="showForm.set(false)">Cancel</button>
+            <button type="button" class="btn btn-light fw-semibold w-100 w-sm-auto" (click)="cancelForm()">Cancel</button>
             <button type="submit" class="btn btn-primary fw-semibold px-sm-4 w-100 w-sm-auto" [disabled]="announcementForm.invalid || isSubmitting()">
               @if (isSubmitting()) {
-                <span class="spinner-border spinner-border-sm me-2"></span> Publishing...
+                <span class="spinner-border spinner-border-sm me-2"></span> Saving...
               } @else {
-                <i class="bi bi-send-fill me-2"></i> Publish
+                <i class="bi bi-send-fill me-2"></i> {{ editingAnnouncement() ? 'Save Changes' : 'Publish' }}
               }
             </button>
           </div>
@@ -91,60 +91,67 @@
     </div>
   }
 
-  @if (loading()) {
-    <div class="text-center py-5">
-      <div class="spinner-border text-primary" role="status"></div>
-      <p class="mt-2 text-secondary">Loading announcements...</p>
-    </div>
-  } @else {
-    <div class="row g-4">
-      @for (announcement of announcements(); track announcement.id) {
-        <div class="col-12">
-          <div class="card border-0 shadow-sm rounded-4 h-100 announcement-card">
-            <div class="card-body p-4 position-relative">
-              @if (authService.hasRole(['super_admin', 'admin'])) {
-                <button class="btn btn-sm btn-outline-danger position-absolute top-0 end-0 mt-3 me-3" (click)="deleteAnnouncement(announcement.id)">
-                  <i class="bi bi-trash3"></i>
-                </button>
-              }
-              
-              <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-semibold">
-                  <i class="bi bi-calendar-event me-1"></i> {{ announcement.created_at | date:'medium' }}
-                </span>
-                @if (authService.getUserRole() === 'super_admin') {
-                  <span class="badge bg-info-subtle text-info rounded-pill px-2 py-1">
-                    <i class="bi bi-building me-1"></i> {{ announcement.tenant ? announcement.tenant.tenant_name : 'Global' }}
-                  </span>
+  @if (!showForm()) {
+    @if (loading()) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-2 text-secondary">Loading announcements...</p>
+      </div>
+    } @else {
+      <div class="row g-4">
+        @for (announcement of announcements(); track announcement.id) {
+          <div class="col-12">
+            <div class="card border-0 shadow-sm rounded-4 h-100 announcement-card">
+              <div class="card-body p-4 position-relative">
+                @if (authService.hasRole(['super_admin', 'admin'])) {
+                  <div class="position-absolute top-0 end-0 mt-3 me-3 d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-primary" (click)="editAnnouncement(announcement)" title="Edit">
+                      <i class="bi bi-pencil-square"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" (click)="deleteAnnouncement(announcement.id)" title="Delete">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </div>
                 }
-                @if (announcement.target_roles && announcement.target_roles.length > 0) {
-                  @for (role of announcement.target_roles; track role) {
-                    <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-1">
-                      {{ role | titlecase }}
+                
+                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                  <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2 fw-semibold">
+                    <i class="bi bi-calendar-event me-1"></i> {{ announcement.created_at | date:'medium' }}
+                  </span>
+                  @if (authService.getUserRole() === 'super_admin') {
+                    <span class="badge bg-info-subtle text-info rounded-pill px-2 py-1">
+                      <i class="bi bi-building me-1"></i> {{ announcement.tenant ? announcement.tenant.tenant_name : 'Global' }}
                     </span>
                   }
-                } @else {
-                  <span class="badge bg-success-subtle text-success rounded-pill px-2 py-1">
-                    All Users
-                  </span>
-                }
+                  @if (announcement.target_roles && announcement.target_roles.length > 0) {
+                    @for (role of announcement.target_roles; track role) {
+                      <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-1">
+                        {{ role | titlecase }}
+                      </span>
+                    }
+                  } @else {
+                    <span class="badge bg-success-subtle text-success rounded-pill px-2 py-1">
+                      All Users
+                    </span>
+                  }
+                </div>
+                
+                <h4 class="fw-bold mb-3 mt-3">{{ announcement.title }}</h4>
+                <p class="text-secondary mb-0" style="white-space: pre-wrap;">{{ announcement.message }}</p>
               </div>
-              
-              <h4 class="fw-bold mb-3 mt-3">{{ announcement.title }}</h4>
-              <p class="text-secondary mb-0" style="white-space: pre-wrap;">{{ announcement.message }}</p>
             </div>
           </div>
-        </div>
-      }
-      @empty {
-        <div class="col-12 text-center py-5">
-          <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3" style="width: 80px; height: 80px;">
-            <i class="bi bi-inbox fs-1 text-secondary opacity-50"></i>
+        }
+        @empty {
+          <div class="col-12 text-center py-5">
+            <div class="d-inline-flex align-items-center justify-content-center bg-light rounded-circle mb-3" style="width: 80px; height: 80px;">
+              <i class="bi bi-inbox fs-1 text-secondary opacity-50"></i>
+            </div>
+            <h5 class="fw-bold text-dark mb-1">No Announcements</h5>
+            <p class="text-secondary mb-0">There are no active announcements to display.</p>
           </div>
-          <h5 class="fw-bold text-dark mb-1">No Announcements</h5>
-          <p class="text-secondary mb-0">There are no active announcements to display.</p>
-        </div>
-      }
-    </div>
+        }
+      </div>
+    }
   }
 </div>

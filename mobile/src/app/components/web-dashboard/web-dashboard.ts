@@ -1,6 +1,6 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { environment } from '../../../environments/environment';
@@ -154,6 +154,7 @@ export class WebDashboardComponent implements OnInit {
     this.updateTimeGreeting();
     this.loadUserData();
     this.fetchCoursesAndProgress();
+    this.fetchAnnouncements();
   }
 
   updateTimeGreeting(): void {
@@ -556,6 +557,35 @@ export class WebDashboardComponent implements OnInit {
     this.activeView.set(view);
     this.closeMobileMenu();
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  showAnnouncementsModal = signal<boolean>(false);
+  announcements = signal<any[]>([]);
+  loadingAnnouncements = signal<boolean>(false);
+
+  fetchAnnouncements(): void {
+    this.loadingAnnouncements.set(true);
+    const token = this.authService.getToken();
+    const headers = token ? new HttpHeaders({ 'Authorization': `Bearer ${token}` }) : undefined;
+    this.http.get<any[]>(`${environment.apiUrl}/announcements`, { headers }).subscribe({
+      next: (data) => {
+        this.announcements.set(data || []);
+        this.loadingAnnouncements.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load announcements', err);
+        this.loadingAnnouncements.set(false);
+      }
+    });
+  }
+
+  goToAnnouncements(): void {
+    this.showAnnouncementsModal.set(true);
+    this.fetchAnnouncements();
+  }
+
+  closeAnnouncements(): void {
+    this.showAnnouncementsModal.set(false);
   }
 
   selectModuleTab(tab: 'lesson' | 'game' | 'video' | 'document'): void {

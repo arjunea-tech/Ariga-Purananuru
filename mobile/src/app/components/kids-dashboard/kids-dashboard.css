@@ -218,7 +218,7 @@
 
 /* Custom Modal Overlay & Content Styling */
 .custom-modal-overlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
@@ -408,4 +408,29 @@
 .pagination-dots .dot.active {
   width: 20px;
   background: #0EA5E9;
+}
+
+/* Notification Bell Button */
+.notification-bell-btn {
+  background: #EEF2FF;
+  color: #4F46E5;
+  border: 1px solid #E0E7FF;
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(79, 70, 229, 0.08);
+}
+
+.notification-bell-btn:active {
+  transform: scale(0.92);
+  background: #E0E7FF;
+}
+
+.notification-bell-btn i {
+  color: #4F46E5 !important;
+  font-size: 1.2rem !important;
 }

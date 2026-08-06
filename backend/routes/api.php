@@ -63,6 +63,7 @@ Route::middleware(['auth:sanctum', 'identify.tenant'])->group(function () {
     // Admin/Staff Routes for Announcements
     Route::middleware(['role:super_admin,admin,staff'])->group(function () {
         Route::post('announcements', [AnnouncementController::class, 'store']);
+        Route::put('announcements/{announcement}', [AnnouncementController::class, 'update']);
         Route::delete('announcements/{announcement}', [AnnouncementController::class, 'destroy']);
     });
 

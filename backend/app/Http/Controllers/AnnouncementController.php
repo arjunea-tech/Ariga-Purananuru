@@ -31,6 +31,7 @@ class AnnouncementController extends Controller
             if ($user->role !== 'admin') {
                 $query->where(function($q) use ($user) {
                     $q->whereNull('target_roles')
+                      ->orWhereJsonLength('target_roles', 0)
                       ->orWhereJsonContains('target_roles', $user->role);
                 });
             }
@@ -52,7 +53,7 @@ class AnnouncementController extends Controller
 
         $tenantId = null;
         if ($user->role === 'super_admin') {
-            $tenantId = $validated['tenant_id'] && $validated['tenant_id'] !== 'global' ? $validated['tenant_id'] : null;
+            $tenantId = (isset($validated['tenant_id']) && $validated['tenant_id'] !== 'global') ? $validated['tenant_id'] : null;
         } else {
             $tenantId = $user->tenant_id;
         }
@@ -66,6 +67,34 @@ class AnnouncementController extends Controller
         ]);
 
         return response()->json($announcement, 201);
+    }
+
+    public function update(Request $request, Announcement $announcement)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'message' => 'required|string',
+            'target_roles' => 'nullable|array',
+            'tenant_id' => 'nullable'
+        ]);
+
+        $user = $request->user();
+
+        $tenantId = null;
+        if ($user->role === 'super_admin') {
+            $tenantId = (isset($validated['tenant_id']) && $validated['tenant_id'] !== 'global') ? $validated['tenant_id'] : null;
+        } else {
+            $tenantId = $user->tenant_id;
+        }
+
+        $announcement->update([
+            'tenant_id' => $tenantId,
+            'title' => $validated['title'],
+            'message' => $validated['message'],
+            'target_roles' => $validated['target_roles'] ?? [],
+        ]);
+
+        return response()->json($announcement);
     }
 
     public function destroy(Announcement $announcement)
