@@ -5,6 +5,7 @@ import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth';
+import { Capacitor } from '@capacitor/core';
 
 @Component({
   selector: 'app-signup',
@@ -75,19 +76,31 @@ export class SignupComponent implements OnInit {
             next: (orderRes) => {
               this.loading = false;
               alert('Course unlocked successfully!');
-              this.router.navigate(['/tabs/home']);
+              if (Capacitor.isNativePlatform()) {
+                this.router.navigate(['/tabs/home']);
+              } else {
+                this.router.navigate(['/download-app']);
+              }
             },
             error: (err) => {
               this.loading = false;
               console.error(err);
               alert('Failed to process payment, but account was created.');
-              this.router.navigate(['/tabs/home']);
+              if (Capacitor.isNativePlatform()) {
+                this.router.navigate(['/tabs/home']);
+              } else {
+                this.router.navigate(['/download-app']);
+              }
             }
           });
         } else {
           this.loading = false;
           setTimeout(() => {
-            this.router.navigate(['/tabs/home']);
+            if (Capacitor.isNativePlatform()) {
+              this.router.navigate(['/tabs/home']);
+            } else {
+              this.router.navigate(['/download-app']);
+            }
           }, 1000);
         }
       },

@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { environment } from '../../../environments/environment';
+import { Capacitor } from '@capacitor/core';
 
 export interface DailyKural {
   number: number;
@@ -187,6 +188,7 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
   private el = inject(ElementRef);
   protected authService = inject(AuthService);
 
+  isMobile = signal<boolean>(Capacitor.isNativePlatform());
   isMobileMenuOpen = signal<boolean>(false);
   showBackToTop = signal<boolean>(false);
   isScrolled = signal<boolean>(false);
@@ -529,7 +531,7 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
     if (this.authService.isLoggedIn()) {
       const role = this.authService.getUserRole();
       if (role === 'student') {
-        this.router.navigate(['/web-dashboard']);
+        this.router.navigate(['/tabs/home']);
       } else {
         this.router.navigate(['/admin-dashboard']);
       }

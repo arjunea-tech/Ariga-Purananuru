@@ -44,6 +44,9 @@ export const routes: Routes = [
   // Public Store Landing Page
   { path: 'public-store', loadComponent: () => import('./components/store/store').then(m => m.StoreComponent) },
 
+  // Public App Download Screen (Success registration on Web)
+  { path: 'download-app', loadComponent: () => import('./components/download-app/download-app').then(m => m.DownloadAppComponent) },
+
   // Public Course Details
   { path: 'public-course-details/:id', loadComponent: () => import('./components/course-details/course-details').then(m => m.CourseDetails) },
 

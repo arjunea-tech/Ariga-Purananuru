@@ -1,4 +1,5 @@
-<!-- 1. NAVIGATION BAR — outside scroll area, always visible -->
+<!-- 1. NAVIGATION BAR — visible only on web/desktop view -->
+@if (!isMobile()) {
 <nav class="landing-navbar">
   <div class="landing-container d-flex justify-content-between align-items-center">
     <div class="landing-brand" (click)="scrollToSection('hero')">
@@ -27,9 +28,10 @@
     </div>
   </div>
 </nav>
+}
 
 <!-- Scrollable body -->
-<div class="landing-scroll-body" id="landingScrollBody">
+<div class="landing-scroll-body" id="landingScrollBody" [class.mobile-mode]="isMobile()">
 
   <div class="landing-page-root">
 
@@ -38,12 +40,13 @@
     <div class="mesh-blur-orb orb-bottom-right-amber"></div>
     <div class="mesh-blur-orb orb-middle-purple"></div>
 
-    <!-- Mobile Drawer Backdrop -->
-    @if (isMobileMenuOpen()) {
+    <!-- Mobile Drawer Backdrop (Web only) -->
+    @if (!isMobile() && isMobileMenuOpen()) {
     <div class="landing-drawer-backdrop" (click)="closeMobileMenu()"></div>
     }
 
-    <!-- Mobile Slide-out Drawer -->
+    <!-- Mobile Slide-out Drawer (Web only) -->
+    @if (!isMobile()) {
     <aside class="landing-mobile-drawer" [class.open]="isMobileMenuOpen()">
       <div class="drawer-header d-flex justify-content-between align-items-center">
         <div class="landing-brand">
@@ -63,6 +66,12 @@
         </button>
       </div>
     </aside>
+    }
+
+    <!-- ---------------------------------------------------- -->
+    <!-- CASE A: FULL WEB LANDING PAGE LAYOUT                 -->
+    <!-- ---------------------------------------------------- -->
+    @if (!isMobile()) {
 
     <!-- 2. HERO SECTION -->
     <section id="hero" class="landing-hero-section position-relative">
@@ -94,78 +103,36 @@
 
           <div class="col-lg-6 text-center anim-zoom-in">
             <div class="hero-emblem-wrapper">
-
-              <!-- Outer glow ring -->
               <div class="hero-emblem-glow"></div>
-
-              <!-- Main circle -->
               <div class="hero-emblem-circle">
-
-                <!-- Inner decorative border ring -->
                 <div class="hero-emblem-inner-ring">
-
-                  <!-- Content stack -->
                   <div class="hero-emblem-content">
                     <span class="hero-emblem-letter font-tamil">அ</span>
                     <div class="hero-emblem-divider"></div>
                     <span class="hero-emblem-subtitle font-tamil">தமிழ் யாப்பு</span>
                   </div>
-
                 </div>
               </div>
-
             </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 3. DARK TEAL CURVED BANNER SECTION ("எதற்காக அழகுத் தமிழ் யாப்பு?") -->
-    <section id="about" class="landing-dark-teal-banner-section">
+    <!-- 3. DAILY THIRUKKURAL CARD -->
+    <section class="daily-kural-section reveal-on-scroll">
       <div class="landing-container">
-        <div class="dark-teal-curved-card anim-fade-in-up reveal-on-scroll">
-          <div class="row align-items-center gy-4">
-            <div class="col-md-5 text-center">
-              <div class="banner-illustration-box d-flex align-items-center justify-content-center p-4">
-                <div
-                  class="p-4 rounded-circle bg-white text-amber shadow-lg d-flex align-items-center justify-content-center anim-pulse-glow"
-                  style="width: 140px; height: 140px; font-size: 3.5rem;">
-                  <i class="bi bi-mortarboard-fill"></i>
-                </div>
-              </div>
-            </div>
-
-            <div class="col-md-7 text-start">
-              <h2 class="dark-banner-title">எதற்காக அழகுத் தமிழ் யாப்பு?</h2>
-              <p class="dark-banner-text">
-                உலகெங்கிலும் வாழும் தமிழ்க் குழந்தைகள் மற்றும் ஆர்வலர்கள் தங்கள் தாய்மொழியை மரபு மாறாமலும்,
-                அலுப்பில்லாமலும், ஆர்வத்தோடும் கற்க வேண்டும் என்பதே அழகுத் தமிழ் யாப்பின் முதன்மை நோக்கமாகும்.
-              </p>
-              <p class="dark-banner-subtext">
-                தொன்மைச் சிறப்புமிக்க தமிழ் செய்யுள் மற்றும் யாப்பிலக்கணச் செல்வங்களை நவீன தொழில்நுட்பக் கருவிகள் மூலமாக
-                அனைவரிடமும் கொண்டு சேர்க்கிறோம்.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3.5 DAILY THIRUKKURAL SECTION (PARCHMENT & GOLDEN GLOW) -->
-    <section id="thirukkural" class="landing-daily-kural-section py-5">
-      <div class="landing-container">
-        <div
-          class="daily-kural-card p-4 p-md-5 rounded-4 shadow-sm bg-white border position-relative overflow-hidden anim-fade-in-up reveal-on-scroll">
-
-          <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3 flex-wrap gap-2">
+        <div class="kural-card p-4 p-md-5 rounded-4 shadow position-relative overflow-hidden">
+          
+          <div class="kural-card-header d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
             <div class="d-flex align-items-center gap-2">
-              <span class="badge bg-amber-soft text-amber-dark fw-bold px-3 py-2 rounded-pill"
-                style="font-size: 0.85rem;">📜 இன்றைய திருக்குறள்</span>
-              <span class="text-muted small fw-semibold font-tamil">{{ todayFormattedDate }}</span>
+              <span class="badge bg-amber text-dark px-3 py-2 rounded-pill font-tamil" style="font-size: 0.85rem;">
+                <i class="bi bi-book-half me-1"></i> இன்றைய திருக்குறள்
+              </span>
+              <span class="text-muted small fw-semibold">{{ todayFormattedDate }}</span>
             </div>
-            <button class="btn btn-sm btn-outline-warning text-dark font-tamil fw-semibold rounded-pill px-3"
-              (click)="copyKural()">
-              <i class="bi bi-clipboard me-1 text-amber"></i> குறளைப் பிரதியெடு
+            <button class="btn-outline-teal-pill btn-sm-pill font-tamil px-3 py-2" (click)="copyKural()">
+              <i class="bi bi-clipboard me-1"></i> குறளைப் பிரதியெடு
             </button>
           </div>
 
@@ -191,9 +158,10 @@
                 <p class="kural-line fs-5 fw-bold text-dark mb-0 font-tamil">{{ dailyKural().line2 }}</p>
               </div>
 
-              <div class="kural-meaning-box mt-3">
-                <span class="fw-bold text-amber me-2">பொருள்:</span>
-                <span class="text-secondary fs-6 opacity-90 font-tamil">{{ dailyKural().meaning }}</span>
+              <div class="kural-explanation-box mt-3">
+                <p class="mb-0 text-muted font-tamil" style="line-height: 1.6;">
+                  <strong class="text-amber">பொருள்:</strong> {{ dailyKural().meaning }}
+                </p>
               </div>
             </div>
           </div>
@@ -202,250 +170,217 @@
       </div>
     </section>
 
-    <!-- 4. OFFERED COURSES PROMOTIONAL SECTION -->
-    <section id="courses" class="landing-courses-offered-section py-5">
+    <!-- 4. DYNAMIC COURSES SECTION -->
+    <section id="courses" class="courses-section reveal-on-scroll">
       <div class="landing-container">
-        <div class="text-center mb-5 anim-fade-in-up reveal-on-scroll">
-          <span class="sub-badge-teal mb-2">பாடத்திட்டம்</span>
-          <h2 class="section-title">நாங்கள் வழங்கும் பாடநெறி</h2>
+        
+        <div class="text-center mb-5">
+          <span class="sub-badge-teal text-amber font-tamil text-uppercase fw-bold letter-spacing-1">பாடத்திட்டம்</span>
+          <h2 class="section-title text-center text-dark-brown mt-2">நாங்கள் வழங்கும் பாடநெறி</h2>
+          <p class="section-subtitle mx-auto text-muted">விளையாட்டு வழிக் கற்றல் முறையில் வடிவமைக்கப்பட்ட தனித்துவமான இலக்கணப் பாடங்கள்.</p>
         </div>
 
-        <div class="row justify-content-center">
-          <div class="col-md-7 col-lg-5">
-            <div
-              class="offered-course-card p-4 p-md-5 rounded-4 shadow-sm bg-white border text-center anim-fade-in-up reveal-on-scroll"
-              (click)="goToLogin()" style="cursor: pointer;">
-              <h3 class="fw-bold text-dark fs-3 mb-4 font-tamil">அழகுத் தமிழ் யாப்பு (யாப்பிலக்கணம்)</h3>
-              <button class="btn-teal-pill w-100 py-3 fs-6 btn-glow" (click)="goToLogin(); $event.stopPropagation()">
-                பாடங்களைக் கற்கத் தொடங்க <i class="bi bi-arrow-right-short fs-4 ms-1"></i>
-              </button>
+        <div class="row g-4 justify-content-center">
+          @if (isLoadingCourses()) {
+          <div class="col-12 text-center py-5">
+            <div class="spinner-border text-warning" role="status">
+              <span class="visually-hidden">ஏற்றப்படுகிறது...</span>
             </div>
+            <p class="text-muted font-tamil mt-3">பாடங்கள் ஏற்றப்படுகின்றன...</p>
           </div>
+          } @else {
+            @for (course of dynamicCourses(); track course.id; let idx = $index) {
+            <div class="col-lg-4 col-md-6 anim-fade-in-up">
+              <div class="course-card-premium h-100 p-4 rounded-4 shadow-sm d-flex flex-column transition-all" (click)="goToLogin()">
+                <div class="course-card-header d-flex align-items-center justify-content-between mb-3">
+                  <div class="course-card-icon" [style.background]="getBadgeBg(idx)" [style.color]="getBadgeColor(idx)">
+                    <i class="bi" [ngClass]="getCourseIcon(idx)"></i>
+                  </div>
+                  <span class="badge text-amber bg-dark-brown px-3 py-1.5 rounded-pill font-tamil" style="font-size: 0.72rem;">
+                    {{ course.category || 'தமிழ் இலக்கணம்' }}
+                  </span>
+                </div>
+                <h3 class="course-card-title text-start font-tamil text-dark-brown mb-2">{{ course.name || course.title }}</h3>
+                <p class="course-card-desc text-start font-tamil text-muted small mb-4 flex-grow-1">{{ course.description }}</p>
+                <div class="course-card-footer border-top pt-3 d-flex align-items-center justify-content-between">
+                  <span class="course-price text-amber font-tamil fw-bold">{{ course.price > 0 ? '₹' + course.price : 'இலவசம்' }}</span>
+                  <button class="btn-teal-pill btn-sm-pill btn-glow">கற்கத் தொடங்க <i class="bi bi-arrow-right-short ms-1"></i></button>
+                </div>
+              </div>
+            </div>
+            } @empty {
+            <div class="col-12 text-center py-5">
+              <div class="alert alert-warning font-tamil rounded-3 py-4">வகுப்புகள் எதுவும் தற்போது கிடைக்கவில்லை.</div>
+            </div>
+            }
+          }
         </div>
+
       </div>
     </section>
 
-    <!-- 6. PASTEL 4-FEATURE CARDS GRID -->
-    <section id="features" class="landing-features-grid-section">
+    <!-- 5. FEATURES SECTION -->
+    <section id="features" class="features-section reveal-on-scroll">
       <div class="landing-container">
-        <div class="text-center mb-5 anim-fade-in-up reveal-on-scroll">
-          <span class="sub-badge-teal mb-2">சிறப்பம்சங்கள்</span>
-          <h2 class="section-title">இத்தளத்தின் முதன்மை அம்சங்கள்</h2>
-          <p class="section-desc max-w-600 mx-auto text-secondary opacity-75">
-            நவீனத் தொழில்நுட்பம் மற்றும் விளையாட்டு முறைக் கற்றல் மூலம் தமிழை மிக எளிதாகக் கற்கலாம்.
-          </p>
+        
+        <div class="text-center mb-5">
+          <span class="sub-badge-teal text-amber font-tamil text-uppercase fw-bold letter-spacing-1">சிறப்பம்சங்கள்</span>
+          <h2 class="section-title text-center text-dark-brown mt-2">ஏன் எங்களோடு கற்க வேண்டும்?</h2>
+          <p class="section-subtitle mx-auto text-muted">விளையாட்டு வடிவக் கற்றல் மற்றும் நவீன தொழில்நுட்பத்தின் கலவை.</p>
         </div>
 
         <div class="row g-4">
           @for (card of featureCards; track card.id; let idx = $index) {
-          <div class="col-md-6 col-lg-3 anim-fade-in-up reveal-on-scroll" [class.anim-delay-1]="idx === 0"
-            [class.anim-delay-2]="idx === 1" [class.anim-delay-3]="idx === 2" [class.anim-delay-4]="idx === 3">
-            <div class="pastel-feature-card" [class]="card.bgClass">
-              <div class="pastel-icon-wrapper" [style.color]="card.color">
-                <i [class]="'bi ' + card.icon"></i>
+          <div class="col-md-4 anim-fade-in-up">
+            <div class="feature-card-premium h-100 p-4 rounded-4 shadow-sm border-0 d-flex flex-column text-start">
+              <div class="feature-icon-box mb-3 [ngClass]='card.bgClass'" [style.color]="card.color">
+                <i class="bi" [ngClass]="card.icon"></i>
               </div>
-              <h3 class="pastel-card-title">{{ card.title }}</h3>
-              <p class="pastel-card-desc">{{ card.desc }}</p>
+              <h3 class="feature-title font-tamil text-dark-brown mb-2">{{ card.title }}</h3>
+              <p class="feature-desc font-tamil text-muted small mb-0">{{ card.desc }}</p>
             </div>
           </div>
           }
         </div>
+
       </div>
     </section>
 
-    <!-- 7. TECH SUPPORTERS / PARTNERS SECTION -->
-    <section class="landing-supporters-section py-4">
+    <!-- 6. IMPACT STATS SECTION -->
+    <section id="impact" class="impact-section reveal-on-scroll bg-light-cream">
       <div class="landing-container">
-        <div class="supporters-header text-center mb-4 anim-fade-in-up reveal-on-scroll">
-          <h3 class="supporters-title">தொழில்நுட்பக் கூட்டாளர் (Technology Partner)</h3>
-          <p class="supporters-sub">அழகுத் தமிழ் யாப்பு உருவாக்கத்தின் முதன்மை மென்பொருள் நிறுவனம்</p>
+        
+        <div class="text-center mb-5">
+          <span class="sub-badge-teal text-amber font-tamil text-uppercase fw-bold letter-spacing-1">சாதனைகள்</span>
+          <h2 class="section-title text-center text-dark-brown mt-2">எங்கள் கற்றல் சமுதாயம்</h2>
+          <p class="section-subtitle mx-auto text-muted">தமிழைக் கற்கும் மாணவர்களின் எண்ணிக்கை மற்றும் சாதனைகளின் விவரம்.</p>
         </div>
 
-        <div class="d-flex justify-content-center anim-zoom-in reveal-on-scroll">
-          <!-- Macvel Software Logo Card -->
-          <a href="https://macvelsoftware.com/" target="_blank" rel="noopener noreferrer"
-            class="supporters-white-card partner-logo-card text-decoration-none d-flex align-items-center justify-content-center py-4 px-5 rounded-4 shadow-sm bg-white border"
-            title="Macvel Software Technologies - https://macvelsoftware.com/">
-            <img src="assets/images/macvel_logo.png" alt="Macvel Software Logo"
-              style="height: 70px; width: auto; max-width: 220px; object-fit: contain; transition: transform 0.3s ease;" />
-          </a>
+        <div class="row g-4 justify-content-center text-center">
+          <div class="col-6 col-md-3">
+            <div class="stat-card p-3 p-md-4 rounded-4 bg-white shadow-xs">
+              <h3 class="stat-number text-amber mb-1">{{ statStudents() | number }} +</h3>
+              <span class="stat-label text-muted small font-tamil">பயன்படுத்தும் மாணவர்கள்</span>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card p-3 p-md-4 rounded-4 bg-white shadow-xs">
+              <h3 class="stat-number text-amber mb-1">{{ statLessons() | number }} +</h3>
+              <span class="stat-label text-muted small font-tamil">கற்றல் பாடங்கள்</span>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card p-3 p-md-4 rounded-4 bg-white shadow-xs">
+              <h3 class="stat-number text-amber mb-1">{{ statSatisfaction() }} %</h3>
+              <span class="stat-label text-muted small font-tamil">திருப்தி விகிதம்</span>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="stat-card p-3 p-md-4 rounded-4 bg-white shadow-xs">
+              <h3 class="stat-number text-amber mb-1">{{ statExercises() | number }} +</h3>
+              <span class="stat-label text-muted small font-tamil">பயிற்சிகள் & தேர்வுகள்</span>
+            </div>
+          </div>
         </div>
+
       </div>
     </section>
 
-    <!-- 9. IMPACT STATS SECTION WITH LIVE NUMBER COUNTERS -->
-    <section id="impact" class="landing-impact-section bg-light-mint py-5">
+    <!-- 7. TESTIMONIALS SECTION -->
+    <section class="testimonials-section reveal-on-scroll" (mouseenter)="pauseTestimonialAutoplay()"
+      (mouseleave)="resumeTestimonialAutoplay()">
+      <div class="landing-container">
+        
+        <div class="text-center mb-5">
+          <span class="sub-badge-teal text-amber font-tamil text-uppercase fw-bold letter-spacing-1">விமர்சனங்கள்</span>
+          <h2 class="section-title text-center text-dark-brown mt-2">பயனர்கள் எங்களைப் பற்றி கூறுவது</h2>
+          <p class="section-subtitle mx-auto text-muted">மாணவர்கள் மற்றும் தமிழ் ஆசிரியர்களின் உண்மையான அனுபவங்கள்.</p>
+        </div>
+
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="testimonial-carousel-box p-4 p-md-5 rounded-4 shadow bg-white position-relative text-center">
+              
+              <div class="testimonial-quotes-icon text-amber opacity-25">“</div>
+
+              <div class="testimonial-content-wrapper">
+                <p class="testimonial-text font-tamil fs-5 text-dark-brown mb-4">
+                  {{ testimonials[activeTestimonialIndex()].comment }}
+                </p>
+                <div class="testimonial-author-group mt-3">
+                  <strong class="author-name font-tamil text-amber d-block">{{
+                    testimonials[activeTestimonialIndex()].name }}</strong>
+                  <span class="author-role text-muted small">{{ testimonials[activeTestimonialIndex()].role }}</span>
+                </div>
+              </div>
+
+              <!-- Carousel Indicators -->
+              <div class="carousel-indicators-custom d-flex justify-content-center gap-2 mt-4">
+                @for (t of testimonials; track t.name; let idx = $index) {
+                <button class="indicator-dot" [class.active]="activeTestimonialIndex() === idx"
+                  (click)="activeTestimonialIndex.set(idx)" [attr.aria-label]="'Slide ' + (idx + 1)"></button>
+                }
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 8. SPONSORS / SUPPORTERS GALLERY -->
+    <section class="supporters-section reveal-on-scroll bg-light-cream">
       <div class="landing-container text-center">
-        <h2 class="impact-section-title anim-fade-in-up reveal-on-scroll">நமது தமிழ்க் கற்றல் புரட்சியின் வரலாற்றுச்
-          சாதனைகள்</h2>
-
-        <div class="row g-4 mt-4">
-          <div class="col-6 col-md-3 anim-fade-in-up reveal-on-scroll anim-delay-1">
-            <div class="stat-white-card p-4 rounded-4 bg-white border shadow-sm h-100">
-              <h3 class="stat-value-num text-amber font-tamil fw-bold fs-2">{{ statStudents() | number }}+</h3>
-              <p class="stat-label-text text-muted mb-0 font-tamil">பயிற்சி பெறும் மாணவர்கள்</p>
+        <span class="sub-badge-teal text-amber font-tamil text-uppercase fw-bold letter-spacing-1">ஆதரவாளர்கள்</span>
+        <h2 class="section-title text-center text-dark-brown mt-2">இணைந்து செயல்படும் நிறுவனங்கள்</h2>
+        
+        <div class="row g-4 align-items-center justify-content-center mt-4">
+          <div class="col-6 col-md-3 anim-scale-in">
+            <div class="supporter-logo-box p-3 rounded-3 bg-white shadow-xs">
+              <img src="assets/images/macvel_logo.png" alt="Macvel Software Solutions" class="img-fluid"
+                style="max-height: 48px; object-fit: contain;">
+              <span class="d-block mt-2 small fw-bold text-muted">Macvel Software</span>
             </div>
           </div>
-
-          <div class="col-6 col-md-3 anim-fade-in-up reveal-on-scroll anim-delay-2">
-            <div class="stat-white-card p-4 rounded-4 bg-white border shadow-sm h-100">
-              <h3 class="stat-value-num text-amber font-tamil fw-bold fs-2">{{ statLessons() | number }}+</h3>
-              <p class="stat-label-text text-muted mb-0 font-tamil">செயல்முறைப் பாடங்கள்</p>
+          <div class="col-6 col-md-3 anim-scale-in">
+            <div class="supporter-logo-box p-3 rounded-3 bg-white shadow-xs">
+              <img src="assets/images/achievement1.jpg" alt="Partner 2" class="img-fluid rounded"
+                style="max-height: 48px; object-fit: cover; width: 100%;">
+              <span class="d-block mt-2 small fw-bold text-muted">தமிழ் வளர்ச்சித் துறை</span>
             </div>
           </div>
-
-          <div class="col-6 col-md-3 anim-fade-in-up reveal-on-scroll anim-delay-3">
-            <div class="stat-white-card p-4 rounded-4 bg-white border shadow-sm h-100">
-              <h3 class="stat-value-num text-amber font-tamil fw-bold fs-2">{{ statSatisfaction() }}%</h3>
-              <p class="stat-label-text text-muted mb-0 font-tamil">கற்றல் திருப்தி விகிதம்</p>
-            </div>
-          </div>
-
-          <div class="col-6 col-md-3 anim-fade-in-up reveal-on-scroll anim-delay-4">
-            <div class="stat-white-card p-4 rounded-4 bg-white border shadow-sm h-100">
-              <h3 class="stat-value-num text-amber font-tamil fw-bold fs-2">{{ statExercises() | number }}+</h3>
-              <p class="stat-label-text text-muted mb-0 font-tamil">முடித்த பயிற்சிகள்</p>
+          <div class="col-6 col-md-3 anim-scale-in">
+            <div class="supporter-logo-box p-3 rounded-3 bg-white shadow-xs">
+              <img src="assets/images/achievement2.jpg" alt="Partner 3" class="img-fluid rounded"
+                style="max-height: 48px; object-fit: cover; width: 100%;">
+              <span class="d-block mt-2 small fw-bold text-muted">யாப்பிலக்கணக் குழு</span>
             </div>
           </div>
         </div>
-
       </div>
     </section>
 
-    <!-- 10. AWARDS & ACHIEVEMENTS PHOTO GALLERY -->
-    <section id="awards" class="landing-awards-section py-5" style="background: #FFFBF0;">
+    <!-- 9. FOOTER SECTION -->
+    <footer id="contact" class="landing-footer-premium text-light py-5">
       <div class="landing-container">
-        <div class="text-center mb-5 anim-fade-in-up reveal-on-scroll">
-          <span class="sub-badge-teal mb-2">சாதனைகள்</span>
-          <h2 class="section-title mb-2">விருதுகள் & அங்கீகாரங்கள்</h2>
-          <p class="section-subtext text-secondary opacity-75">தமிழ் மக்களால் விரும்பப்பட்ட சிறந்த அங்கீகாரங்கள்</p>
-        </div>
+        <div class="row gy-5">
 
-        <div class="row g-4 justify-content-center">
-          <div class="col-md-4 anim-fade-in-up reveal-on-scroll anim-delay-1">
-            <div class="achievement-photo-card">
-              <img src="assets/images/achievement1.jpg" alt="StartupTN Hackathon Winner" class="achievement-img" />
+          <!-- Col 1: About & Social -->
+          <div class="col-lg-4 text-start">
+            <div class="footer-brand d-flex align-items-center gap-2 mb-3">
+              <div class="brand-badge-circle bg-amber text-dark-brown"><span>அ</span></div>
+              <span class="h4 mb-0 fw-bold font-tamil text-light">அழகுத் தமிழ் யாப்பு</span>
             </div>
-          </div>
-          <div class="col-md-4 anim-fade-in-up reveal-on-scroll anim-delay-2">
-            <div class="achievement-photo-card">
-              <img src="assets/images/achievement2.jpg" alt="Madurai District Award" class="achievement-img" />
-            </div>
-          </div>
-          <div class="col-md-4 anim-fade-in-up reveal-on-scroll anim-delay-3">
-            <div class="achievement-photo-card">
-              <img src="assets/images/achievement3.jpg" alt="Achievement Recognition" class="achievement-img" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 11. STUDENT & TEACHER TESTIMONIALS SECTION (INFINITE MARQUEE TRAIN) -->
-    <section id="testimonials" class="landing-testimonials-section py-5" style="background: #FFFDF7;">
-      <div class="text-center mb-5 landing-container">
-        <span class="sub-badge-teal mb-2">பயனர் கருத்துக்கள்</span>
-        <h2 class="section-title mb-2">ஆசிரியர்கள் & மாணவர்களின் அனுபவம்</h2>
-        <p class="section-subtext text-secondary opacity-75">அழகுத் தமிழ் யாப்பு தளத்தைக் கற்றுப்பயின்றவர்களின்
-          நற்சான்றுகள்</p>
-      </div>
-
-      <!-- Marquee Track — no container constraint so it bleeds edge to edge -->
-      <div class="testimonial-marquee-outer">
-        <div class="testimonial-marquee-track">
-
-          <!-- Original set of cards -->
-          @for (item of testimonials; track item.id) {
-          <div class="testimonial-marquee-card">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <div class="quote-icon text-amber fs-1"><i class="bi bi-quote"></i></div>
-              <div class="star-rating text-warning fs-6">
-                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              </div>
-            </div>
-            <p class="testimonial-text font-tamil mb-4" style="line-height: 1.7; color: #451A03; font-size: 1rem;">"{{
-              item.comment }}"</p>
-            <div class="d-flex align-items-center gap-3 pt-3 border-top border-warning border-opacity-25">
-              <div
-                class="author-avatar d-flex align-items-center justify-content-center text-white fs-5 rounded-circle shadow-sm flex-shrink-0"
-                [style.background-color]="item.badgeColor" style="width: 46px; height: 46px;">
-                <i [class]="'bi ' + item.avatarIcon"></i>
-              </div>
-              <div class="text-start">
-                <h6 class="fw-bold mb-0 font-tamil" style="color: #451A03;">{{ item.name }}</h6>
-                <small class="font-tamil" style="color: #92400E;">{{ item.role }}</small>
-              </div>
-            </div>
-          </div>
-          }
-
-          <!-- Duplicate set for seamless loop -->
-          @for (item of testimonials; track item.id) {
-          <div class="testimonial-marquee-card">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <div class="quote-icon text-amber fs-1"><i class="bi bi-quote"></i></div>
-              <div class="star-rating text-warning fs-6">
-                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i>
-              </div>
-            </div>
-            <p class="testimonial-text font-tamil mb-4" style="line-height: 1.7; color: #451A03; font-size: 1rem;">"{{
-              item.comment }}"</p>
-            <div class="d-flex align-items-center gap-3 pt-3 border-top border-warning border-opacity-25">
-              <div
-                class="author-avatar d-flex align-items-center justify-content-center text-white fs-5 rounded-circle shadow-sm flex-shrink-0"
-                [style.background-color]="item.badgeColor" style="width: 46px; height: 46px;">
-                <i [class]="'bi ' + item.avatarIcon"></i>
-              </div>
-              <div class="text-start">
-                <h6 class="fw-bold mb-0 font-tamil" style="color: #451A03;">{{ item.name }}</h6>
-                <small class="font-tamil" style="color: #92400E;">{{ item.role }}</small>
-              </div>
-            </div>
-          </div>
-          }
-
-        </div>
-      </div>
-
-    </section>
-
-    <!-- 12. UNIFIED CONTACT & FOOTER SECTION -->
-    <!-- 12. 2026 COMPLETE SAAS SOFT WARM CREAM & GOLDEN AMBER FOOTER BAR -->
-    <footer id="contact" class="landing-saas-footer py-5 position-relative">
-      <div class="landing-container">
-
-        <!-- Top Row: 4 Column Grid -->
-        <div class="row gy-4 border-bottom border-secondary border-opacity-15 pb-5">
-
-          <!-- Col 1: Brand Info & Tech Partner -->
-          <div class="col-lg-4 col-md-6 text-start">
-            <div class="d-flex align-items-center gap-3 mb-3">
-              <div class="brand-badge-circle"
-                style="width: 44px; height: 44px; font-size: 1.4rem; background: linear-gradient(135deg, #D97706 0%, #B45309 100%);">
-                <span>அ</span>
-              </div>
-              <div>
-                <h4 class="fw-bold text-amber mb-0 font-tamil fs-4">அழகுத் தமிழ் யாப்பு</h4>
-                <small class="text-light-tan font-tamil fw-semibold opacity-75">தமிழ் செய்யுள் மரபுத் தளம்</small>
-              </div>
-            </div>
-            <p class="text-light-tan small font-tamil mb-4" style="line-height: 1.6; max-width: 320px;">
-              தமிழ் செய்யுள் மரபு மற்றும் யாப்பிலக்கண அமைப்புகளை எளிய முறையில் கற்பிக்கும் நவீன இயங்குதளம்.
+            <p class="footer-about-text font-tamil small text-light-brown mb-4">
+              தமிழ் யாப்பிலக்கணத்தைக் குழந்தைகள் மற்றும் பெரியவர்கள் எளிதாகக் கற்றுக் கொள்வதற்காக உருவாக்கப்பட்ட
+              விளையாட்டு வழி கற்றல் தளம்.
             </p>
-            <div class="partner-badge p-2 px-3 rounded-3 d-inline-flex align-items-center gap-2 shadow-sm">
-              <small class="text-light-tan font-tamil">தொழில்நுட்பக் கூட்டாளர்:</small>
-              <a href="https://macvelsoftware.com/" target="_blank" rel="noopener noreferrer"
-                class="text-amber font-tamil text-decoration-none fw-bold small">
-                Macvel Software Solutions <i class="bi bi-box-arrow-up-right ms-1"></i>
-              </a>
-            </div>
           </div>
 
-          <!-- Col 2: Navigation Links -->
-          <div class="col-lg-2 col-md-6 text-start">
-            <h6 class="fw-bold text-amber font-tamil mb-3 text-uppercase tracking-wider">வழிசெலுத்தல்</h6>
+          <!-- Col 2: Quick Links -->
+          <div class="col-lg-3 text-start">
+            <h4 class="footer-title font-tamil text-amber mb-3">வழிசெலுத்தல்</h4>
             <ul class="list-unstyled d-flex flex-column gap-2 mb-0 font-tamil small">
               <li><button class="footer-nav-link" (click)="scrollToSection('hero')">முகப்பு</button></li>
               <li><button class="footer-nav-link" (click)="scrollToSection('courses')">பாடநெறிகள்</button></li>
@@ -456,10 +391,10 @@
             </ul>
           </div>
 
-          <!-- Col 3: Contact Details -->
-          <div class="col-lg-3 col-md-6 text-start">
-            <h6 class="fw-bold text-amber font-tamil mb-3 text-uppercase tracking-wider">தொடர்பு கொள்ள</h6>
-            <div class="d-flex flex-column gap-3 font-tamil small">
+          <!-- Col 3: Contact details -->
+          <div class="col-lg-5 text-start">
+            <h4 class="footer-title font-tamil text-amber mb-3">தொடர்பு கொள்ள</h4>
+            <div class="d-flex flex-column gap-3 font-tamil small mb-4">
               <div class="d-flex align-items-center gap-3">
                 <div class="footer-icon-box"><i class="bi bi-telephone-fill text-amber"></i></div>
                 <div>
@@ -486,43 +421,40 @@
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- Col 4: Quick Contact Form -->
-          <div class="col-lg-3 col-md-6 text-start">
-            <h6 class="fw-bold text-amber font-tamil mb-3 text-uppercase tracking-wider">செய்தி அனுப்ப</h6>
-            @if (contactSuccessMsg()) {
-            <div class="alert alert-warning p-2 small rounded-3 font-tamil mb-2">
-              <i class="bi bi-check-circle me-1"></i> {{ contactSuccessMsg() }}
+            <!-- Contact Mini Form -->
+            <div class="footer-contact-box bg-dark-espresso p-3 rounded-3 border border-secondary border-opacity-25 mt-3">
+              <h5 class="small font-tamil text-amber mb-2">எங்களுக்கு எழுதவும்</h5>
+              @if (contactSuccessMsg()) {
+              <div class="alert alert-success p-2 rounded-2 small text-center font-tamil mb-2">
+                {{ contactSuccessMsg() }}
+              </div>
+              }
+              <form (ngSubmit)="submitContactForm()" class="d-flex flex-column gap-2">
+                <input type="text" placeholder="உங்கள் பெயர்"
+                  class="form-control form-control-sm bg-dark-espresso border-secondary border-opacity-50 text-light small font-tamil"
+                  [value]="contactName()" (input)="contactName.set($any($event.target).value)" required>
+                <input type="email" placeholder="உங்கள் மின்னஞ்சல்"
+                  class="form-control form-control-sm bg-dark-espresso border-secondary border-opacity-50 text-light small font-tamil"
+                  [value]="contactEmail()" (input)="contactEmail.set($any($event.target).value)" required>
+                <textarea placeholder="உங்கள் செய்தி..." rows="2"
+                  class="form-control form-control-sm bg-dark-espresso border-secondary border-opacity-50 text-light small font-tamil"
+                  [value]="contactMessage()" (input)="contactMessage.set($any($event.target).value)" required></textarea>
+                <button type="submit"
+                  class="btn btn-warning text-dark fw-bold py-2 text-center w-100 btn-sm font-tamil mt-1 shadow-sm rounded-pill"
+                  [disabled]="isSubmittingContact()">
+                  {{ isSubmittingContact() ? 'அனுப்பப்படுகிறது...' : 'செய்தி அனுப்புக' }}
+                </button>
+              </form>
             </div>
-            }
-            <form (ngSubmit)="submitContactForm()" class="d-flex flex-column gap-2">
-              <input type="text" class="form-control form-control-sm footer-dark-input font-tamil"
-                placeholder="உங்கள் பெயர்" [value]="contactName()" (input)="contactName.set($any($event.target).value)"
-                required />
-              <input type="email" class="form-control form-control-sm footer-dark-input font-tamil"
-                placeholder="மின்னஞ்சல் முகவரி" [value]="contactEmail()"
-                (input)="contactEmail.set($any($event.target).value)" required />
-              <input type="text" class="form-control form-control-sm footer-dark-input font-tamil" placeholder="தலைப்பு"
-                [value]="contactSubject()" (input)="contactSubject.set($any($event.target).value)" />
-              <textarea class="form-control form-control-sm footer-dark-input font-tamil" rows="2"
-                placeholder="உங்கள் செய்தி..." [value]="contactMessage()"
-                (input)="contactMessage.set($any($event.target).value)" required></textarea>
-              <button type="submit"
-                class="btn btn-warning text-dark fw-bold py-2 text-center w-100 btn-sm font-tamil mt-1 shadow-sm rounded-pill"
-                [disabled]="isSubmittingContact()">
-                {{ isSubmittingContact() ? 'அனுப்பப்படுகிறது...' : 'செய்தி அனுப்புக' }}
-              </button>
-            </form>
+
           </div>
 
         </div>
 
         <!-- Bottom Bar: Copyright & Rights -->
-        <div
-          class="d-flex flex-column align-items-center justify-content-center gap-2 pt-4 small font-tamil text-center">
-          <p class="mb-0 text-light opacity-75">&copy; 2026 அழகுத் தமிழ் யாப்பு. அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.
-          </p>
+        <div class="d-flex flex-column align-items-center justify-content-center gap-2 pt-4 small font-tamil text-center">
+          <p class="mb-0 text-light opacity-75">&copy; 2026 அழகுத் தமிழ் யாப்பு. அனைத்து உரிமைகளும் பாதுகாக்கப்பட்டவை.</p>
         </div>
 
       </div>
@@ -536,5 +468,105 @@
     </button>
     }
 
-  </div><!-- /.landing-page-root -->
-</div><!-- /.landing-scroll-body -->
+    <!-- ---------------------------------------------------- -->
+    <!-- CASE B: CLEAN NATIVE MOBILE APP ONBOARDING VIEW      -->
+    <!-- ---------------------------------------------------- -->
+    } @else {
+
+    <div class="mobile-onboarding-container text-center">
+      
+      <!-- Logo Branding Header -->
+      <div class="mobile-logo-section">
+        <div class="hero-emblem-circle mx-auto">
+          <div class="hero-emblem-inner-ring">
+            <div class="hero-emblem-content">
+              <span class="hero-emblem-letter font-tamil">அ</span>
+              <div class="hero-emblem-divider"></div>
+              <span class="hero-emblem-subtitle font-tamil">தமிழ் யாப்பு</span>
+            </div>
+          </div>
+        </div>
+        <h1 class="mobile-app-title font-tamil mt-3">அழகுத் தமிழ் யாப்பு</h1>
+        <p class="mobile-app-tagline font-tamil">விளையாட்டு வடிவில் யாப்பிலக்கணம் கற்கலாம்!</p>
+      </div>
+
+      <!-- Thirukkural of the Day -->
+      <div class="mobile-kural-card-wrapper my-4">
+        <div class="mobile-kural-card p-4 rounded-4 shadow-sm text-center">
+          <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+            <span class="badge bg-amber text-dark px-3 py-1.5 rounded-pill font-tamil" style="font-size: 0.72rem;">
+              <i class="bi bi-book-half me-1"></i> இன்றைய திருக்குறள்
+            </span>
+            <span class="text-muted" style="font-size: 0.75rem; font-weight: 600;">குறள் #{{ dailyKural().number }}</span>
+          </div>
+
+          <div class="row align-items-center gy-3">
+            <div class="col-4 text-center">
+              <img src="assets/images/thiruvalluvar_sitting.png" alt="Thiruvalluvar"
+                style="width: 85px; height: 85px; object-fit: contain;">
+            </div>
+            <div class="col-8 text-start">
+              <div class="kural-verses-box bg-light-cream p-2.5 rounded-3 border-start border-3 border-warning mb-2">
+                <p class="kural-line small fw-bold text-dark mb-1 font-tamil">{{ dailyKural().line1 }}</p>
+                <p class="kural-line small fw-bold text-dark mb-0 font-tamil">{{ dailyKural().line2 }}</p>
+              </div>
+              <p class="kural-meaning font-tamil text-muted mb-0" style="font-size: 0.75rem; line-height: 1.4;">
+                <strong>பொருள்:</strong> {{ dailyKural().meaning }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Course Preview Carousel -->
+      <div class="mobile-courses-preview text-start mb-4">
+        <h3 class="mobile-section-heading font-tamil px-2 mb-3">நாங்கள் வழங்கும் பாடங்கள்</h3>
+        
+        <div class="mobile-courses-scroll-container d-flex gap-3 overflow-x-auto pb-3 px-2 custom-scrollbar">
+          @if (isLoadingCourses()) {
+            <div class="w-100 text-center py-4">
+              <div class="spinner-border text-warning spinner-border-sm" role="status"></div>
+            </div>
+          } @else {
+            @for (course of dynamicCourses(); track course.id; let idx = $index) {
+              <div class="mobile-course-card p-3 rounded-4 shadow-xs bg-white flex-shrink-0" (click)="goToLogin()">
+                <div class="course-header-row d-flex align-items-center gap-2.5 mb-2">
+                  <div class="course-icon-badge" [style.background]="getBadgeBg(idx)" [style.color]="getBadgeColor(idx)">
+                    <i class="bi" [ngClass]="getCourseIcon(idx)"></i>
+                  </div>
+                  <span class="badge bg-light text-dark font-tamil px-2 rounded-pill" style="font-size: 0.65rem;">
+                    {{ course.category || 'இலக்கணம்' }}
+                  </span>
+                </div>
+                <h4 class="course-title font-tamil text-dark mb-1 text-truncate" style="font-size: 0.9rem;">
+                  {{ course.name || course.title }}
+                </h4>
+                <p class="course-desc font-tamil text-muted mb-0 small text-truncate-2" style="font-size: 0.75rem; line-height: 1.3;">
+                  {{ course.description }}
+                </p>
+              </div>
+            } @empty {
+              <div class="w-100 text-center py-3 font-tamil text-muted small">வகுப்புகள் எதுவும் கிடைக்கவில்லை.</div>
+            }
+          }
+        </div>
+      </div>
+
+      <!-- Onboarding Buttons -->
+      <div class="mobile-action-buttons-group d-flex flex-column gap-3 mt-4">
+        <button class="btn-teal-pill btn-glow w-100 py-3.5" (click)="goToLogin()" style="font-size: 1rem;">
+          உள்நுழைக (Login) <i class="bi bi-arrow-right-short fs-5"></i>
+        </button>
+        <a routerLink="/signup" class="btn-outline-teal-pill w-100 py-3 text-center d-block text-decoration-none fw-bold" style="font-size: 0.95rem;">
+          கணக்கு உருவாக்கு (Register)
+        </a>
+      </div>
+
+      <!-- Minimal Rights Tag -->
+      <p class="text-muted small mt-4 opacity-50">&copy; 2026 அழகுத் தமிழ் யாப்பு.</p>
+    </div>
+
+    }
+
+  </div>
+</div>
