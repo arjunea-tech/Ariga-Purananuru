@@ -1,0 +1,838 @@
+<div class="web-dashboard-layout">
+
+  <!-- Mobile Sidebar Backdrop Overlay -->
+  @if (isMobileMenuOpen()) {
+  <div class="web-sidebar-backdrop" (click)="closeMobileMenu()"></div>
+  }
+
+  <!-- Fixed Left Sidebar Navigation -->
+  <aside class="web-sidebar" [class.mobile-open]="isMobileMenuOpen()">
+    <!-- Brand Logo Section -->
+    <div class="brand-logo-area">
+      <div class="brand-badge-icon">
+        <span>அ</span>
+      </div>
+      <div class="brand-text">
+        <h1 class="brand-title" style="font-size: 1.1rem;">அழகுத் தமிழ் யாப்பு</h1>
+        <span class="brand-subtitle">Alagu Tamil Yappu</span>
+      </div>
+      <button class="mobile-sidebar-close-btn" (click)="closeMobileMenu()" aria-label="Close menu">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <!-- Navigation Menu Links -->
+    <nav class="web-nav-menu">
+      <button class="nav-item-btn" [class.active]="activeView() === 'home'" (click)="setActiveView('home')">
+        <i class="bi bi-house-door-fill"></i>
+        <span>Home</span>
+      </button>
+
+      <button class="nav-item-btn" [class.active]="activeView() === 'learn'" (click)="setActiveView('learn')">
+        <i class="bi bi-cap-fill"></i>
+        <span>Learn</span>
+      </button>
+
+      <button class="nav-item-btn" [class.active]="activeView() === 'practice'" (click)="setActiveView('practice')">
+        <i class="bi bi-pencil-square"></i>
+        <span>Practice</span>
+      </button>
+
+      <button class="nav-item-btn" [class.active]="activeView() === 'progress'" (click)="setActiveView('progress')">
+        <i class="bi bi-bar-chart-fill"></i>
+        <span>Progress</span>
+      </button>
+
+      <button class="nav-item-btn" [class.active]="activeView() === 'profile'" (click)="setActiveView('profile')">
+        <i class="bi bi-person-fill"></i>
+        <span>Profile</span>
+      </button>
+    </nav>
+
+    <!-- Sidebar Bottom Section -->
+    <div class="sidebar-bottom-action">
+      <button class="btn-practice-now" (click)="startPractice()">
+        Practice Now
+      </button>
+
+      <button class="btn-logout-link" (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <main class="web-main-workspace">
+
+    <!-- Top Global Header -->
+    <header class="web-top-header">
+      <div class="header-left-group">
+        <button class="mobile-menu-toggle-btn" (click)="toggleMobileMenu()" aria-label="Open menu">
+          <i class="bi bi-list"></i>
+        </button>
+
+        <div class="search-input-wrapper">
+          <i class="bi bi-search search-icon"></i>
+          <input type="text" class="web-search-input" [value]="searchQuery()" placeholder="Search lessons..."
+            (input)="searchQuery.set($any($event.target).value)" />
+        </div>
+      </div>
+
+      <div class="header-right-actions">
+        <button class="icon-circle-btn" title="Notifications">
+          <i class="bi bi-bell"></i>
+          <span class="notification-dot"></span>
+        </button>
+
+        <button class="icon-circle-btn" title="Settings">
+          <i class="bi bi-gear"></i>
+        </button>
+
+        <button class="icon-circle-btn" title="Help & FAQs">
+          <i class="bi bi-question-circle"></i>
+        </button>
+
+        <div class="user-avatar-badge" (click)="setActiveView('profile')" title="My Profile">
+          @if (userAvatar()) {
+          <img [src]="userAvatar()" alt="User Avatar" class="user-avatar-img" />
+          } @else {
+          <div class="user-initial-fallback">
+            {{ (userName() || 'A').charAt(0) }}
+          </div>
+          }
+        </div>
+      </div>
+    </header>
+
+    <!-- Dynamic View Containers -->
+    <div class="view-content-area">
+
+      <!-- ============================================== -->
+      <!-- 1. HOME VIEW -->
+      <!-- ============================================== -->
+      @if (activeView() === 'home') {
+      <div class="home-view-container animate-fade-in">
+
+        <div class="greeting-bar d-flex justify-content-between align-items-start mb-4">
+          <div>
+            <h2 class="welcome-heading">{{ timeGreeting() }}, {{ userName() }}!</h2>
+            <p class="welcome-subtext">Ready to continue your Tamil journey today?</p>
+          </div>
+
+          <div class="streak-badge-pill">
+            <i class="bi bi-fire text-orange"></i>
+            <span>{{ streakDays() }} Day Streak</span>
+          </div>
+        </div>
+
+        <!-- Main Grid (Hero + Right Documents Sidebar) -->
+        <div class="home-dashboard-grid">
+
+          <!-- Left Main Column -->
+          <div class="main-column-left">
+
+            <!-- Hero Course Card (Dynamic Active Course) -->
+            @let hero = activeHeroCourse() || assignedCourses()[0];
+            @if (hero) {
+            <div class="hero-course-card position-relative">
+              <span class="status-badge-green">IN PROGRESS</span>
+
+              <!-- Mascot Speech Bubble -->
+              <div class="speech-bubble-overlay">
+                <span>Let's finish this!</span>
+                <div class="mascot-mini-logo">
+                  @if (userAvatar()) {
+                  <img [src]="userAvatar()" alt="Mascot" />
+                  } @else {
+                  <img src="assets/images/logo.png" alt="Mascot" />
+                  }
+                </div>
+              </div>
+
+              <h3 class="hero-course-title">{{ hero.title }}</h3>
+              <p class="hero-course-subtitle">{{ hero.desc }}</p>
+
+              <div class="hero-progress-section">
+                <div class="d-flex justify-content-between mb-2">
+                  <span class="progress-label">Progress</span>
+                  <span class="progress-pct-value">{{ hero.progress }}%</span>
+                </div>
+                <div class="hero-progress-bar">
+                  <div class="hero-progress-fill" [style.width.%]="hero.progress || 45"></div>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-between align-items-center mt-4">
+                <button class="btn-hero-continue" (click)="openCourse(hero)">
+                  தொடர்க <i class="bi bi-play-fill"></i>
+                </button>
+
+                <div class="pagination-dots-indicator">
+                  <span class="dot active"></span>
+                  <span class="dot"></span>
+                  <span class="dot"></span>
+                </div>
+              </div>
+            </div>
+            }
+
+            <!-- Quick Access 3 Cards Grid -->
+            <div class="quick-access-3grid">
+
+              <div class="quick-access-card" (click)="setActiveView('learn')">
+                <div class="card-icon-circle bg-light-blue text-primary">
+                  <i class="bi bi-book-half"></i>
+                </div>
+                <h4 class="quick-card-title">📖 பாடங்கள்</h4>
+                <span class="quick-card-sub">{{ courseLevels().length || 12 }} Modules</span>
+              </div>
+
+              <div class="quick-access-card" (click)="setActiveView('practice')">
+                <div class="card-icon-circle bg-light-amber text-amber">
+                  <i class="bi bi-controller"></i>
+                </div>
+                <h4 class="quick-card-title">🎮 பயிற்சிகள்</h4>
+                <span class="quick-card-sub">Pending: 3</span>
+              </div>
+
+              <div class="quick-access-card" (click)="setActiveView('progress')">
+                <div class="card-icon-circle bg-light-purple text-purple">
+                  <i class="bi bi-trophy-fill"></i>
+                </div>
+                <h4 class="quick-card-title">🏆 லீடர்போர்டு</h4>
+                <span class="quick-card-sub">XP: {{ xpPoints() }}</span>
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Right Column (Documents & Books) -->
+          <div class="main-column-right">
+            <div class="documents-card-panel">
+              <div class="doc-panel-header">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-folder2-open text-primary fs-4"></i>
+                  <h4 class="doc-panel-title">📚 பாட நூல்கள் & ஆவணங்கள்</h4>
+                </div>
+              </div>
+
+              <div class="doc-files-list">
+                @for (file of attachments(); track file.name) {
+                <div class="doc-file-item cursor-pointer" (click)="openFile(file.url)">
+                  <div class="file-icon-box" [style.color]="file.color">
+                    <i class="bi" [ngClass]="file.icon"></i>
+                  </div>
+                  <div class="file-details">
+                    <h5 class="file-name text-truncate" style="max-width: 180px;">{{ file.name }}</h5>
+                    <span class="file-size">{{ file.size }}</span>
+                  </div>
+                </div>
+                } @empty {
+                <div class="text-center py-4 text-muted small">
+                  ஆவணங்கள் எதுவும் இணைக்கப்படவில்லை.
+                </div>
+                }
+              </div>
+
+              <button class="btn-view-all-files" (click)="setActiveView('learn')">
+                View All Files
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+      }
+
+      <!-- ============================================== -->
+      <!-- 2. LEARN VIEW -->
+      <!-- ============================================== -->
+      @if (activeView() === 'learn') {
+      <div class="learn-view-container animate-fade-in">
+
+        <div class="page-title-banner mb-4">
+          <h2 class="view-main-title">உங்கள் கற்றல் பயணம்</h2>
+          <p class="view-sub-title">தொடர்ந்து கற்று உங்கள் தமிழ் அறிவை வளர்த்துக் கொள்ளுங்கள்.</p>
+        </div>
+
+        <!-- Course Levels / Modules Grid Cards -->
+        <div class="courses-grid-cards mb-5">
+          @for (level of getFilteredLevels(); track level.id) {
+          <div class="web-course-card" [class.locked]="level.status === 'locked'"
+            [class.active-level]="selectedLevel()?.id === level.id" (click)="selectLevel(level)">
+
+            <div class="course-card-top d-flex align-items-center gap-3 mb-3">
+              <div class="course-icon-badge" [style.background]="level.colorBg" [style.color]="level.colorText">
+                <i class="bi" [ngClass]="level.icon"></i>
+              </div>
+              <div>
+                <h3 class="course-item-title">{{ level.name }}</h3>
+                <p class="course-item-desc">{{ level.desc }}</p>
+              </div>
+            </div>
+
+            <div class="course-card-footer d-flex justify-content-between align-items-center">
+              @if (level.status === 'completed') {
+              <span class="completed-text"><i class="bi bi-check-circle-fill me-1"></i> முடிந்தது</span>
+              } @else if (level.status === 'in-progress') {
+              <div class="w-75">
+                <div class="mini-progress-bar">
+                  <div class="mini-progress-fill" [style.width.%]="level.progress"></div>
+                </div>
+                <span class="progress-small-text">{{ level.progress }}%</span>
+              </div>
+              } @else {
+              <span class="locked-text"><i class="bi bi-lock-fill me-1"></i> Locked</span>
+              }
+
+              <i class="bi bi-arrow-right arrow-next-icon"></i>
+            </div>
+
+          </div>
+          } @empty {
+          <div class="col-12 text-center py-5 text-muted">
+            தேடிய தொகுதி இல்லை.
+          </div>
+          }
+        </div>
+
+        <!-- Selected Module Details Banner & Tabs -->
+        <div class="module-detail-banner-card">
+          <div class="banner-badge">தேர்ந்தெடுக்கப்பட்ட தொகுதி</div>
+          <h2 class="banner-title">{{ selectedCourseTitle() }}</h2>
+          <p class="banner-desc">{{ selectedCourseDesc() }}</p>
+
+          <!-- Filter Tabs -->
+          <div class="module-filter-tabs">
+            <button class="filter-tab-btn" [class.active]="selectedTabForModule() === 'lesson'"
+              (click)="selectModuleTab('lesson')">
+              <i class="bi bi-book-half"></i> பாடம்
+            </button>
+            <button class="filter-tab-btn" [class.active]="selectedTabForModule() === 'game'"
+              (click)="selectModuleTab('game')">
+              <i class="bi bi-controller"></i> விளையாட்டு
+            </button>
+            <button class="filter-tab-btn" [class.active]="selectedTabForModule() === 'video'"
+              (click)="selectModuleTab('video')">
+              <i class="bi bi-play-circle-fill"></i> Videos
+            </button>
+            <button class="filter-tab-btn" [class.active]="selectedTabForModule() === 'document'"
+              (click)="selectModuleTab('document')">
+              <i class="bi bi-file-earmark-text-fill"></i> Documents
+            </button>
+          </div>
+
+          <!-- Content Area Rendered Per Selected Tab -->
+          @if (selectedTabForModule() === 'lesson') {
+          <!-- 1. Lessons Tab Content -->
+          <div class="lessons-vertical-list animate-fade-in">
+            @for (lesson of moduleLessons(); track lesson.id) {
+            <div class="lesson-item-row" [class.locked]="lesson.status === 'locked'" (click)="startLesson(lesson)">
+              <div class="d-flex align-items-center gap-3">
+                <div class="lesson-num-badge" [class.completed]="lesson.status === 'completed'"
+                  [class.current]="lesson.status === 'current'">
+                  @if (lesson.status === 'completed') {
+                  <i class="bi bi-check-lg"></i>
+                  } @else {
+                  {{ lesson.id }}
+                  }
+                </div>
+                <div>
+                  <h4 class="lesson-item-name">{{ lesson.title }}</h4>
+                  <p class="lesson-item-sub">{{ lesson.desc }}</p>
+                </div>
+              </div>
+
+              <button class="btn-lesson-action" [class.btn-blue]="lesson.status === 'current'"
+                (click)="startLesson(lesson, $event)">
+                {{ lesson.actionLabel }}
+              </button>
+            </div>
+            } @empty {
+            <div class="text-center py-4 text-muted">
+              இந்தத் தொகுதியில் பாடங்கள் எதுவுமில்லை.
+            </div>
+            }
+          </div>
+          } @else if (selectedTabForModule() === 'game') {
+          <!-- 2. Games Tab Content -->
+          <div class="lessons-vertical-list animate-fade-in">
+            @for (game of moduleGames(); track game.id) {
+            <div class="lesson-item-row cursor-pointer" (click)="launchPracticeGame(game.type)">
+              <div class="d-flex align-items-center gap-3">
+                <div class="lesson-num-badge" [style.background]="game.color + '20'" [style.color]="game.color">
+                  <i class="bi" [ngClass]="game.icon"></i>
+                </div>
+                <div>
+                  <h4 class="lesson-item-name">{{ game.title }}</h4>
+                  <p class="lesson-item-sub">{{ game.desc }}</p>
+                </div>
+              </div>
+
+              <button class="btn-lesson-action btn-blue"
+                (click)="launchPracticeGame(game.type); $event.stopPropagation()">
+                விளையாடு ▶
+              </button>
+            </div>
+            } @empty {
+            <div class="text-center py-4 text-muted">
+              இந்தத் தொகுதியில் பயிற்சிகள் எதுவுமில்லை.
+            </div>
+            }
+          </div>
+          } @else if (selectedTabForModule() === 'video') {
+          <!-- 3. Videos Tab Content -->
+          <div class="lessons-vertical-list animate-fade-in">
+            @for (video of moduleVideos(); track video.id) {
+            <div class="lesson-item-row cursor-pointer" (click)="launchPracticeGame('mcq')">
+              <div class="d-flex align-items-center gap-3">
+                <div class="lesson-num-badge bg-light-emerald text-emerald">
+                  <i class="bi" [ngClass]="video.icon"></i>
+                </div>
+                <div>
+                  <h4 class="lesson-item-name">{{ video.title }}</h4>
+                  <p class="lesson-item-sub">கால அளவு: {{ video.duration }}</p>
+                </div>
+              </div>
+
+              <button class="btn-lesson-action btn-blue" (click)="launchPracticeGame('mcq'); $event.stopPropagation()">
+                பார் ▶
+              </button>
+            </div>
+            } @empty {
+            <div class="text-center py-4 text-muted">
+              இந்தத் தொகுதியில் காணொளிகள் எதுவுமில்லை.
+            </div>
+            }
+          </div>
+          } @else if (selectedTabForModule() === 'document') {
+          <!-- 4. Documents Tab Content -->
+          <div class="lessons-vertical-list animate-fade-in">
+            @for (doc of moduleDocuments(); track doc.name) {
+            <div class="lesson-item-row cursor-pointer" (click)="openFile(doc.url)">
+              <div class="d-flex align-items-center gap-3">
+                <div class="lesson-num-badge bg-light-rose text-rose">
+                  <i class="bi" [ngClass]="doc.icon"></i>
+                </div>
+                <div>
+                  <h4 class="lesson-item-name">{{ doc.name }}</h4>
+                  <p class="lesson-item-sub">அளவு: {{ doc.size }}</p>
+                </div>
+              </div>
+
+              <button class="btn-lesson-action btn-blue" (click)="openFile(doc.url); $event.stopPropagation()">
+                பார் 👁️
+              </button>
+            </div>
+            } @empty {
+            <div class="text-center py-4 text-muted">
+              இந்தத் தொகுதியில் ஆவணங்கள் எதுவுமில்லை.
+            </div>
+            }
+          </div>
+          }
+
+        </div>
+
+      </div>
+      }
+
+      <!-- ============================================== -->
+      <!-- 3. PRACTICE VIEW -->
+      <!-- ============================================== -->
+      @if (activeView() === 'practice') {
+      <div class="practice-view-container animate-fade-in">
+
+        <div class="d-flex justify-content-between align-items-start mb-4">
+          <div>
+            <h2 class="view-main-title d-flex align-items-center gap-2">
+              <i class="bi bi-trophy-fill text-amber"></i> பயிற்சி மையம்
+            </h2>
+            <p class="view-sub-title">Master Tamil through interactive challenges, mini-games, and practical exercises.
+              Earn rewards as you progress.</p>
+          </div>
+
+          <div class="streak-badge-pill amber-streak">
+            <i class="bi bi-fire"></i> {{ streakDays() }} Day Streak
+          </div>
+        </div>
+
+        <!-- Featured Challenge Grid -->
+        <div class="featured-challenges-grid mb-5">
+          <!-- Featured Large Card -->
+          <div class="featured-big-card">
+            <div class="card-badge-orange">FEATURED CHALLENGE</div>
+            <h3 class="featured-card-title">எழுத்து வேட்டை (Letter Hunt)</h3>
+            <p class="featured-card-desc">Find and connect the right Tamil characters to form basic words before the
+              timer runs out.</p>
+
+            <button class="btn-start-orange-game" (click)="launchPracticeGame('word_hunt')">
+              <i class="bi bi-play-fill fs-5"></i> Start Game
+            </button>
+          </div>
+
+          <!-- Right 2 Stacked Mini Cards -->
+          <div class="stacked-mini-cards">
+
+            <div class="mini-practice-card green-tint">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <h4 class="mini-card-title">சொல் புதிர்</h4>
+                  <p class="mini-card-sub">Daily Word Puzzle. Guess the 5-letter Tamil word.</p>
+                </div>
+                <i class="bi bi-puzzle-fill mini-card-icon text-emerald"></i>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <span class="badge-tag-pill bg-light-emerald">பயிற்சி</span>
+                <button class="link-btn-play" (click)="launchPracticeGame('word_builder')">Play <i
+                    class="bi bi-arrow-right"></i></button>
+              </div>
+            </div>
+
+            <div class="mini-practice-card blue-tint">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <h4 class="mini-card-title">ஒலிப் பயிற்சி</h4>
+                  <p class="mini-card-sub">Listen and repeat. Perfect your pronunciation of tricky sounds.</p>
+                </div>
+                <i class="bi bi-mic-fill mini-card-icon text-primary"></i>
+              </div>
+              <div class="d-flex justify-content-between align-items-center mt-3">
+                <span class="badge-tag-pill bg-light-blue">பயிற்சி</span>
+                <button class="link-btn-play" (click)="launchPracticeGame('mcq')">Start <i
+                    class="bi bi-arrow-right"></i></button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- More Practice Modules -->
+        <div class="section-title-label mb-3">More Practice Modules</div>
+
+        <div class="more-modules-3grid">
+
+          <div class="more-module-card cursor-pointer" (click)="launchPracticeGame('mcq')">
+            <div class="module-icon-circle bg-light-amber">
+              <i class="bi bi-book text-amber"></i>
+            </div>
+            <h4 class="more-mod-title">வாசிப்பு (Reading)</h4>
+            <p class="more-mod-desc">Read short stories and answer comprehension questions.</p>
+            <div class="d-flex justify-content-between align-items-center mt-4">
+              <span class="mod-levels-count">12 Levels</span>
+              <span class="badge-tag-pill">பயிற்சி</span>
+            </div>
+          </div>
+
+          <div class="more-module-card cursor-pointer" (click)="launchPracticeGame('word_hunt')">
+            <div class="module-icon-circle bg-light-rose">
+              <i class="bi bi-pencil-fill text-rose"></i>
+            </div>
+            <h4 class="more-mod-title">எழுதுதல் (Writing)</h4>
+            <p class="more-mod-desc">Trace characters and practice grammar construction.</p>
+            <div class="d-flex justify-content-between align-items-center mt-4">
+              <span class="mod-levels-count">8 Levels</span>
+              <span class="badge-tag-pill">பயிற்சி</span>
+            </div>
+          </div>
+
+          <div class="more-module-card cursor-pointer" (click)="launchPracticeGame('word_builder')">
+            <div class="module-icon-circle bg-light-indigo">
+              <i class="bi bi-chat-dots-fill text-indigo"></i>
+            </div>
+            <h4 class="more-mod-title">உரையாடல் (Conversation)</h4>
+            <p class="more-mod-desc">Interactive dialogue simulations for real-world usage.</p>
+            <div class="d-flex justify-content-between align-items-center mt-4">
+              <span class="mod-levels-count">15 Levels</span>
+              <span class="badge-tag-pill">பயிற்சி</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+      }
+
+      <!-- ============================================== -->
+      <!-- 4. PROGRESS VIEW -->
+      <!-- ============================================== -->
+      @if (activeView() === 'progress') {
+      <div class="progress-view-container animate-fade-in">
+
+        <div class="d-flex justify-content-between align-items-start mb-4">
+          <div>
+            <h2 class="view-main-title d-flex align-items-center gap-2">
+              <i class="bi bi-bar-chart-line-fill text-primary"></i> My Progress
+            </h2>
+            <p class="view-sub-title">Track your learning journey and milestones.</p>
+          </div>
+
+          <button class="btn-reset-light">
+            <i class="bi bi-arrow-counterclockwise"></i> Reset
+          </button>
+        </div>
+
+        <!-- Top Row (Mastery, Streak/XP, Weekly Chart) -->
+        <div class="progress-top-row-grid mb-4">
+
+          <div class="progress-panel-card text-center">
+            <h4 class="panel-card-title">Overall Mastery</h4>
+            <div class="big-stat-number text-primary">{{ overallProgress() }}%</div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill bg-primary" [style.width.%]="overallProgress()"></div>
+            </div>
+          </div>
+
+          <div class="progress-panel-card flex-center-column">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="icon-bubble bg-light-orange text-orange">
+                <i class="bi bi-fire"></i>
+              </div>
+              <div>
+                <span class="stat-mini-label">CURRENT STREAK</span>
+                <h3 class="stat-bold-val">{{ streakDays() }} Days</h3>
+              </div>
+            </div>
+
+            <div class="d-flex align-items-center gap-3">
+              <div class="icon-bubble bg-light-amber text-amber">
+                <i class="bi bi-star-fill"></i>
+              </div>
+              <div>
+                <span class="stat-mini-label">TOTAL EXPERIENCE</span>
+                <h3 class="stat-bold-val">{{ xpPoints() | number }} XP</h3>
+              </div>
+            </div>
+          </div>
+
+          <div class="progress-panel-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="panel-card-title mb-0">Weekly Activity</h4>
+              <i class="bi bi-fire text-orange"></i>
+            </div>
+
+            <!-- Bar chart -->
+            <div class="weekly-bars-flex">
+              @for (item of weeklyActivity(); track item.day) {
+              <div class="bar-col" [class.active]="item.active">
+                <div class="bar-fill" [style.height.%]="item.heightPct || 40"></div>
+                <span>{{ item.day }}</span>
+              </div>
+              }
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bottom Row (Module Breakdown & Circle Metrics) -->
+        <div class="progress-bottom-row-grid">
+
+          <div class="progress-panel-card col-span-2">
+            <h4 class="panel-card-title mb-3">Module Breakdown</h4>
+
+            <div class="module-breakdown-list">
+
+              @for (mod of moduleProgressList(); track mod.name || mod.id) {
+              <div class="breakdown-item" [class.locked]="mod.percentage === 0">
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="item-name">{{ mod.name || mod.title }}</span>
+                  <span class="item-pct fw-bold" [class.text-emerald]="mod.percentage === 100"
+                    [class.text-primary]="mod.percentage < 100">{{ mod.percentage }}%</span>
+                </div>
+                <div class="progress-bar-track">
+                  <div class="progress-bar-fill" [class.bg-emerald]="mod.percentage === 100"
+                    [class.bg-primary]="mod.percentage < 100" [style.width.%]="mod.percentage"></div>
+                </div>
+              </div>
+              } @empty {
+              <div class="breakdown-item">
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="item-name">Vowels (உயிரெழுத்துக்கள்)</span>
+                  <span class="item-pct text-emerald fw-bold">100%</span>
+                </div>
+                <div class="progress-bar-track">
+                  <div class="progress-bar-fill bg-emerald" style="width: 100%;"></div>
+                </div>
+              </div>
+
+              <div class="breakdown-item">
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="item-name">Consonants (மெய்யெழுத்துக்கள்)</span>
+                  <span class="item-pct text-primary fw-bold">85%</span>
+                </div>
+                <div class="progress-bar-track">
+                  <div class="progress-bar-fill bg-primary" style="width: 85%;"></div>
+                </div>
+              </div>
+
+              <div class="breakdown-item">
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="item-name">Common Words (சொற்கள்)</span>
+                  <span class="item-pct text-primary fw-bold">40%</span>
+                </div>
+                <div class="progress-bar-track">
+                  <div class="progress-bar-fill bg-primary" style="width: 40%;"></div>
+                </div>
+              </div>
+
+              <div class="breakdown-item locked">
+                <div class="d-flex justify-content-between mb-1">
+                  <span class="item-name"><i class="bi bi-lock-fill me-1"></i> Sentences (வாக்கியங்கள்)</span>
+                  <span class="item-pct text-muted">0%</span>
+                </div>
+                <div class="progress-bar-track">
+                  <div class="progress-bar-fill bg-muted" style="width: 0%;"></div>
+                </div>
+              </div>
+              }
+
+            </div>
+          </div>
+
+          <div class="circle-metrics-flex">
+
+            <div class="circle-stat-card">
+              <div class="circle-stat-icon text-primary"><i class="bi bi-stopwatch"></i></div>
+              <h3 class="circle-stat-val">{{ studiedMins() }}m</h3>
+              <span class="circle-stat-sub">Today</span>
+            </div>
+
+            <div class="circle-stat-card">
+              <div class="circle-stat-icon text-emerald"><i class="bi bi-check-square"></i></div>
+              <h3 class="circle-stat-val">{{ accuracyPct() }}%</h3>
+              <span class="circle-stat-sub">Accuracy</span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+      }
+
+      <!-- ============================================== -->
+      <!-- 5. PROFILE VIEW -->
+      <!-- ============================================== -->
+      @if (activeView() === 'profile') {
+      <div class="profile-view-container animate-fade-in">
+
+        <!-- Top Section (Profile Left Card + Navigation Menu Right Card) -->
+        <div class="profile-top-grid mb-5">
+
+          <!-- Left Main User Card -->
+          <div class="profile-user-card text-center">
+            <div class="profile-avatar-wrapper mx-auto mb-3">
+              @if (userAvatar()) {
+              <img [src]="userAvatar()" alt="User Avatar" class="profile-avatar-img" />
+              } @else {
+              <div class="profile-avatar-placeholder">
+                {{ (userName() || 'A').charAt(0) }}
+              </div>
+              }
+              <button class="btn-edit-avatar-pencil" title="Edit Profile">
+                <i class="bi bi-pencil-fill"></i>
+              </button>
+            </div>
+
+            <h3 class="user-full-name">{{ userName() }}</h3>
+            <div class="user-role-pill">{{ userRole() }}</div>
+
+            <div class="level-scholar-badge">
+              <i class="bi bi-star-fill text-amber me-1"></i> Level 12 Scholar
+            </div>
+
+            <div class="profile-stats-3row mt-4">
+              <div class="stat-col border-end">
+                <div class="stat-num text-orange">{{ streakDays() }}</div>
+                <div class="stat-lbl">DAY STREAK</div>
+              </div>
+              <div class="stat-col border-end">
+                <div class="stat-num text-primary">{{ overallProgress() }}%</div>
+                <div class="stat-lbl">COMPLETION</div>
+              </div>
+              <div class="stat-col">
+                <div class="stat-num text-emerald">{{ accuracyPct() }}%</div>
+                <div class="stat-lbl">ACCURACY</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Options Menu Panel -->
+          <div class="profile-options-panel">
+
+            <div class="option-row-item">
+              <div class="option-left d-flex align-items-center gap-3">
+                <div class="option-icon-box text-primary"><i class="bi bi-person"></i></div>
+                <div>
+                  <h4 class="option-title">Personal Info</h4>
+                  <p class="option-sub">Manage your details and preferences</p>
+                </div>
+              </div>
+              <i class="bi bi-chevron-right option-arrow"></i>
+            </div>
+
+            <div class="option-row-item">
+              <div class="option-left d-flex align-items-center gap-3">
+                <div class="option-icon-box text-amber"><i class="bi bi-award"></i></div>
+                <div>
+                  <h4 class="option-title">My Certificates</h4>
+                  <p class="option-sub">View your official course completions</p>
+                </div>
+              </div>
+              <i class="bi bi-chevron-right option-arrow"></i>
+            </div>
+
+            <div class="option-row-item">
+              <div class="option-left d-flex align-items-center gap-3">
+                <div class="option-icon-box text-emerald"><i class="bi bi-bar-chart"></i></div>
+                <div>
+                  <h4 class="option-title">My Statistics</h4>
+                  <p class="option-sub">Detailed learning analytics</p>
+                </div>
+              </div>
+              <i class="bi bi-chevron-right option-arrow"></i>
+            </div>
+
+            <div class="option-row-item border-0">
+              <div class="option-left d-flex align-items-center gap-3">
+                <div class="option-icon-box text-purple"><i class="bi bi-question-circle"></i></div>
+                <div>
+                  <h4 class="option-title">Help & Support</h4>
+                  <p class="option-sub">FAQs and contact information</p>
+                </div>
+              </div>
+              <i class="bi bi-chevron-right option-arrow"></i>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- Bottom Recent Achievements Section -->
+        <div class="achievements-section">
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="section-title-label mb-0">Recent Achievements</h3>
+            <button class="link-view-all">View All</button>
+          </div>
+
+          <div class="achievements-flex-row">
+            @for (badge of achievements(); track badge.name || badge.title) {
+            <div class="achievement-badge-card" [class.locked]="!badge.unlocked"
+              [style.background]="badge.bg || '#ECFDF5'">
+              <div class="badge-emoji-icon">{{ badge.icon || '🏆' }}</div>
+              <span class="badge-name-lbl">{{ badge.name || badge.title }}</span>
+            </div>
+            }
+          </div>
+        </div>
+
+      </div>
+      }
+
+    </div>
+  </main>
+
+</div>

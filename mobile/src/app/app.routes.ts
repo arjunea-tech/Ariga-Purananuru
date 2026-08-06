@@ -19,6 +19,7 @@ import { AdminDashboardComponent } from './components/admin-dashboard/admin-dash
 import { Announcements } from './components/announcements/announcements';
 import { roleGuard } from './guards/role.guard';
 import { guestGuard } from './guards/guest.guard';
+import { platformGuard } from './guards/platform.guard';
 import { AdminUploadComponent } from './components/admin-upload/admin-upload.component';
 import { ActivityBuilder } from './components/activity-builder/activity-builder';
 import { PracticeEngineComponent } from './components/practice-engine/practice-engine.component';
@@ -28,11 +29,27 @@ import { GamesHubComponent } from './components/games-hub/games-hub';
 import { StudentProfileComponent } from './components/student-profile/student-profile';
 import { KidsDashboard } from './components/kids-dashboard/kids-dashboard';
 import { WelcomeScreen } from './components/welcome-screen/welcome-screen';
+import { WebDashboardComponent } from './components/web-dashboard/web-dashboard';
 
 export const routes: Routes = [
+  // 🌐 Public Landing Page (Root) - Landing Page on Web, Redirect to Login on Mobile App
+  { path: '', component: WelcomeScreen, pathMatch: 'full', canActivate: [platformGuard] },
+
   // Public Login route
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   
+  // 💻 Desktop Website View Shell
+  {
+    path: 'web-dashboard',
+    component: WebDashboardComponent,
+    canActivate: [roleGuard(['student', 'super_admin', 'admin', 'staff'])]
+  },
+  {
+    path: 'web',
+    redirectTo: 'web-dashboard',
+    pathMatch: 'full'
+  },
+
   // 📱 Mobile Native 5-Tab Navigation Shell
   {
     path: 'tabs',
@@ -47,9 +64,6 @@ export const routes: Routes = [
       { path: 'profile', component: StudentProfileComponent }
     ]
   },
-  
-  // Welcome Screen (App open)
-  { path: '', component: WelcomeScreen, canActivate: [guestGuard] },
 
 
   /*
