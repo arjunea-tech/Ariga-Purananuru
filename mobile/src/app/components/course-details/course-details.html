@@ -1,134 +1,198 @@
-<div class="course-details-page bg-light min-vh-100 pb-5">
-  <!-- Navbar/Header -->
-  <nav class="navbar navbar-light bg-white shadow-sm sticky-top">
-    <div class="container py-2">
-      <button class="btn btn-light d-flex align-items-center rounded-pill" (click)="goBack()">
-        <span class="fs-4 me-2">&larr;</span> Back to Courses
-      </button>
-    </div>
-  </nav>
+<div class="cd-page-shell">
 
-  @if (loading) {
-    <div class="text-center py-5 mt-5">
-      <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
-      <h4>Loading Course Details...</h4>
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="cd-loading-screen">
+      <div class="cd-loading-spinner"></div>
+      <p class="cd-loading-text font-tamil">பாடநெறி விவரங்கள் ஏற்றப்படுகின்றன...</p>
     </div>
-  } @else if (!course) {
-    <div class="text-center py-5 mt-5">
-      <h3 class="text-danger">Course not found.</h3>
-      <button class="btn btn-primary mt-3" (click)="goBack()">Go Back</button>
+  }
+
+  <!-- Error / Not Found State -->
+  @else if (!course()) {
+    <div class="cd-error-screen">
+      <div class="cd-error-icon">😔</div>
+      <h2 class="font-tamil cd-error-title">பாடநெறி கிடைக்கவில்லை</h2>
+      <p class="font-tamil cd-error-sub">சர்வர் இணைப்பு இல்லாமல் இருக்கலாம். மீண்டும் முயற்சிக்கவும்.</p>
+      <button class="cd-btn-primary font-tamil" (click)="fetchCourseData()">மீண்டும் முயற்சி</button>
+      <button class="cd-btn-ghost font-tamil mt-3" (click)="goBack()">திரும்பிச் செல்</button>
     </div>
-  } @else {
-    <!-- Course Header (Cover Image) -->
-    <div class="course-header position-relative">
-      @if (course.cover_image) {
-        <img [src]="course.cover_image" class="w-100 object-fit-cover" style="height: 350px;" alt="{{ course.name }}">
-      } @else {
-        <div class="gradient-bg w-100" style="height: 350px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
-      }
-      <div class="header-overlay position-absolute bottom-0 start-0 w-100 p-4 pb-5 text-white" style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
-        <div class="container">
-          <h1 class="display-4 fw-bold text-white shadow-sm">{{ course.name }}</h1>
-          @if (course.tags) {
-            <div class="mt-2">
-              @for (tag of course.tags; track tag) {
-                <span class="badge bg-warning text-dark me-2 fs-6">{{ tag }}</span>
-              }
+  }
+
+  <!-- Main Course Details -->
+  @else {
+
+    <!-- Sticky Header -->
+    <div class="cd-sticky-header">
+      <button class="cd-back-btn" (click)="goBack()" aria-label="Back">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <span class="cd-header-title font-tamil">பாடநெறி விவரம்</span>
+      <div style="width: 40px;"></div>
+    </div>
+
+    <!-- Scrollable Content -->
+    <div class="cd-scrollable-content">
+
+      <!-- Course Hero Card -->
+      <div class="cd-hero-card">
+        <div class="cd-hero-badge-row">
+          <span class="cd-category-badge font-tamil">
+            <i class="bi bi-book me-1"></i>பாடநெறி
+          </span>
+        </div>
+
+        <h1 class="cd-course-name font-tamil">{{ course().name || course().title }}</h1>
+
+        <p class="cd-course-desc font-tamil">{{ course().description }}</p>
+
+        <!-- Quick Stats Row -->
+        <div class="cd-quick-stats-row">
+          @if (loadingSyllabus()) {
+            <div class="cd-stat-shimmer"></div>
+            <div class="cd-stat-shimmer"></div>
+            <div class="cd-stat-shimmer"></div>
+          } @else {
+            <div class="cd-stat-chip">
+              <i class="bi bi-layers text-amber"></i>
+              <span class="font-tamil">{{ totalLevels() }} நிலைகள்</span>
+            </div>
+            <div class="cd-stat-chip">
+              <i class="bi bi-journal-text text-amber"></i>
+              <span class="font-tamil">{{ totalLessons() }} படிப்புகள்</span>
+            </div>
+            <div class="cd-stat-chip">
+              <i class="bi bi-controller text-amber"></i>
+              <span class="font-tamil">{{ totalActivities() }} பயிற்சிகள்</span>
             </div>
           }
         </div>
       </div>
-    </div>
 
-    <!-- Main Content Area -->
-    <div class="container mt-n4 position-relative z-3">
-      <div class="row gx-5">
-        
-        <!-- Left Column: Description & Syllabus -->
-        <div class="col-lg-8 mb-4">
-          <div class="card border-0 shadow-sm rounded-4 mb-4">
-            <div class="card-body p-4 p-md-5">
-              <h3 class="fw-bold mb-4">About this Course</h3>
-              <p class="fs-5 text-secondary lh-lg mb-0">{{ course.description || 'A comprehensive learning module designed to help you master the subject step by step.' }}</p>
-            </div>
-          </div>
-
-          <div class="card border-0 shadow-sm rounded-4">
-            <div class="card-body p-4 p-md-5">
-              <h3 class="fw-bold mb-4">Course Syllabus</h3>
-              
-              @if (loadingSyllabus) {
-                <div class="text-center py-4">
-                  <div class="spinner-border text-primary" role="status"></div>
-                  <p class="text-muted mt-2">Loading syllabus...</p>
-                </div>
-              } @else if (syllabus) {
-                <div class="accordion accordion-flush" id="syllabusAccordion">
-                  @for (level of syllabus.levels; track level.id; let i = $index) {
-                    <div class="accordion-item mb-3 border rounded-3 overflow-hidden">
-                      <h2 class="accordion-header">
-                        <button class="accordion-button collapsed bg-light fs-5 fw-bold py-3" type="button" data-bs-toggle="collapse" [attr.data-bs-target]="'#collapseLevel' + i">
-                          {{ level.name }}
-                          <span class="badge bg-secondary ms-auto me-3">{{ level.chapters?.length || 0 }} Chapters</span>
-                        </button>
-                      </h2>
-                      <div [id]="'collapseLevel' + i" class="accordion-collapse collapse" data-bs-parent="#syllabusAccordion">
-                        <div class="accordion-body p-0">
-                          <ul class="list-group list-group-flush">
-                            @for (chapter of level.chapters; track chapter.id) {
-                              <li class="list-group-item d-flex justify-content-between align-items-center py-3 px-4">
-                                <div class="d-flex align-items-center">
-                                  <span class="text-muted me-3 fs-5">🔒</span>
-                                  <span class="fs-5">{{ chapter.name }}</span>
-                                </div>
-                                @if (chapter.activities) {
-                                  <small class="text-muted fw-semibold">{{ chapter.activities.length }} Activities</small>
-                                }
-                              </li>
-                            }
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  }
+      <!-- What You'll Learn Section — dynamic from API -->
+      @if (course().what_you_learn?.length || course().tags?.length || course().highlights?.length) {
+        <div class="cd-section-card mt-3">
+          <h2 class="cd-section-title font-tamil">
+            <i class="bi bi-stars text-amber me-2"></i>இதில் என்ன கற்கலாம்?
+          </h2>
+          <div class="cd-learn-list">
+            <!-- Priority 1: what_you_learn array from API -->
+            @if (course().what_you_learn?.length) {
+              @for (item of course().what_you_learn; track item) {
+                <div class="cd-learn-item">
+                  <span class="cd-learn-check">✓</span>
+                  <span class="font-tamil">{{ item }}</span>
                 </div>
               }
-            </div>
+            }
+            <!-- Priority 2: highlights array from API -->
+            @else if (course().highlights?.length) {
+              @for (item of course().highlights; track item) {
+                <div class="cd-learn-item">
+                  <span class="cd-learn-check">✓</span>
+                  <span class="font-tamil">{{ item }}</span>
+                </div>
+              }
+            }
+            <!-- Priority 3: tags as chips -->
+            @else if (course().tags?.length) {
+              @for (tag of course().tags; track tag) {
+                <div class="cd-learn-item">
+                  <span class="cd-learn-check">✓</span>
+                  <span class="font-tamil">{{ tag }}</span>
+                </div>
+              }
+            }
           </div>
         </div>
+      }
 
-        <!-- Right Column: Sticky Pricing Card -->
-        <div class="col-lg-4">
-          <div class="pricing-card card border-0 shadow-lg rounded-4 sticky-top" style="top: 100px;">
-            <div class="card-body p-4 p-md-5 text-center">
-              <div class="price-info mb-4">
-                <div class="display-3 fw-bold text-primary mb-2">₹{{ course.price }}</div>
-                @if (course.original_price && course.original_price > course.price) {
-                  <div class="text-muted text-decoration-line-through fs-4">₹{{ course.original_price }}</div>
-                  <div class="badge bg-danger mt-2 fs-6 py-2 px-3">Limited Time Offer</div>
-                }
-              </div>
-              
-              <button class="btn btn-primary btn-lg w-100 py-3 fs-4 fw-bold rounded-pill shadow" (click)="buyCourse()" [disabled]="buying">
-                @if (buying) {
-                  Processing...
-                } @else {
-                  Enroll Now
-                }
-              </button>
-              
-              <div class="mt-4 text-start text-muted small">
-                <ul class="list-unstyled lh-lg mb-0">
-                  <li><span class="me-2 text-success">✓</span> Full Lifetime Access</li>
-                  <li><span class="me-2 text-success">✓</span> Access on Mobile and Web</li>
-                  <li><span class="me-2 text-success">✓</span> Interactive Quizzes</li>
-                </ul>
-              </div>
-            </div>
+      <!-- Syllabus Section -->
+      <div class="cd-section-card mt-3">
+        <h2 class="cd-section-title font-tamil">
+          <i class="bi bi-list-ul text-amber me-2"></i>பாடத்திட்டம் (Syllabus)
+        </h2>
+
+        @if (loadingSyllabus()) {
+          <div class="cd-syllabus-loading font-tamil">
+            <span class="cd-small-spinner"></span>
+            பாடத்திட்டம் ஏற்றப்படுகிறது...
           </div>
-        </div>
+        } @else if (levelsList.length === 0) {
+          <p class="cd-no-syllabus font-tamil">பாடத்திட்டம் விரைவில் சேர்க்கப்படும்.</p>
+        } @else {
+          <div class="cd-level-list">
+            @for (level of levelsList; track level.id; let i = $index) {
+              <div class="cd-level-item">
+                <div class="cd-level-header">
+                  <div class="cd-level-num-badge">{{ i + 1 }}</div>
+                  <div class="cd-level-meta flex-1">
+                    <span class="cd-level-name font-tamil">{{ level.name }}</span>
+                    <span class="cd-level-sub font-tamil">{{ level.chapters?.length || 0 }} படிப்புகள்</span>
+                  </div>
+                  <i class="bi bi-lock-fill cd-lock-icon"></i>
+                </div>
 
+                @if (level.chapters && level.chapters.length > 0) {
+                  <div class="cd-chapter-list">
+                    @for (chapter of level.chapters; track chapter.id; let ci = $index) {
+                      <div class="cd-chapter-row">
+                        <span class="cd-chapter-dot"></span>
+                        <span class="cd-chapter-name font-tamil">{{ chapter.name }}</span>
+                        @if (chapter.activities?.length) {
+                          <span class="cd-chapter-acts font-tamil">{{ chapter.activities.length }} பயிற்சி</span>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
       </div>
+
+      <!-- Price Summary Card -->
+      <div class="cd-price-card mt-3 mb-2">
+        <div class="cd-price-row">
+          <div>
+            <span class="cd-price-label font-tamil">முழு கட்டணம்</span>
+            @if (course().original_price && course().original_price > course().price) {
+              <span class="cd-original-price font-tamil">₹{{ course().original_price }}</span>
+            }
+          </div>
+          <div class="cd-price-main font-tamil">₹{{ course().price || 0 }}</div>
+        </div>
+        @if (course().original_price && course().original_price > course().price) {
+          <div class="cd-discount-badge font-tamil">
+            ⚡ சிறப்பு தள்ளுபடி விலை!
+          </div>
+        }
+      </div>
+
+      <!-- Benefits List -->
+      <div class="cd-benefits-row mb-4">
+        <div class="cd-benefit-chip font-tamil"><i class="bi bi-check-circle text-green me-1"></i> வாழ்நாள் அணுகல்</div>
+        <div class="cd-benefit-chip font-tamil"><i class="bi bi-check-circle text-green me-1"></i> மொபைல் + வலை</div>
+        <div class="cd-benefit-chip font-tamil"><i class="bi bi-check-circle text-green me-1"></i> சான்றிதழ்</div>
+      </div>
+
+      <!-- Spacer for sticky enroll button -->
+      <div style="height: 80px;"></div>
+
     </div>
+
+    <!-- Sticky Enroll Button at Bottom -->
+    <div class="cd-sticky-enroll-bar">
+      <button class="cd-enroll-btn font-tamil" (click)="enrollCourse()" [disabled]="buying()">
+        @if (buying()) {
+          <span class="cd-btn-spinner me-2"></span> சேர்க்கப்படுகிறது...
+        } @else {
+          <i class="bi bi-bolt-fill me-2"></i> இப்போது சேரவும் (Enroll Now)
+        }
+      </button>
+    </div>
+
   }
+
 </div>

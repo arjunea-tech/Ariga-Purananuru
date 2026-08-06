@@ -1,3 +1,4 @@
+@if (!isNative()) {
 <!-- 1. NAVIGATION BAR — outside scroll area, always visible -->
 <nav class="landing-navbar">
   <div class="landing-container d-flex justify-content-between align-items-center">
@@ -538,3 +539,195 @@
 
   </div><!-- /.landing-page-root -->
 </div><!-- /.landing-scroll-body -->
+}
+
+@if (isNative()) {
+<div class="mobile-onboarding-wrapper">
+  
+  <!-- Mobile Premium Top Navigation Bar -->
+  <div class="mobile-top-nav d-flex justify-content-between align-items-center px-3">
+    <div class="mobile-mini-brand d-flex align-items-center gap-2">
+      <div class="brand-badge-circle-mini"><span>அ</span></div>
+      <span class="font-tamil fw-bold text-dark" style="font-size: 0.95rem; letter-spacing: -0.3px;">அழகுத் தமிழ் யாப்பு</span>
+    </div>
+    <button class="btn-avatar-nav" (click)="goToLogin()" aria-label="Profile">
+      <i class="bi bi-person-circle"></i>
+    </button>
+  </div>
+
+
+  <div class="mobile-onboarding-content">
+    
+    <!-- Tab 1: Home View -->
+    @if (activeTab() === 'home') {
+      <!-- Hero / Mascot Section -->
+      <div class="mobile-hero-section text-center py-4">
+        <div class="mobile-mascot-box mx-auto mb-3">
+          <img src="assets/images/thiruvalluvar_sitting.png" alt="Thiruvalluvar" class="mobile-mascot-img">
+        </div>
+        <h2 class="mobile-hero-title font-tamil">தமிழ் கற்பது<br>இனி எளிது.</h2>
+        <p class="mobile-hero-subtitle font-tamil text-muted px-2">யாப்பிலக்கணம் முதல் தமிழ் சார்ந்த கற்றல் வரை ஒரே இடத்தில் விளையாட்டாகக் கற்கலாம்.</p>
+        
+        <!-- Primary CTA Button -->
+        <button class="btn-mobile-primary-cta font-tamil mt-3 w-100" (click)="goToSignup()">
+          இலவசமாகத் தொடங்குங்கள் <i class="bi bi-arrow-right-short ms-1 fs-5"></i>
+        </button>
+      </div>
+
+      <!-- Mobile Impact Stats Grid (2x2) -->
+      <div class="mobile-stats-grid mb-4 px-1">
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="mobile-stat-card p-3 text-center">
+              <span class="stat-num text-amber font-tamil fw-bold d-block">{{ statStudents() | number }}+</span>
+              <span class="stat-label text-muted font-tamil small">மாணவர்கள்</span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="mobile-stat-card p-3 text-center">
+              <span class="stat-num text-amber font-tamil fw-bold d-block">{{ statLessons() | number }}+</span>
+              <span class="stat-label text-muted font-tamil small">பாடங்கள்</span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="mobile-stat-card p-3 text-center">
+              <span class="stat-num text-amber font-tamil fw-bold d-block">{{ statSatisfaction() }}%</span>
+              <span class="stat-label text-muted font-tamil small">திருப்தி</span>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="mobile-stat-card p-3 text-center">
+              <span class="stat-num text-amber font-tamil fw-bold d-block">{{ statExercises() | number }}+</span>
+              <span class="stat-label text-muted font-tamil small">பயிற்சிகள்</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Features Grid -->
+      <div class="mobile-features-section mb-4 px-1">
+        <h3 class="section-title font-tamil mb-3"><i class="bi bi-star-fill text-amber me-1"></i> சிறப்பம்சங்கள்</h3>
+        <div class="row g-3">
+          @for (card of featureCards; track card.id) {
+            <div class="col-12">
+              <div class="mobile-feature-item-card p-3 d-flex align-items-center gap-3">
+                <div class="feature-item-icon-wrapper" [class]="card.bgClass" [style.color]="card.color">
+                  <i [class]="'bi ' + card.icon"></i>
+                </div>
+                <div class="feature-item-info text-start" style="flex: 1;">
+                  <h4 class="feature-item-title font-tamil mb-0.5" style="color: #451A03; font-weight: 700; font-size: 0.95rem;">{{ card.title }}</h4>
+                  <p class="feature-item-desc font-tamil text-muted small mb-0" style="line-height: 1.4; font-size: 0.8rem;">{{ card.desc }}</p>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Featured Courses Section -->
+      <div class="onboarding-courses-section mb-4">
+        <div class="d-flex justify-content-between align-items-center px-3 mb-3">
+          <h3 class="section-title font-tamil mb-0"><i class="bi bi-journal-code me-1 text-amber"></i> எங்கள் பாடநெறிகள்</h3>
+          <span class="text-muted small font-tamil" style="font-size: 0.82rem; cursor: pointer;" (click)="activeTab.set('courses')">அனைத்தும் <i class="bi bi-arrow-right"></i></span>
+        </div>
+        
+        @if (isLoadingCourses()) {
+          <div class="text-center py-5">
+            <span class="spinner-border text-amber" style="width: 2rem; height: 2rem;"></span>
+          </div>
+        } @else {
+          <div class="mobile-course-carousel">
+            @for (course of dynamicCourses(); track course.id; let idx = $index) {
+              <div class="mobile-course-swipe-card p-4" (click)="goToCourseDetails(course.id)">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                  <span class="badge bg-amber text-dark font-tamil px-2.5 py-1 rounded-pill" style="font-size: 0.70rem;">பாடநெறி</span>
+                  <div class="mobile-carousel-icon-box"
+                    [style.background-color]="course.badgeBg || '#EEF2FF'"
+                    [style.color]="course.badgeColor || '#4F46E5'">
+                    <i class="bi" [ngClass]="course.icon || 'bi-journal-code'"></i>
+                  </div>
+                </div>
+                
+                <h4 class="course-card-title font-tamil text-dark mb-2">{{ course.name || course.title }}</h4>
+                <p class="course-card-desc font-tamil text-muted mb-4 text-truncate-3">{{ course.description }}</p>
+                
+                <div class="d-flex justify-content-between align-items-center mt-auto border-top pt-3">
+                  <div class="course-price-group text-start">
+                    <span class="d-block text-muted small" style="font-size: 0.70rem;">முழு கட்டணம்</span>
+                    <strong class="fs-5 text-dark font-tamil">₹{{ course.price || 0 }}</strong>
+                  </div>
+                  <button class="btn-carousel-start-glow font-tamil px-3 py-1.5" (click)="goToCourseDetails(course.id); $event.stopPropagation();">
+                    கற்க <i class="bi bi-chevron-right ms-1"></i>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+          <!-- Swipe Indicator Dots -->
+          <div class="carousel-dots-indicator d-flex justify-content-center gap-1.5 mt-2">
+            <span class="dot active"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+        }
+      </div>
+
+    }
+
+    <!-- Tab 2: All Courses Catalog View -->
+    @if (activeTab() === 'courses') {
+      <div class="courses-catalog-page py-2">
+        <h3 class="section-title font-tamil mb-3 px-1"><i class="bi bi-journal-code me-1 text-amber"></i> அனைத்து பாடநெறிகள்</h3>
+        
+        @if (isLoadingCourses()) {
+          <div class="text-center py-5">
+            <span class="spinner-border text-amber" style="width: 2rem; height: 2rem;"></span>
+          </div>
+        } @else {
+          <div class="course-list-vertical">
+            @for (course of dynamicCourses(); track course.id) {
+              <div class="mobile-course-swipe-card p-4 mb-3" (click)="goToCourseDetails(course.id)" style="flex: none; width: 100%;">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                  <span class="badge bg-amber text-dark font-tamil px-2.5 py-1 rounded-pill" style="font-size: 0.70rem;">பாடநெறி</span>
+                  <div class="mobile-carousel-icon-box"
+                    [style.background-color]="course.badgeBg || '#EEF2FF'"
+                    [style.color]="course.badgeColor || '#4F46E5'">
+                    <i class="bi" [ngClass]="course.icon || 'bi-journal-code'"></i>
+                  </div>
+                </div>
+                
+                <h4 class="course-card-title font-tamil text-dark mb-2">{{ course.name || course.title }}</h4>
+                <p class="course-card-desc font-tamil text-muted mb-4">{{ course.description }}</p>
+                
+                <div class="d-flex justify-content-between align-items-center mt-auto border-top pt-3">
+                  <div class="course-price-group text-start">
+                    <span class="d-block text-muted small" style="font-size: 0.70rem;">முழு கட்டணம்</span>
+                    <strong class="fs-5 text-dark font-tamil">₹{{ course.price || 0 }}</strong>
+                  </div>
+                  <button class="btn-carousel-start-glow font-tamil px-4 py-2" (click)="goToCourseDetails(course.id); $event.stopPropagation();">
+                    சேரவும் <i class="bi bi-chevron-right ms-1"></i>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+
+  <!-- Mobile Premium Bottom Navigation Bar -->
+  <div class="mobile-bottom-nav d-flex justify-content-around align-items-center">
+    <button class="nav-item" [class.active]="activeTab() === 'home'" (click)="activeTab.set('home'); scrollToTop();">
+      <i class="bi bi-house-door-fill"></i>
+      <span class="font-tamil">முகப்பு</span>
+    </button>
+    <button class="nav-item" [class.active]="activeTab() === 'courses'" (click)="activeTab.set('courses')">
+      <i class="bi bi-journal-code"></i>
+      <span class="font-tamil">பாடநெறிகள்</span>
+    </button>
+  </div>
+
+</div>
+}

@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { environment } from '../../../environments/environment';
+import { Capacitor } from '@capacitor/core';
 
 export interface DailyKural {
   number: number;
@@ -188,6 +189,8 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
   protected authService = inject(AuthService);
 
   isMobileMenuOpen = signal<boolean>(false);
+  isNative = signal<boolean>(Capacitor.isNativePlatform());
+  activeTab = signal<string>('home');
   showBackToTop = signal<boolean>(false);
   isScrolled = signal<boolean>(false);
   kuralCopied = signal<boolean>(false);
@@ -469,7 +472,7 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
 
   fetchCoursesFromBackend(): void {
     this.isLoadingCourses.set(true);
-    this.http.get<any[]>(`${environment.apiUrl}/courses`).subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/store/courses`).subscribe({
       next: (courses) => {
         if (courses && Array.isArray(courses)) {
           const activeList = courses.filter(c => c.is_active !== false);
@@ -480,7 +483,7 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
         this.isLoadingCourses.set(false);
       },
       error: (err) => {
-        console.log('Error fetching courses for landing page:', err);
+        console.error('Error fetching courses for landing page:', err);
         this.dynamicCourses.set([]);
         this.isLoadingCourses.set(false);
       }
@@ -527,15 +530,27 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
 
   goToLogin(): void {
     if (this.authService.isLoggedIn()) {
-      const role = this.authService.getUserRole();
-      if (role === 'student') {
-        this.router.navigate(['/web-dashboard']);
+      if (Capacitor.isNativePlatform()) {
+        this.router.navigate(['/tabs/home']);
       } else {
-        this.router.navigate(['/admin-dashboard']);
+        const role = this.authService.getUserRole();
+        if (role === 'student') {
+          this.router.navigate(['/web-dashboard']);
+        } else {
+          this.router.navigate(['/admin-dashboard']);
+        }
       }
     } else {
       this.router.navigate(['/login']);
     }
+  }
+
+  goToSignup(): void {
+    this.router.navigate(['/signup']);
+  }
+
+  goToCourseDetails(courseId: number): void {
+    this.router.navigate(['/public-course-details', courseId]);
   }
 
   submitContactForm(): void {
