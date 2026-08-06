@@ -5,7 +5,7 @@ const config: CapacitorConfig = {
   appName: 'தமிழ் யாப்பு',
   webDir: 'dist/language_app/browser',
   server: {
-    androidScheme: 'https',
+    androidScheme: 'http',
     // url: 'http://192.168.1.60:4200',
     cleartext: true
   },
