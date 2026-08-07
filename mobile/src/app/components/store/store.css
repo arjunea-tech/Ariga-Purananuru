@@ -5,9 +5,9 @@
 }
 
 /* Header */
-.page-header.indigo-theme {
-  background: #EEF2FF !important; /* Flat soft indigo - no gradient */
-  color: #4F46E5 !important;
+.page-header.teal-theme {
+  background: #CCFBF1 !important; /* Flat soft teal - no gradient */
+  color: #0D9488 !important;
   box-shadow: none;
 }
 
@@ -57,12 +57,12 @@
   transform: scale(1.05);
 }
 
-.text-indigo {
-  color: #4F46E5 !important;
+.text-teal {
+  color: #0D9488 !important;
 }
 
 .btn-primary:disabled {
-  background-color: #A5B4FC !important;
-  border-color: #A5B4FC !important;
+  background-color: #99F6E4 !important;
+  border-color: #99F6E4 !important;
 }
 

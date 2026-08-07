@@ -443,22 +443,12 @@ export class LearnModulesComponent implements OnInit {
         cached.contents.forEach((cont: any) => {
           if (cont.attachments && cont.attachments.length > 0) {
             cont.attachments.forEach((att: any) => {
-              let fileUrl = att.url || att;
-              if (fileUrl) {
-                if (Capacitor.getPlatform() === 'android') {
-                  fileUrl = fileUrl.replace('http://localhost:8000', 'http://10.0.2.2:8000');
-                  fileUrl = fileUrl.replace('http://127.0.0.1:8000', 'http://10.0.2.2:8000');
-                }
-                if (fileUrl.startsWith('http://localhost/') && !fileUrl.includes(':8000')) {
-                  fileUrl = fileUrl.replace('http://localhost/', `${environment.baseUrl}/`);
-                } else if (!fileUrl.startsWith('http') && !fileUrl.startsWith('data:')) {
-                  fileUrl = `${environment.baseUrl}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
-                }
-              }
+              const isPdf = (att.file_extension || '').toLowerCase() === 'pdf';
+              const downloadUrl = `${environment.apiUrl}/attachments/${att.id}/download` + (isPdf ? '?disposition=inline' : '?disposition=attachment');
               documents.push({
                 chapterName: chap.name || 'அத்தியாயம்',
-                fileName: att.name || 'பாட புத்தகம் / ஆவணம்',
-                url: fileUrl
+                fileName: att.alias_name || att.original_name || 'பாட புத்தகம் / ஆவணம்',
+                url: downloadUrl
               });
             });
           }

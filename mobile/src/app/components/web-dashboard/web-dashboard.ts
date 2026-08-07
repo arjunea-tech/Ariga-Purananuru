@@ -486,20 +486,15 @@ export class WebDashboardComponent implements OnInit {
                     chap.contents.forEach((cont: any) => {
                       if (cont.attachments && cont.attachments.length > 0) {
                         cont.attachments.forEach((att: any) => {
-                          let fileUrl = att.url || att;
-                          if (fileUrl && fileUrl.startsWith('http://localhost/') && !fileUrl.includes(':8000')) {
-                            fileUrl = fileUrl.replace('http://localhost/', `${environment.baseUrl}/`);
-                          } else if (fileUrl && !fileUrl.startsWith('http') && !fileUrl.startsWith('data:')) {
-                            fileUrl = `${environment.baseUrl}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
-                          }
-                          const isPdf = fileUrl.toLowerCase().endsWith('.pdf');
+                          const isPdf = (att.file_extension || '').toLowerCase() === 'pdf';
+                          const downloadUrl = `${environment.apiUrl}/attachments/${att.id}/download` + (isPdf ? '?disposition=inline' : '?disposition=attachment');
                           fileList.push({
-                            name: att.name || (isPdf ? 'பாட புத்தகம்.pdf' : 'பாட ஆவணம்.docx'),
-                            size: att.size || '2.4 MB',
+                            name: att.alias_name || att.original_name || (isPdf ? 'பாட புத்தகம்.pdf' : 'பாட ஆவணம்.docx'),
+                            size: att.file_size || '2.4 MB',
                             type: isPdf ? 'pdf' : 'doc',
                             icon: isPdf ? 'bi-file-earmark-pdf-fill' : 'bi-file-earmark-word-fill',
                             color: isPdf ? '#EF4444' : '#3B82F6',
-                            url: fileUrl,
+                            url: downloadUrl,
                             courseName: struct.name,
                             chapterName: chap.name
                           });

@@ -270,17 +270,13 @@ export class KidsDashboard implements OnInit, OnDestroy {
                         // Check if content has attachments
                         if (cont.attachments && cont.attachments.length > 0) {
                           cont.attachments.forEach((att: any) => {
-                            let fileUrl = att.url || att;
-                            if (fileUrl && fileUrl.startsWith('http://localhost/') && !fileUrl.includes(':8000')) {
-                              fileUrl = fileUrl.replace('http://localhost/', `${environment.baseUrl}/`);
-                            } else if (fileUrl && !fileUrl.startsWith('http') && !fileUrl.startsWith('data:')) {
-                              fileUrl = `${environment.baseUrl}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
-                            }
+                            const isPdf = (att.file_extension || '').toLowerCase() === 'pdf';
+                            const downloadUrl = `${environment.apiUrl}/attachments/${att.id}/download` + (isPdf ? '?disposition=inline' : '?disposition=attachment');
                             list.push({
                               courseName: struct.name || 'பாடநெறி',
                               chapterName: chap.name || 'அத்தியாயம்',
-                              fileName: att.name || 'பாட புத்தகம் / ஆவணம்',
-                              url: fileUrl
+                              fileName: att.alias_name || att.original_name || 'பாட புத்தகம் / ஆவணம்',
+                              url: downloadUrl
                             });
                           });
                         }

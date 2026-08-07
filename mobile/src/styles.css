@@ -332,7 +332,7 @@ ion-router-outlet>* {
 .page-header.orange-theme,
 .page-header.blue-theme,
 .page-header.pink-theme,
-.page-header.indigo-theme {
+.page-header.teal-theme {
   position: sticky !important;
   top: 0 !important;
   left: 0 !important;
@@ -376,9 +376,9 @@ ion-router-outlet>* {
 .page-header.pink-theme h1,
 .page-header.pink-theme i { color: #DB2777 !important; }
 
-.page-header.indigo-theme .page-title,
-.page-header.indigo-theme h1,
-.page-header.indigo-theme i { color: #4F46E5 !important; }
+.page-header.teal-theme .page-title,
+.page-header.teal-theme h1,
+.page-header.teal-theme i { color: #0D9488 !important; }
 
 /* Keep pill badges & spans dark enough to read */
 .home-header span:not(.badge):not(.stat-pill-badge)     { color: #7C3AED !important; }
@@ -386,7 +386,7 @@ ion-router-outlet>* {
 .page-header.orange-theme span:not(.badge) { color: #C2410C !important; }
 .page-header.blue-theme span:not(.badge)   { color: #1D4ED8 !important; }
 .page-header.pink-theme span:not(.badge)   { color: #BE185D !important; }
-.page-header.indigo-theme span:not(.badge) { color: #4338CA !important; }
+.page-header.teal-theme span:not(.badge)   { color: #0F766E !important; }
 
 /* Uniform title sizing */
 .home-header .greeting-title,

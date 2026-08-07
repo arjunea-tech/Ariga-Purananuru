@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Content;
 use App\Models\ContentChunk;
+use App\Models\ContentAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -334,5 +335,35 @@ class ContentController extends Controller
             Log::error('Embedding Exception: ' . $e->getMessage());
         }
         return null;
+    }
+
+    public function downloadAttachment(Request $request, $id)
+    {
+        $attachment = ContentAttachment::findOrFail($id);
+        $url = $attachment->url; // Cloudinary URL
+        
+        $filename = ($attachment->alias_name ?: $attachment->original_name);
+        
+        // Ensure extension matches
+        $ext = pathinfo($url, PATHINFO_EXTENSION);
+        if (!$ext && str_contains($url, '.')) {
+            $parts = explode('.', $url);
+            $ext = end($parts);
+        }
+        
+        if ($ext && !str_ends_with(strtolower($filename), '.' . strtolower($ext))) {
+            $filename .= '.' . $ext;
+        }
+
+        $disposition = $request->query('disposition', 'attachment'); // inline or attachment
+        
+        $headers = [
+            'Content-Type' => 'application/octet-stream',
+            'Content-Disposition' => $disposition . '; filename="' . rawurlencode($filename) . '"',
+        ];
+
+        return response()->streamDownload(function () use ($url) {
+            echo file_get_contents($url);
+        }, $filename, $headers);
     }
 }

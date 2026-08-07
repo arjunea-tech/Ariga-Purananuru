@@ -34,6 +34,7 @@ Route::get('/yappu-seer-words', [YappuSeerWordController::class, 'index']);
 // Public B2C Store
 Route::get('store/courses', [CourseController::class, 'getStorefront']);
 Route::get('courses/{course}/player-structure', [CourseController::class, 'getPlayerStructure']);
+Route::get('attachments/{id}/download', [ContentController::class, 'downloadAttachment']);
 
 Route::get('/test-db', function() {
     return [

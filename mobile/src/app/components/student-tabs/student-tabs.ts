@@ -22,7 +22,7 @@ export class StudentTabsComponent {
     { id: 'learn', label: 'Learn', icon: 'bi-book-half', route: '/tabs/learn', color: '#10B981' }, /* Emerald Green */
     { id: 'games', label: 'Practice', icon: 'bi-controller', route: '/tabs/games', color: '#F59E0B' }, /* Bright Amber/Orange */
     { id: 'progress', label: 'Progress', icon: 'bi-bar-chart-line-fill', route: '/tabs/progress', color: '#8B5CF6' }, /* Soft Purple */
-    { id: 'store', label: 'Store', icon: 'bi-shop', route: '/tabs/store', color: '#6366F1' }, /* Indigo */
+    { id: 'store', label: 'Store', icon: 'bi-shop', route: '/tabs/store', color: '#14B8A6' }, /* Teal */
     { id: 'profile', label: 'Profile', icon: 'bi-person-circle', route: '/tabs/profile', color: '#F43F5E' } /* Bright Rose */
   ];
 
