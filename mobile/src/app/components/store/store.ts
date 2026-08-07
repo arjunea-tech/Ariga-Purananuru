@@ -25,6 +25,10 @@ export class StoreComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
+  goBackToHome(): void {
+    this.router.navigate(['/tabs/home']);
+  }
+
   ngOnInit(): void {
     this.loadScript('https://checkout.razorpay.com/v1/checkout.js');
     this.fetchStorefront();
