@@ -6,6 +6,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { environment } from '../../../environments/environment';
 import { Capacitor } from '@capacitor/core';
+import confetti from 'canvas-confetti';
 
 export interface DailyKural {
   number: number;
@@ -198,6 +199,10 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
   isTestimonialPaused = false;
   private testimonialTimer: any;
 
+  // Premium Animated Splash Screen Signal
+  showSplash = signal<boolean>(true);
+  mascotInteractiveQuote = signal<string | null>(null);
+
   // Statistics Animated Counters
   statStudents = signal<number>(0);
   statLessons = signal<number>(0);
@@ -374,6 +379,32 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
     this.setDailyKuralBasedOnDate();
     this.fetchCoursesFromBackend();
     this.startTestimonialAutoplay();
+    setTimeout(() => {
+      this.showSplash.set(false);
+    }, 2200);
+  }
+
+  dismissSplash(): void {
+    this.showSplash.set(false);
+  }
+
+  triggerMascotConfetti(): void {
+    confetti({
+      particleCount: 80,
+      spread: 70,
+      origin: { y: 0.5 },
+      colors: ['#F59E0B', '#10B981', '#6366F1', '#EC4899']
+    });
+    const quotes = [
+      '“கற்க கசடறக் கற்பவை கற்றபின் நிற்க அதற்குத் தக.” 🌟',
+      '“முயற்சி தன் மெய்வருத்தக் கூலி தரும்.” 💪',
+      '“தொட்டனைத் தூறும் மணற்கேணி மாந்தர்க்குக் கற்றனைத் தூறும் அறிவு.” 📚',
+      '“இனிய உளவாக இன்னாத கூறல் கனிஇருப்பக் காய்கவர்ந் தற்று.” 🍇',
+      '“அன்புடையார் என்பும் உரியர் பிறர்க்கு.” ❤️'
+    ];
+    const randQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    this.mascotInteractiveQuote.set(randQuote);
+    setTimeout(() => this.mascotInteractiveQuote.set(null), 4000);
   }
 
   setDailyKuralBasedOnDate(): void {
@@ -503,6 +534,15 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
   getBadgeColor(index: number): string {
     const colors = ['#4F46E5', '#10B981', '#D97706', '#7C3AED', '#0284C7'];
     return colors[index % colors.length];
+  }
+
+  getCoverImageUrl(path: string | null | undefined): string | null {
+    if (!path) return null;
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    const baseUrl = environment.baseUrl || 'http://127.0.0.1:8000';
+    return `${baseUrl}/${path.startsWith('/') ? path.substring(1) : path}`;
   }
 
   toggleMobileMenu(): void {

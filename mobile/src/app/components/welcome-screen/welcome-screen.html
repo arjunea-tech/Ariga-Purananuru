@@ -1,3 +1,39 @@
+<!-- 🌟 PREMIUM ANIMATED SPLASH INTRO OVERLAY -->
+@if (showSplash()) {
+  <div class="splash-screen-overlay" (click)="dismissSplash()">
+    <div class="splash-particles-layer">
+      <span class="p-star p1">✦</span>
+      <span class="p-star p2">✧</span>
+      <span class="p-star p3">✦</span>
+      <span class="p-star p4">✧</span>
+      <span class="p-star p5">✦</span>
+    </div>
+
+    <div class="splash-content-center">
+      <div class="splash-logo-container mb-3">
+        <div class="splash-aura-ring"></div>
+        <div class="splash-aura-ring-outer"></div>
+        <div class="splash-badge-circle">
+          <span>அ</span>
+        </div>
+      </div>
+
+      <h1 class="splash-app-title font-tamil mb-1">
+        அழகுத் தமிழ் யாப்பு
+      </h1>
+      <p class="splash-app-sub font-tamil mb-3">
+        தமிழ் யாப்பிலக்கணக் கற்றல் தளம்
+      </p>
+
+      <div class="splash-loader-bar mx-auto">
+        <div class="splash-loader-progress"></div>
+      </div>
+
+      <span class="splash-skip-hint font-tamil small mt-3 d-block">திரையைத் தட்டித் தொடர்க</span>
+    </div>
+  </div>
+}
+
 @if (!isNative()) {
 <!-- 1. NAVIGATION BAR — outside scroll area, always visible -->
 <nav class="landing-navbar">
@@ -562,10 +598,19 @@
     @if (activeTab() === 'home') {
       <!-- Hero / Mascot Section -->
       <div class="mobile-hero-section text-center py-4">
-        <div class="mobile-mascot-box mx-auto mb-3">
-          <img src="assets/images/thiruvalluvar_sitting.png" alt="Thiruvalluvar" class="mobile-mascot-img">
+        <div class="mobile-mascot-wrapper mx-auto mb-3 position-relative cursor-pointer" (click)="triggerMascotConfetti()" title="தட்டுக">
+          <div class="mascot-aura-ring"></div>
+          <div class="mobile-mascot-box mx-auto">
+            <img src="assets/images/thiruvalluvar_sitting.png" alt="Thiruvalluvar" class="mobile-mascot-img float-mascot-anim">
+          </div>
+
+          @if (mascotInteractiveQuote()) {
+            <div class="mascot-speech-popover font-tamil animate-bounce-in shadow-lg">
+              {{ mascotInteractiveQuote() }}
+            </div>
+          }
         </div>
-        <h2 class="mobile-hero-title font-tamil">தமிழ் கற்பது<br>இனி எளிது.</h2>
+        <h2 class="mobile-hero-title font-tamil shimmer-gold-text">தமிழ் கற்பது<br>இனி எளிது.</h2>
         <p class="mobile-hero-subtitle font-tamil text-muted px-2">யாப்பிலக்கணம் முதல் தமிழ் சார்ந்த கற்றல் வரை ஒரே இடத்தில் விளையாட்டாகக் கற்கலாம்.</p>
         
         <!-- Primary CTA Button -->
@@ -639,6 +684,11 @@
           <div class="mobile-course-carousel">
             @for (course of dynamicCourses(); track course.id; let idx = $index) {
               <div class="mobile-course-swipe-card p-4" (click)="goToCourseDetails(course.id)">
+                @if (course.cover_image) {
+                  <div class="mb-3 rounded-4 overflow-hidden shadow-xs" style="max-height: 160px;">
+                    <img [src]="getCoverImageUrl(course.cover_image)" [alt]="course.name || course.title" class="w-100 h-100" style="object-fit: cover; max-height: 160px;">
+                  </div>
+                }
                 <div class="d-flex justify-content-between align-items-start mb-3">
                   <span class="badge bg-amber text-dark font-tamil px-2.5 py-1 rounded-pill" style="font-size: 0.70rem;">பாடநெறி</span>
                   <div class="mobile-carousel-icon-box"
@@ -687,6 +737,11 @@
           <div class="course-list-vertical">
             @for (course of dynamicCourses(); track course.id) {
               <div class="mobile-course-swipe-card p-4 mb-3" (click)="goToCourseDetails(course.id)" style="flex: none; width: 100%;">
+                @if (course.cover_image) {
+                  <div class="mb-3 rounded-4 overflow-hidden shadow-xs" style="max-height: 160px;">
+                    <img [src]="getCoverImageUrl(course.cover_image)" [alt]="course.name || course.title" class="w-100 h-100" style="object-fit: cover; max-height: 160px;">
+                  </div>
+                }
                 <div class="d-flex justify-content-between align-items-start mb-3">
                   <span class="badge bg-amber text-dark font-tamil px-2.5 py-1 rounded-pill" style="font-size: 0.70rem;">பாடநெறி</span>
                   <div class="mobile-carousel-icon-box"
