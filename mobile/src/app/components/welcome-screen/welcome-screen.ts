@@ -380,12 +380,21 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
     this.fetchCoursesFromBackend();
     this.startTestimonialAutoplay();
     setTimeout(() => {
-      this.showSplash.set(false);
+      this.handleSplashDismissal();
     }, 2200);
   }
 
   dismissSplash(): void {
+    this.handleSplashDismissal();
+  }
+
+  private handleSplashDismissal(): void {
     this.showSplash.set(false);
+    if (this.isNative()) {
+      if (this.authService.isLoggedIn()) {
+        this.router.navigate(['/tabs/home']);
+      }
+    }
   }
 
   triggerMascotConfetti(): void {

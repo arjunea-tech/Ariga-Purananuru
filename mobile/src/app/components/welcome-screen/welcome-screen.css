@@ -1641,7 +1641,6 @@
   padding: 24px;
   overflow: hidden;
   cursor: pointer;
-  animation: splashFadeIn 0.4s ease-out forwards;
 }
 
 @keyframes splashFadeIn {
