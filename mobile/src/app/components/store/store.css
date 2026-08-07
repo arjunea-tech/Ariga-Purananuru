@@ -138,3 +138,9 @@
   background: #cbd5e1;
   cursor: not-allowed;
 }
+
+.course-cover-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

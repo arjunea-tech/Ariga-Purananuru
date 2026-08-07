@@ -21,8 +21,11 @@
       @for (course of courses; track course.id) {
       <div class="course-card">
         <div class="card-image">
-          <!-- Placeholder gradient since we don't have course images yet -->
-          <div class="gradient-bg"></div>
+          @if (course.cover_image) {
+            <img [src]="getCoverImageUrl(course.cover_image)" alt="{{ course.name }}" class="course-cover-img">
+          } @else {
+            <div class="gradient-bg"></div>
+          }
           <span class="price-tag">₹{{ course.price }}</span>
         </div>
         <div class="card-content">

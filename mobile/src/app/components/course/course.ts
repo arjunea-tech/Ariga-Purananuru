@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { CourseService, CourseData } from '../../services/course';
 import { NotificationService } from '../../services/notification.service';
+import { environment } from '../../../environments/environment';
 import {
   McvInputField,
   McvTextArea,
@@ -36,6 +37,8 @@ export class Course implements OnInit {
   isEditMode = signal(false);
   isFormVisible = signal(false);
   currentCourseId = signal<number | null>(null);
+  localPreviewUrl = signal<string | null>(null);
+  selectedFileName = signal<string>('');
 
   constructor() {
     this.courseForm = this.fb.group({
@@ -105,6 +108,8 @@ export class Course implements OnInit {
   editCourse(course: CourseData): void {
     this.isEditMode.set(true);
     this.currentCourseId.set(course.id!);
+    this.localPreviewUrl.set(null); // Reset local preview
+    this.selectedFileName.set('');  // Reset selected filename
     this.courseForm.patchValue({
       name: course.name,
       price: course.price ?? 500,
@@ -134,6 +139,8 @@ export class Course implements OnInit {
     this.courseForm.reset({ is_active: true, price: 500, tags: '' });
     this.isEditMode.set(false);
     this.currentCourseId.set(null);
+    this.localPreviewUrl.set(null); // Reset local preview
+    this.selectedFileName.set('');  // Reset selected filename
   }
 
   cancelForm(): void {
@@ -148,6 +155,25 @@ export class Course implements OnInit {
   onFileSelected(event: any): void {
     const file = event.target.files[0];
     if (file) {
+      // 2MB size check (2 * 1024 * 1024 bytes)
+      const maxLimit = 2 * 1024 * 1024;
+      if (file.size > maxLimit) {
+        const selectedSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        this.showFeedback('error', `Selected file size (${selectedSizeMB} MB) exceeds the 2 MB limit.`);
+        event.target.value = ''; // clear selection
+        this.selectedFileName.set('');
+        return;
+      }
+
+      this.selectedFileName.set(file.name);
+
+      // Read local preview instantly
+      const reader = new FileReader();
+      reader.onload = (e: any) => {
+        this.localPreviewUrl.set(e.target.result);
+      };
+      reader.readAsDataURL(file);
+
       this.courseService.uploadCover(file).subscribe({
         next: (res) => {
           this.courseForm.patchValue({ cover_image: res.url });
@@ -159,5 +185,20 @@ export class Course implements OnInit {
         }
       });
     }
+  }
+
+  getCoverImageUrl(path: string | null | undefined): string | null {
+    if (!path) return null;
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    const baseUrl = environment.baseUrl || 'http://127.0.0.1:8000';
+    return `${baseUrl}/${path.startsWith('/') ? path.substring(1) : path}`;
+  }
+
+  getFileName(url: string | null | undefined): string {
+    if (!url) return '';
+    const parts = url.split('/');
+    return parts[parts.length - 1];
   }
 }

@@ -120,12 +120,19 @@ class CourseController extends Controller
     public function uploadCoverImage(Request $request)
     {
         $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048', // 2MB max
         ]);
 
-        if ($request->file('image')) {
-            $path = $request->file('image')->store('courses/covers', 'public');
-            return response()->json(['url' => asset('storage/' . $path)]);
+        if ($request->hasFile('image')) {
+            try {
+                $file = $request->file('image');
+                $response = cloudinary()->uploadApi()->upload($file->getRealPath(), [
+                    'folder' => 'courses/covers',
+                ]);
+                return response()->json(['url' => $response['secure_url']]);
+            } catch (\Exception $e) {
+                return response()->json(['message' => 'Image upload to Cloudinary failed: ' . $e->getMessage()], 500);
+            }
         }
 
         return response()->json(['message' => 'Image upload failed'], 400);

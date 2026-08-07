@@ -26,13 +26,17 @@ class TenantController extends Controller
             'address' => 'nullable|string',
             'is_active' => 'boolean',
             'logo_path' => 'nullable|string',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048', // 2MB max
             'primary_color' => 'nullable|string|max:10',
             'secondary_color' => 'nullable|string|max:10',
         ]);
 
         if ($request->hasFile('logo')) {
-            $path = $request->file('logo')->store('logos', 'public');
-            $validated['logo_path'] = asset('storage/' . $path);
+            $file = $request->file('logo');
+            $response = cloudinary()->uploadApi()->upload($file->getRealPath(), [
+                'folder' => 'logos',
+            ]);
+            $validated['logo_path'] = $response['secure_url'];
         }
 
         return Tenant::create($validated);
@@ -54,13 +58,17 @@ class TenantController extends Controller
             'address' => 'nullable|string',
             'is_active' => 'boolean',
             'logo_path' => 'nullable|string',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048', // 2MB max
             'primary_color' => 'nullable|string|max:10',
             'secondary_color' => 'nullable|string|max:10',
         ]);
 
         if ($request->hasFile('logo')) {
-            $path = $request->file('logo')->store('logos', 'public');
-            $validated['logo_path'] = asset('storage/' . $path);
+            $file = $request->file('logo');
+            $response = cloudinary()->uploadApi()->upload($file->getRealPath(), [
+                'folder' => 'logos',
+            ]);
+            $validated['logo_path'] = $response['secure_url'];
         }
 
         $tenant->update($validated);
@@ -108,11 +116,15 @@ class TenantController extends Controller
             'primary_color' => 'nullable|string|max:10',
             'secondary_color' => 'nullable|string|max:10',
             'logo_path' => 'nullable|string',
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048', // 2MB max
         ]);
 
         if ($request->hasFile('logo')) {
-            $path = $request->file('logo')->store('logos', 'public');
-            $validated['logo_path'] = asset('storage/' . $path);
+            $file = $request->file('logo');
+            $response = cloudinary()->uploadApi()->upload($file->getRealPath(), [
+                'folder' => 'logos',
+            ]);
+            $validated['logo_path'] = $response['secure_url'];
         }
 
         $tenant->update($validated);

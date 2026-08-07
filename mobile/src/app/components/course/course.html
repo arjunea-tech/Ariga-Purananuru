@@ -113,14 +113,21 @@
             <mcv-input-field label="Tags (comma separated)" formControlName="tags" placeholder="e.g. Bestseller, New"></mcv-input-field>
           </div>
 
-          <div class="col-md-6 d-flex align-items-end gap-3">
-            <div class="flex-grow-1">
-              <label class="form-label fw-bold text-dark">Cover Image</label>
-              <input type="file" class="form-control form-control-lg" (change)="onFileSelected($event)" accept="image/*">
+          <div class="col-md-6">
+            <label class="form-label fw-bold text-dark mb-1" style="font-size: 14px;">Cover Image</label>
+            <div class="d-flex align-items-center gap-3">
+              <div class="input-group flex-grow-1">
+                <input type="text" class="form-control bg-white" readonly [value]="selectedFileName() || getFileName(courseForm.get('cover_image')?.value) || 'No file chosen'" style="height: 38px; font-size: 14px;" (click)="fileInput.click()">
+                <button class="btn btn-outline-secondary" type="button" style="height: 38px; font-size: 14px;" (click)="fileInput.click()">Browse...</button>
+              </div>
+              <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*" class="d-none">
+              
+              @if (localPreviewUrl()) {
+                <img [src]="localPreviewUrl()" alt="Preview" class="rounded border shadow-sm" style="height: 38px; width: 38px; object-fit: cover; flex-shrink: 0;">
+              } @else if (courseForm.get('cover_image')?.value) {
+                <img [src]="getCoverImageUrl(courseForm.get('cover_image')?.value)" alt="Cover" class="rounded border shadow-sm" style="height: 38px; width: 38px; object-fit: cover; flex-shrink: 0;">
+              }
             </div>
-            @if (courseForm.get('cover_image')?.value) {
-              <img [src]="courseForm.get('cover_image')?.value" alt="Cover" class="rounded" style="height: 48px; width: 48px; object-fit: cover;">
-            }
           </div>
           
           <div class="col-md-12 d-flex align-items-end">

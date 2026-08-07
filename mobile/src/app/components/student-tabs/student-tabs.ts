@@ -2,6 +2,7 @@ import { Component, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-student-tabs',
@@ -12,6 +13,7 @@ import { filter } from 'rxjs';
 })
 export class StudentTabsComponent {
   private router = inject(Router);
+  private authService = inject(AuthService);
 
   activeTab = signal<string>('home');
 
@@ -23,6 +25,16 @@ export class StudentTabsComponent {
     { id: 'store', label: 'Store', icon: 'bi-shop', route: '/tabs/store', color: '#6366F1' }, /* Indigo */
     { id: 'profile', label: 'Profile', icon: 'bi-person-circle', route: '/tabs/profile', color: '#F43F5E' } /* Bright Rose */
   ];
+
+  get filteredTabs() {
+    const tenantCode = this.authService.getTenantCode();
+    return this.tabs.filter(tab => {
+      if (tab.id === 'store') {
+        return tenantCode === 'PUBLIC';
+      }
+      return true;
+    });
+  }
 
   constructor() {
     // If opened on desktop screen width (>= 992px), automatically load web-dashboard view
@@ -93,7 +105,7 @@ export class StudentTabsComponent {
 
     // Detect horizontal swipes only if horizontal displacement is greater than vertical
     if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 60) {
-      const order = ['home', 'learn', 'games', 'progress', 'store', 'profile'];
+      const order = this.filteredTabs.map(t => t.id);
       const currentIdx = order.findIndex(id => id.toLowerCase() === this.activeTab().toLowerCase());
 
       if (diffX < 0) {
@@ -115,12 +127,12 @@ export class StudentTabsComponent {
       event.preventDefault();
     }
     this.scrollToTop();
-    const tab = this.tabs.find(t => t.id === tabId || t.id.toLowerCase() === tabId.toLowerCase());
+    const tab = this.filteredTabs.find(t => t.id === tabId || t.id.toLowerCase() === tabId.toLowerCase());
     if (tab) {
       
       // Determine animation direction if not provided by swipe
       if (!animationDir) {
-        const order = ['home', 'learn', 'games', 'progress', 'store', 'profile'];
+        const order = this.filteredTabs.map(t => t.id);
         const currentIdx = order.findIndex(id => id.toLowerCase() === this.activeTab().toLowerCase());
         const targetIdx = order.findIndex(id => id.toLowerCase() === tab.id.toLowerCase());
         animationDir = targetIdx > currentIdx ? 'slide-left' : 'slide-right';

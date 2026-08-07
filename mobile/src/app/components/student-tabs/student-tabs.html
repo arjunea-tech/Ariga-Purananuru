@@ -8,7 +8,7 @@
 
   <!-- Persistent Native Bottom Navigation Bar -->
   <nav class="bottom-nav-bar">
-    @for (tab of tabs; track tab.id) {
+    @for (tab of filteredTabs; track tab.id) {
       <a [routerLink]="tab.route"
          [replaceUrl]="true"
          routerLinkActive="active"

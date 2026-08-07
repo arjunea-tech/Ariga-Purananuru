@@ -9,7 +9,11 @@ export interface Announcement {
   title: string;
   message: string;
   target_roles: string[];
+  tenant_id?: any;
   created_at: string;
+  tenant?: {
+    tenant_name: string;
+  };
 }
 
 @Component({
@@ -25,6 +29,7 @@ export class Announcements implements OnInit {
   private fb = inject(FormBuilder);
 
   announcements = signal<Announcement[]>([]);
+  tenants = signal<any[]>([]);
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
 
@@ -36,12 +41,27 @@ export class Announcements implements OnInit {
     this.announcementForm = this.fb.group({
       title: ['', [Validators.required, Validators.maxLength(255)]],
       message: ['', [Validators.required]],
-      target_roles: [[]]
+      target_roles: [[]],
+      tenant_id: ['global']
     });
   }
 
   ngOnInit(): void {
     this.loadAnnouncements();
+    if (this.authService.hasRole(['super_admin'])) {
+      this.loadTenants();
+    }
+  }
+
+  loadTenants(): void {
+    this.http.get<any[]>('http://127.0.0.1:8000/api/tenants').subscribe({
+      next: (data) => {
+        this.tenants.set(data);
+      },
+      error: () => {
+        console.error('Failed to load tenants');
+      }
+    });
   }
 
   loadAnnouncements(): void {
@@ -65,7 +85,7 @@ export class Announcements implements OnInit {
     this.http.post<Announcement>('http://127.0.0.1:8000/api/announcements', this.announcementForm.value).subscribe({
       next: (newAnnouncement) => {
         this.announcements.update(list => [newAnnouncement, ...list]);
-        this.announcementForm.reset({ target_roles: [] });
+        this.announcementForm.reset({ target_roles: [], tenant_id: 'global' });
         this.showForm.set(false);
         this.isSubmitting.set(false);
       },

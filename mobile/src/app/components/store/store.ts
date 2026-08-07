@@ -81,4 +81,13 @@ export class StoreComponent implements OnInit {
       document.body.appendChild(script);
     }
   }
+
+  getCoverImageUrl(path: string | null | undefined): string | null {
+    if (!path) return null;
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    const baseUrl = environment.baseUrl || 'http://127.0.0.1:8000';
+    return `${baseUrl}/${path.startsWith('/') ? path.substring(1) : path}`;
+  }
 }

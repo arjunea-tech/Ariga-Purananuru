@@ -26,7 +26,7 @@ class ContentController extends Controller
     public function upload(Request $request)
     {
         $request->validate([
-            'file' => 'required|file|max:51200', // 50MB max
+            'file' => 'required|file|max:5120', // 5MB max (KB limits)
         ]);
 
         $file = $request->file('file');
@@ -61,17 +61,14 @@ class ContentController extends Controller
             $options['public_id'] = uniqid() . '.' . $extension;
         }
 
-        // Attempt to upload to Cloudinary
+        // Upload to Cloudinary (No local storage fallback allowed)
         try {
             $response = cloudinary()->uploadApi()->upload($file->getRealPath(), $options);
             $url = $response['secure_url'];
             $uniqueId = $url; // We store the full URL as unique_id
         } catch (\Exception $e) {
-            // Fallback to local storage if Cloudinary fails (e.g. SSL cert error in local dev)
-            $uniqueId = uniqid();
-            $fileName = $uniqueId . '.' . $extension;
-            $file->storeAs("contents/{$folder}", $fileName, 'public');
-            $url = asset("storage/contents/{$folder}/{$fileName}");
+            Log::error("Cloudinary upload failed: " . $e->getMessage());
+            return response()->json(['error' => 'Cloudinary upload failed: ' . $e->getMessage()], 500);
         }
 
         return response()->json([
