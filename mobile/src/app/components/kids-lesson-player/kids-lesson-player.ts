@@ -1,6 +1,6 @@
 import { Component, input, Output, EventEmitter, OnInit, OnDestroy, signal, effect, computed, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivityRenderer } from '../activity-engine/activity-renderer/activity-renderer';
 import { PracticeEngineComponent } from '../practice-engine/practice-engine.component';
 import { AudioService } from '../../services/audio.service';
@@ -88,6 +88,28 @@ export class KidsLessonPlayer implements OnInit, OnDestroy {
   private audioService = inject(AudioService);
   private authService = inject(AuthService);
   private sanitizer = inject(DomSanitizer);
+
+  isYouTubeUrl(url: string): boolean {
+    if (!url || typeof url !== 'string') return false;
+    return url.includes('youtube.com') || url.includes('youtu.be');
+  }
+
+  getYouTubeEmbedUrl(url: string): SafeResourceUrl {
+    let videoId = '';
+    if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1]?.split('?')[0]?.split('&')[0];
+    } else if (url.includes('youtube.com/watch')) {
+      const urlParams = new URLSearchParams(url.split('?')[1] || '');
+      videoId = urlParams.get('v') || '';
+    } else if (url.includes('youtube.com/embed/')) {
+      videoId = url.split('youtube.com/embed/')[1]?.split('?')[0]?.split('&')[0];
+    } else if (url.includes('youtube.com/shorts/')) {
+      videoId = url.split('youtube.com/shorts/')[1]?.split('?')[0]?.split('&')[0];
+    }
+    
+    const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` : url;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+  }
 
   currentContentPage = signal<number>(0);
   typedContent = signal<string>('');

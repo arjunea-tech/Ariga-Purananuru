@@ -95,7 +95,7 @@
   transform: scale(0.95);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 992px) and (min-height: 650px) {
   .mobile-tabs-shell {
     max-width: 480px;
     margin: 0 auto;
@@ -112,13 +112,47 @@
   }
 }
 
+/* Mobile Portrait & Mobile Landscape (Full width & height responsive) */
+@media (max-width: 991px), (max-height: 649px) {
+  .mobile-tabs-shell {
+    max-width: 100% !important;
+    width: 100% !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .bottom-nav-bar {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+  }
+}
+
+/* Mobile Landscape specific padding for bottom nav */
+@media (orientation: landscape) and (max-height: 600px) {
+  .bottom-nav-bar {
+    padding: 2px 16px !important;
+  }
+  .nav-tab-icon-wrapper {
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 1rem !important;
+  }
+  .nav-tab-label {
+    font-size: 0.65rem !important;
+  }
+}
+
 /* 3D Cube Page Turn Animations */
 .mobile-tabs-shell {
   perspective: 1200px;
 }
 
-.tab-content-area {
-}
+
 
 @keyframes cubeFliplLeft {
   0% { 

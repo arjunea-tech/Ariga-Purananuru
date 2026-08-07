@@ -51,7 +51,8 @@ interface Content {
   title?: string;
   text_content?: string;
   attachments?: any[];
-  external_url?: any[];
+  external_url?: any;
+  urls?: any;
   assessments?: any[];
   sort_order?: number;
   is_active?: boolean;
@@ -764,30 +765,8 @@ export class CoursePlayer implements OnInit, OnDestroy {
     // Step 1: Chapter Intro (Skipped to go directly to content as requested)
 
     contents.forEach(content => {
-      // if (content.id === 1) {
-      //   steps.push({
-      //     type: 'video',
-      //     title: 'Homophones Lesson',
-      //     data: 'assets/Homophones video .mp4'
-      //   });
-      // }
-
-      // if (content.external_url && content.external_url.length > 0) {
-      //   steps.push({
-      //     type: 'video',
-      //     title: content.title || content.name,
-      //     data: content.external_url[0] // Assume first URL is the video link
-      //   });
-      // }
-
-      // Removed PDF step generation here as PDFs are now accessed via Documents tab
-      // if (content.attachments && content.attachments.length > 0) {
-      //   steps.push({
-      //     type: 'pdf',
-      //     title: content.title || content.name + ' - Document',
-      //     data: content.attachments
-      //   });
-      // }
+      // Videos are accessed exclusively via Videos tab (Option A)
+      // External Video URLs and EditorJS Video blocks are not inserted as in-chapter lesson steps
 
       if (content.text_content) {
         let isJson = false;
@@ -802,22 +781,12 @@ export class CoursePlayer implements OnInit, OnDestroy {
         }
 
         if (isJson) {
-          const videoBlocks = blocks.filter((b: any) => b.type === 'video' || b.type === 'embed');
+          const videoBlocks = blocks.filter((b: any) => b.type === 'video' || b.type === 'embed' || b.type === 'youtube');
           const pdfBlocks = blocks.filter((b: any) => b.type === 'pdf');
-          const readingBlocks = blocks.filter((b: any) => b.type !== 'activity' && b.type !== 'video' && b.type !== 'embed' && b.type !== 'practice' && b.type !== 'pdf' && b.type !== 'assessment');
+          const readingBlocks = blocks.filter((b: any) => b.type !== 'activity' && b.type !== 'video' && b.type !== 'embed' && b.type !== 'youtube' && b.type !== 'practice' && b.type !== 'pdf' && b.type !== 'assessment');
           const practiceBlocks = blocks.filter((b: any) => b.type === 'practice');
           const activityBlocks = blocks.filter((b: any) => b.type === 'activity');
           const assessmentBlocks = blocks.filter((b: any) => b.type === 'assessment');
-
-          // if (videoBlocks.length > 0) {
-          //   videoBlocks.forEach((block: any, idx: number) => {
-          //     steps.push({
-          //       type: 'video',
-          //       title: (content.title || content.name) + (videoBlocks.length > 1 ? ` - Video ${idx + 1}` : ' - Video'),
-          //       data: block.data.url || block.data.embed
-          //     });
-          //   });
-          // }
 
           // Removed PDF blocks step generation here
           // if (pdfBlocks.length > 0) {

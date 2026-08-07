@@ -312,7 +312,7 @@
                  @for (vid of getCategoryVideos(mod.id); track vid.url) {
                    <div class="card border-0 rounded-4 p-3.5 hover-lift cursor-pointer transition-all position-relative overflow-hidden" 
                         style="box-shadow: 0 8px 22px rgba(0,0,0,0.07); background: #FFFFFF; border-left: 6px solid #10B981 !important;"
-                        (click)="openVideo(vid.url)">
+                        (click)="openVideo(vid.url, vid.fileName)">
                      <div class="d-flex align-items-center justify-content-between">
                        <div class="d-flex align-items-center gap-3">
                          <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0 text-white" 
@@ -378,3 +378,49 @@
     }
   </div>
 </div>
+
+<!-- 📹 IN-APP VIDEO PLAYER POPUP MODAL -->
+@if (selectedVideoModalUrl(); as videoUrl) {
+  <div class="video-modal-overlay"
+       [class.landscape-mode]="isLandscape()"
+       (click)="closeVideoModal()">
+    <div class="video-modal-container"
+         [class.landscape-container]="isLandscape()"
+         (click)="$event.stopPropagation()">
+
+      <!-- Header (hidden in landscape fullscreen) -->
+      @if (!isLandscape()) {
+        <div class="video-modal-header">
+          <h5 class="video-modal-title">
+            <i class="bi bi-camera-video-fill text-warning"></i>
+            {{ selectedVideoModalTitle() }}
+          </h5>
+          <button type="button" class="video-close-btn" (click)="closeVideoModal()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      }
+
+      <!-- Video Body -->
+      <div class="video-modal-body" [class.landscape-body]="isLandscape()">
+        <!-- Landscape close button -->
+        @if (isLandscape()) {
+          <button class="landscape-close-btn" (click)="closeVideoModal()">
+            <i class="bi bi-x-circle-fill"></i>
+          </button>
+        }
+
+        @if (isYouTubeUrl(videoUrl)) {
+          <iframe [src]="getYouTubeEmbedUrl(videoUrl)"
+                  class="video-iframe"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                  allowfullscreen></iframe>
+        } @else {
+          <video [src]="videoUrl" controls class="video-player" autoplay playsinline></video>
+        }
+      </div>
+
+    </div>
+  </div>
+}
+

@@ -1,6 +1,7 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Router, ActivatedRoute } from '@angular/router';
 import { of, Observable, switchMap } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
@@ -500,6 +501,10 @@ export class LearnModulesComponent implements OnInit {
     }
   }
 
+  protected sanitizer = inject(DomSanitizer);
+  selectedVideoModalUrl = signal<string | null>(null);
+  selectedVideoModalTitle = signal<string>('');
+
   getCategoryVideos(categoryId: string): any[] {
     this.chapterCacheUpdated();
     const mod = this.modules().find(m => m.id === categoryId);
@@ -510,6 +515,27 @@ export class LearnModulesComponent implements OnInit {
       const cached = this.resolvedChaptersMap.get(chap.id);
       if (cached && cached.contents) {
         cached.contents.forEach((cont: any) => {
+          // 1. External Video URLs (added in Content Management "External URLs")
+          const rawUrls = cont.urls || cont.external_url;
+          const urlList = Array.isArray(rawUrls) ? rawUrls : (rawUrls ? [rawUrls] : []);
+          urlList.forEach((url: string, uIdx: number) => {
+            if (url && typeof url === 'string' && url.trim().length > 0) {
+              let fileUrl = url.trim();
+              if (fileUrl.startsWith('http://localhost/') && !fileUrl.includes(':8000')) {
+                fileUrl = fileUrl.replace('http://localhost/', `${environment.baseUrl}/`);
+              } else if (!fileUrl.startsWith('http') && !fileUrl.startsWith('data:')) {
+                fileUrl = `${environment.baseUrl}${fileUrl.startsWith('/') ? '' : '/'}${fileUrl}`;
+              }
+              videos.push({
+                chapterName: chap.name || 'அத்தியாயம்',
+                fileName: cont.title || cont.name || `காணொளி ${uIdx + 1}`,
+                url: fileUrl,
+                type: 'video'
+              });
+            }
+          });
+
+          // 2. EditorJS JSON Video/Embed blocks
           if (cont.text_content) {
             try {
               const parsed = JSON.parse(cont.text_content);
@@ -525,7 +551,7 @@ export class LearnModulesComponent implements OnInit {
                       }
                       videos.push({
                         chapterName: chap.name || 'அத்தியாயம்',
-                        fileName: b.data.title || b.data.caption || 'காணொளி (Video)',
+                        fileName: b.data.title || b.data.caption || cont.title || cont.name || 'காணொளி (Video)',
                         url: fileUrl,
                         type: b.type
                       });
@@ -541,8 +567,45 @@ export class LearnModulesComponent implements OnInit {
     return videos;
   }
 
-  openVideo(url: string): void {
-    window.open(url, '_blank');
+  isLandscape = signal<boolean>(false);
+  private orientationHandler = () => {
+    this.isLandscape.set(window.innerWidth > window.innerHeight);
+  };
+
+  openVideo(url: string, title?: string): void {
+    this.selectedVideoModalTitle.set(title || 'காணொளி');
+    this.selectedVideoModalUrl.set(url);
+    // Start listening for orientation changes
+    window.addEventListener('resize', this.orientationHandler);
+    this.orientationHandler(); // Check current orientation immediately
+  }
+
+  closeVideoModal(): void {
+    this.selectedVideoModalUrl.set(null);
+    window.removeEventListener('resize', this.orientationHandler);
+    this.isLandscape.set(false);
+  }
+
+  isYouTubeUrl(url: string): boolean {
+    if (!url || typeof url !== 'string') return false;
+    return url.includes('youtube.com') || url.includes('youtu.be');
+  }
+
+  getYouTubeEmbedUrl(url: string): SafeResourceUrl {
+    let videoId = '';
+    if (url.includes('youtu.be/')) {
+      videoId = url.split('youtu.be/')[1]?.split('?')[0]?.split('&')[0];
+    } else if (url.includes('youtube.com/watch')) {
+      const urlParams = new URLSearchParams(url.split('?')[1] || '');
+      videoId = urlParams.get('v') || '';
+    } else if (url.includes('youtube.com/embed/')) {
+      videoId = url.split('youtube.com/embed/')[1]?.split('?')[0]?.split('&')[0];
+    } else if (url.includes('youtube.com/shorts/')) {
+      videoId = url.split('youtube.com/shorts/')[1]?.split('?')[0]?.split('&')[0];
+    }
+    
+    const embedUrl = videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` : url;
+    return this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
   }
 
   loadModules(): void {

@@ -31,3 +31,124 @@
     transform: translateY(0);
   }
 }
+
+/* ─── VIDEO PLAYER MODAL ─────────────────────────────────── */
+.video-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+}
+
+/* Portrait mode: centred card */
+.video-modal-container {
+  width: 95%;
+  max-width: 640px;
+  background: #111;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Landscape mode: take the FULL screen */
+.video-modal-overlay.landscape-mode {
+  padding: 0;
+  background: #000;
+}
+
+.video-modal-container.landscape-container {
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Header */
+.video-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  background: #1a1a2e;
+}
+
+.video-modal-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.video-close-btn {
+  background: rgba(255,255,255,0.1);
+  border: none;
+  color: #fff;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.video-close-btn:hover { background: rgba(255,255,255,0.2); }
+
+/* Video body */
+.video-modal-body {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+/* Landscape body: fill remaining height */
+.video-modal-body.landscape-body {
+  aspect-ratio: unset;
+  flex: 1;
+  height: 100%;
+}
+
+/* iframe & video fill the container */
+.video-iframe,
+.video-player {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  object-fit: contain;
+}
+
+/* Landscape close button (top-right corner) */
+.landscape-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 10;
+  background: rgba(0,0,0,0.55);
+  border: none;
+  color: #fff;
+  font-size: 1.8rem;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s, transform 0.15s;
+}
+.landscape-close-btn:hover { background: rgba(0,0,0,0.8); transform: scale(1.08); }
