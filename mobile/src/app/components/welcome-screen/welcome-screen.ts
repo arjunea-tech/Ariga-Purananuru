@@ -199,8 +199,8 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
   isTestimonialPaused = false;
   private testimonialTimer: any;
 
-  // Premium Animated Splash Screen Signal
-  showSplash = signal<boolean>(true);
+  // Premium Animated Splash Screen Signal (Disabled to prevent duplicate loading screens)
+  showSplash = signal<boolean>(false);
   mascotInteractiveQuote = signal<string | null>(null);
 
   // Statistics Animated Counters
@@ -379,9 +379,11 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
     this.setDailyKuralBasedOnDate();
     this.fetchCoursesFromBackend();
     this.startTestimonialAutoplay();
-    setTimeout(() => {
-      this.handleSplashDismissal();
-    }, 2200);
+    
+    // Auto-redirect logged-in mobile users on startup
+    if (this.isNative() && this.authService.isLoggedIn()) {
+      this.router.navigate(['/tabs/home']);
+    }
   }
 
   dismissSplash(): void {

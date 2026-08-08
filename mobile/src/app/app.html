@@ -1,5 +1,5 @@
 <ion-app>
-@if (!authService.isLoggedIn()) {
+@if (!authService.isLoggedIn() || isPublicRoute()) {
   <!-- Standalone Login view layout -->
   <ion-router-outlet></ion-router-outlet>
 } @else if (authService.getUserRole() === 'student') {

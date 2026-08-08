@@ -24,8 +24,10 @@ use App\Http\Controllers\YappuSeerWordController;
 | Public Routes
 |--------------------------------------------------------------------------
 */
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::middleware('throttle:5,1')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
 Route::get('/tenants/brand/{code}', [TenantController::class, 'getBranding']);
 Route::get('/practice-words', [PracticeWordController::class, 'index']);
 Route::get('/practice-words/random', [PracticeWordController::class, 'getRandom']);

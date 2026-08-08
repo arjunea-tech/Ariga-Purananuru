@@ -1,6 +1,6 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from './services/auth';
 import { NotificationService } from './services/notification.service';
@@ -23,10 +23,26 @@ export class App implements OnInit {
   protected notificationService = inject(NotificationService);
   public loaderService = inject(LoaderService);
   private http = inject(HttpClient);
+  private router = inject(Router);
 
   currentLang = signal('en');
   isSidebarOpen = signal(false);
   tenantBranding = signal<any>(null);
+
+  isPublicRoute(): boolean {
+    const url = this.router.url.split('?')[0];
+    const publicPaths = [
+      '/',
+      '/login',
+      '/signup',
+      '/public-store',
+      '/download-app',
+      '/unauthorized',
+      '/admin/login',
+      '/superadmin/login'
+    ];
+    return publicPaths.includes(url) || url.startsWith('/public-course-details/');
+  }
 
   ngOnInit() {
     const savedLang = localStorage.getItem('userLang') || 'en';

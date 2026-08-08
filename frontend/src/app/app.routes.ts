@@ -26,6 +26,8 @@ import { PracticeEngineComponent } from './components/practice-engine/practice-e
 export const routes: Routes = [
   // Public Login route
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
+  { path: 'admin/login', component: LoginComponent, canActivate: [guestGuard] },
+  { path: 'superadmin/login', component: LoginComponent, canActivate: [guestGuard] },
   
   // Safe Fallback redirect
   { path: '', redirectTo: 'login', pathMatch: 'full' },
