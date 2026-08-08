@@ -37,6 +37,8 @@ export const routes: Routes = [
 
   // Public Login route
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
+  { path: 'admin/login', component: LoginComponent, canActivate: [guestGuard] },
+  { path: 'superadmin/login', component: LoginComponent, canActivate: [guestGuard] },
 
   // Public Signup route
   { path: 'signup', loadComponent: () => import('./components/signup/signup').then(m => m.SignupComponent), canActivate: [guestGuard] },

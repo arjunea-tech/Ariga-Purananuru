@@ -7,7 +7,11 @@
         த
       </div>
       <h1>தமிழ் யாப்பு</h1>
-      <!-- <p>Language Learning Portal</p> -->
+      @if (loginType === 'admin') {
+        <div style="font-size: 0.95rem; font-weight: 700; color: #78350F; margin-top: 4px; letter-spacing: 0.5px; text-transform: uppercase;">Admin Portal</div>
+      } @else if (loginType === 'superadmin') {
+        <div style="font-size: 0.95rem; font-weight: 700; color: #78350F; margin-top: 4px; letter-spacing: 0.5px; text-transform: uppercase;">Super Admin Portal</div>
+      }
     </div>
 
     <!-- Unified Login Form -->

@@ -26,12 +26,22 @@ export class LoginComponent implements OnInit {
   loading = false;
   tenantBranding: any = null;
   showPassword = false;
+  loginType: 'student' | 'admin' | 'superadmin' = 'student';
 
   togglePasswordVisibility(): void {
     this.showPassword = !this.showPassword;
   }
 
   ngOnInit(): void {
+    const url = this.router.url;
+    if (url.includes('/superadmin/login')) {
+      this.loginType = 'superadmin';
+    } else if (url.includes('/admin/login')) {
+      this.loginType = 'admin';
+    } else {
+      this.loginType = 'student';
+    }
+
     // Clear any previous active session when visiting login
     setTimeout(() => {
       this.authService.clearSession();
@@ -91,10 +101,30 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(credentials).subscribe({
       next: (response) => {
+        const role = response.user.role;
+
+        // Perform strict role validation based on the login pathway
+        if (this.loginType === 'student' && role !== 'student') {
+          this.authService.clearSession();
+          this.loading = false;
+          this.errorMessage = 'Student credentials required for this path.';
+          return;
+        }
+        if (this.loginType === 'admin' && role !== 'admin' && role !== 'staff') {
+          this.authService.clearSession();
+          this.loading = false;
+          this.errorMessage = 'Admin or Staff credentials required for this path.';
+          return;
+        }
+        if (this.loginType === 'superadmin' && role !== 'super_admin') {
+          this.authService.clearSession();
+          this.loading = false;
+          this.errorMessage = 'Super Admin credentials required for this path.';
+          return;
+        }
+
         this.loading = false;
         this.successMessage = 'Login successful! Redirecting...';
-
-        const role = response.user.role;
 
         // Fetch and apply branding if tenant_code is returned
         if (response.tenant_code) {

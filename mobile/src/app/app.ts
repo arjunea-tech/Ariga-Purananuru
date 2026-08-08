@@ -53,6 +53,21 @@ export class App implements OnInit {
   isSidebarOpen = signal(false);
   tenantBranding = signal<any>(null);
 
+  isPublicRoute(): boolean {
+    const url = this.router.url.split('?')[0];
+    const publicPaths = [
+      '/',
+      '/login',
+      '/signup',
+      '/public-store',
+      '/download-app',
+      '/unauthorized',
+      '/admin/login',
+      '/superadmin/login'
+    ];
+    return publicPaths.includes(url) || url.startsWith('/public-course-details/');
+  }
+
   constructor() {
     addIcons({
       playCircleOutline, megaphoneOutline, speedometerOutline, peopleOutline, 

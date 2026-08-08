@@ -1,4 +1,4 @@
-@if (!authService.isLoggedIn()) {
+@if (!authService.isLoggedIn() || isPublicRoute()) {
 <!-- Standalone Login view layout (No sidebar or header visible) -->
 <main class="w-100 min-vh-100 m-0 p-0 overflow-hidden">
   <router-outlet></router-outlet>
