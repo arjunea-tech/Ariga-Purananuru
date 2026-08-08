@@ -1,20 +1,29 @@
 <div class="login-container">
 
-
   <!-- Traditional Oolai Chuvadi Scroll Wrapper -->
   <div class="scroll-wrapper">
+
     <!-- Pure CSS Top Wooden Roller Rod -->
     <div class="wooden-roller top-roller">
       <div class="knob left-knob"></div>
       <div class="roller-rod"></div>
       <div class="knob right-knob"></div>
+    </div>
+
+    <!-- Aged Parchment Paper Card Body -->
+    <div class="scroll-parchment-card">
+
+      <!-- Ancient Palm Leaf Manuscript Binding Holes & Thread -->
+      <div class="scroll-binding-hole left-hole" title="ஏடு தையல் துளை"></div>
+      <div class="scroll-binding-hole right-hole" title="ஏடு தையல் துளை"></div>
+
       <!-- Branding Header -->
       <div class="login-header">
         <div class="logo-badge" routerLink="/" style="cursor: pointer;" title="முகப்புப் பக்கத்திற்குச் செல்ல">
-          <img src="assets/images/logo.png" alt="Logo"
-            style="width: 100%; height: 100%; object-fit: contain; border-radius: 20px; padding: 4px;">
+          <span class="logo-letter">த</span>
         </div>
-        <h1 routerLink="/" style="cursor: pointer; text-decoration: none;">அழகுத் தமிழ் யாப்பு</h1>
+        <h1 routerLink="/" style="cursor: pointer; text-decoration: none;">தமிழ் யாப்பு</h1>
+        <p class="subtitle">📜 சங்கத் தமிழ் இலக்கண ஏடு</p>
         @if (loginType === 'admin') {
         <div
           style="font-size: 0.95rem; font-weight: 700; color: #78350F; margin-top: 4px; letter-spacing: 0.5px; text-transform: uppercase;">
@@ -26,111 +35,89 @@
         }
       </div>
 
-      <!-- Aged Parchment Paper Card Body -->
-      <div class="scroll-parchment-card">
-
-        <!-- Ancient Palm Leaf Manuscript Binding Holes & Thread -->
-        <div class="scroll-binding-hole left-hole" title="ஏடு தையல் துளை"></div>
-        <div class="scroll-binding-hole right-hole" title="ஏடு தையல் துளை"></div>
-
-        <!-- Branding Header -->
-        <div class="login-header">
-          <div class="logo-badge" routerLink="/" style="cursor: pointer;" title="முகப்புப் பக்கத்திற்குச் செல்ல">
-            <span class="logo-letter">ழ</span>
-          </div>
-          <h1 routerLink="/" style="cursor: pointer; text-decoration: none;">அழகுத் தமிழ் யாப்பு</h1>
-          <p class="subtitle">📜 சங்கத் தமிழ் இலக்கண ஏடு</p>
+      <!-- Unified Login Form -->
+      <div class="form-container">
+        <!-- Alert Messages -->
+        @if (errorMessage) {
+        <div class="alert alert-danger">
+          <span class="alert-icon">⚠️</span>
+          <span class="alert-text">{{ errorMessage }}</span>
         </div>
+        }
 
-        <!-- Unified Login Form -->
-        <div class="form-container">
-          <!-- Alert Messages -->
-          @if (errorMessage) {
-          <div class="alert alert-danger">
-            <span class="alert-icon">⚠️</span>
-            <span class="alert-text">{{ errorMessage }}</span>
-          </div>
-          }
+        @if (successMessage) {
+        <div class="alert alert-success">
+          <span class="alert-icon">✓</span>
+          <span class="alert-text">{{ successMessage }}</span>
+        </div>
+        }
 
-          @if (successMessage) {
-          <div class="alert alert-success">
-            <span class="alert-icon">✓</span>
-            <span class="alert-text">{{ successMessage }}</span>
-          </div>
-          }
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
 
-          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
-
-            <!-- Username / Email -->
-            <div class="form-group">
-              <label for="login">பயனர்பெயர் / Username</label>
-              <div class="input-wrapper">
-                <span class="input-icon">👤</span>
-                <input id="login" type="text" formControlName="login" placeholder="பயனர்பெயரை உள்ளிடவும்"
-                  [class.invalid]="loginForm.get('login')?.touched && loginForm.get('login')?.invalid" />
-              </div>
-              @if (loginForm.get('login')?.hasError('serverError')) {
-              <small class="error-msg">{{ loginForm.get('login')?.errors?.['serverError'] }}</small>
-              } @else if (loginForm.get('login')?.touched && loginForm.get('login')?.invalid) {
-              <small class="error-msg">Username or Email is required (min 3 chars).</small>
-              }
+          <!-- Username / Email -->
+          <div class="form-group">
+            <label for="login">பயனர்பெயர் / Username</label>
+            <div class="input-wrapper">
+              <span class="input-icon">👤</span>
+              <input id="login" type="text" formControlName="login" placeholder="பயனர்பெயரை உள்ளிடவும்"
+                [class.invalid]="loginForm.get('login')?.touched && loginForm.get('login')?.invalid" />
             </div>
+            @if (loginForm.get('login')?.hasError('serverError')) {
+            <small class="error-msg">{{ loginForm.get('login')?.errors?.['serverError'] }}</small>
+            } @else if (loginForm.get('login')?.touched && loginForm.get('login')?.invalid) {
+            <small class="error-msg">Username or Email is required (min 3 chars).</small>
+            }
+          </div>
 
-            <!-- Password -->
-            <div class="form-group">
-              <label for="password">கடவுச்சொல் / Password</label>
-              <div class="input-wrapper">
-                <span class="input-icon">🔑</span>
-                <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password"
-                  placeholder="••••••••"
-                  [class.invalid]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid" />
-                <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()" tabindex="-1">
-                  @if (showPassword) {
-                  <span title="Hide password">👁️‍🗨️</span>
-                  } @else {
-                  <span title="Show password">👁️</span>
-                  }
-                </button>
-              </div>
-              @if (loginForm.get('password')?.hasError('serverError')) {
-              <small class="error-msg">{{ loginForm.get('password')?.errors?.['serverError'] }}</small>
-              } @else if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
-              <small class="error-msg">Password is required (min 4 chars).</small>
-              }
+          <!-- Password -->
+          <div class="form-group">
+            <label for="password">கடவுச்சொல் / Password</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔑</span>
+              <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password"
+                placeholder="••••••••"
+                [class.invalid]="loginForm.get('password')?.touched && loginForm.get('password')?.invalid" />
+              <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()" tabindex="-1">
+                @if (showPassword) {
+                <span title="Hide password">👁️‍🗨️</span>
+                } @else {
+                <span title="Show password">👁️</span>
+                }
+              </button>
             </div>
+            @if (loginForm.get('password')?.hasError('serverError')) {
+            <small class="error-msg">{{ loginForm.get('password')?.errors?.['serverError'] }}</small>
+            } @else if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
+            <small class="error-msg">Password is required (min 4 chars).</small>
+            }
+          </div>
 
-            <!-- Submit Button -->
-            <button type="submit" [disabled]="loading || loginForm.invalid" class="btn-submit">
-              @if (loading) {
-              <span class="spinner"></span> சரிபார்க்கிறது...
-              } @else {
-              <span>உள்நுழைக / Sign In</span>
-              }
-            </button>
+          <!-- Submit Button -->
+          <button type="submit" [disabled]="loading || loginForm.invalid" class="btn-submit">
+            @if (loading) {
+            <span class="spinner"></span> சரிபார்க்கிறது...
+            } @else {
+            <span>உள்நுழைக / Sign In</span>
+            }
+          </button>
 
-          </form>
-        </div>
-
-        <div class="login-footer">
-          <p style="margin-bottom: 6px;">கணக்கு இல்லையா? <a routerLink="/signup">பதிவு செய்க (Sign Up)</a></p>
-          <p>© 2026 தமிழ் யாப்பு. All rights reserved.</p>
-        </div>
-
+        </form>
       </div>
 
-      <<<<<<< HEAD <!-- Pure CSS Bottom Wooden Roller Rod -->
-        <div class="wooden-roller bottom-roller">
-          <div class="knob left-knob"></div>
-          <div class="roller-rod"></div>
-          <div class="knob right-knob"></div>
-          =======
-          <div class="login-footer">
-            @if (loginType === 'student') {
-            <p style="margin-bottom: 8px;">Don't have an account? <a routerLink="/signup"
-                style="color: var(--bs-primary); font-weight: bold; text-decoration: none;">Sign Up</a></p>
-            }
-            <p>© 2026 தமிழ் யாப்பு. All rights reserved.</p>
-            >>>>>>> 44b2336ab745ce0f5612200d8d41b1a9aa88862c
-          </div>
-        </div>
+      <div class="login-footer">
+        <p style="margin-bottom: 6px;">கணக்கு இல்லையா? <a routerLink="/signup">பதிவு செய்க (Sign Up)</a></p>
+        <p>© 2026 தமிழ் யாப்பு. All rights reserved.</p>
+      </div>
+
     </div>
+
+    <!-- Pure CSS Bottom Wooden Roller Rod -->
+    <div class="wooden-roller bottom-roller">
+      <div class="knob left-knob"></div>
+      <div class="roller-rod"></div>
+      <div class="knob right-knob"></div>
+    </div>
+
+  </div>
+
+</div>
