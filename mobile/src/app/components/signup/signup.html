@@ -1,113 +1,136 @@
-<div class="login-container" style="background: url('assets/images/login_bg_new.png') no-repeat center right / cover;">
-  <div class="login-glass-card">
+<div class="login-container">
 
-    <!-- Branding Header -->
-    <div class="login-header">
-      <div class="logo-badge">
-        <img src="assets/images/logo.png" alt="Logo"
-          style="width: 100%; height: 100%; object-fit: contain; border-radius: 20px; padding: 4px;">
-      </div>
-      <h1>Create Account</h1>
+  <!-- Traditional Oolai Chuvadi Scroll Wrapper -->
+  <div class="scroll-wrapper">
+
+    <!-- Pure CSS Top Wooden Roller Rod -->
+    <div class="wooden-roller top-roller">
+      <div class="knob left-knob"></div>
+      <div class="roller-rod"></div>
+      <div class="knob right-knob"></div>
     </div>
 
-    <!-- Unified Form -->
-    <div class="form-container">
-      @if (errorMessage) {
-      <div class="alert alert-danger">
-        <span class="alert-icon">⚠️</span>
-        <span class="alert-text">{{ errorMessage }}</span>
+    <!-- Aged Parchment Paper Card Body -->
+    <div class="scroll-parchment-card">
+
+      <!-- Ancient Palm Leaf Manuscript Binding Holes & Thread -->
+      <div class="scroll-binding-hole left-hole" title="ஏடு தையல் துளை"></div>
+      <div class="scroll-binding-hole right-hole" title="ஏடு தையல் துளை"></div>
+
+      <!-- Branding Header -->
+      <div class="login-header">
+        <div class="logo-badge" routerLink="/" style="cursor: pointer;" title="முகப்புப் பக்கத்திற்குச் செல்ல">
+          <span class="logo-letter">த</span>
+        </div>
+        <h1 routerLink="/" style="cursor: pointer; text-decoration: none;">புதிய கணக்கு உருவாக்கு</h1>
+        <p class="subtitle">📜 தமிழ் யாப்பு - கணக்கு பதிவு</p>
       </div>
-      }
 
-      @if (successMessage) {
-      <div class="alert alert-success">
-        <span class="alert-icon">✓</span>
-        <span class="alert-text">{{ successMessage }}</span>
+      <!-- Unified Form -->
+      <div class="form-container">
+        @if (errorMessage) {
+        <div class="alert alert-danger">
+          <span class="alert-icon">⚠️</span>
+          <span class="alert-text">{{ errorMessage }}</span>
+        </div>
+        }
+
+        @if (successMessage) {
+        <div class="alert alert-success">
+          <span class="alert-icon">✓</span>
+          <span class="alert-text">{{ successMessage }}</span>
+        </div>
+        }
+
+        <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="login-form">
+
+          <!-- Name -->
+          <div class="form-group">
+            <label for="name">முழுப் பெயர் / Full Name</label>
+            <div class="input-wrapper">
+              <span class="input-icon">👤</span>
+              <input id="name" type="text" formControlName="name" placeholder="உங்கள் பெயரை உள்ளிடவும்"
+                [class.invalid]="signupForm.get('name')?.touched && signupForm.get('name')?.invalid" />
+            </div>
+            @if (signupForm.get('name')?.touched && signupForm.get('name')?.invalid) {
+            <small class="error-msg">Name is required (min 3 chars).</small>
+            }
+          </div>
+
+          <!-- Email -->
+          <div class="form-group">
+            <label for="login">மின்னஞ்சல் / Email Address</label>
+            <div class="input-wrapper">
+              <span class="input-icon">📧</span>
+              <input id="login" type="email" formControlName="login" placeholder="email@example.com"
+                [class.invalid]="signupForm.get('login')?.touched && signupForm.get('login')?.invalid" />
+            </div>
+            @if (signupForm.get('login')?.touched && signupForm.get('login')?.invalid) {
+            <small class="error-msg">A valid email is required.</small>
+            }
+          </div>
+
+          <!-- Password -->
+          <div class="form-group">
+            <label for="password">கடவுச்சொல் / Password</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔑</span>
+              <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password"
+                placeholder="••••••••"
+                [class.invalid]="signupForm.get('password')?.touched && signupForm.get('password')?.invalid" />
+              <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()" tabindex="-1">
+                @if (showPassword) {
+                <span title="Hide password">👁️‍🗨️</span>
+                } @else {
+                <span title="Show password">👁️</span>
+                }
+              </button>
+            </div>
+            @if (signupForm.get('password')?.touched && signupForm.get('password')?.invalid) {
+            <small class="error-msg">Password is required (min 6 chars).</small>
+            }
+          </div>
+
+          <!-- Confirm Password -->
+          <div class="form-group">
+            <label for="password_confirmation">கடவுச்சொல் உறுதி செய்க / Confirm Password</label>
+            <div class="input-wrapper">
+              <span class="input-icon">🔑</span>
+              <input id="password_confirmation" [type]="showPassword ? 'text' : 'password'"
+                formControlName="password_confirmation" placeholder="••••••••"
+                [class.invalid]="signupForm.hasError('mismatch') || (signupForm.get('password_confirmation')?.touched && signupForm.get('password_confirmation')?.invalid)" />
+            </div>
+            @if (signupForm.hasError('mismatch') && signupForm.get('password_confirmation')?.touched) {
+            <small class="error-msg">Passwords do not match.</small>
+            }
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" [disabled]="loading || signupForm.invalid" class="btn-submit">
+            @if (loading) {
+            <span class="spinner"></span> பதிவு செய்கிறது...
+            } @else {
+            <span>பதிவு செய்க / Sign Up</span>
+            }
+          </button>
+
+        </form>
       </div>
-      }
 
-      <form [formGroup]="signupForm" (ngSubmit)="onSubmit()" class="login-form">
+      <div class="login-footer">
+        <p style="margin-bottom: 6px;">ஏற்கனவே கணக்கு உள்ளதா? <a routerLink="/login">உள்நுழைக (Log In)</a></p>
+        <p>© 2026 தமிழ் யாப்பு. All rights reserved.</p>
+      </div>
 
-        <!-- Name -->
-        <div class="form-group">
-          <label for="name">Full Name</label>
-          <div class="input-wrapper">
-            <span class="input-icon">👤</span>
-            <input id="name" type="text" formControlName="name" placeholder="John Doe"
-              [class.invalid]="signupForm.get('name')?.touched && signupForm.get('name')?.invalid" />
-          </div>
-          @if (signupForm.get('name')?.touched && signupForm.get('name')?.invalid) {
-          <small class="error-msg">Name is required (min 3 chars).</small>
-          }
-        </div>
-
-        <!-- Email -->
-        <div class="form-group">
-          <label for="login">Email Address</label>
-          <div class="input-wrapper">
-            <span class="input-icon">📧</span>
-            <input id="login" type="email" formControlName="login" placeholder="email@example.com"
-              [class.invalid]="signupForm.get('login')?.touched && signupForm.get('login')?.invalid" />
-          </div>
-          @if (signupForm.get('login')?.touched && signupForm.get('login')?.invalid) {
-          <small class="error-msg">A valid email is required.</small>
-          }
-        </div>
-
-        <!-- Password -->
-        <div class="form-group">
-          <label for="password">Password</label>
-          <div class="input-wrapper" style="position: relative;">
-            <span class="input-icon">🔑</span>
-            <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password"
-              placeholder="••••••••"
-              [class.invalid]="signupForm.get('password')?.touched && signupForm.get('password')?.invalid"
-              style="padding-right: 40px;" />
-            <button type="button" class="password-toggle-btn" (click)="togglePasswordVisibility()" tabindex="-1"
-              style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #6c757d;">
-              @if (showPassword) {
-              <span title="Hide password">👁️‍🗨️</span>
-              } @else {
-              <span title="Show password">👁️</span>
-              }
-            </button>
-          </div>
-          @if (signupForm.get('password')?.touched && signupForm.get('password')?.invalid) {
-          <small class="error-msg">Password is required (min 6 chars).</small>
-          }
-        </div>
-
-        <!-- Confirm Password -->
-        <div class="form-group">
-          <label for="password_confirmation">Confirm Password</label>
-          <div class="input-wrapper" style="position: relative;">
-            <span class="input-icon">🔑</span>
-            <input id="password_confirmation" [type]="showPassword ? 'text' : 'password'"
-              formControlName="password_confirmation" placeholder="••••••••"
-              [class.invalid]="signupForm.hasError('mismatch') || (signupForm.get('password_confirmation')?.touched && signupForm.get('password_confirmation')?.invalid)"
-              style="padding-right: 40px;" />
-          </div>
-          @if (signupForm.hasError('mismatch') && signupForm.get('password_confirmation')?.touched) {
-          <small class="error-msg">Passwords do not match.</small>
-          }
-        </div>
-
-        <!-- Submit Button -->
-        <button type="submit" [disabled]="loading || signupForm.invalid" class="btn-submit">
-          @if (loading) {
-          <span class="spinner"></span> Creating Account...
-          } @else {
-          Sign Up
-          }
-        </button>
-
-      </form>
     </div>
 
-    <div class="login-footer" style="margin-top: 15px;">
-      <p>Already have an account? <a routerLink="/login"
-          style="color: var(--bs-primary); font-weight: bold; text-decoration: none;">Log In</a></p>
+    <!-- Pure CSS Bottom Wooden Roller Rod -->
+    <div class="wooden-roller bottom-roller">
+      <div class="knob left-knob"></div>
+      <div class="roller-rod"></div>
+      <div class="knob right-knob"></div>
     </div>
 
   </div>
+
 </div>
