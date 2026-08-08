@@ -36,10 +36,19 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: any) => {
       if (error instanceof HttpErrorResponse && error.status === 401) {
         // Clear session and redirect to login on 401 Unauthorized (unless user is on root Landing Page)
+        const role = authService.getUserRole();
         authService.clearSession();
         const currentUrl = router.url || window.location.pathname;
-        if (currentUrl !== '/' && currentUrl !== '' && !currentUrl.startsWith('/login')) {
-          router.navigate(['/login']);
+        const isAlreadyOnLogin = currentUrl.startsWith('/login') || currentUrl.startsWith('/admin/login') || currentUrl.startsWith('/superadmin/login');
+        
+        if (currentUrl !== '/' && currentUrl !== '' && !isAlreadyOnLogin) {
+          if (role === 'super_admin') {
+            router.navigate(['/superadmin/login']);
+          } else if (role === 'admin' || role === 'staff') {
+            router.navigate(['/admin/login']);
+          } else {
+            router.navigate(['/login']);
+          }
         }
       }
       return throwError(() => error);

@@ -36,8 +36,16 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: any) => {
       if (error instanceof HttpErrorResponse && error.status === 401) {
         // Clear session and redirect to login on 401 Unauthorized
+        const role = authService.getUserRole();
         authService.clearSession();
-        router.navigate(['/login']);
+        
+        if (role === 'super_admin') {
+          router.navigate(['/superadmin/login']);
+        } else if (role === 'admin' || role === 'staff') {
+          router.navigate(['/admin/login']);
+        } else {
+          router.navigate(['/login']);
+        }
       }
       return throwError(() => error);
     })
