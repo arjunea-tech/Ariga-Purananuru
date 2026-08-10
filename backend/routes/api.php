@@ -26,14 +26,16 @@ use App\Http\Controllers\YappuSeerWordController;
 */
 Route::middleware('throttle:5,1')->group(function () {
     Route::post('/register', [AuthController::class, 'register']);
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
 });
 Route::get('/tenants/brand/{code}', [TenantController::class, 'getBranding']);
 Route::get('/practice-words', [PracticeWordController::class, 'index']);
 Route::get('/practice-words/random', [PracticeWordController::class, 'getRandom']);
 Route::get('/yappu-seer-words', [YappuSeerWordController::class, 'index']);
 
-// Public B2C Store
+// Public Courses & Store
+Route::get('courses', [CourseController::class, 'index']);
+Route::get('courses/{course}', [CourseController::class, 'show']);
 Route::get('store/courses', [CourseController::class, 'getStorefront']);
 Route::get('courses/{course}/player-structure', [CourseController::class, 'getPlayerStructure']);
 Route::get('attachments/{id}/download', [ContentController::class, 'downloadAttachment']);

@@ -12,6 +12,11 @@ class DashboardController extends Controller
     /**
      * Fetch student dashboard analytics and gamified badges.
      */
+    public function studentDashboard(Request $request)
+    {
+        return $this->getStudentStats($request);
+    }
+
     public function getStudentStats(Request $request)
     {
         $user = $request->user();
