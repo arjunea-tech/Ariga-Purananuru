@@ -120,7 +120,7 @@ export class Property implements OnInit {
 
   createPackageRow(): FormGroup {
     return this.fb.group({
-      course_id: ['', Validators.required],
+      course_id: [''],
       package_id: ['', Validators.required],
       start_date: [null],
       end_date: [null],
@@ -256,7 +256,7 @@ export class Property implements OnInit {
           }
         }
         const row = this.fb.group({
-          course_id: [pivot?.course_id || '', Validators.required],
+          course_id: [pivot?.course_id ?? ''],
           package_id: [pkg.id, Validators.required],
           start_date: [pivot?.start_date || null],
           end_date: [pivot?.end_date || null],
