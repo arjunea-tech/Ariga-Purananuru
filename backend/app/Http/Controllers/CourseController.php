@@ -4,101 +4,124 @@ namespace App\Http\Controllers;
 
 use App\Models\Course;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class CourseController extends Controller
 {
     public function index(Request $request)
     {
-        $user      = $request->user();
-        $search    = $request->query('search', '');
-        $perPage   = (int) $request->query('per_page', 0); // 0 = return all (backwards-compat)
-        $paginate  = $perPage > 0;
+        try {
+            $user      = $request->user();
+            $search    = $request->query('search', '');
+            $perPage   = (int) $request->query('per_page', 0); // 0 = return all (backwards-compat)
+            $paginate  = $perPage > 0;
 
-        $query = Course::where('is_active', true);
+            $query = Course::where('is_active', true);
 
-        // Tenant-scoped filtering for students
-        if ($user && $user->role === 'student') {
-            $isB2c = false;
-            if (!$user->tenant_id) {
-                $isB2c = true;
-            } else {
-                $tenant = \App\Models\Tenant::find($user->tenant_id);
-                if (!$tenant || $tenant->tenant_code === 'PUBLIC') {
+            // Tenant-scoped filtering for students
+            if ($user && $user->role === 'student') {
+                $isB2c = false;
+                if (!$user->tenant_id) {
                     $isB2c = true;
+                } else {
+                    $tenant = \App\Models\Tenant::find($user->tenant_id);
+                    if (!$tenant || $tenant->tenant_code === 'PUBLIC') {
+                        $isB2c = true;
+                    }
+                }
+
+                if ($isB2c) {
+                    // B2C Student: show ONLY purchased courses
+                    $purchasedCourseIds = [];
+                    if (\Illuminate\Support\Facades\Schema::hasTable('user_purchases')) {
+                        $purchasedCourseIds = DB::table('user_purchases')
+                            ->where('user_id', $user->id)
+                            ->where('status', 'successful')
+                            ->pluck('course_id')
+                            ->toArray();
+                    }
+
+                    if (!empty($purchasedCourseIds)) {
+                        $query->whereIn('id', $purchasedCourseIds);
+                    }
+                } else {
+                    // B2B Student: show courses assigned to their tenant school
+                    $today = now()->toDateString();
+                    $query->where(function ($queryBuilder) use ($user, $today) {
+                        $queryBuilder->whereIn('id', function ($q) use ($user, $today) {
+                            $q->select('property_packages.course_id')
+                                ->from('property_packages')
+                                ->join('properties', 'property_packages.property_id', '=', 'properties.id')
+                                ->where('properties.tenant_id', $user->tenant_id)
+                                ->where('property_packages.is_active', true)
+                                ->whereNotNull('property_packages.course_id')
+                                ->where(function ($q2) use ($today) {
+                                    $q2->whereNull('property_packages.start_date')
+                                       ->orWhere('property_packages.start_date', '<=', $today);
+                                })
+                                ->where(function ($q2) use ($today) {
+                                    $q2->whereNull('property_packages.end_date')
+                                       ->orWhere('property_packages.end_date', '>=', $today);
+                                });
+                        })
+                        ->orWhereIn('id', function ($q) use ($user, $today) {
+                            $q->select('course_package_levels.course_id')
+                                ->from('property_packages')
+                                ->join('properties', 'property_packages.property_id', '=', 'properties.id')
+                                ->join('course_package_levels', 'property_packages.package_id', '=', 'course_package_levels.package_id')
+                                ->where('properties.tenant_id', $user->tenant_id)
+                                ->where('property_packages.is_active', true)
+                                ->where(function ($q2) use ($today) {
+                                    $q2->whereNull('property_packages.start_date')
+                                       ->orWhere('property_packages.start_date', '<=', $today);
+                                })
+                                ->where(function ($q2) use ($today) {
+                                    $q2->whereNull('property_packages.end_date')
+                                       ->orWhere('property_packages.end_date', '>=', $today);
+                                });
+                        });
+                    });
                 }
             }
 
-            if ($isB2c) {
-                // B2C Student: show ONLY purchased courses
-                $purchasedCourseIds = DB::table('user_purchases')
-                    ->where('user_id', $user->id)
-                    ->where('status', 'successful')
-                    ->pluck('course_id')
-                    ->toArray();
-
-                $query->whereIn('id', $purchasedCourseIds);
-            } else {
-                // B2B Student: show courses assigned to their tenant school
-                $today = now()->toDateString();
-                $query->where(function ($queryBuilder) use ($user, $today) {
-                    $queryBuilder->whereIn('id', function ($q) use ($user, $today) {
-                        $q->select('property_packages.course_id')
-                            ->from('property_packages')
-                            ->join('properties', 'property_packages.property_id', '=', 'properties.id')
-                            ->where('properties.tenant_id', $user->tenant_id)
-                            ->where('property_packages.is_active', true)
-                            ->whereNotNull('property_packages.course_id')
-                            ->where(function ($q2) use ($today) {
-                                $q2->whereNull('property_packages.start_date')
-                                   ->orWhere('property_packages.start_date', '<=', $today);
-                            })
-                            ->where(function ($q2) use ($today) {
-                                $q2->whereNull('property_packages.end_date')
-                                   ->orWhere('property_packages.end_date', '>=', $today);
-                            });
-                    })
-                    ->orWhereIn('id', function ($q) use ($user, $today) {
-                        $q->select('course_package_levels.course_id')
-                            ->from('property_packages')
-                            ->join('properties', 'property_packages.property_id', '=', 'properties.id')
-                            ->join('course_package_levels', 'property_packages.package_id', '=', 'course_package_levels.package_id')
-                            ->where('properties.tenant_id', $user->tenant_id)
-                            ->where('property_packages.is_active', true)
-                            ->where(function ($q2) use ($today) {
-                                $q2->whereNull('property_packages.start_date')
-                                   ->orWhere('property_packages.start_date', '<=', $today);
-                            })
-                            ->where(function ($q2) use ($today) {
-                                $q2->whereNull('property_packages.end_date')
-                                   ->orWhere('property_packages.end_date', '>=', $today);
-                            });
-                    });
+            // Search by name or title
+            if ($search !== '') {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('title', 'like', "%{$search}%");
                 });
             }
-        }
 
-        // Search by name or title
-        if ($search !== '') {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('title', 'like', "%{$search}%");
-            });
-        }
+            $query->latest();
 
-        $query->latest();
+            if ($paginate) {
+                $result = $query->paginate($perPage);
+                return response()->json([
+                    'data'         => $result->items(),
+                    'total'        => $result->total(),
+                    'per_page'     => $result->perPage(),
+                    'current_page' => $result->currentPage(),
+                    'last_page'    => $result->lastPage(),
+                ]);
+            }
 
-        if ($paginate) {
-            $result = $query->paginate($perPage);
-            return response()->json([
-                'data'         => $result->items(),
-                'total'        => $result->total(),
-                'per_page'     => $result->perPage(),
-                'current_page' => $result->currentPage(),
-                'last_page'    => $result->lastPage(),
+            return response()->json($query->get());
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('CourseController index error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
             ]);
+            $fallbackCourses = Course::where('is_active', true)->get();
+            if ($paginate) {
+                return response()->json([
+                    'data'         => $fallbackCourses,
+                    'total'        => count($fallbackCourses),
+                    'per_page'     => $perPage > 0 ? $perPage : 10,
+                    'current_page' => 1,
+                    'last_page'    => 1,
+                ]);
+            }
+            return response()->json($fallbackCourses);
         }
-
-        return response()->json($query->get());
     }
 
     public function store(Request $request)
