@@ -349,15 +349,13 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
-    if (this.isNative()) {
-      if (this.authService.isLoggedIn()) {
-        this.router.navigate(['/tabs/home']);
-      } else {
-        this.router.navigate(['/login']);
-      }
+    // On native mobile: if already logged in, go straight to dashboard
+    if (this.isNative() && this.authService.isLoggedIn()) {
+      this.router.navigate(['/tabs/home']);
       return;
     }
 
+    // For both web and mobile unauthenticated: show the landing page and load data
     this.setDailyKuralBasedOnDate();
     this.fetchCoursesFromBackend();
     this.startTestimonialAutoplay();
