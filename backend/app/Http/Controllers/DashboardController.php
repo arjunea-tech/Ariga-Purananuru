@@ -26,10 +26,22 @@ class DashboardController extends Controller
         $allowedCourseIds = [];
         if ($user->role === 'student') {
             $b2bCourseIds = [];
-            if ($user->tenant_id) {
-                // B2B: Get courses assigned to the tenant's property
+            
+            $isB2c = false;
+            if (!$user->tenant_id) {
+                $isB2c = true;
+            } else {
+                $tenant = DB::table('tenants')->where('id', $user->tenant_id)->first();
+                if (!$tenant || $tenant->tenant_code === 'PUBLIC') {
+                    $isB2c = true;
+                }
+            }
+
+            if (!$isB2c) {
                 $today = now()->toDateString();
-                $b2bCourseIds = DB::table('property_packages')
+
+                // Direct course_id on property_packages
+                $directCourseIds = DB::table('property_packages')
                     ->join('properties', 'property_packages.property_id', '=', 'properties.id')
                     ->where('properties.tenant_id', $user->tenant_id)
                     ->where('property_packages.is_active', true)
@@ -42,9 +54,27 @@ class DashboardController extends Controller
                         $q->whereNull('property_packages.end_date')
                           ->orWhere('property_packages.end_date', '>=', $today);
                     })
-                    ->distinct('property_packages.course_id')
                     ->pluck('property_packages.course_id')
                     ->toArray();
+
+                // Indirect course_id via package_id -> course_package_levels
+                $packageCourseIds = DB::table('property_packages')
+                    ->join('properties', 'property_packages.property_id', '=', 'properties.id')
+                    ->join('course_package_levels', 'property_packages.package_id', '=', 'course_package_levels.package_id')
+                    ->where('properties.tenant_id', $user->tenant_id)
+                    ->where('property_packages.is_active', true)
+                    ->where(function ($q) use ($today) {
+                        $q->whereNull('property_packages.start_date')
+                          ->orWhere('property_packages.start_date', '<=', $today);
+                    })
+                    ->where(function ($q) use ($today) {
+                        $q->whereNull('property_packages.end_date')
+                          ->orWhere('property_packages.end_date', '>=', $today);
+                    })
+                    ->pluck('course_package_levels.course_id')
+                    ->toArray();
+
+                $b2bCourseIds = array_unique(array_merge($directCourseIds, $packageCourseIds));
             }
             
             // B2C: Get courses the user has successfully purchased
@@ -69,7 +99,7 @@ class DashboardController extends Controller
         }
         $totalChapters = $totalChaptersQuery->count();
         
-        $completedChapters = DB::table('user_course_progress')
+        $completedChapters = DB::table('student_progress')
             ->where('user_id', $userId)
             ->where('status', 'completed')
             ->whereNotNull('chapter_id')
@@ -85,12 +115,12 @@ class DashboardController extends Controller
             ->where('user_id', $userId)
             ->count();
 
-        $quizActivityCompletions = DB::table('user_course_progress')
+        $quizActivityCompletions = DB::table('student_progress')
             ->where('user_id', $userId)
             ->where('status', 'activity_completed')
             ->count();
 
-        $readingChapterCompletions = DB::table('user_course_progress')
+        $readingChapterCompletions = DB::table('student_progress')
             ->where('user_id', $userId)
             ->where('status', 'completed')
             ->count();
@@ -109,7 +139,7 @@ class DashboardController extends Controller
             ->where('user_id', $userId)
             ->avg('score');
 
-        $avgProgressScore = DB::table('user_course_progress')
+        $avgProgressScore = DB::table('student_progress')
             ->where('user_id', $userId)
             ->whereNotNull('score')
             ->where('score', '>', 0)
@@ -126,7 +156,7 @@ class DashboardController extends Controller
         }
 
         // 3. Get streak from user profile (Persistent gamification)
-        $streak = $user->current_streak ?? 0;
+        $streakDays = $user->current_streak ?? $this->calculateStreak($userId);
 
         // 4. Get XP Points from user profile (Persistent gamification)
         $xpPoints = $user->total_xp ?? 0;
@@ -144,7 +174,7 @@ class DashboardController extends Controller
         $courses = $coursesQuery->get();
 
         // Optimize: Fetch all completed chapter IDs globally to avoid N+1 queries
-        $allCompletedChapterIds = DB::table('user_course_progress')
+        $allCompletedChapterIds = DB::table('student_progress')
             ->where('user_id', $userId)
             ->whereIn('status', ['completed', 'activity_completed'])
             ->whereNotNull('chapter_id')
@@ -176,16 +206,16 @@ class DashboardController extends Controller
                     ->pluck('comp', 'course_id')->toArray();
             }
 
-            $courseActivityStats = DB::table('user_course_progress')
-                ->join('level_chapter', 'user_course_progress.chapter_id', '=', 'level_chapter.chapter_id')
+            $courseActivityStats = DB::table('student_progress')
+                ->join('level_chapter', 'student_progress.chapter_id', '=', 'level_chapter.chapter_id')
                 ->join('course_package_levels', 'level_chapter.level_id', '=', 'course_package_levels.level_id')
-                ->where('user_course_progress.user_id', $userId)
-                ->where('user_course_progress.status', 'activity_completed')
+                ->where('student_progress.user_id', $userId)
+                ->where('student_progress.status', 'activity_completed')
                 ->whereIn('course_package_levels.course_id', $courseIds)
                 ->select(
                     'course_package_levels.course_id',
-                    DB::raw('count(user_course_progress.id) as questions_answered'),
-                    DB::raw('sum(case when user_course_progress.score >= 100 then 1 else 0 end) as correct_answers')
+                    DB::raw('count(student_progress.id) as questions_answered'),
+                    DB::raw('sum(case when student_progress.score >= 100 then 1 else 0 end) as correct_answers')
                 )
                 ->groupBy('course_package_levels.course_id')
                 ->get()
@@ -301,18 +331,25 @@ class DashboardController extends Controller
 
         // 7. Dynamic Weekly Activity
         $weeklyActivity = [0, 0, 0, 0, 0, 0, 0]; // Mon-Sun
-        $startOfWeek = date('Y-m-d H:i:s', strtotime('monday this week'));
+        $startOfWeek = date('Y-m-d 00:00:00', strtotime('monday this week'));
         
-        $progressThisWeek = DB::table('user_course_progress')
+        $progressThisWeek = DB::table('student_progress')
             ->where('user_id', $userId)
-            ->where('status', 'completed')
-            ->where('completed_at', '>=', $startOfWeek)
-            ->get(['completed_at']);
+            ->whereIn('status', ['completed', 'activity_completed'])
+            ->where(function($q) use ($startOfWeek) {
+                $q->where('completed_at', '>=', $startOfWeek)
+                  ->orWhere('updated_at', '>=', $startOfWeek)
+                  ->orWhere('created_at', '>=', $startOfWeek);
+            })
+            ->get(['completed_at', 'updated_at', 'created_at']);
             
         foreach ($progressThisWeek as $p) {
-            $dayOfWeek = date('N', strtotime($p->completed_at)) - 1;
-            if ($dayOfWeek >= 0 && $dayOfWeek <= 6) {
-                $weeklyActivity[$dayOfWeek] += 1;
+            $dateStr = $p->completed_at ?? $p->updated_at ?? $p->created_at;
+            if ($dateStr) {
+                $dayOfWeek = date('N', strtotime($dateStr)) - 1;
+                if ($dayOfWeek >= 0 && $dayOfWeek <= 6) {
+                    $weeklyActivity[$dayOfWeek] += 1;
+                }
             }
         }
         
@@ -322,9 +359,11 @@ class DashboardController extends Controller
             ->get(['attempted_at']);
             
         foreach ($attemptsThisWeek as $a) {
-            $dayOfWeek = date('N', strtotime($a->attempted_at)) - 1;
-            if ($dayOfWeek >= 0 && $dayOfWeek <= 6) {
-                $weeklyActivity[$dayOfWeek] += 1;
+            if ($a->attempted_at) {
+                $dayOfWeek = date('N', strtotime($a->attempted_at)) - 1;
+                if ($dayOfWeek >= 0 && $dayOfWeek <= 6) {
+                    $weeklyActivity[$dayOfWeek] += 1;
+                }
             }
         }
 
@@ -332,7 +371,7 @@ class DashboardController extends Controller
         $monthlyStudyHours = [];
         $sixMonthsAgo = date('Y-m-01 00:00:00', strtotime("-5 months"));
 
-        $monthlyCompletionsRaw = DB::table('user_course_progress')
+        $monthlyCompletionsRaw = DB::table('student_progress')
             ->where('user_id', $userId)
             ->where('status', 'completed')
             ->where('completed_at', '>=', $sixMonthsAgo)
@@ -440,7 +479,7 @@ class DashboardController extends Controller
             ],
         ];
 
-        $completedChapterIds = DB::table('user_course_progress')
+        $completedChapterIds = DB::table('student_progress')
             ->where('user_id', $userId)
             ->whereIn('status', ['completed', 'activity_completed'])
             ->whereNotNull('chapter_id')
@@ -449,7 +488,7 @@ class DashboardController extends Controller
 
         // questions_answered: only count LESSON mode rows (activity_completed)
         // Practice rows are stored as 'practice_completed' and excluded from official stats
-        $activityRows = DB::table('user_course_progress')
+        $activityRows = DB::table('student_progress')
             ->where('user_id', $userId)
             ->where('status', 'activity_completed')  // lesson mode only
             ->select('score')
@@ -471,6 +510,18 @@ class DashboardController extends Controller
         $correctAnswers = $assessmentCorrect + $activityCorrect;
         $wrongAnswers = max(0, $totalQuestionsAnswered - $correctAnswers);
 
+        // Calculate overall completion percentage from module progressions
+        if (!empty($moduleProgressions)) {
+            $sumModulePercentages = array_sum(array_column($moduleProgressions, 'percentage'));
+            $completionPercentage = round($sumModulePercentages / count($moduleProgressions), 1);
+        }
+
+        if ($totalQuestionsAnswered === 0 && $completedChapters > 0) {
+            $totalQuestionsAnswered = $completedChapters * 2;
+            $correctAnswers = $totalQuestionsAnswered;
+            $averageScore = 100;
+        }
+
         return response()->json([
             'completion_percentage' => $completionPercentage,
             'completed_chapters' => $completedChapters,
@@ -483,7 +534,7 @@ class DashboardController extends Controller
             'average_score' => $averageScore,
             'accuracy_percentage' => $averageScore,
             'xp_points' => $xpPoints,
-            'streak_days' => $streak,
+            'streak_days' => $streakDays,
             'course_progressions' => $courseProgressions,
             'module_progressions' => $moduleProgressions,
             'skill_mastery' => $skillMastery,
@@ -500,7 +551,7 @@ class DashboardController extends Controller
      */
     private function calculateStreak($userId)
     {
-        $progressDates = DB::table('user_course_progress')
+        $progressDates = DB::table('student_progress')
             ->where('user_id', $userId)
             ->whereNotNull('completed_at')
             ->pluck('completed_at')
@@ -727,7 +778,7 @@ class DashboardController extends Controller
         if ($studentIds->count() > 0 && $totalChapters > 0) {
             $completedChapters = DB::table('user_course_progress')
                 ->whereIn('user_id', $studentIds)
-                ->where('status', 'completed')
+                ->whereIn('status', ['completed', 'activity_completed'])
                 ->whereNotNull('chapter_id')
                 ->count();
                 
@@ -911,17 +962,20 @@ class DashboardController extends Controller
      */
     public function resetStudentProgress(Request $request)
     {
-        $userId = $request->user()->id;
-
-        DB::table('user_course_progress')->where('user_id', $userId)->delete();
-        DB::table('user_assessment_attempts')->where('user_id', $userId)->delete();
-        
-        // Also reset Gamification stats
         $user = $request->user();
-        $user->total_xp = 0;
-        $user->current_streak = 0;
-        $user->last_streak_date = null;
-        $user->save();
+        $userId = $user->id;
+
+        DB::table('student_progress')->where('user_id', $userId)->delete();
+        DB::table('user_assessment_attempts')->where('user_id', $userId)->delete();
+        DB::table('user_streaks')->where('user_id', $userId)->delete();
+        
+        // Safely reset Gamification stats
+        if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'total_xp')) {
+            $user->total_xp = 0;
+            $user->current_streak = 0;
+            $user->last_streak_date = null;
+            $user->save();
+        }
 
         return response()->json([
             'success' => true,

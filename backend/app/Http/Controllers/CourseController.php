@@ -17,35 +17,64 @@ class CourseController extends Controller
         $query = Course::where('is_active', true);
 
         // Tenant-scoped filtering for students
-        if ($user && $user->role === 'student' && $user->tenant_id) {
-            $today = now()->toDateString();
-            
-            $query->where(function ($queryBuilder) use ($user, $today) {
-                // 1. Courses they have access to via their tenant/school
-                $queryBuilder->whereIn('id', function ($q) use ($user, $today) {
-                    $q->select('property_packages.course_id')
-                        ->from('property_packages')
-                        ->join('properties', 'property_packages.property_id', '=', 'properties.id')
-                        ->where('properties.tenant_id', $user->tenant_id)
-                        ->where('property_packages.is_active', true)
-                        ->whereNotNull('property_packages.course_id')
-                        ->where(function ($q2) use ($today) {
-                            $q2->whereNull('property_packages.start_date')
-                               ->orWhere('property_packages.start_date', '<=', $today);
-                        })
-                        ->where(function ($q2) use ($today) {
-                            $q2->whereNull('property_packages.end_date')
-                               ->orWhere('property_packages.end_date', '>=', $today);
-                        });
-                })
-                // 2. Courses they have explicitly purchased (B2C)
-                ->orWhereIn('id', function ($q) use ($user) {
-                    $q->select('course_id')
-                        ->from('user_purchases')
-                        ->where('user_id', $user->id)
-                        ->where('status', 'successful');
+        if ($user && $user->role === 'student') {
+            $isB2c = false;
+            if (!$user->tenant_id) {
+                $isB2c = true;
+            } else {
+                $tenant = \App\Models\Tenant::find($user->tenant_id);
+                if (!$tenant || $tenant->tenant_code === 'PUBLIC') {
+                    $isB2c = true;
+                }
+            }
+
+            if ($isB2c) {
+                // B2C Student: show ONLY purchased courses
+                $purchasedCourseIds = DB::table('user_purchases')
+                    ->where('user_id', $user->id)
+                    ->where('status', 'successful')
+                    ->pluck('course_id')
+                    ->toArray();
+
+                $query->whereIn('id', $purchasedCourseIds);
+            } else {
+                // B2B Student: show courses assigned to their tenant school
+                $today = now()->toDateString();
+                $query->where(function ($queryBuilder) use ($user, $today) {
+                    $queryBuilder->whereIn('id', function ($q) use ($user, $today) {
+                        $q->select('property_packages.course_id')
+                            ->from('property_packages')
+                            ->join('properties', 'property_packages.property_id', '=', 'properties.id')
+                            ->where('properties.tenant_id', $user->tenant_id)
+                            ->where('property_packages.is_active', true)
+                            ->whereNotNull('property_packages.course_id')
+                            ->where(function ($q2) use ($today) {
+                                $q2->whereNull('property_packages.start_date')
+                                   ->orWhere('property_packages.start_date', '<=', $today);
+                            })
+                            ->where(function ($q2) use ($today) {
+                                $q2->whereNull('property_packages.end_date')
+                                   ->orWhere('property_packages.end_date', '>=', $today);
+                            });
+                    })
+                    ->orWhereIn('id', function ($q) use ($user, $today) {
+                        $q->select('course_package_levels.course_id')
+                            ->from('property_packages')
+                            ->join('properties', 'property_packages.property_id', '=', 'properties.id')
+                            ->join('course_package_levels', 'property_packages.package_id', '=', 'course_package_levels.package_id')
+                            ->where('properties.tenant_id', $user->tenant_id)
+                            ->where('property_packages.is_active', true)
+                            ->where(function ($q2) use ($today) {
+                                $q2->whereNull('property_packages.start_date')
+                                   ->orWhere('property_packages.start_date', '<=', $today);
+                            })
+                            ->where(function ($q2) use ($today) {
+                                $q2->whereNull('property_packages.end_date')
+                                   ->orWhere('property_packages.end_date', '>=', $today);
+                            });
+                    });
                 });
-            });
+            }
         }
 
         // Search by name or title
@@ -149,8 +178,7 @@ class CourseController extends Controller
                     ->orderBy('level_chapter.sort_order');
             },
             'levels.chapters.contents' => function ($query) {
-                $query->select('contents.id', 'contents.name', 'contents.title', 'contents.sort_order', 'contents.is_active', 'contents.text_content', 'contents.external_url')
-                    ->where('contents.is_active', true)
+                $query->where('contents.is_active', true)
                     ->orderBy('contents.sort_order');
             },
             'levels.chapters.contents.attachments' => function ($query) {

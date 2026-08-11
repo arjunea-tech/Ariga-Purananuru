@@ -39,6 +39,7 @@ Route::get('courses/{course}', [CourseController::class, 'show']);
 Route::get('store/courses', [CourseController::class, 'getStorefront']);
 Route::get('courses/{course}/player-structure', [CourseController::class, 'getPlayerStructure']);
 Route::get('attachments/{id}/download', [ContentController::class, 'downloadAttachment']);
+Route::get('learning-modes', [LearningModeController::class, 'index']);
 
 Route::get('/test-db', function() {
     return [
@@ -157,6 +158,7 @@ Route::middleware(['auth:sanctum', 'identify.tenant'])->group(function () {
      */
     // Course player structure is read-only for players
     Route::get('courses', [CourseController::class, 'index']);
+    Route::get('courses/{course}/player-structure', [CourseController::class, 'getPlayerStructure']);
     Route::get('courses/{course}', [CourseController::class, 'show']);
 
     // B2C Payments
@@ -211,14 +213,28 @@ Route::middleware(['auth:sanctum', 'identify.tenant'])->group(function () {
     // Record student activity for XP & streak tracking
     Route::post('student/record-activity', [DashboardController::class, 'recordActivity']);
 
-    // ── Support Tickets ────────────────────────────────────────────────────
-    // Student: submit a ticket & view own tickets
+    // Support Tickets
     Route::post('support/tickets', [SupportTicketController::class, 'store']);
     Route::get('support/my-tickets', [SupportTicketController::class, 'myTickets']);
 
-    // Admin/Staff/Super Admin: list all tickets & reply
     Route::middleware(['role:super_admin,admin,staff,tenant_admin'])->group(function () {
         Route::get('support/tickets', [SupportTicketController::class, 'index']);
         Route::post('support/tickets/{id}/reply', [SupportTicketController::class, 'reply']);
     });
+
+    // User Management (Tenant Admin / Super Admin)
+    Route::get('users', [AuthController::class, 'getUsers']);
+    Route::post('users', [AuthController::class, 'createUser']);
+    Route::put('users/{id}', [AuthController::class, 'updateUser']);
+    Route::delete('users/{id}', [AuthController::class, 'deleteUser']);
+    Route::post('users/{id}/assign-courses', [AuthController::class, 'assignCourses']);
+
+    // Announcements
+    Route::get('announcements', [\App\Http\Controllers\AnnouncementController::class, 'index']);
+    Route::post('announcements', [\App\Http\Controllers\AnnouncementController::class, 'store']);
+    Route::put('announcements/{announcement}', [\App\Http\Controllers\AnnouncementController::class, 'update']);
+    Route::delete('announcements/{announcement}', [\App\Http\Controllers\AnnouncementController::class, 'destroy']);
+
+    // Tenant & Admin Stats
+    Route::get('dashboard/tenant-stats', [DashboardController::class, 'getTenantStats']);
 });
