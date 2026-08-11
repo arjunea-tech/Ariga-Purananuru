@@ -22,9 +22,6 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          port: 22
-          timeout: 60s
-          command_timeout: 15m
           script: |
             echo "Starting deployment..."
             
@@ -51,9 +48,14 @@ jobs:
             php artisan route:cache
             php artisan view:cache
             
+            # Build Angular Mobile Web App
+            cd /var/www/Ariga-Purananuru/mobile
+            npm install --legacy-peer-deps
+            npm run build
+
             # Ensure correct permissions
-            chown -R www-data:www-data /var/www/Ariga-Purananuru/backend
-            chmod -R 775 /var/www/Ariga-Purananuru/backend/storage
-            chmod -R 775 /var/www/Ariga-Purananuru/backend/bootstrap/cache
+            sudo chown -R www-data:www-data /var/www/Ariga-Purananuru/backend
+            sudo chmod -R 775 /var/www/Ariga-Purananuru/backend/storage
+            sudo chmod -R 775 /var/www/Ariga-Purananuru/backend/bootstrap/cache
             
             echo "Deployment successful!"

@@ -3,6 +3,7 @@ import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ActivityRenderer, NormalizedActivity } from '../activity-renderer/activity-renderer';
+import { environment } from '../../../../environments/environment';
 
 interface Option {
   id: number;
@@ -203,7 +204,7 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
       answers: answersPayload
     };
 
-    const url = `http://localhost:8000/api/assessments/${exam.id}/submit`;
+    const url = `${environment.apiUrl}/assessments/${exam.id}/submit`;
     this.http.post<any>(url, body).subscribe({
       next: (res) => {
         this.resultsData.set({
