@@ -43,6 +43,8 @@ class CourseController extends Controller
 
                     if (!empty($purchasedCourseIds)) {
                         $query->whereIn('id', $purchasedCourseIds);
+                    } else {
+                        $query->whereRaw('1 = 0');
                     }
                 } else {
                     // B2B Student: show courses assigned to their tenant school

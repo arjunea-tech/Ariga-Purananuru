@@ -288,20 +288,12 @@ export class StudentProfileComponent implements OnInit {
             skillMastery: this.skillMastery().filter((m: any) => m.course_id == cp.course_id)
           }));
           this.enrolledCourses.set(courses);
-        } else {
-          // 🔄 Current single-course backend — wrap as first course
-          let cName = 'புறநானூறு - யாப்பு இலக்கணம்';
-          if (res.course_name) {
-            cName = res.course_name;
-          } else if (res.course_progressions?.length > 0) {
-            cName = res.course_progressions[0].course_name || res.course_progressions[0].name || cName;
-          }
-          this.courseName.set(cName);
-
+        } else if (res.course_name) {
+          this.courseName.set(res.course_name);
           const mastery = this.skillMastery();
           const singleCourse: EnrolledCourse = {
             id: 'course-1',
-            name: cName,
+            name: res.course_name,
             completion: this.completionPercentage(),
             accuracy: this.accuracyPercentage(),
             questionsAnswered: this.questionsAnswered(),
@@ -314,6 +306,8 @@ export class StudentProfileComponent implements OnInit {
             skillMastery: mastery
           };
           this.enrolledCourses.set([singleCourse]);
+        } else {
+          this.enrolledCourses.set([]);
         }
 
         // Default to "Overall" for stats tab if nothing selected
@@ -325,6 +319,10 @@ export class StudentProfileComponent implements OnInit {
         if (res.certificates && Array.isArray(res.certificates)) {
           this.certificates.set(res.certificates);
         }
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load profile stats:', err);
         this.isLoading.set(false);
       }
     });
