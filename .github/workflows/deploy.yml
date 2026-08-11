@@ -29,7 +29,8 @@ jobs:
             cd /var/www/Ariga-Purananuru
             
             # Pull the latest changes from git
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
             
             # Navigate to the backend directory
             cd backend
