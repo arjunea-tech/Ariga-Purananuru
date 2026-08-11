@@ -376,14 +376,18 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    if (this.isNative()) {
+      if (this.authService.isLoggedIn()) {
+        this.router.navigate(['/tabs/home']);
+      } else {
+        this.router.navigate(['/login']);
+      }
+      return;
+    }
+
     this.setDailyKuralBasedOnDate();
     this.fetchCoursesFromBackend();
     this.startTestimonialAutoplay();
-    
-    // Auto-redirect logged-in mobile users on startup
-    if (this.isNative() && this.authService.isLoggedIn()) {
-      this.router.navigate(['/tabs/home']);
-    }
   }
 
   dismissSplash(): void {
@@ -425,7 +429,7 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
       const diff = today.getTime() - start.getTime();
       const oneDay = 1000 * 60 * 60 * 24;
       const dayOfYear = Math.floor(diff / oneDay);
-      
+
       const index = dayOfYear % THIRUKKURALS.length;
       this.dailyKural.set(THIRUKKURALS[index]);
     } catch (e) {
@@ -513,20 +517,23 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
   }
 
   fetchCoursesFromBackend(): void {
-    this.isLoadingCourses.set(true);
+    if (this.dynamicCourses().length === 0) {
+      this.dynamicCourses.set(this.offeredCourses);
+      this.isLoadingCourses.set(false);
+    }
     this.http.get<any[]>(`${environment.apiUrl}/store/courses`).subscribe({
       next: (courses) => {
-        if (courses && Array.isArray(courses)) {
+        if (courses && Array.isArray(courses) && courses.length > 0) {
           const activeList = courses.filter(c => c.is_active !== false);
-          this.dynamicCourses.set(activeList);
+          this.dynamicCourses.set(activeList.length > 0 ? activeList : this.offeredCourses);
         } else {
-          this.dynamicCourses.set([]);
+          this.dynamicCourses.set(this.offeredCourses);
         }
         this.isLoadingCourses.set(false);
       },
       error: (err) => {
         console.error('Error fetching courses for landing page:', err);
-        this.dynamicCourses.set([]);
+        this.dynamicCourses.set(this.offeredCourses);
         this.isLoadingCourses.set(false);
       }
     });
@@ -581,18 +588,22 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
 
   goToLogin(): void {
     if (this.authService.isLoggedIn()) {
-      if (Capacitor.isNativePlatform()) {
+      const role = this.authService.getUserRole();
+      if (role === 'student') {
         this.router.navigate(['/tabs/home']);
       } else {
-        const role = this.authService.getUserRole();
-        if (role === 'student') {
-          this.router.navigate(['/web-dashboard']);
-        } else {
-          this.router.navigate(['/admin-dashboard']);
-        }
+        this.router.navigate(['/admin-dashboard']);
       }
     } else {
       this.router.navigate(['/login']);
+    }
+  }
+
+  playStoreUrl = 'https://play.google.com/store';
+
+  goToPlayStore(): void {
+    if (typeof window !== 'undefined') {
+      window.open(this.playStoreUrl, '_blank');
     }
   }
 
