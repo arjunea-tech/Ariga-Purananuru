@@ -19,8 +19,12 @@ class DashboardController extends Controller
 
     public function getStudentStats(Request $request)
     {
-        $user = $request->user();
-        $userId = $user->id;
+        try {
+            $user = $request->user();
+            if (!$user) {
+                return response()->json(['error' => 'Unauthenticated'], 401);
+            }
+            $userId = $user->id;
 
         // 1. Overall Completion Progress
         $allowedCourseIds = [];
@@ -78,11 +82,14 @@ class DashboardController extends Controller
             }
             
             // B2C: Get courses the user has successfully purchased
-            $b2cCourseIds = DB::table('user_purchases')
-                ->where('user_id', $user->id)
-                ->where('status', 'successful')
-                ->pluck('course_id')
-                ->toArray();
+            $b2cCourseIds = [];
+            if (\Illuminate\Support\Facades\Schema::hasTable('user_purchases')) {
+                $b2cCourseIds = DB::table('user_purchases')
+                    ->where('user_id', $user->id)
+                    ->where('status', 'successful')
+                    ->pluck('course_id')
+                    ->toArray();
+            }
                 
             $allowedCourseIds = array_unique(array_merge($b2bCourseIds, $b2cCourseIds));
         }
@@ -544,6 +551,34 @@ class DashboardController extends Controller
             'badges' => $badges,
             'completed_chapter_ids' => $completedChapterIds,
         ]);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('getStudentStats Exception: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'completion_percentage' => 0,
+                'completed_chapters' => 0,
+                'total_chapters' => 0,
+                'total_attempts' => 0,
+                'passed_attempts' => 0,
+                'questions_answered' => 0,
+                'correct_answers' => 0,
+                'wrong_answers' => 0,
+                'average_score' => 0,
+                'accuracy_percentage' => 0,
+                'xp_points' => 0,
+                'streak_days' => 0,
+                'course_progressions' => [],
+                'module_progressions' => [],
+                'skill_mastery' => [],
+                'weekly_activity' => [0, 0, 0, 0, 0, 0, 0],
+                'monthly_study_hours' => [],
+                'certificates' => [],
+                'badges' => [],
+                'completed_chapter_ids' => [],
+            ]);
+        }
     }
 
     /**
