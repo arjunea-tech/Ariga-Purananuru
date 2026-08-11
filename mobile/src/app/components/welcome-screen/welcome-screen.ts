@@ -489,7 +489,8 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
 
   fetchCoursesFromBackend(): void {
     this.isLoadingCourses.set(true);
-    this.http.get<any[]>(`${environment.apiUrl}/store/courses`).subscribe({
+    // Public endpoint: GET /api/courses - returns ALL active courses (no auth needed, no purchase filter)
+    this.http.get<any[]>(`${environment.apiUrl}/courses`).subscribe({
       next: (courses) => {
         if (courses && Array.isArray(courses) && courses.length > 0) {
           const activeList = courses.filter(c => c.is_active !== false);
