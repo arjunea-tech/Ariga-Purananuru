@@ -242,8 +242,8 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
   ];
 
   // Dynamic Courses Signal loaded directly from Backend DB
-  dynamicCourses = signal<any[]>([]);
-  isLoadingCourses = signal<boolean>(true);
+  dynamicCourses = signal<any[]>(this.offeredCourses);
+  isLoadingCourses = signal<boolean>(false);
 
   // Contact Form Signals
   contactName = signal<string>('');
