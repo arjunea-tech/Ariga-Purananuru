@@ -105,7 +105,7 @@ export class StudentProfileComponent implements OnInit {
   // Certificates from backend & Preview mode
   certificates = signal<any[]>([]);
   showCertPreview = signal<boolean>(false);
-  courseName = signal<string>('புறநானூறு - யாப்பு இலக்கணம்');
+  courseName = signal<string>('');
   certDate = new Date().toLocaleDateString('ta-IN', { year: 'numeric', month: 'short', day: 'numeric' });
   certId = Math.floor(100000 + Math.random() * 900000).toString();
 

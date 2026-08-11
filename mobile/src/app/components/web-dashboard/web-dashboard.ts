@@ -96,14 +96,14 @@ export class WebDashboardComponent implements OnInit {
   userRole = signal<string>('STUDENT · மாணவர்');
   timeGreeting = signal<string>('வணக்கம்');
 
-  streakDays = signal<number>(5);
-  xpPoints = signal<number>(2450);
-  overallProgress = signal<number>(75);
-  accuracyPct = signal<number>(92);
-  studiedMins = signal<number>(45);
-  questionsAnswered = signal<number>(120);
-  correctAnswers = signal<number>(110);
-  wrongAnswers = signal<number>(10);
+  streakDays = signal<number>(0);
+  xpPoints = signal<number>(0);
+  overallProgress = signal<number>(0);
+  accuracyPct = signal<number>(0);
+  studiedMins = signal<number>(0);
+  questionsAnswered = signal<number>(0);
+  correctAnswers = signal<number>(0);
+  wrongAnswers = signal<number>(0);
 
   searchQuery = signal<string>('');
 
@@ -123,8 +123,8 @@ export class WebDashboardComponent implements OnInit {
 
   // Selected Course / Module Details
   selectedCourseId = signal<number | null>(null);
-  selectedCourseTitle = signal<string>('எழுத்து இலக்கணம்');
-  selectedCourseDesc = signal<string>('தமிழ் எழுத்துக்களின் வகைகள் மற்றும் அவற்றின் உச்சரிப்பு முறைகள்.');
+  selectedCourseTitle = signal<string>('');
+  selectedCourseDesc = signal<string>('');
 
   moduleLessons = signal<LessonItem[]>([]);
   moduleGames = signal<GameItem[]>([]);
@@ -132,23 +132,10 @@ export class WebDashboardComponent implements OnInit {
   moduleDocuments = signal<AttachmentItem[]>([]);
 
   // Weekly Activity
-  weeklyActivity = signal<any[]>([
-    { day: 'M', heightPct: 30, active: false },
-    { day: 'T', heightPct: 50, active: false },
-    { day: 'W', heightPct: 90, active: true },
-    { day: 'T', heightPct: 40, active: false },
-    { day: 'F', heightPct: 60, active: false },
-    { day: 'S', heightPct: 20, active: false },
-    { day: 'S', heightPct: 80, active: true }
-  ]);
+  weeklyActivity = signal<any[]>([]);
 
   // Profile achievements
-  achievements = signal<AchievementItem[]>([
-    { name: 'First Seed', title: 'First Seed', icon: '🌱', unlocked: true, bg: '#ECFDF5' },
-    { name: 'Quick Learner', title: 'Quick Learner', icon: '🦊', unlocked: true, bg: '#FFF7ED' },
-    { name: 'Syntax Master', title: 'Syntax Master', icon: '🛡️', unlocked: true, bg: '#F0F9FF' },
-    { name: 'Locked', title: 'Locked', icon: '🔒', unlocked: false, bg: '#F3F4F6' }
-  ]);
+  achievements = signal<AchievementItem[]>([]);
 
   ngOnInit(): void {
     this.updateTimeGreeting();
@@ -329,44 +316,37 @@ export class WebDashboardComponent implements OnInit {
   }
 
   groupChaptersIntoLevels(chapters: any[]): WebLevelItem[] {
-    const levelConfigs = [
-      { name: 'அடிப்படைத் தமிழ்', desc: 'உயிரெழுத்துக்கள், மெய்யெழுத்துக்கள் மற்றும் அடிப்படைக் கட்டமைப்பு.', status: 'completed' as const, pct: 100 },
-      { name: 'எழுத்து இலக்கணம்', desc: 'எழுத்துக்களின் பிறப்பு, வகை.', status: 'in-progress' as const, pct: 75 },
-      { name: 'சொல் இலக்கணம்', desc: 'பெயர், வினை, இடை, உரி.', status: 'in-progress' as const, pct: 25 },
-      { name: 'யாப்பு இலக்கணம்', desc: 'அசை, சீர், தளை, அடி, தொடை...', status: 'in-progress' as const, pct: 0 },
-      { name: 'அணி இலக்கணம்', desc: 'செய்யுளின் அழகு.', status: 'in-progress' as const, pct: 0 }
-    ];
-
     const icons = ['bi-book-fill', 'bi-journal-code', 'bi-chat-quote-fill', 'bi-layers-fill', 'bi-puzzle-fill'];
     const bgs = ['#EEF2FF', '#ECFDF5', '#FEF3C7', '#F3E8FF', '#FFE4E6'];
     const colors = ['#4F46E5', '#10B981', '#D97706', '#7C3AED', '#E11D48'];
 
-    const chunkSize = Math.max(1, Math.ceil(chapters.length / 3));
+    const chunkSize = Math.max(1, Math.ceil(chapters.length / 5));
+    const totalLevels = Math.ceil(chapters.length / chunkSize);
 
-    return levelConfigs.map((config, idx) => {
+    return Array.from({ length: totalLevels }, (_, idx) => {
       const slice = chapters.slice(idx * chunkSize, (idx + 1) * chunkSize);
       const levelChapters: LessonItem[] = slice.map((chap: any, cIdx: number) => ({
         id: cIdx + 1,
         chapterId: chap.id,
         title: `${cIdx + 1}. ${chap.name || 'பாட அத்தியாயம்'}`,
-        desc: chap.description || chap.desc || 'அடிப்படை இலக்கண விளக்கம் மற்றும் உதாரணங்கள்.',
+        desc: chap.description || chap.desc || '',
         status: chap.completed ? 'completed' : 'current',
         actionLabel: chap.completed ? 'மீண்டும் கற்க' : 'தொடர்க'
       }));
 
-      if (levelChapters.length === 0) {
-        levelChapters.push(
-          { id: 1, title: '1. முதல் எழுத்துக்கள்', desc: 'உயிர் மற்றும் மெய் எழுத்துக்களின் விளக்கம்.', status: 'completed', actionLabel: 'மீண்டும் கற்க' },
-          { id: 2, title: '2. சார்பெழுத்துக்கள்', desc: 'உயிர்மெய், ஆயுதம், அளபெடை வகைகள்.', status: 'current', actionLabel: 'தொடர்க' }
-        );
-      }
+      const completedCount = levelChapters.filter(c => c.status === 'completed').length;
+      const pct = levelChapters.length > 0 ? Math.round((completedCount / levelChapters.length) * 100) : 0;
+      const status: 'completed' | 'in-progress' | 'locked' = pct >= 100 ? 'completed' : 'in-progress';
+
+      const firstName = slice[0]?.name || '';
+      const levelName = firstName ? `தொகுதி ${idx + 1}: ${firstName}` : `தொகுதி ${idx + 1}`;
 
       return {
         id: `lvl_${idx + 1}`,
-        name: config.name,
-        desc: config.desc,
-        progress: config.pct,
-        status: config.status,
+        name: levelName,
+        desc: slice[0]?.description || slice[0]?.desc || '',
+        progress: pct,
+        status,
         icon: icons[idx % icons.length],
         colorBg: bgs[idx % bgs.length],
         colorText: colors[idx % colors.length],
@@ -375,16 +355,7 @@ export class WebDashboardComponent implements OnInit {
     });
   }
 
-  getDefaultFallbackLevels(): WebLevelItem[] {
-    return this.groupChaptersIntoLevels([
-      { id: 1, name: 'அறிமுகம்', desc: 'அறிமுகம் பற்றி அறிவோம்', completed: true },
-      { id: 2, name: 'அடிப்படை எழுத்துக்கள்', desc: 'அடிப்படை எழுத்துக்கள் பற்றி அறிவோம்', completed: false },
-      { id: 3, name: 'சிறப்பு எழுத்துக்கள்', desc: 'சிறப்பு எழுத்துக்கள் பற்றி அறிவோம்', completed: false },
-      { id: 4, name: 'அசை மற்றும் நேரசை', desc: 'அசை மற்றும் நேரசை பற்றி அறிவோம்', completed: false },
-      { id: 5, name: 'நிரையசை', desc: 'நிரையசை பற்றி அறிவோம்', completed: false },
-      { id: 6, name: 'அசை பிரித்தல் பயிற்சி', desc: 'அசை பிரித்தல் பயிற்சி பற்றி அறிவோம்', completed: false }
-    ]);
-  }
+
 
   selectLevel(level: WebLevelItem): void {
     this.selectedLevel.set(level);
@@ -517,20 +488,7 @@ export class WebDashboardComponent implements OnInit {
     });
   }
 
-  getDefaultFallbackCourses(): WebCourseItem[] {
-    return [
-      {
-        id: 1,
-        title: 'அழகுத் தமிழ் யாப்பு (யாப்பிலக்கணம்)',
-        desc: 'யாப்பிலக்கணம் என்பது தமிழின் செய்யுள் (மரபுக்கவிதை) எழுதுவதற்கான இலக்கணத்தை விளக்குகிறது.',
-        progress: 45,
-        status: 'in-progress',
-        icon: 'bi-book-fill',
-        colorBg: '#EEF2FF',
-        colorText: '#4F46E5'
-      }
-    ];
-  }
+
 
   getFilteredLevels(): WebLevelItem[] {
     const q = this.searchQuery().toLowerCase().trim();

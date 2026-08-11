@@ -131,18 +131,7 @@ export const THIRUKKURALS: DailyKural[] = [
   }
 ];
 
-export interface OfferedCourse {
-  id: number;
-  title: string;
-  category: string;
-  description: string;
-  lessonsCount: number;
-  gamesCount: number;
-  badgeBg: string;
-  badgeColor: string;
-  icon: string;
-  isFeatured?: boolean;
-}
+
 
 export interface FeatureCard {
   id: string;
@@ -225,25 +214,9 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
     meaning: 'கற்கத் தகுந்த நூல்களைக் குற்றமறக் கற்க வேண்டும்; கற்ற பிறகு, அக்கல்விக்குத் தகுந்தவாறு நெறியில் நிற்க வேண்டும்.'
   });
 
-  // Featured Course Offered
-  offeredCourses: OfferedCourse[] = [
-    {
-      id: 1,
-      title: 'அழகுத் தமிழ் யாப்பு (யாப்பிலக்கணம்)',
-      category: 'செய்யுள் இலக்கணம்',
-      description: 'யாப்பிலக்கணம் என்பது தமிழின் செய்யுள் (மரபுக்கவிதை) எழுதுவதற்கான இலக்கணத்தை விளக்குகிறது. அசை, சீர், தளை, அடி மற்றும் தொடை அமைப்புகளை விளையாட்டு வடிவில் எளிதாகக் கற்கலாம்.',
-      lessonsCount: 18,
-      gamesCount: 8,
-      badgeBg: '#EEF2FF',
-      badgeColor: '#4F46E5',
-      icon: 'bi-journal-code',
-      isFeatured: true
-    }
-  ];
-
   // Dynamic Courses Signal loaded directly from Backend DB
-  dynamicCourses = signal<any[]>(this.offeredCourses);
-  isLoadingCourses = signal<boolean>(false);
+  dynamicCourses = signal<any[]>([]);
+  isLoadingCourses = signal<boolean>(true);
 
   // Contact Form Signals
   contactName = signal<string>('');
@@ -517,23 +490,20 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
   }
 
   fetchCoursesFromBackend(): void {
-    if (this.dynamicCourses().length === 0) {
-      this.dynamicCourses.set(this.offeredCourses);
-      this.isLoadingCourses.set(false);
-    }
+    this.isLoadingCourses.set(true);
     this.http.get<any[]>(`${environment.apiUrl}/store/courses`).subscribe({
       next: (courses) => {
         if (courses && Array.isArray(courses) && courses.length > 0) {
           const activeList = courses.filter(c => c.is_active !== false);
-          this.dynamicCourses.set(activeList.length > 0 ? activeList : this.offeredCourses);
+          this.dynamicCourses.set(activeList);
         } else {
-          this.dynamicCourses.set(this.offeredCourses);
+          this.dynamicCourses.set([]);
         }
         this.isLoadingCourses.set(false);
       },
       error: (err) => {
         console.error('Error fetching courses for landing page:', err);
-        this.dynamicCourses.set(this.offeredCourses);
+        this.dynamicCourses.set([]);
         this.isLoadingCourses.set(false);
       }
     });
