@@ -156,10 +156,9 @@ Route::middleware(['auth:sanctum', 'identify.tenant'])->group(function () {
     /*
      * 🎓 Shared/Student Access Resources
      */
-    // Course player structure is read-only for players
-    Route::get('courses', [CourseController::class, 'index']);
-    Route::get('courses/{course}/player-structure', [CourseController::class, 'getPlayerStructure']);
-    Route::get('courses/{course}', [CourseController::class, 'show']);
+    // NOTE: GET courses, GET courses/{course}/player-structure, and GET courses/{course}
+    // are public routes defined above (no auth required). Do not duplicate here.
+
 
     // B2C Payments
     Route::post('payment/order', [\App\Http\Controllers\PaymentController::class, 'createOrder']);
