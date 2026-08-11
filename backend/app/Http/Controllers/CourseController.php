@@ -168,53 +168,62 @@ class CourseController extends Controller
     }
     public function getPlayerStructure(\Illuminate\Http\Request $request, Course $course)
     {
-        $structure = $course->load([
-            'levels' => function ($query) {
-                $query->where('course_package_levels.is_active', true)
-                    ->orderBy('levels.sort_order');
-            },
-            'levels.chapters' => function ($query) {
-                $query->where('level_chapter.is_active', true)
-                    ->orderBy('level_chapter.sort_order');
-            },
-            'levels.chapters.contents' => function ($query) {
-                $query->where('contents.is_active', true)
-                    ->orderBy('contents.sort_order');
-            },
-            'levels.chapters.contents.attachments' => function ($query) {
-                $query->where('content_attachments.is_deleted', false);
-            },
-            'levels.chapters.assessments' => function ($query) {
-                $query->where('assessments.is_active', true);
-            }
-        ]);
+        try {
+            $structure = $course->load([
+                'levels' => function ($query) {
+                    $query->orderBy('levels.sort_order');
+                },
+                'levels.chapters' => function ($query) {
+                    $query->orderBy('level_chapter.sort_order');
+                },
+                'levels.chapters.contents' => function ($query) {
+                    $query->where('contents.is_active', true)
+                        ->orderBy('contents.sort_order');
+                },
+                'levels.chapters.contents.attachments' => function ($query) {
+                    $query->where('content_attachments.is_deleted', false);
+                },
+                'levels.chapters.assessments' => function ($query) {
+                    $query->where('assessments.is_active', true);
+                }
+            ]);
 
-        $mode = 'strict'; // Default fallback
-        $user = $request->user();
-        if ($user && $user->role === 'student' && $user->tenant_id) {
-            $propPackage = \Illuminate\Support\Facades\DB::table('property_packages')
-                ->join('properties', 'property_packages.property_id', '=', 'properties.id')
-                ->where('properties.tenant_id', $user->tenant_id)
-                ->where('property_packages.course_id', $course->id)
-                ->where('property_packages.is_active', true)
-                ->select('property_packages.learning_mode_ids')
-                ->first();
+            $mode = 'strict'; // Default fallback
+            $user = $request->user();
+            if ($user && $user->role === 'student' && $user->tenant_id) {
+                if (\Illuminate\Support\Facades\Schema::hasTable('property_packages') && \Illuminate\Support\Facades\Schema::hasTable('properties')) {
+                    $propPackage = \Illuminate\Support\Facades\DB::table('property_packages')
+                        ->join('properties', 'property_packages.property_id', '=', 'properties.id')
+                        ->where('properties.tenant_id', $user->tenant_id)
+                        ->where('property_packages.course_id', $course->id)
+                        ->where('property_packages.is_active', true)
+                        ->select('property_packages.learning_mode_ids')
+                        ->first();
 
-            if ($propPackage && $propPackage->learning_mode_ids) {
-                $modeIds = is_string($propPackage->learning_mode_ids) ? json_decode($propPackage->learning_mode_ids, true) : $propPackage->learning_mode_ids;
-                if (is_array($modeIds) && count($modeIds) > 0) {
-                    $learningModeObj = \App\Models\LearningMode::find($modeIds[0]);
-                    if ($learningModeObj) {
-                        $mode = $learningModeObj->code;
+                    if ($propPackage && isset($propPackage->learning_mode_ids) && $propPackage->learning_mode_ids) {
+                        $modeIds = is_string($propPackage->learning_mode_ids) ? json_decode($propPackage->learning_mode_ids, true) : $propPackage->learning_mode_ids;
+                        if (is_array($modeIds) && count($modeIds) > 0 && \Illuminate\Support\Facades\Schema::hasTable('learning_modes')) {
+                            $learningModeObj = \App\Models\LearningMode::find($modeIds[0]);
+                            if ($learningModeObj) {
+                                $mode = $learningModeObj->code;
+                            }
+                        }
                     }
                 }
             }
+
+            $structureArray = $structure->toArray();
+            $structureArray['learning_mode'] = $mode;
+
+            return response()->json($structureArray);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('getPlayerStructure error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            $res = $course->toArray();
+            $res['learning_mode'] = 'strict';
+            return response()->json($res);
         }
-
-        $structureArray = $structure->toArray();
-        $structureArray['learning_mode'] = $mode;
-
-        return response()->json($structureArray);
     }
 
     public function getStorefront(Request $request)
