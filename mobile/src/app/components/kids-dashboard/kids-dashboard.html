@@ -34,9 +34,7 @@
 
     @if (isLoading()) {
       <!-- Fills space cleanly behind the global loader -->
-      <div class="d-flex flex-column align-items-center justify-content-center py-5 w-100" style="min-height: 350px;">
-        <p class="text-secondary fw-semibold opacity-50" style="font-family: 'Nunito', sans-serif; font-size: 0.95rem;">விவரங்கள் ஏற்றப்படுகிறது...</p>
-      </div>
+      <div style="min-height: 350px;"></div>
     } @else {
       @if (assignedCourses().length === 0) {
         <div class="card border-0 shadow-sm p-4 text-center rounded-5 bg-white mb-4 animate-fade-in" style="margin-top: 1rem;">
