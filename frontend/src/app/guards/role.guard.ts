@@ -8,12 +8,7 @@ export const roleGuard = (allowedRoles: string[]): CanActivateFn => {
     const router = inject(Router);
 
     if (!authService.isLoggedIn()) {
-      if (allowedRoles.includes('super_admin') && !allowedRoles.includes('admin') && !allowedRoles.includes('student')) {
-        return router.createUrlTree(['/superadmin/login']);
-      } else if (allowedRoles.includes('admin') || allowedRoles.includes('staff')) {
-        return router.createUrlTree(['/admin/login']);
-      }
-      return router.createUrlTree(['/login']);
+      return router.createUrlTree(['/']);
     }
 
     if (authService.hasRole(allowedRoles)) {
