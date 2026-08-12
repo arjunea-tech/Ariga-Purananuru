@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.ariga.purananuru',
+  appId: 'com.macvel.azhagutamil',
   appName: 'தமிழ் யாப்பு',
   webDir: 'dist/language_app/browser',
   server: {

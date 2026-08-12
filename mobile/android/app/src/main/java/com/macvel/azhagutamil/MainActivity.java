@@ -1,4 +1,4 @@
-package com.ariga.purananuru;
+package com.macvel.azhagutamil;
  
 import android.os.Bundle;
 import android.graphics.Color;
