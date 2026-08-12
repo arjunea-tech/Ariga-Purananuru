@@ -273,4 +273,50 @@
     </div>
   </div>
 }
+
+<!-- GLOBAL CUSTOM ALERT MODAL -->
+@if (notificationService.activeAlert(); as alert) {
+  <div class="modal-backdrop fade show" style="z-index: 10600; backdrop-filter: blur(4px); background: rgba(0, 0, 0, 0.45);"></div>
+  <div class="modal fade show d-block" tabindex="-1" style="z-index: 10601;">
+    <div class="modal-dialog modal-dialog-centered px-3" style="max-width: 360px; margin: auto;">
+      <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden text-center p-4" style="background: #ffffff; animation: scaleIn 0.2s ease-out;">
+        
+        <!-- Icon based on alert type -->
+        @if (alert.type === 'success') {
+          <div class="rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-3"
+               style="width: 64px; height: 64px; background-color: #E6F4EA; color: #137333;">
+            <i class="bi bi-check-circle-fill fs-1"></i>
+          </div>
+        } @else if (alert.type === 'error') {
+          <div class="rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-3"
+               style="width: 64px; height: 64px; background-color: #FCE8E6; color: #C5221F;">
+            <i class="bi bi-exclamation-octagon-fill fs-1"></i>
+          </div>
+        } @else if (alert.type === 'warning') {
+          <div class="rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-3"
+               style="width: 64px; height: 64px; background-color: #FEF7E0; color: #B06000;">
+            <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+          </div>
+        } @else {
+          <div class="rounded-circle d-inline-flex align-items-center justify-content-center mx-auto mb-3"
+               style="width: 64px; height: 64px; background-color: #E8F0FE; color: #1A73E8;">
+            <i class="bi bi-info-circle-fill fs-1"></i>
+          </div>
+        }
+
+        <h3 class="fw-extrabold text-dark h5 mb-2 font-tamil">{{ alert.title }}</h3>
+        <p class="text-secondary small mb-4 font-tamil" style="white-space: pre-line; line-height: 1.5; font-size: 0.9rem;">{{ alert.message }}</p>
+
+        <div class="d-flex align-items-center justify-content-center">
+          <button type="button" 
+                  class="btn btn-teal w-100 py-2.5 rounded-pill fw-bold text-white shadow-sm font-tamil"
+                  style="background-color: #0D9488; border: none; font-size: 0.95rem; transition: background-color 0.2s;"
+                  (click)="notificationService.confirmAlert()">
+            {{ alert.confirmText }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
 </ion-app>

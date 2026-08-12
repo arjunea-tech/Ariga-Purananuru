@@ -37,10 +37,7 @@ export class StudentTabsComponent {
   }
 
   constructor() {
-    // If opened on desktop screen width (>= 992px), automatically load web-dashboard view
-    if (typeof window !== 'undefined' && window.innerWidth >= 992 && !window.location.search.includes('mobile=true')) {
-      this.router.navigate(['/web-dashboard']);
-    }
+
 
     let previousUrl = '';
     this.router.events.pipe(

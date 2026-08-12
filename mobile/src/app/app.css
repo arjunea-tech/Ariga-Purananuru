@@ -107,3 +107,14 @@
     margin-top: calc(60px + max(28px, env(safe-area-inset-top))) !important;
   }
 }
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

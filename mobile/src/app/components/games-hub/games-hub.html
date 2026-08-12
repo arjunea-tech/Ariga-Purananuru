@@ -67,10 +67,23 @@
           </div>
         } @empty {
           @if (!isLoading()) {
-            <div class="text-center py-5 text-secondary">
-              <i class="bi bi-search fs-1 mb-3 d-block opacity-40"></i>
-              <p class="fw-semibold">தேடிய பயிற்சி இல்லை</p>
-            </div>
+            @if (courseSearchQuery()) {
+              <div class="text-center py-5 text-secondary">
+                <i class="bi bi-search fs-1 mb-3 d-block opacity-40"></i>
+                <p class="fw-semibold">தேடிய பயிற்சி இல்லை</p>
+              </div>
+            } @else {
+              <div class="card border-0 shadow-sm p-4 text-center rounded-5 bg-white mb-4 animate-fade-in" style="margin-top: 1rem;">
+                <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; background-color: #FEF3C7 !important;">
+                  <i class="bi bi-controller text-warning" style="font-size: 2.2rem;"></i>
+                </div>
+                <h3 class="fw-bold text-dark" style="font-size: 1.25rem;">விளையாட்டுகள் எதுவும் இல்லை</h3>
+                <p class="text-secondary small mb-3">உங்களுக்குப் பாடங்கள் எதுவும் ஒதுக்கப்படவில்லை என்பதால் பயிற்சிகள் தற்சமயம் கிடைக்கவில்லை. புதிய பாடங்களை வாங்க ஸ்டோருக்குச் செல்லவும்!</p>
+                <button class="btn btn-warning rounded-pill px-4 py-2 fw-bold w-100 shadow-sm text-white" (click)="goToStore()" style="background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%) !important; border: none;">
+                  ஸ்டோருக்குச் செல்லவும் <i class="bi bi-arrow-right-short fs-5 text-white"></i>
+                </button>
+              </div>
+            }
           }
         }
       </div>

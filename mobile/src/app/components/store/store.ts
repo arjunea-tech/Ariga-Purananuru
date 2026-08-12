@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { NotificationService } from '../../services/notification.service';
 
 declare var window: any; // For Razorpay
 
@@ -22,7 +23,8 @@ export class StoreComponent implements OnInit {
   constructor(
     private http: HttpClient, 
     private router: Router,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private notificationService: NotificationService
   ) {}
 
   goBackToHome(): void {
@@ -64,14 +66,24 @@ export class StoreComponent implements OnInit {
     // Mock Payment Flow for Testing
     this.http.post<any>(`${this.apiUrl}/payment/order`, { course_id: course.id }).subscribe({
       next: (res) => {
-        alert('Mock Payment Successful! Course unlocked.');
         this.buyingId = null;
-        this.fetchStorefront(); // Refresh list to remove bought course
+        this.notificationService.alert({
+          title: 'வெற்றி! (Success)',
+          message: 'வகுப்பு வெற்றிகரமாக வாங்கப்பட்டது! பாடப்பிரிவை இப்போது நீங்கள் பயிலலாம். (Course unlocked successfully!)',
+          type: 'success',
+          onConfirm: () => {
+            this.fetchStorefront(); // Refresh list to remove bought course
+          }
+        });
       },
       error: (err) => {
-        alert('Failed to process mock payment.');
-        console.error(err);
         this.buyingId = null;
+        this.notificationService.alert({
+          title: 'பிழை! (Error)',
+          message: 'கட்டணம் செலுத்த முடியவில்லை. மீண்டும் முயலவும். (Failed to process payment. Please try again.)',
+          type: 'error'
+        });
+        console.error(err);
       }
     });
   }

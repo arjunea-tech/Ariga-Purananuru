@@ -32,6 +32,19 @@
 
   <div class="content-wrapper container-fluid px-3 pt-3">
 
+    @if (assignedCourses().length === 0) {
+      <div class="card border-0 shadow-sm p-4 text-center rounded-5 bg-white mb-4 animate-fade-in" style="margin-top: 1rem;">
+        <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; background-color: #F0F9FF !important;">
+          <i class="bi bi-book text-primary" style="font-size: 2.2rem;"></i>
+        </div>
+        <h3 class="fw-bold text-dark" style="font-size: 1.25rem;">பாடங்கள் எதுவும் ஒதுக்கப்படவில்லை</h3>
+        <p class="text-secondary small mb-3">நீங்கள் இன்னும் எந்தப் பாடங்களையும் வாங்கவில்லை. கற்றலைத் தொடங்க எங்களது ஸ்டோர் பக்கத்திற்குச் செல்லுங்கள்!</p>
+        <button class="btn btn-primary rounded-pill px-4 py-2 fw-bold w-100 shadow-sm" (click)="goToStore()" style="background: linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%) !important; border: none;">
+          ஸ்டோருக்குச் செல்லவும் <i class="bi bi-arrow-right-short fs-5 text-white"></i>
+        </button>
+      </div>
+    }
+
     <!-- Continue Learning Section -->
     @if (assignedCourses().length > 0) {
       <div class="section-title mb-3 d-flex align-items-center justify-content-between animate-fade-in">

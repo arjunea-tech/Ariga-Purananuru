@@ -213,41 +213,51 @@ export class GamesHubComponent implements OnInit {
       this.isLoadingMoreCourses.set(true);
     }
 
-    const search = this.courseSearchQuery();
-    let url = `${environment.apiUrl}/courses?per_page=${this.coursesPerPage}&page=${page}`;
-    if (search) url += `&search=${encodeURIComponent(search)}`;
+    this.http.get<any>(`${environment.apiUrl}/student/dashboard`).subscribe({
+      next: (dashboardRes) => {
+        const courseProgressions = dashboardRes?.course_progressions || [];
+        
+        const search = this.courseSearchQuery();
+        let url = `${environment.apiUrl}/courses?per_page=${this.coursesPerPage}&page=${page}`;
+        if (search) url += `&search=${encodeURIComponent(search)}`;
 
-    this.http.get<any>(url).subscribe({
-      next: (res) => {
-        const items: any[] = Array.isArray(res) ? res : (res.data || []);
-        const total: number = res.total ?? items.length;
-        const lastPage: number = res.last_page ?? 1;
+        this.http.get<any>(url).subscribe({
+          next: (res) => {
+            const items: any[] = Array.isArray(res) ? res : (res.data || []);
+            const total: number = res.total ?? items.length;
+            const lastPage: number = res.last_page ?? 1;
 
-        this.coursesTotal.set(total);
-        this.coursesLastPage.set(lastPage);
-        this.coursePage.set(page);
+            this.coursesTotal.set(total);
+            this.coursesLastPage.set(lastPage);
+            this.coursePage.set(page);
 
-        const activeCourses = items.filter(c => c.is_active !== false);
-        const listToUse = activeCourses.length > 0 ? activeCourses : items;
+            const activeCourses = items.filter(c => c.is_active !== false && courseProgressions.some((p: any) => p.course_id === c.id));
 
-        if (append) {
-          this.availableCourses.update(existing => [...existing, ...listToUse]);
-        } else {
-          this.availableCourses.set(listToUse);
-        }
+            if (append) {
+              this.availableCourses.update(existing => [...existing, ...activeCourses]);
+            } else {
+              this.availableCourses.set(activeCourses);
+            }
 
-        if (isInitialLoad && this.availableCourses().length > 0) {
-           const targetCourseId = this.availableCourses()[0].id;
-           this.fetchCourseStructure(targetCourseId);
-        }
+            if (isInitialLoad && this.availableCourses().length > 0) {
+               const targetCourseId = this.availableCourses()[0].id;
+               this.fetchCourseStructure(targetCourseId);
+            }
 
-        this.isLoading.set(false);
-        this.isLoadingMoreCourses.set(false);
+            this.isLoading.set(false);
+            this.isLoadingMoreCourses.set(false);
+          },
+          error: (err) => {
+            this.isLoading.set(false);
+            this.isLoadingMoreCourses.set(false);
+            console.error('Failed to load courses from DB:', err);
+          }
+        });
       },
       error: (err) => {
         this.isLoading.set(false);
         this.isLoadingMoreCourses.set(false);
-        console.error('Failed to load courses from DB:', err);
+        console.error('Failed to load student progressions in games hub:', err);
       }
     });
   }
@@ -325,6 +335,10 @@ export class GamesHubComponent implements OnInit {
   goBackToHome() {
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
     this.router.navigate(['/tabs/home']);
+  }
+
+  goToStore() {
+    this.router.navigate(['/tabs/store']);
   }
 
   launchPracticeEngine(moduleId: string, moduleLabel?: string) {

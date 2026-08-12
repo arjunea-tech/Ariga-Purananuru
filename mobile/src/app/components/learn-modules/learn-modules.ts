@@ -210,6 +210,10 @@ export class LearnModulesComponent implements OnInit {
     this.router.navigate(['/tabs/home']);
   }
 
+  goToStore() {
+    this.router.navigate(['/tabs/store']);
+  }
+
   openCategoryModule(mod: any) {
     const cid = this.currentSelectedCourseId();
     this.router.navigate([], { relativeTo: this.route, queryParams: { view: 'category-details', moduleId: mod.id, id: cid || undefined }, queryParamsHandling: 'merge' });
@@ -634,10 +638,12 @@ export class LearnModulesComponent implements OnInit {
 
             if (!courses || courses.length === 0) return of(null);
 
-            const annotated = courses.map((c: any) => {
-              const cp = courseProgressions.find((p: any) => +p.course_id === +c.id);
-              return { ...c, progress: cp ? Math.round(cp.percentage) : 0 };
-            });
+            const annotated = courses
+              .filter((c: any) => courseProgressions.some((p: any) => +p.course_id === +c.id))
+              .map((c: any) => {
+                const cp = courseProgressions.find((p: any) => +p.course_id === +c.id);
+                return { ...c, progress: cp ? Math.round(cp.percentage) : 0 };
+              });
             this.availableCourses.set(annotated);
 
             // Step 3: Fetch structure for the currently selected course

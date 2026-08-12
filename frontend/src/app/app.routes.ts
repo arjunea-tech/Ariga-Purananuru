@@ -29,6 +29,9 @@ export const routes: Routes = [
   { path: 'admin/login', component: LoginComponent, canActivate: [guestGuard] },
   { path: 'superadmin/login', component: LoginComponent, canActivate: [guestGuard] },
   
+  { path: 'superadmin', redirectTo: 'superadmin/login', pathMatch: 'full' },
+  { path: 'admin', redirectTo: 'admin/login', pathMatch: 'full' },
+  
   // Safe Fallback redirect
   { path: '', redirectTo: 'login', pathMatch: 'full' },
 

@@ -29,7 +29,7 @@ import { GamesHubComponent } from './components/games-hub/games-hub';
 import { StudentProfileComponent } from './components/student-profile/student-profile';
 import { KidsDashboard } from './components/kids-dashboard/kids-dashboard';
 import { WelcomeScreen } from './components/welcome-screen/welcome-screen';
-import { WebDashboardComponent } from './components/web-dashboard/web-dashboard';
+
 
 export const routes: Routes = [
   // 🌐 Public Landing Page (Root) - Landing Page on Web, Redirect to Login on Mobile App
@@ -39,6 +39,9 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
   { path: 'admin/login', component: LoginComponent, canActivate: [guestGuard] },
   { path: 'superadmin/login', component: LoginComponent, canActivate: [guestGuard] },
+
+  { path: 'superadmin', redirectTo: 'superadmin/login', pathMatch: 'full' },
+  { path: 'admin', redirectTo: 'admin/login', pathMatch: 'full' },
 
   // Public Signup route
   { path: 'signup', loadComponent: () => import('./components/signup/signup').then(m => m.SignupComponent), canActivate: [guestGuard] },
@@ -52,17 +55,7 @@ export const routes: Routes = [
   // Public Course Details
   { path: 'public-course-details/:id', loadComponent: () => import('./components/course-details/course-details').then(m => m.CourseDetails) },
 
-  // 💻 Desktop Website View Shell
-  {
-    path: 'web-dashboard',
-    component: WebDashboardComponent,
-    canActivate: [roleGuard(['student', 'super_admin', 'admin', 'staff'])]
-  },
-  {
-    path: 'web',
-    redirectTo: 'web-dashboard',
-    pathMatch: 'full'
-  },
+
 
   // 📱 Mobile Native 5-Tab Navigation Shell
   {

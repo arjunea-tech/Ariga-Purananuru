@@ -114,12 +114,14 @@ export class KidsDashboard implements OnInit, OnDestroy {
               if (res.completion_percentage !== undefined) this.overallProgress.set(res.completion_percentage);
               
               if (res.course_progressions && Array.isArray(res.course_progressions)) {
-                activeCourses = activeCourses.map(c => {
-                  const prog = res.course_progressions.find((p: any) => p.course_id === c.id);
-                  return { ...c, progress: prog ? prog.percentage : 0 };
-                });
+                activeCourses = activeCourses
+                  .filter(c => res.course_progressions.some((p: any) => p.course_id === c.id))
+                  .map(c => {
+                    const prog = res.course_progressions.find((p: any) => p.course_id === c.id);
+                    return { ...c, progress: prog ? Math.round(prog.percentage) : 0 };
+                  });
               } else {
-                activeCourses = activeCourses.map(c => ({ ...c, progress: 0 }));
+                activeCourses = [];
               }
 
               // Sort: In-progress first, then untouched, then completed
@@ -150,18 +152,19 @@ export class KidsDashboard implements OnInit, OnDestroy {
                   color: m.color || bgColors[idx % bgColors.length]
                 }));
                 this.dynamicModules.set(dynamicList);
-              } else if (res.completed_chapter_ids && Array.isArray(res.completed_chapter_ids)) {
-                this.initializeModules(res.completed_chapter_ids);
+              } else {
+                this.dynamicModules.set([]);
               }
             }
           },
           error: () => {
-            this.assignedCourses.set(activeCourses.map(c => ({ ...c, progress: 0 })));
+            this.assignedCourses.set([]);
           }
         });
       },
       error: (err) => {
         console.error('Failed to fetch assigned courses:', err);
+        this.assignedCourses.set([]);
       }
     });
   }
@@ -231,7 +234,15 @@ export class KidsDashboard implements OnInit, OnDestroy {
   }
 
   openCourse(course: any): void {
-    this.router.navigate(['/tabs/learn'], { queryParams: { id: course.id, view: 'modules' } });
+    if (course && course.id) {
+      this.router.navigate(['/tabs/learn'], { queryParams: { id: course.id, view: 'modules' } });
+    } else {
+      this.router.navigate(['/tabs/learn']);
+    }
+  }
+
+  goToStore(): void {
+    this.router.navigate(['/tabs/store']);
   }
 
   openModule(mod: DynamicModuleItem): void {

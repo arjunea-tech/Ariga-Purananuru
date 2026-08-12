@@ -26,8 +26,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   let url = req.url;
   if (url.startsWith('http://localhost:8000')) {
     url = url.replace('http://localhost:8000', environment.baseUrl);
+  } else if (url.startsWith('https://localhost:8000')) {
+    url = url.replace('https://localhost:8000', environment.baseUrl);
   } else if (url.startsWith('http://127.0.0.1:8000')) {
     url = url.replace('http://127.0.0.1:8000', environment.baseUrl);
+  } else if (url.startsWith('https://127.0.0.1:8000')) {
+    url = url.replace('https://127.0.0.1:8000', environment.baseUrl);
   }
 
   const clonedReq = req.clone({ headers, url });

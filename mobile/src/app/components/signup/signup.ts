@@ -6,6 +6,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../services/auth';
 import { Capacitor } from '@capacitor/core';
+import { NotificationService } from '../../services/notification.service';
 
 @Component({
   selector: 'app-signup',
@@ -26,7 +27,8 @@ export class SignupComponent implements OnInit {
     private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
-    private http: HttpClient
+    private http: HttpClient,
+    private notificationService: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -75,22 +77,34 @@ export class SignupComponent implements OnInit {
           this.http.post<any>(`${environment.apiUrl}/payment/order`, { course_id: buyCourseId }).subscribe({
             next: (orderRes) => {
               this.loading = false;
-              alert('Course unlocked successfully!');
-              if (Capacitor.isNativePlatform()) {
-                this.router.navigate(['/tabs/home']);
-              } else {
-                this.router.navigate(['/download-app']);
-              }
+              this.notificationService.alert({
+                title: 'வெற்றி! (Success)',
+                message: 'வகுப்பு வெற்றிகரமாக வாங்கப்பட்டது! பாடப்பிரிவை இப்போது நீங்கள் பயிலலாம். (Course unlocked successfully!)',
+                type: 'success',
+                onConfirm: () => {
+                  if (Capacitor.isNativePlatform()) {
+                    this.router.navigate(['/tabs/home']);
+                  } else {
+                    this.router.navigate(['/download-app']);
+                  }
+                }
+              });
             },
             error: (err) => {
               this.loading = false;
               console.error(err);
-              alert('Failed to process payment, but account was created.');
-              if (Capacitor.isNativePlatform()) {
-                this.router.navigate(['/tabs/home']);
-              } else {
-                this.router.navigate(['/download-app']);
-              }
+              this.notificationService.alert({
+                title: 'பதிவு செய்யப்பட்டது (Registered)',
+                message: 'கட்டணம் செலுத்த முடியவில்லை, ஆனால் கணக்கு உருவாக்கப்பட்டது. (Failed to process payment, but account was created.)',
+                type: 'warning',
+                onConfirm: () => {
+                  if (Capacitor.isNativePlatform()) {
+                    this.router.navigate(['/tabs/home']);
+                  } else {
+                    this.router.navigate(['/download-app']);
+                  }
+                }
+              });
             }
           });
         } else {

@@ -83,7 +83,7 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
     if (!this.assessmentId()) return;
     this.errorMessage.set(null);
 
-    const url = `http://localhost:8000/api/assessments/${this.assessmentId()}`;
+    const url = `${environment.apiUrl}/assessments/${this.assessmentId()}`;
     this.http.get<AssessmentData>(url).subscribe({
       next: (data) => {
         this.assessment.set(data);

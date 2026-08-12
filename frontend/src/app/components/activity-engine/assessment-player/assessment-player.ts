@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { environment } from '../../../../environments/environment';
 
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -82,7 +83,7 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
     if (!this.assessmentId()) return;
     this.errorMessage.set(null);
 
-    const url = `http://localhost:8000/api/assessments/${this.assessmentId()}`;
+    const url = `${environment.apiUrl}/assessments/${this.assessmentId()}`;
     this.http.get<AssessmentData>(url).subscribe({
       next: (data) => {
         this.assessment.set(data);
@@ -177,7 +178,7 @@ export class AssessmentPlayerComponent implements OnInit, OnDestroy {
       answers: answersPayload
     };
 
-    const url = `http://localhost:8000/api/assessments/${exam.id}/submit`;
+    const url = `${environment.apiUrl}/assessments/${exam.id}/submit`;
     this.http.post<any>(url, body).subscribe({
       next: (res) => {
         this.resultsData.set({

@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { environment } from '../../../environments/environment';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -54,7 +55,7 @@ export class Announcements implements OnInit {
   }
 
   loadTenants(): void {
-    this.http.get<any[]>('http://127.0.0.1:8000/api/tenants').subscribe({
+    this.http.get<any[]>(`${environment.apiUrl}/tenants`).subscribe({
       next: (data) => {
         this.tenants.set(data);
       },
@@ -66,7 +67,7 @@ export class Announcements implements OnInit {
 
   loadAnnouncements(): void {
     this.loading.set(true);
-    this.http.get<Announcement[]>('http://127.0.0.1:8000/api/announcements').subscribe({
+    this.http.get<Announcement[]>(`${environment.apiUrl}/announcements`).subscribe({
       next: (data) => {
         this.announcements.set(data);
         this.loading.set(false);
@@ -82,7 +83,7 @@ export class Announcements implements OnInit {
     if (this.announcementForm.invalid) return;
 
     this.isSubmitting.set(true);
-    this.http.post<Announcement>('http://127.0.0.1:8000/api/announcements', this.announcementForm.value).subscribe({
+    this.http.post<Announcement>(`${environment.apiUrl}/announcements`, this.announcementForm.value).subscribe({
       next: (newAnnouncement) => {
         this.announcements.update(list => [newAnnouncement, ...list]);
         this.announcementForm.reset({ target_roles: [], tenant_id: 'global' });
@@ -99,7 +100,7 @@ export class Announcements implements OnInit {
   deleteAnnouncement(id: number): void {
     if (!confirm('Are you sure you want to delete this announcement?')) return;
     
-    this.http.delete(`http://127.0.0.1:8000/api/announcements/${id}`).subscribe({
+    this.http.delete(`${environment.apiUrl}/announcements/${id}`).subscribe({
       next: () => {
         this.announcements.update(list => list.filter(a => a.id !== id));
       },
