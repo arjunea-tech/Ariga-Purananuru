@@ -247,6 +247,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
   }
 
   loadStructure(): void {
+    this.courseStructure.set(null);
     if (!this.courseId()) return;
 
     if (this.courseService.cachedStructure && this.courseService.cachedStructure.id === this.courseId()) {

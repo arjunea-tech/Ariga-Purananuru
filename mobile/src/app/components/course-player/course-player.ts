@@ -263,6 +263,7 @@ export class CoursePlayer implements OnInit, OnDestroy {
   }
 
   loadStructure(): void {
+    this.courseStructure.set(null);
     const currentCid = this.courseId();
     if (!currentCid) {
       this.http.get<any[]>(`${environment.apiUrl}/courses`).subscribe({
