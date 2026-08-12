@@ -67,6 +67,7 @@ class DashboardController extends Controller
                     ->join('course_package_levels', 'property_packages.package_id', '=', 'course_package_levels.package_id')
                     ->where('properties.tenant_id', $user->tenant_id)
                     ->where('property_packages.is_active', true)
+                    ->whereNull('property_packages.course_id')
                     ->where(function ($q) use ($today) {
                         $q->whereNull('property_packages.start_date')
                           ->orWhere('property_packages.start_date', '<=', $today);
