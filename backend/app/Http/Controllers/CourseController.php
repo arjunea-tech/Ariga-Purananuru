@@ -11,7 +11,7 @@ class CourseController extends Controller
     public function index(Request $request)
     {
         try {
-            $user      = $request->user();
+            $user      = $request->user() ?? auth('sanctum')->user();
             $search    = $request->query('search', '');
             $perPage   = (int) $request->query('per_page', 0); // 0 = return all (backwards-compat)
             $paginate  = $perPage > 0;
@@ -214,7 +214,7 @@ class CourseController extends Controller
             ]);
 
             $mode = 'strict'; // Default fallback
-            $user = $request->user();
+            $user = $request->user() ?? auth('sanctum')->user();
             if ($user && $user->role === 'student' && $user->tenant_id) {
                 if (\Illuminate\Support\Facades\Schema::hasTable('property_packages') && \Illuminate\Support\Facades\Schema::hasTable('properties')) {
                     $propPackage = \Illuminate\Support\Facades\DB::table('property_packages')
