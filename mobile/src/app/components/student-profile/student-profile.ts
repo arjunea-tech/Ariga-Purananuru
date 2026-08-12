@@ -290,7 +290,7 @@ export class StudentProfileComponent implements OnInit {
           this.enrolledCourses.set(courses);
         } else {
           // 🔄 Current single-course backend — wrap as first course
-          let cName = 'புறநானூறு - யாப்பு இலக்கணம்';
+          let cName = 'அரிகா புறநானூறு';
           if (res.course_name) {
             cName = res.course_name;
           } else if (res.course_progressions?.length > 0) {
