@@ -5,3 +5,4 @@ import { Capacitor } from '@capacitor/core';
 export const platformGuard: CanActivateFn = (route, state) => {
   return true;
 };
+

@@ -221,6 +221,6 @@ export const routes: Routes = [
   },
 
   // Fallback for unauthorized pages
-  { path: 'unauthorized', redirectTo: 'login' },
-  { path: '**', redirectTo: 'login' }
+  { path: 'unauthorized', redirectTo: '' },
+  { path: '**', redirectTo: '' }
 ];

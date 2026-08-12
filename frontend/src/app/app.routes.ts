@@ -33,7 +33,7 @@ export const routes: Routes = [
   { path: 'admin', redirectTo: 'admin/login', pathMatch: 'full' },
   
   // Safe Fallback redirect
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: '', redirectTo: 'admin/login', pathMatch: 'full' },
 
   /*
    * 👑 Super Admin Only Pages
@@ -182,6 +182,6 @@ export const routes: Routes = [
   },
 
   // Fallback for unauthorized pages
-  { path: 'unauthorized', redirectTo: 'login' },
-  { path: '**', redirectTo: 'login' }
+  { path: 'unauthorized', redirectTo: 'admin/login' },
+  { path: '**', redirectTo: 'admin/login' }
 ];
