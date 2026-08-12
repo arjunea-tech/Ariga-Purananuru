@@ -43,6 +43,7 @@ export class KidsDashboard implements OnInit, OnDestroy {
   userName = signal<string>('Student');
   userAvatar = signal<string | null>(null);
   timeGreeting = signal<string>('வணக்கம்'); // Time based greeting
+  isLoading = signal<boolean>(true);
   
   streakDays = signal<number>(0);
   xpPoints = signal<number>(0);
@@ -102,6 +103,7 @@ export class KidsDashboard implements OnInit, OnDestroy {
   }
 
   fetchCoursesAndProgress(): void {
+    this.isLoading.set(true);
     // Fetch courses first, then dashboard data to merge
     this.http.get<any[]>(`${environment.apiUrl}/courses`).subscribe({
       next: (courses) => {
@@ -156,15 +158,18 @@ export class KidsDashboard implements OnInit, OnDestroy {
                 this.dynamicModules.set([]);
               }
             }
+            this.isLoading.set(false);
           },
           error: () => {
             this.assignedCourses.set([]);
+            this.isLoading.set(false);
           }
         });
       },
       error: (err) => {
         console.error('Failed to fetch assigned courses:', err);
         this.assignedCourses.set([]);
+        this.isLoading.set(false);
       }
     });
   }

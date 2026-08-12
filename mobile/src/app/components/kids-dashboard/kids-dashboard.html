@@ -32,123 +32,126 @@
 
   <div class="content-wrapper container-fluid px-3 pt-3">
 
-    @if (assignedCourses().length === 0) {
-      <div class="card border-0 shadow-sm p-4 text-center rounded-5 bg-white mb-4 animate-fade-in" style="margin-top: 1rem;">
-        <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; background-color: #F0F9FF !important;">
-          <i class="bi bi-book text-primary" style="font-size: 2.2rem;"></i>
-        </div>
-        <h3 class="fw-bold text-dark" style="font-size: 1.25rem;">பாடங்கள் எதுவும் ஒதுக்கப்படவில்லை</h3>
-        <p class="text-secondary small mb-3">நீங்கள் இன்னும் எந்தப் பாடங்களையும் வாங்கவில்லை. கற்றலைத் தொடங்க எங்களது ஸ்டோர் பக்கத்திற்குச் செல்லுங்கள்!</p>
-        <button class="btn btn-primary rounded-pill px-4 py-2 fw-bold w-100 shadow-sm" (click)="goToStore()" style="background: linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%) !important; border: none;">
-          ஸ்டோருக்குச் செல்லவும் <i class="bi bi-arrow-right-short fs-5 text-white"></i>
-        </button>
-      </div>
-    }
-
-    <!-- Continue Learning Section -->
-    @if (assignedCourses().length > 0) {
-      <div class="section-title mb-3 d-flex align-items-center justify-content-between animate-fade-in">
-        <h2 class="mb-0">தொடர்ந்து படிக்க</h2>
-      </div>
-
-      <div class="horizontal-scroll-wrapper mb-2" (scroll)="onCourseScroll($event)">
-        @for (course of assignedCourses(); track course.id; let i = $index) {
-          <!-- Clean White Course Card -->
-          <div class="continue-learning-card p-4 animate-slide-up-1 position-relative" 
-               [class.active-course]="currentScrollIndex() === i"
-               (click)="startNextLesson(course)">
-            
-            <!-- Mascot Overlay for First Card -->
-            @if (i === 0) {
-              <div class="mascot-overlay">
-                <div class="speech-bubble">Let's finish this!</div>
-                @if (userAvatar()) {
-                  <img [src]="userAvatar()" alt="Mascot Avatar" class="mascot-avatar rounded-circle shadow-sm bg-light" style="width: 55px; height: 55px; object-fit: contain; border: 2px solid white;">
-                } @else {
-                  <div class="mascot-avatar rounded-circle shadow-sm bg-light d-flex align-items-center justify-content-center fw-bold" style="width: 55px; height: 55px; font-size: 2rem; color: #BE185D; border: 2px solid white;">
-                    {{ (userName() || 'S').charAt(0) }}
-                  </div>
-                }
-              </div>
-            }
-            
-            <div class="carousel-slide h-100 d-flex flex-column" style="z-index: 2; position: relative;">
-              <div class="d-flex justify-content-between align-items-start mb-2">
-                <span class="course-badge fw-bold shadow-xs">பயிற்சியில் உள்ளது</span>
-              </div>
-
-              <h3 class="course-title mb-3 fw-bold">{{ course.name || course.title }}</h3>
-
-              <div class="d-flex justify-content-between align-items-end mt-auto">
-                <div class="flex-grow-1 me-3">
-                  <div class="d-flex justify-content-between mb-1.5 align-items-center">
-                    <span class="small fw-bold text-secondary">Progress</span>
-                    <span class="small fw-extrabold text-primary" style="font-size: 0.88rem;">{{ course.progress }}%</span>
-                  </div>
-                  <div class="progress-track bg-light shadow-xs" style="background: #E2E8F0 !important;">
-                    <div class="progress-fill" 
-                         [style.width.%]="course.progress"
-                         style="background: linear-gradient(90deg, #0EA5E9 0%, #2563EB 100%) !important;">
-                    </div>
-                  </div>
-                </div>
-
-                <button class="btn btn-play shadow-sm d-flex align-items-center gap-1.5"
-                        [class.pulse-btn]="currentScrollIndex() === i"
-                        style="background: #0EA5E9 !important; color: #FFFFFF !important; border: none;">
-                  தொடர்க <i class="bi bi-play-fill fs-5 text-white"></i>
-                </button>
-              </div>
-            </div>
+    @if (isLoading()) {
+      <!-- Fills space cleanly behind the global loader -->
+      <div style="min-height: 350px;"></div>
+    } @else {
+      @if (assignedCourses().length === 0) {
+        <div class="card border-0 shadow-sm p-4 text-center rounded-5 bg-white mb-4 animate-fade-in" style="margin-top: 1rem;">
+          <div class="rounded-circle bg-light d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px; background-color: #F0F9FF !important;">
+            <i class="bi bi-book text-primary" style="font-size: 2.2rem;"></i>
           </div>
-        }
-      </div>
-
-      <!-- Pagination Dots -->
-      @if (assignedCourses().length > 1) {
-        <div class="pagination-dots d-flex justify-content-center gap-2 mb-4">
-          @for (course of assignedCourses(); track course.id; let i = $index) {
-            <div class="dot" [class.active]="currentScrollIndex() === i"></div>
-          }
+          <h3 class="fw-bold text-dark" style="font-size: 1.25rem;">பாடங்கள் எதுவும் ஒதுக்கப்படவில்லை</h3>
+          <p class="text-secondary small mb-3">நீங்கள் இன்னும் எந்தப் பாடங்களையும் வாங்கவில்லை. கற்றலைத் தொடங்க எங்களது ஸ்டோர் பக்கத்திற்குச் செல்லுங்கள்!</p>
+          <button class="btn btn-primary rounded-pill px-4 py-2 fw-bold w-100 shadow-sm" (click)="goToStore()" style="background: linear-gradient(135deg, #0EA5E9 0%, #2563EB 100%) !important; border: none;">
+            ஸ்டோருக்குச் செல்லவும் <i class="bi bi-arrow-right-short fs-5 text-white"></i>
+          </button>
         </div>
       }
+
+      <!-- Continue Learning Section -->
+      @if (assignedCourses().length > 0) {
+        <div class="section-title mb-3 d-flex align-items-center justify-content-between animate-fade-in">
+          <h2 class="mb-0">தொடர்ந்து படிக்க</h2>
+        </div>
+
+        <div class="horizontal-scroll-wrapper mb-2" (scroll)="onCourseScroll($event)">
+          @for (course of assignedCourses(); track course.id; let i = $index) {
+            <!-- Clean White Course Card -->
+            <div class="continue-learning-card p-4 animate-slide-up-1 position-relative" 
+                 [class.active-course]="currentScrollIndex() === i"
+                 (click)="startNextLesson(course)">
+              
+              <!-- Mascot Overlay for First Card -->
+              @if (i === 0) {
+                <div class="mascot-overlay">
+                  <div class="speech-bubble">Let's finish this!</div>
+                  @if (userAvatar()) {
+                    <img [src]="userAvatar()" alt="Mascot Avatar" class="mascot-avatar rounded-circle shadow-sm bg-light" style="width: 55px; height: 55px; object-fit: contain; border: 2px solid white;">
+                  } @else {
+                    <div class="mascot-avatar rounded-circle shadow-sm bg-light d-flex align-items-center justify-content-center fw-bold" style="width: 55px; height: 55px; font-size: 2rem; color: #BE185D; border: 2px solid white;">
+                      {{ (userName() || 'S').charAt(0) }}
+                    </div>
+                  }
+                </div>
+              }
+              
+              <div class="carousel-slide h-100 d-flex flex-column" style="z-index: 2; position: relative;">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                  <span class="course-badge fw-bold shadow-xs">பயிற்சியில் உள்ளது</span>
+                </div>
+
+                <h3 class="course-title mb-3 fw-bold">{{ course.name || course.title }}</h3>
+
+                <div class="d-flex justify-content-between align-items-end mt-auto">
+                  <div class="flex-grow-1 me-3">
+                    <div class="d-flex justify-content-between mb-1.5 align-items-center">
+                      <span class="small fw-bold text-secondary">Progress</span>
+                      <span class="small fw-extrabold text-primary" style="font-size: 0.88rem;">{{ course.progress }}%</span>
+                    </div>
+                    <div class="progress-track bg-light shadow-xs" style="background: #E2E8F0 !important;">
+                      <div class="progress-fill" 
+                           [style.width.%]="course.progress"
+                           style="background: linear-gradient(90deg, #0EA5E9 0%, #2563EB 100%) !important;">
+                      </div>
+                    </div>
+                  </div>
+
+                  <button class="btn btn-play shadow-sm d-flex align-items-center gap-1.5"
+                          [class.pulse-btn]="currentScrollIndex() === i"
+                          style="background: #0EA5E9 !important; color: #FFFFFF !important; border: none;">
+                    தொடர்க <i class="bi bi-play-fill fs-5 text-white"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Pagination Dots -->
+        @if (assignedCourses().length > 1) {
+          <div class="pagination-dots d-flex justify-content-center gap-2 mb-4">
+            @for (course of assignedCourses(); track course.id; let i = $index) {
+              <div class="dot" [class.active]="currentScrollIndex() === i"></div>
+            }
+          </div>
+        }
+      }
+
+      <!-- Quick Access Section -->
+      <div class="section-title mb-3 animate-slide-up-2">
+        <h2 class="mb-0">விரைவு பயிற்சிகள்</h2>
+      </div>
+
+      <!-- Professional Grid System -->
+      <div class="quick-access-grid mb-5 pb-4 animate-slide-up-2">
+
+        <div class="grid-card cursor-pointer" (click)="openCourse(assignedCourses()[0])">
+          <div class="grid-icon-wrapper icon-blue">
+            <i class="bi bi-book"></i>
+          </div>
+          <h3 class="grid-title">பாடங்கள்</h3>
+          <span class="grid-subtitle">Courses</span>
+        </div>
+
+        <div class="grid-card cursor-pointer" (click)="startQuickQuiz()">
+          <div class="grid-icon-wrapper icon-amber">
+            <i class="bi bi-controller"></i>
+          </div>
+          <h3 class="grid-title">பயிற்சிகள்</h3>
+          <span class="grid-subtitle">Practice Hub</span>
+        </div>
+
+        <div class="grid-card cursor-pointer" (click)="openLeaderboard()">
+          <div class="grid-icon-wrapper icon-purple">
+            <i class="bi bi-trophy"></i>
+          </div>
+          <h3 class="grid-title">லீடர்போர்டு</h3>
+          <span class="grid-subtitle">Rankings</span>
+        </div>
+
+      </div>
     }
-
-    <!-- Quick Access Section -->
-    <div class="section-title mb-3 animate-slide-up-2">
-      <h2 class="mb-0">விரைவு பயிற்சிகள்</h2>
-    </div>
-
-    <!-- Professional Grid System -->
-    <div class="quick-access-grid mb-5 pb-4 animate-slide-up-2">
-
-      <div class="grid-card cursor-pointer" (click)="openCourse(assignedCourses()[0])">
-        <div class="grid-icon-wrapper icon-blue">
-          <i class="bi bi-book"></i>
-        </div>
-        <h3 class="grid-title">பாடங்கள்</h3>
-        <span class="grid-subtitle">Courses</span>
-      </div>
-
-      <div class="grid-card cursor-pointer" (click)="startQuickQuiz()">
-        <div class="grid-icon-wrapper icon-amber">
-          <i class="bi bi-controller"></i>
-        </div>
-        <h3 class="grid-title">பயிற்சிகள்</h3>
-        <span class="grid-subtitle">Practice Hub</span>
-      </div>
-
-      <div class="grid-card cursor-pointer" (click)="openLeaderboard()">
-        <div class="grid-icon-wrapper icon-purple">
-          <i class="bi bi-trophy"></i>
-        </div>
-        <h3 class="grid-title">லீடர்போர்டு</h3>
-        <span class="grid-subtitle">Rankings</span>
-      </div>
-
-
-
-    </div>
 
   </div>
 
