@@ -87,6 +87,12 @@
         </div>
       }
 
+      @if (isLoadingChapters()) {
+        <div class="d-flex flex-column align-items-center justify-content-center py-5 w-100" style="min-height: 250px;">
+          <p class="text-secondary fw-semibold opacity-50" style="font-family: 'Nunito', sans-serif; font-size: 0.95rem;">பாடங்கள் ஏற்றப்படுகிறது...</p>
+        </div>
+      }
+
       <div class="d-flex flex-column gap-3 mb-3">
         @for (course of availableCourses(); track course.id; let idx = $index) {
           <div class="card border-0 rounded-5 p-4 cursor-pointer hover-lift transition-all position-relative overflow-hidden"
