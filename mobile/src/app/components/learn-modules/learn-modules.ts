@@ -613,6 +613,7 @@ export class LearnModulesComponent implements OnInit {
   }
 
   loadModules(): void {
+    this.modules.set([]);
     this.isLoadingChapters.set(true);
     // Step 1: Fetch student progress FIRST from DB
     this.http.get<any>(`${environment.apiUrl}/student/dashboard`).pipe(
@@ -877,6 +878,7 @@ export class LearnModulesComponent implements OnInit {
   }
 
   fetchCourseModules(courseId: any): void {
+    this.modules.set([]);
     this.isLoadingChapters.set(true);
     // Fetch student progress FIRST, then the course structure
     this.http.get<any>(`${environment.apiUrl}/student/dashboard`).pipe(
