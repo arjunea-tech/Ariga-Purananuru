@@ -53,9 +53,13 @@ jobs:
             npm install --legacy-peer-deps
             npm run build
 
+            # Copy built files to Nginx web root directory
+            sudo cp -r /var/www/Ariga-Purananuru/mobile/dist/language_app/browser/* /var/www/azhagutamil/
+
             # Ensure correct permissions
             sudo chown -R www-data:www-data /var/www/Ariga-Purananuru/backend
             sudo chmod -R 775 /var/www/Ariga-Purananuru/backend/storage
             sudo chmod -R 775 /var/www/Ariga-Purananuru/backend/bootstrap/cache
+            sudo chown -R www-data:www-data /var/www/azhagutamil
             
             echo "Deployment successful!"
