@@ -29,7 +29,8 @@ jobs:
             cd /var/www/Ariga-Purananuru
             
             # Pull the latest changes from git
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
             
             # Navigate to the backend directory
             cd backend
@@ -47,6 +48,11 @@ jobs:
             php artisan route:cache
             php artisan view:cache
             
+            # Build Angular Mobile Web App
+            cd /var/www/Ariga-Purananuru/mobile
+            npm install --legacy-peer-deps
+            npm run build
+
             # Ensure correct permissions
             sudo chown -R www-data:www-data /var/www/Ariga-Purananuru/backend
             sudo chmod -R 775 /var/www/Ariga-Purananuru/backend/storage

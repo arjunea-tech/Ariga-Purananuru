@@ -15,11 +15,16 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
+        $loginInput = $request->input('login') ?? $request->input('email') ?? $request->input('username');
+        if ($loginInput) {
+            $request->merge(['login' => $loginInput]);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'login' => 'required|string|max:255', // email or username
             'password' => 'required|string|min:6|confirmed',
-            'role' => 'required|string|in:admin,staff,student',
+            'role' => 'nullable|string|in:admin,staff,student',
             'tenant_code' => 'nullable|string|exists:tenants,tenant_code',
             'dob' => 'nullable|date',
         ]);
@@ -59,10 +64,18 @@ class AuthController extends Controller
 
         $isEmail = filter_var($validated['login'], FILTER_VALIDATE_EMAIL);
         $email = $isEmail ? $validated['login'] : null;
-        $username = !$isEmail ? $validated['login'] : null;
+        $username = $request->input('username');
+        if (empty($username)) {
+            $username = $isEmail ? explode('@', $validated['login'])[0] : $validated['login'];
+            $base = $username;
+            $counter = 1;
+            while (User::where('username', $username)->exists()) {
+                $username = $base . $counter++;
+            }
+        }
 
-        // Double check uniqueness within the tenant
-        $existsQuery = User::where('tenant_id', $tenant->id);
+        // Double check uniqueness
+        $existsQuery = User::query();
         if ($isEmail) {
             $existsQuery->where('email', $email);
         } else {
@@ -71,7 +84,7 @@ class AuthController extends Controller
 
         if ($existsQuery->exists()) {
             throw ValidationException::withMessages([
-                'login' => ['This user identifier is already registered under this tenant.'],
+                'login' => ['This email or username is already registered.'],
             ]);
         }
 
@@ -80,7 +93,7 @@ class AuthController extends Controller
             'email' => $email,
             'username' => $username,
             'password' => Hash::make($validated['password']),
-            'role' => $validated['role'],
+            'role' => $validated['role'] ?? 'student',
             'tenant_id' => $tenant->id,
             'dob' => $request->input('dob'),
         ]);
@@ -287,6 +300,11 @@ class AuthController extends Controller
     /**
      * Get list of users based on the requesting user's role.
      */
+    public function indexUsers(Request $request)
+    {
+        return $this->getUsers($request);
+    }
+
     public function getUsers(Request $request)
     {
         $user = $request->user();
@@ -385,11 +403,49 @@ class AuthController extends Controller
     }
 
     /**
-     * Delete a user.
+     * Delete a user account and cleanup related tables.
      */
-    public function destroyUser(User $user)
+    public function deleteUser(Request $request, $id)
     {
-        $user->delete();
-        return response()->json(['message' => 'User deleted successfully']);
+        $user = User::find($id);
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        if ($request->user() && $request->user()->id == $user->id) {
+            return response()->json(['message' => 'You cannot delete your own active account.'], 400);
+        }
+
+        try {
+            \Illuminate\Support\Facades\DB::beginTransaction();
+
+            if (\Illuminate\Support\Facades\Schema::hasTable('user_purchases')) {
+                \Illuminate\Support\Facades\DB::table('user_purchases')->where('user_id', $user->id)->delete();
+            }
+            if (\Illuminate\Support\Facades\Schema::hasTable('student_progress')) {
+                \Illuminate\Support\Facades\DB::table('student_progress')->where('user_id', $user->id)->delete();
+            }
+            if (\Illuminate\Support\Facades\Schema::hasTable('user_streaks')) {
+                \Illuminate\Support\Facades\DB::table('user_streaks')->where('user_id', $user->id)->delete();
+            }
+            if (\Illuminate\Support\Facades\Schema::hasTable('support_tickets')) {
+                \Illuminate\Support\Facades\DB::table('support_tickets')->where('user_id', $user->id)->delete();
+            }
+
+            $user->tokens()->delete();
+            $user->delete();
+
+            \Illuminate\Support\Facades\DB::commit();
+
+            return response()->json(['message' => 'User deleted successfully']);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\DB::rollBack();
+            return response()->json(['message' => 'Failed to delete user: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function destroyUser(Request $request, $id)
+    {
+        return $this->deleteUser($request, $id);
     }
 }

@@ -131,18 +131,7 @@ export const THIRUKKURALS: DailyKural[] = [
   }
 ];
 
-export interface OfferedCourse {
-  id: number;
-  title: string;
-  category: string;
-  description: string;
-  lessonsCount: number;
-  gamesCount: number;
-  badgeBg: string;
-  badgeColor: string;
-  icon: string;
-  isFeatured?: boolean;
-}
+
 
 export interface FeatureCard {
   id: string;
@@ -224,22 +213,6 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
     line2: 'நிற்க அதற்குத் தக.',
     meaning: 'கற்கத் தகுந்த நூல்களைக் குற்றமறக் கற்க வேண்டும்; கற்ற பிறகு, அக்கல்விக்குத் தகுந்தவாறு நெறியில் நிற்க வேண்டும்.'
   });
-
-  // Featured Course Offered
-  offeredCourses: OfferedCourse[] = [
-    {
-      id: 1,
-      title: 'அழகுத் தமிழ் யாப்பு (யாப்பிலக்கணம்)',
-      category: 'செய்யுள் இலக்கணம்',
-      description: 'யாப்பிலக்கணம் என்பது தமிழின் செய்யுள் (மரபுக்கவிதை) எழுதுவதற்கான இலக்கணத்தை விளக்குகிறது. அசை, சீர், தளை, அடி மற்றும் தொடை அமைப்புகளை விளையாட்டு வடிவில் எளிதாகக் கற்கலாம்.',
-      lessonsCount: 18,
-      gamesCount: 8,
-      badgeBg: '#EEF2FF',
-      badgeColor: '#4F46E5',
-      icon: 'bi-journal-code',
-      isFeatured: true
-    }
-  ];
 
   // Dynamic Courses Signal loaded directly from Backend DB
   dynamicCourses = signal<any[]>([]);
@@ -376,14 +349,16 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    // On native mobile: if already logged in, go straight to dashboard
+    if (this.isNative() && this.authService.isLoggedIn()) {
+      this.router.navigate(['/tabs/home']);
+      return;
+    }
+
+    // For both web and mobile unauthenticated: show the landing page and load data
     this.setDailyKuralBasedOnDate();
     this.fetchCoursesFromBackend();
     this.startTestimonialAutoplay();
-    
-    // Auto-redirect logged-in mobile users on startup
-    if (this.isNative() && this.authService.isLoggedIn()) {
-      this.router.navigate(['/tabs/home']);
-    }
   }
 
   dismissSplash(): void {
@@ -425,7 +400,7 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
       const diff = today.getTime() - start.getTime();
       const oneDay = 1000 * 60 * 60 * 24;
       const dayOfYear = Math.floor(diff / oneDay);
-      
+
       const index = dayOfYear % THIRUKKURALS.length;
       this.dailyKural.set(THIRUKKURALS[index]);
     } catch (e) {
@@ -514,9 +489,10 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
 
   fetchCoursesFromBackend(): void {
     this.isLoadingCourses.set(true);
-    this.http.get<any[]>(`${environment.apiUrl}/store/courses`).subscribe({
+    // Public endpoint: GET /api/courses - returns ALL active courses (no auth needed, no purchase filter)
+    this.http.get<any[]>(`${environment.apiUrl}/courses`).subscribe({
       next: (courses) => {
-        if (courses && Array.isArray(courses)) {
+        if (courses && Array.isArray(courses) && courses.length > 0) {
           const activeList = courses.filter(c => c.is_active !== false);
           this.dynamicCourses.set(activeList);
         } else {
@@ -581,18 +557,22 @@ export class WelcomeScreen implements OnInit, AfterViewInit {
 
   goToLogin(): void {
     if (this.authService.isLoggedIn()) {
-      if (Capacitor.isNativePlatform()) {
+      const role = this.authService.getUserRole();
+      if (role === 'student') {
         this.router.navigate(['/tabs/home']);
       } else {
-        const role = this.authService.getUserRole();
-        if (role === 'student') {
-          this.router.navigate(['/web-dashboard']);
-        } else {
-          this.router.navigate(['/admin-dashboard']);
-        }
+        this.router.navigate(['/admin-dashboard']);
       }
     } else {
       this.router.navigate(['/login']);
+    }
+  }
+
+  playStoreUrl = 'https://play.google.com/store';
+
+  goToPlayStore(): void {
+    if (typeof window !== 'undefined') {
+      window.open(this.playStoreUrl, '_blank');
     }
   }
 

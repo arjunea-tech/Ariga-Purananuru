@@ -105,7 +105,7 @@ export class StudentProfileComponent implements OnInit {
   // Certificates from backend & Preview mode
   certificates = signal<any[]>([]);
   showCertPreview = signal<boolean>(false);
-  courseName = signal<string>('புறநானூறு - யாப்பு இலக்கணம்');
+  courseName = signal<string>('');
   certDate = new Date().toLocaleDateString('ta-IN', { year: 'numeric', month: 'short', day: 'numeric' });
   certId = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -288,20 +288,12 @@ export class StudentProfileComponent implements OnInit {
             skillMastery: this.skillMastery().filter((m: any) => m.course_id == cp.course_id)
           }));
           this.enrolledCourses.set(courses);
-        } else {
-          // 🔄 Current single-course backend — wrap as first course
-          let cName = 'அரிகா புறநானூறு';
-          if (res.course_name) {
-            cName = res.course_name;
-          } else if (res.course_progressions?.length > 0) {
-            cName = res.course_progressions[0].course_name || res.course_progressions[0].name || cName;
-          }
-          this.courseName.set(cName);
-
+        } else if (res.course_name) {
+          this.courseName.set(res.course_name);
           const mastery = this.skillMastery();
           const singleCourse: EnrolledCourse = {
             id: 'course-1',
-            name: cName,
+            name: res.course_name,
             completion: this.completionPercentage(),
             accuracy: this.accuracyPercentage(),
             questionsAnswered: this.questionsAnswered(),
@@ -314,6 +306,8 @@ export class StudentProfileComponent implements OnInit {
             skillMastery: mastery
           };
           this.enrolledCourses.set([singleCourse]);
+        } else {
+          this.enrolledCourses.set([]);
         }
 
         // Default to "Overall" for stats tab if nothing selected
@@ -325,6 +319,10 @@ export class StudentProfileComponent implements OnInit {
         if (res.certificates && Array.isArray(res.certificates)) {
           this.certificates.set(res.certificates);
         }
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load profile stats:', err);
         this.isLoading.set(false);
       }
     });
@@ -608,7 +606,7 @@ export class StudentProfileComponent implements OnInit {
         origin: { y: 0.5 },
         colors: ['#F59E0B', '#10B981', '#6366F1', '#EC4899', '#3B82F6']
       });
-    } catch (e) {}
+    } catch (e) { }
   }
 
   closeBadgeModal() {
@@ -626,7 +624,7 @@ export class StudentProfileComponent implements OnInit {
 
   logout() {
     this.authService.clearSession();
-    this.authService.logout().subscribe({ error: () => {} });
+    this.authService.logout().subscribe({ error: () => { } });
     this.router.navigate(['/login']);
   }
 
@@ -643,7 +641,7 @@ export class StudentProfileComponent implements OnInit {
           this.supportTickets.set(res.tickets);
         }
       },
-      error: () => {}
+      error: () => { }
     });
   }
 
@@ -671,13 +669,13 @@ export class StudentProfileComponent implements OnInit {
       next: (res) => {
         this.isSubmittingTicket.set(false);
         this.ticketSuccessMsg.set(res.message || 'Ticket submitted successfully!');
-        
+
         // Reset form
         this.ticketSubject.set('');
         this.ticketMessage.set('');
         this.ticketCategory.set('general');
         this.ticketPriority.set('normal');
-        
+
         // Refresh list and switch to list view
         this.fetchMyTickets();
         setTimeout(() => {

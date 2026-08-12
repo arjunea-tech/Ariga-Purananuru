@@ -1,37 +1,37 @@
 <!-- 🌟 PREMIUM ANIMATED SPLASH INTRO OVERLAY -->
 @if (showSplash()) {
-  <div class="splash-screen-overlay" (click)="dismissSplash()">
-    <div class="splash-particles-layer">
-      <span class="p-star p1">✦</span>
-      <span class="p-star p2">✧</span>
-      <span class="p-star p3">✦</span>
-      <span class="p-star p4">✧</span>
-      <span class="p-star p5">✦</span>
-    </div>
-
-    <div class="splash-content-center">
-      <div class="splash-logo-container mb-3">
-        <div class="splash-aura-ring"></div>
-        <div class="splash-aura-ring-outer"></div>
-        <div class="splash-badge-circle">
-          <span>அ</span>
-        </div>
-      </div>
-
-      <h1 class="splash-app-title font-tamil mb-1">
-        அழகுத் தமிழ் யாப்பு
-      </h1>
-      <p class="splash-app-sub font-tamil mb-3">
-        தமிழ் யாப்பிலக்கணக் கற்றல் தளம்
-      </p>
-
-      <div class="splash-loader-bar mx-auto">
-        <div class="splash-loader-progress"></div>
-      </div>
-
-      <span class="splash-skip-hint font-tamil small mt-3 d-block">திரையைத் தட்டித் தொடர்க</span>
-    </div>
+<div class="splash-screen-overlay" (click)="dismissSplash()">
+  <div class="splash-particles-layer">
+    <span class="p-star p1">✦</span>
+    <span class="p-star p2">✧</span>
+    <span class="p-star p3">✦</span>
+    <span class="p-star p4">✧</span>
+    <span class="p-star p5">✦</span>
   </div>
+
+  <div class="splash-content-center">
+    <div class="splash-logo-container mb-3">
+      <div class="splash-aura-ring"></div>
+      <div class="splash-aura-ring-outer"></div>
+      <div class="splash-badge-circle">
+        <span>அ</span>
+      </div>
+    </div>
+
+    <h1 class="splash-app-title font-tamil mb-1">
+      அழகுத் தமிழ் யாப்பு
+    </h1>
+    <p class="splash-app-sub font-tamil mb-3">
+      தமிழ் யாப்பிலக்கணக் கற்றல் தளம்
+    </p>
+
+    <div class="splash-loader-bar mx-auto">
+      <div class="splash-loader-progress"></div>
+    </div>
+
+    <span class="splash-skip-hint font-tamil small mt-3 d-block">திரையைத் தட்டித் தொடர்க</span>
+  </div>
+</div>
 }
 
 @if (!isNative()) {
@@ -52,13 +52,14 @@
       <button class="nav-link-btn" (click)="scrollToSection('contact')">தொடர்பு</button>
     </div>
     <div class="nav-actions-right d-flex align-items-center gap-3">
-      @if (authService.isLoggedIn()) {
-      <button class="btn-teal-pill btn-glow" (click)="goToLogin()">கற்றல் பலகை <i
-          class="bi bi-speedometer2"></i></button>
+      <button class="btn-teal-pill btn-glow" (click)="goToPlayStore()">
+        Get App <i class="bi bi-google-play ms-1"></i>
+      </button>
+      <!-- @if (authService.isLoggedIn()) {
+        <button class="btn-outline-teal-pill px-3 py-2 small" (click)="goToLogin()">கற்றல் பலகை</button>
       } @else {
-      <button class="btn-teal-pill btn-glow" (click)="goToLogin()">உள்நுழைக <i
-          class="bi bi-arrow-right-short"></i></button>
-      }
+        <button class="btn-outline-teal-pill px-3 py-2 small" (click)="goToLogin()">உள்நுழைக</button>
+      } -->
       <button class="btn-mobile-toggle d-lg-none" (click)="toggleMobileMenu()" aria-label="Toggle Navigation"><i
           class="bi bi-list"></i></button>
     </div>
@@ -95,8 +96,8 @@
         <button class="drawer-item" (click)="scrollToSection('features')">சிறப்பம்சங்கள்</button>
         <button class="drawer-item" (click)="scrollToSection('contact')">தொடர்பு</button>
         <hr class="my-2 opacity-25">
-        <button class="btn-teal-pill w-100 py-3 text-center btn-glow" (click)="goToLogin()">
-          {{ authService.isLoggedIn() ? 'கற்றல் பலகை' : 'உள்நுழைக' }}
+        <button class="btn-teal-pill w-100 py-3 text-center btn-glow mb-2" (click)="goToPlayStore()">
+          செயலியைப் பதிவிறக்குக <i class="bi bi-google-play ms-1"></i>
         </button>
       </div>
     </aside>
@@ -120,8 +121,8 @@
               தமிழ் ஆர்வலர்கள் வரை அனைவரும் கற்கும் நவீன இயங்குதளம்.
             </p>
             <div class="hero-action-buttons d-flex align-items-center gap-3 mt-4">
-              <button class="btn-teal-pill btn-lg-pill btn-glow" (click)="goToLogin()">
-                இலவசமாகத் தொடங்க <i class="bi bi-arrow-right-short fs-4"></i>
+              <button class="btn-teal-pill btn-lg-pill btn-glow" (click)="goToPlayStore()">
+                செயலியைப் பதிவிறக்குக <i class="bi bi-google-play ms-2 fs-5"></i>
               </button>
               <button class="btn-outline-teal-pill btn-lg-pill" (click)="scrollToSection('courses')">
                 பாடங்களைக் காண்க <i class="bi bi-book ms-1"></i>
@@ -242,22 +243,56 @@
     <!-- 4. OFFERED COURSES PROMOTIONAL SECTION -->
     <section id="courses" class="landing-courses-offered-section py-5">
       <div class="landing-container">
-        <div class="text-center mb-5 anim-fade-in-up reveal-on-scroll">
+        <div class="text-center mb-5">
           <span class="sub-badge-teal mb-2">பாடத்திட்டம்</span>
           <h2 class="section-title">நாங்கள் வழங்கும் பாடநெறி</h2>
         </div>
 
-        <div class="row justify-content-center">
-          <div class="col-md-7 col-lg-5">
-            <div
-              class="offered-course-card p-4 p-md-5 rounded-4 shadow-sm bg-white border text-center anim-fade-in-up reveal-on-scroll"
-              (click)="goToLogin()" style="cursor: pointer;">
-              <h3 class="fw-bold text-dark fs-3 mb-4 font-tamil">அழகுத் தமிழ் யாப்பு (யாப்பிலக்கணம்)</h3>
-              <button class="btn-teal-pill w-100 py-3 fs-6 btn-glow" (click)="goToLogin(); $event.stopPropagation()">
-                பாடங்களைக் கற்கத் தொடங்க <i class="bi bi-arrow-right-short fs-4 ms-1"></i>
-              </button>
+        <div class="row justify-content-center gy-4">
+          @if (dynamicCourses().length > 0) {
+          @for (course of dynamicCourses(); track course.id) {
+          <div class="col-md-8 col-lg-6">
+            <div class="offered-course-card p-0 rounded-4 shadow-sm bg-white border overflow-hidden text-center"
+              (click)="goToPlayStore()" style="cursor: pointer;">
+              @if (course.cover_image) {
+              <div class="course-cover-img-wrapper" style="height: 240px; overflow: hidden; background: #FFFBF5;">
+                <img [src]="getCoverImageUrl(course.cover_image)" [alt]="course.name"
+                  style="width: 100%; height: 100%; object-fit: cover;" />
+              </div>
+              }
+              <div class="p-4">
+                <h3 class="fw-bold text-dark fs-4 mb-2 font-tamil">{{ course.name }}</h3>
+                @if (course.description) {
+                <p class="text-muted font-tamil small mb-3">{{ course.description }}</p>
+                }
+                <button class="btn-teal-pill w-100 py-3 fs-6 btn-glow"
+                  (click)="goToPlayStore(); $event.stopPropagation()">
+                  செயலியைப் பதிவிறக்குக <i class="bi bi-google-play ms-1"></i>
+                </button>
+              </div>
             </div>
           </div>
+          }
+          } @else {
+          <div class="col-md-8 col-lg-6">
+            <div class="offered-course-card p-0 rounded-4 shadow-sm bg-white border overflow-hidden text-center"
+              (click)="goToPlayStore()" style="cursor: pointer;">
+              <div class="course-cover-img-wrapper" style="height: 240px; overflow: hidden; background: #FFFBF5;">
+                <img
+                  src="https://res.cloudinary.com/dy8bu8suk/image/upload/v1786088122/courses/covers/eyjbh9kd8fihdofs6uev.jpg"
+                  alt="அழகுத் தமிழ் யாப்பு" style="width: 100%; height: 100%; object-fit: cover;" />
+              </div>
+              <div class="p-4">
+                <h3 class="fw-bold text-dark fs-4 mb-2 font-tamil">அழகுத் தமிழ் யாப்பு (யாப்பிலக்கணம்)</h3>
+                <p class="text-muted font-tamil small mb-3">தமிழ் செய்யுள் இயற்றுவதற்கான யாப்பிலக்கணப் பாடநெறி</p>
+                <button class="btn-teal-pill w-100 py-3 fs-6 btn-glow"
+                  (click)="goToPlayStore(); $event.stopPropagation()">
+                  செயலியைப் பதிவிறக்குக <i class="bi bi-google-play ms-1"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+          }
         </div>
       </div>
     </section>
@@ -265,17 +300,20 @@
     <!-- 6.5 MOBILE APP DOWNLOAD PROMO SECTION -->
     <section id="download-app-promo" class="landing-app-promo-section py-5">
       <div class="landing-container">
-        <div class="app-promo-card p-4 p-md-5 rounded-5 position-relative overflow-hidden anim-fade-in-up reveal-on-scroll">
+        <div
+          class="app-promo-card p-4 p-md-5 rounded-5 position-relative overflow-hidden anim-fade-in-up reveal-on-scroll">
           <div class="row align-items-center gy-5">
             <div class="col-lg-7 text-start">
-              <span class="badge bg-amber-soft text-amber-dark fw-bold px-3 py-2 rounded-pill mb-3" style="font-size: 0.85rem;">
+              <span class="badge bg-amber-soft text-amber-dark fw-bold px-3 py-2 rounded-pill mb-3"
+                style="font-size: 0.85rem;">
                 <i class="bi bi-phone me-1"></i> மொபைல் செயலி (Mobile App)
               </span>
               <h2 class="promo-title font-tamil mb-3">
                 இப்போது உங்களது <span class="text-amber">கைப்பேசியிலும்!</span>
               </h2>
               <p class="promo-description font-tamil">
-                அழகுத் தமிழ் யாப்பு மொபைல் செயலியைப் பதிவிறக்கம் செய்து, எங்கும் எப்போதும் யாப்பிலக்கணத்தை விளையாட்டு முறையில் எளிதாகக் கற்றுக்கொள்ளுங்கள்.
+                அழகுத் தமிழ் யாப்பு மொபைல் செயலியைப் பதிவிறக்கம் செய்து, எங்கும் எப்போதும் யாப்பிலக்கணத்தை விளையாட்டு
+                முறையில் எளிதாகக் கற்றுக்கொள்ளுங்கள்.
               </p>
               <div class="promo-features-list d-flex flex-column gap-2 mb-4 font-tamil">
                 <div class="d-flex align-items-center gap-2">
@@ -291,7 +329,7 @@
                   <span>தொடுதிரை விளையாட்டுப் பயிற்சிகள் (Interactive Touch Games)</span>
                 </div>
               </div>
-              
+
               <!-- Store Badges -->
               <div class="d-flex flex-wrap gap-3">
                 <a href="https://play.google.com/store" target="_blank" class="store-badge-link text-decoration-none">
@@ -320,7 +358,8 @@
                 <div class="phone-frame shadow-lg">
                   <div class="phone-screen">
                     <!-- Inner app visual -->
-                    <div class="phone-app-overlay d-flex flex-column justify-content-between p-3 text-white" style="background: linear-gradient(135deg, #0D9488 0%, #115E59 100%);">
+                    <div class="phone-app-overlay d-flex flex-column justify-content-between p-3 text-white"
+                      style="background: linear-gradient(135deg, #0D9488 0%, #115E59 100%);">
                       <div class="d-flex justify-content-between align-items-center">
                         <span class="small fw-bold">அழகுத் தமிழ் யாப்பு</span>
                         <i class="bi bi-wifi"></i>
@@ -330,8 +369,10 @@
                         <h5 class="fw-bold mt-2" style="font-size: 1.1rem; line-height: 1.3;">யாப்பிலக்கணம்</h5>
                       </div>
                       <div class="text-start">
-                        <span class="badge bg-warning text-dark rounded-pill px-2 py-0.5 mb-1" style="font-size: 0.6rem;">பாடங்கள்</span>
-                        <p class="small opacity-75 mb-0" style="font-size: 0.75rem;">எங்கும் எப்போதும் எளிதாகக் கற்கலாம்</p>
+                        <span class="badge bg-warning text-dark rounded-pill px-2 py-0.5 mb-1"
+                          style="font-size: 0.6rem;">பாடங்கள்</span>
+                        <p class="small opacity-75 mb-0" style="font-size: 0.75rem;">எங்கும் எப்போதும் எளிதாகக் கற்கலாம்
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -660,12 +701,13 @@
 
 @if (isNative()) {
 <div class="mobile-onboarding-wrapper">
-  
+
   <!-- Mobile Premium Top Navigation Bar -->
   <div class="mobile-top-nav d-flex justify-content-between align-items-center px-3">
     <div class="mobile-mini-brand d-flex align-items-center gap-2">
       <div class="brand-badge-circle-mini"><span>அ</span></div>
-      <span class="font-tamil fw-bold text-dark" style="font-size: 0.95rem; letter-spacing: -0.3px;">அழகுத் தமிழ் யாப்பு</span>
+      <span class="font-tamil fw-bold text-dark" style="font-size: 0.95rem; letter-spacing: -0.3px;">அழகுத் தமிழ்
+        யாப்பு</span>
     </div>
     <button class="btn-avatar-nav" (click)="goToLogin()" aria-label="Profile">
       <i class="bi bi-person-circle"></i>
@@ -674,153 +716,171 @@
 
 
   <div class="mobile-onboarding-content">
-    
+
     <!-- Tab 1: Home View -->
     @if (activeTab() === 'home') {
-      <!-- Hero / Mascot Section -->
-      <div class="mobile-hero-section text-center py-4">
-        <div class="mobile-mascot-wrapper mx-auto mb-3 position-relative cursor-pointer" (click)="triggerMascotConfetti()" title="தட்டுக">
-          <div class="mascot-aura-ring"></div>
-          <div class="mobile-mascot-box mx-auto">
-            <img src="assets/images/thiruvalluvar_sitting.png" alt="Thiruvalluvar" class="mobile-mascot-img float-mascot-anim">
-          </div>
-
-          @if (mascotInteractiveQuote()) {
-            <div class="mascot-speech-popover font-tamil animate-bounce-in shadow-lg">
-              {{ mascotInteractiveQuote() }}
-            </div>
-          }
+    <!-- Hero / Mascot Section -->
+    <div class="mobile-hero-section text-center py-4">
+      <div class="mobile-mascot-wrapper mx-auto mb-3 position-relative cursor-pointer" (click)="triggerMascotConfetti()"
+        title="தட்டுக">
+        <div class="mascot-aura-ring"></div>
+        <div class="mobile-mascot-box mx-auto">
+          <img src="assets/images/thiruvalluvar_sitting.png" alt="Thiruvalluvar"
+            class="mobile-mascot-img float-mascot-anim">
         </div>
-        <h2 class="mobile-hero-title font-tamil shimmer-gold-text">தமிழ் கற்பது<br>இனி எளிது.</h2>
-        <p class="mobile-hero-subtitle font-tamil text-muted px-2">யாப்பிலக்கணம் முதல் தமிழ் சார்ந்த கற்றல் வரை ஒரே இடத்தில் விளையாட்டாகக் கற்கலாம்.</p>
-        
-        <!-- Primary CTA Button -->
-        <button class="btn-mobile-primary-cta font-tamil mt-3 w-100" (click)="goToSignup()">
-          இலவசமாகத் தொடங்குங்கள் <i class="bi bi-arrow-right-short ms-1 fs-5"></i>
-        </button>
-      </div>
 
-
-
-      <!-- Mobile Features Grid -->
-      <div class="mobile-features-section mb-4 px-1">
-        <h3 class="section-title font-tamil mb-3"><i class="bi bi-star-fill text-amber me-1"></i> சிறப்பம்சங்கள்</h3>
-        <div class="row g-3">
-          @for (card of featureCards; track card.id) {
-            <div class="col-12">
-              <div class="mobile-feature-item-card p-3 d-flex align-items-center gap-3">
-                <div class="feature-item-icon-wrapper" [class]="card.bgClass" [style.color]="card.color">
-                  <i [class]="'bi ' + card.icon"></i>
-                </div>
-                <div class="feature-item-info text-start" style="flex: 1;">
-                  <h4 class="feature-item-title font-tamil mb-0.5" style="color: #451A03; font-weight: 700; font-size: 0.95rem;">{{ card.title }}</h4>
-                  <p class="feature-item-desc font-tamil text-muted small mb-0" style="line-height: 1.4; font-size: 0.8rem;">{{ card.desc }}</p>
-                </div>
-              </div>
-            </div>
-          }
+        @if (mascotInteractiveQuote()) {
+        <div class="mascot-speech-popover font-tamil animate-bounce-in shadow-lg">
+          {{ mascotInteractiveQuote() }}
         </div>
-      </div>
-
-      <!-- Featured Courses Section -->
-      <div class="onboarding-courses-section mb-4">
-        <div class="d-flex justify-content-between align-items-center px-3 mb-3">
-          <h3 class="section-title font-tamil mb-0"><i class="bi bi-journal-code me-1 text-amber"></i> எங்கள் பாடநெறிகள்</h3>
-          <span class="text-muted small font-tamil" style="font-size: 0.82rem; cursor: pointer;" (click)="activeTab.set('courses')">அனைத்தும் <i class="bi bi-arrow-right"></i></span>
-        </div>
-        
-        @if (isLoadingCourses()) {
-          <div class="text-center py-5">
-            <span class="spinner-border text-amber" style="width: 2rem; height: 2rem;"></span>
-          </div>
-        } @else {
-          <div class="mobile-course-carousel">
-            @for (course of dynamicCourses(); track course.id; let idx = $index) {
-              <div class="mobile-course-swipe-card p-4" (click)="goToCourseDetails(course.id)">
-                @if (course.cover_image) {
-                  <div class="mb-3 rounded-4 overflow-hidden shadow-xs" style="max-height: 160px;">
-                    <img [src]="getCoverImageUrl(course.cover_image)" [alt]="course.name || course.title" class="w-100 h-100" style="object-fit: cover; max-height: 160px;">
-                  </div>
-                }
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                  <span class="badge bg-amber text-dark font-tamil px-2.5 py-1 rounded-pill" style="font-size: 0.70rem;">பாடநெறி</span>
-                  <div class="mobile-carousel-icon-box"
-                    [style.background-color]="course.badgeBg || '#EEF2FF'"
-                    [style.color]="course.badgeColor || '#4F46E5'">
-                    <i class="bi" [ngClass]="course.icon || 'bi-journal-code'"></i>
-                  </div>
-                </div>
-                
-                <h4 class="course-card-title font-tamil text-dark mb-2">{{ course.name || course.title }}</h4>
-                <p class="course-card-desc font-tamil text-muted mb-4 text-truncate-3">{{ course.description }}</p>
-                
-                <div class="d-flex justify-content-between align-items-center mt-auto border-top pt-3">
-                  <div class="course-price-group text-start">
-                    <span class="d-block text-muted small" style="font-size: 0.70rem;">முழு கட்டணம்</span>
-                    <strong class="fs-5 text-dark font-tamil">₹{{ course.price || 0 }}</strong>
-                  </div>
-                  <button class="btn-carousel-start-glow font-tamil px-3 py-1.5" (click)="goToCourseDetails(course.id); $event.stopPropagation();">
-                    கற்க <i class="bi bi-chevron-right ms-1"></i>
-                  </button>
-                </div>
-              </div>
-            }
-          </div>
-          <!-- Swipe Indicator Dots -->
-          <div class="carousel-dots-indicator d-flex justify-content-center gap-1.5 mt-2">
-            <span class="dot active"></span>
-            <span class="dot"></span>
-            <span class="dot"></span>
-          </div>
         }
       </div>
+      <h2 class="mobile-hero-title font-tamil shimmer-gold-text">தமிழ் கற்பது<br>இனி எளிது.</h2>
+      <p class="mobile-hero-subtitle font-tamil text-muted px-2">யாப்பிலக்கணம் முதல் தமிழ் சார்ந்த கற்றல் வரை ஒரே
+        இடத்தில் விளையாட்டாகக் கற்கலாம்.</p>
+
+      <!-- Primary CTA Button -->
+      <button class="btn-mobile-primary-cta font-tamil mt-3 w-100" (click)="goToSignup()">
+        இலவசமாகத் தொடங்குங்கள் <i class="bi bi-arrow-right-short ms-1 fs-5"></i>
+      </button>
+    </div>
+
+
+
+    <!-- Mobile Features Grid -->
+    <div class="mobile-features-section mb-4 px-1">
+      <h3 class="section-title font-tamil mb-3"><i class="bi bi-star-fill text-amber me-1"></i> சிறப்பம்சங்கள்</h3>
+      <div class="row g-3">
+        @for (card of featureCards; track card.id) {
+        <div class="col-12">
+          <div class="mobile-feature-item-card p-3 d-flex align-items-center gap-3">
+            <div class="feature-item-icon-wrapper" [class]="card.bgClass" [style.color]="card.color">
+              <i [class]="'bi ' + card.icon"></i>
+            </div>
+            <div class="feature-item-info text-start" style="flex: 1;">
+              <h4 class="feature-item-title font-tamil mb-0.5"
+                style="color: #451A03; font-weight: 700; font-size: 0.95rem;">{{ card.title }}</h4>
+              <p class="feature-item-desc font-tamil text-muted small mb-0"
+                style="line-height: 1.4; font-size: 0.8rem;">{{ card.desc }}</p>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+
+    <!-- Featured Courses Section -->
+    <div class="onboarding-courses-section mb-4">
+      <div class="d-flex justify-content-between align-items-center px-3 mb-3">
+        <h3 class="section-title font-tamil mb-0"><i class="bi bi-journal-code me-1 text-amber"></i> எங்கள் பாடநெறிகள்
+        </h3>
+        <span class="text-muted small font-tamil" style="font-size: 0.82rem; cursor: pointer;"
+          (click)="activeTab.set('courses')">அனைத்தும் <i class="bi bi-arrow-right"></i></span>
+      </div>
+
+      @if (isLoadingCourses()) {
+      <div class="text-center py-5">
+        <span class="spinner-border text-amber" style="width: 2rem; height: 2rem;"></span>
+      </div>
+      } @else if (dynamicCourses().length === 0) {
+      <div class="text-center py-4 px-3">
+        <i class="bi bi-journal-x fs-2 text-muted opacity-50"></i>
+        <p class="font-tamil text-muted small mt-2 mb-0" style="font-size: 0.82rem;">தற்போது பாடநெறிகள் ஏதுமில்லை. விரைவில் சேர்க்கப்படும்!</p>
+      </div>
+      } @else {
+      <div class="mobile-course-carousel">
+        @for (course of dynamicCourses(); track course.id; let idx = $index) {
+        <div class="mobile-course-swipe-card p-4" (click)="goToCourseDetails(course.id)">
+          @if (course.cover_image) {
+          <div class="mb-3 rounded-4 overflow-hidden shadow-xs" style="max-height: 160px;">
+            <img [src]="getCoverImageUrl(course.cover_image)" [alt]="course.name || course.title" class="w-100 h-100"
+              style="object-fit: cover; max-height: 160px;">
+          </div>
+          }
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <span class="badge bg-amber text-dark font-tamil px-2.5 py-1 rounded-pill"
+              style="font-size: 0.70rem;">பாடநெறி</span>
+            <div class="mobile-carousel-icon-box" [style.background-color]="course.badgeBg || '#EEF2FF'"
+              [style.color]="course.badgeColor || '#4F46E5'">
+              <i class="bi" [ngClass]="course.icon || 'bi-journal-code'"></i>
+            </div>
+          </div>
+
+          <h4 class="course-card-title font-tamil text-dark mb-2">{{ course.name || course.title }}</h4>
+          <p class="course-card-desc font-tamil text-muted mb-4 text-truncate-3">{{ course.description }}</p>
+
+          <div class="d-flex justify-content-between align-items-center mt-auto border-top pt-3">
+            <div class="course-price-group text-start">
+              <span class="d-block text-muted small" style="font-size: 0.70rem;">முழு கட்டணம்</span>
+              <strong class="fs-5 text-dark font-tamil">₹{{ course.price || 0 }}</strong>
+            </div>
+            <button class="btn-carousel-start-glow font-tamil px-3 py-1.5"
+              (click)="goToCourseDetails(course.id); $event.stopPropagation();">
+              கற்க <i class="bi bi-chevron-right ms-1"></i>
+            </button>
+          </div>
+        </div>
+        }
+      </div>
+      <!-- Swipe Indicator Dots -->
+      <div class="carousel-dots-indicator d-flex justify-content-center gap-1.5 mt-2">
+        <span class="dot active"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+      }
+    </div>
 
     }
 
     <!-- Tab 2: All Courses Catalog View -->
     @if (activeTab() === 'courses') {
-      <div class="courses-catalog-page py-2">
-        <h3 class="section-title font-tamil mb-3 px-1"><i class="bi bi-journal-code me-1 text-amber"></i> அனைத்து பாடநெறிகள்</h3>
-        
-        @if (isLoadingCourses()) {
-          <div class="text-center py-5">
-            <span class="spinner-border text-amber" style="width: 2rem; height: 2rem;"></span>
+    <div class="courses-catalog-page py-2">
+      <h3 class="section-title font-tamil mb-3 px-1"><i class="bi bi-journal-code me-1 text-amber"></i> அனைத்து
+        பாடநெறிகள்</h3>
+
+      @if (isLoadingCourses()) {
+      <div class="text-center py-5">
+        <span class="spinner-border text-amber" style="width: 2rem; height: 2rem;"></span>
+      </div>
+      } @else {
+      <div class="course-list-vertical">
+        @for (course of dynamicCourses(); track course.id) {
+        <div class="mobile-course-swipe-card p-4 mb-3" (click)="goToCourseDetails(course.id)"
+          style="flex: none; width: 100%;">
+          @if (course.cover_image) {
+          <div class="mb-3 rounded-4 overflow-hidden shadow-xs" style="max-height: 160px;">
+            <img [src]="getCoverImageUrl(course.cover_image)" [alt]="course.name || course.title" class="w-100 h-100"
+              style="object-fit: cover; max-height: 160px;">
           </div>
-        } @else {
-          <div class="course-list-vertical">
-            @for (course of dynamicCourses(); track course.id) {
-              <div class="mobile-course-swipe-card p-4 mb-3" (click)="goToCourseDetails(course.id)" style="flex: none; width: 100%;">
-                @if (course.cover_image) {
-                  <div class="mb-3 rounded-4 overflow-hidden shadow-xs" style="max-height: 160px;">
-                    <img [src]="getCoverImageUrl(course.cover_image)" [alt]="course.name || course.title" class="w-100 h-100" style="object-fit: cover; max-height: 160px;">
-                  </div>
-                }
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                  <span class="badge bg-amber text-dark font-tamil px-2.5 py-1 rounded-pill" style="font-size: 0.70rem;">பாடநெறி</span>
-                  <div class="mobile-carousel-icon-box"
-                    [style.background-color]="course.badgeBg || '#EEF2FF'"
-                    [style.color]="course.badgeColor || '#4F46E5'">
-                    <i class="bi" [ngClass]="course.icon || 'bi-journal-code'"></i>
-                  </div>
-                </div>
-                
-                <h4 class="course-card-title font-tamil text-dark mb-2">{{ course.name || course.title }}</h4>
-                <p class="course-card-desc font-tamil text-muted mb-4">{{ course.description }}</p>
-                
-                <div class="d-flex justify-content-between align-items-center mt-auto border-top pt-3">
-                  <div class="course-price-group text-start">
-                    <span class="d-block text-muted small" style="font-size: 0.70rem;">முழு கட்டணம்</span>
-                    <strong class="fs-5 text-dark font-tamil">₹{{ course.price || 0 }}</strong>
-                  </div>
-                  <button class="btn-carousel-start-glow font-tamil px-4 py-2" (click)="goToCourseDetails(course.id); $event.stopPropagation();">
-                    சேரவும் <i class="bi bi-chevron-right ms-1"></i>
-                  </button>
-                </div>
-              </div>
-            }
+          }
+          <div class="d-flex justify-content-between align-items-start mb-3">
+            <span class="badge bg-amber text-dark font-tamil px-2.5 py-1 rounded-pill"
+              style="font-size: 0.70rem;">பாடநெறி</span>
+            <div class="mobile-carousel-icon-box" [style.background-color]="course.badgeBg || '#EEF2FF'"
+              [style.color]="course.badgeColor || '#4F46E5'">
+              <i class="bi" [ngClass]="course.icon || 'bi-journal-code'"></i>
+            </div>
           </div>
+
+          <h4 class="course-card-title font-tamil text-dark mb-2">{{ course.name || course.title }}</h4>
+          <p class="course-card-desc font-tamil text-muted mb-4">{{ course.description }}</p>
+
+          <div class="d-flex justify-content-between align-items-center mt-auto border-top pt-3">
+            <div class="course-price-group text-start">
+              <span class="d-block text-muted small" style="font-size: 0.70rem;">முழு கட்டணம்</span>
+              <strong class="fs-5 text-dark font-tamil">₹{{ course.price || 0 }}</strong>
+            </div>
+            <button class="btn-carousel-start-glow font-tamil px-4 py-2"
+              (click)="goToCourseDetails(course.id); $event.stopPropagation();">
+              சேரவும் <i class="bi bi-chevron-right ms-1"></i>
+            </button>
+          </div>
+        </div>
         }
       </div>
+      }
+    </div>
     }
 
   </div>
