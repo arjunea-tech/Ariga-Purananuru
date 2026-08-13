@@ -1,7 +1,9 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth';
-import { Capacitor } from '@capacitor/core';
+const isNativePlatform = (): boolean => {
+  return typeof window !== 'undefined' && !!(window as any).Capacitor?.isNativePlatform?.();
+};
 
 export const roleGuard = (allowedRoles: string[]): CanActivateFn => {
   return (route, state) => {
@@ -9,7 +11,7 @@ export const roleGuard = (allowedRoles: string[]): CanActivateFn => {
     const router = inject(Router);
 
     if (!authService.isLoggedIn()) {
-      if (Capacitor.isNativePlatform()) {
+      if (isNativePlatform()) {
         return router.createUrlTree(['/login']);
       } else {
         return router.createUrlTree(['/']);

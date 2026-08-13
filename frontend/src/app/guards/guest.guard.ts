@@ -1,7 +1,9 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth';
-import { Capacitor } from '@capacitor/core';
+const isNativePlatform = (): boolean => {
+  return typeof window !== 'undefined' && !!(window as any).Capacitor?.isNativePlatform?.();
+};
 
 export const guestGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
@@ -10,7 +12,7 @@ export const guestGuard: CanActivateFn = (route, state) => {
   const path = state.url.split('?')[0];
 
   // Block student login/signup on web platform and redirect to landing page
-  if (!Capacitor.isNativePlatform() && (path === '/login' || path === '/signup')) {
+  if (!isNativePlatform() && (path === '/login' || path === '/signup')) {
     authService.clearSession();
     return router.createUrlTree(['/']);
   }
