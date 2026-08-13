@@ -323,21 +323,29 @@ export class StudentProgressComponent implements OnInit {
   }
 
   resetProgress(): void {
-    if (!confirm('Are you sure you want to reset your progress back to 0%?')) return;
+    this.notificationService.alert({
+      title: 'முன்னேற்றத்தை மீட்டமைக்கலாமா?',
+      message: 'உங்கள் தற்போதைய கற்றல் முன்னேற்றம் அனைத்தையும் பூஜ்ஜியமாக (0%) மீட்டமைக்க விரும்புகிறீர்களா?',
+      type: 'warning',
+      showCancel: true,
+      confirmText: 'ஆம், மீட்டமை',
+      cancelText: 'ரத்து செய்',
+      onConfirm: () => {
+        const token = this.authService.getToken();
+        if (!token) return;
 
-    const token = this.authService.getToken();
-    if (!token) return;
-
-    const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
-    this.http.post<any>(`${environment.apiUrl}/student/reset-progress`, {}, { headers }).subscribe({
-      next: () => {
-        this.notificationService.show('success', 'Progress reset to 0%!');
-        // Study time is tracked in-memory (no localStorage to clear)
-        this.loadProgressData();
-      },
-      error: (err) => {
-        console.error('Failed to reset progress', err);
-        this.notificationService.show('error', 'Failed to reset progress');
+        const headers = new HttpHeaders({ 'Authorization': `Bearer ${token}` });
+        this.http.post<any>(`${environment.apiUrl}/student/reset-progress`, {}, { headers }).subscribe({
+          next: () => {
+            this.notificationService.show('success', 'Progress reset to 0%!');
+            // Study time is tracked in-memory (no localStorage to clear)
+            this.loadProgressData();
+          },
+          error: (err) => {
+            console.error('Failed to reset progress', err);
+            this.notificationService.show('error', 'Failed to reset progress');
+          }
+        });
       }
     });
   }

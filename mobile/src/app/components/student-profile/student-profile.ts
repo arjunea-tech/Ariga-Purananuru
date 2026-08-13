@@ -625,7 +625,7 @@ export class StudentProfileComponent implements OnInit {
   logout() {
     this.authService.clearSession();
     this.authService.logout().subscribe({ error: () => { } });
-    this.router.navigate(['/login']);
+    this.router.navigate(['/']);
   }
 
   // ── Support Tickets Methods ──────────────────────────────────────────

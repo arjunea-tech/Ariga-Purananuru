@@ -1,4 +1,5 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, signal, inject } from '@angular/core';
+import { TamilNLPService } from '../../../services/tamil-nlp.service';
 
 import { MatchCloudComponent } from './match-cloud/match-cloud';
 import { MatchStandardComponent } from './match-standard/match-standard';
@@ -44,6 +45,8 @@ export class MatchComponent implements OnInit, OnChanges {
   @Input() showFeedback: boolean = true;
 
   @Output() answered = new EventEmitter<{ isCorrect: boolean }>();
+
+  private tamilNLPService = inject(TamilNLPService);
 
   leftItems = signal<ShuffledItem[]>([]);
   rightItems = signal<ShuffledItem[]>([]);
@@ -174,8 +177,33 @@ export class MatchComponent implements OnInit, OnChanges {
 
     if (leftItem && rightItem) {
       const expectedRightText = this.activity?.pairs[leftItem.originalIndex]?.right;
-      const isCorrectMatch = (leftItem.originalIndex === rightItem.originalIndex) || 
+      
+      // Smart hybrid matching: check if text/indices match directly, or fallback to Tamil NLP grammar rules
+      let isCorrectMatch = (leftItem.originalIndex === rightItem.originalIndex) || 
                              (!!expectedRightText && rightItem.text.trim() === expectedRightText.trim());
+
+      if (!isCorrectMatch) {
+        const isFormula = (t: string) => t.includes('நேர்') || t.includes('நிரை');
+        const cleanFormula = (t: string) => t.replace(/\s+/g, '');
+        const leftText = leftItem.text.trim();
+        const rightText = rightItem.text.trim();
+
+        if (isFormula(leftText) && !isFormula(rightText)) {
+          // Left is formula, Right is word
+          const analyzed = this.tamilNLPService.identifyAsai(rightText);
+          const calculated = analyzed.map(a => a.type).join('+');
+          if (cleanFormula(leftText) === cleanFormula(calculated)) {
+            isCorrectMatch = true;
+          }
+        } else if (!isFormula(leftText) && isFormula(rightText)) {
+          // Left is word, Right is formula
+          const analyzed = this.tamilNLPService.identifyAsai(leftText);
+          const calculated = analyzed.map(a => a.type).join('+');
+          if (cleanFormula(rightText) === cleanFormula(calculated)) {
+            isCorrectMatch = true;
+          }
+        }
+      }
 
       if (isCorrectMatch) {
         // MATCH DETECTED!

@@ -54,6 +54,10 @@ export class StoreComponent implements OnInit {
     });
   }
 
+  viewCourseDetails(course: any) {
+    this.router.navigate(['/public-course-details', course.id], { queryParams: { from: 'store' } });
+  }
+
   buyCourse(course: any) {
     const token = localStorage.getItem('token') || localStorage.getItem('auth_token');
     if (!token) {

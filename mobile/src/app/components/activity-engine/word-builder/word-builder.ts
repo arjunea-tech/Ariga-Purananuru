@@ -63,8 +63,18 @@ const TAMIL_CONFUSABLES: { [key: string]: string[] } = {
   'நை': ['ணை', 'னை'], 'ணை': ['நை', 'னை'], 'னை': ['நை', 'ணை'],
   'நொ': ['ணொ', 'னொ'], 'ணொ': ['நொ', 'னொ'], 'னொ': ['நொ', 'ணொ'],
   'நோ': ['ணோ', 'னோ'], 'ணோ': ['நோ', 'னோ'], 'னோ': ['நோ', 'ணோ'],
-  'ந்': ['ண்', 'ன்'], 'ண்': ['ந்', 'ன்'], 'ன்': ['ந்', 'ண்']
 };
+
+const VALID_TAMIL_WORDS = new Set([
+  'தாமரை', 'கல்வி', 'அகரம்', 'கண்ணன்', 'அம்மா', 'அப்பா', 'தம்பி', 'செல்வம்', 'பள்ளி', 'நாடு',
+  'வீடு', 'காடு', 'தோட்டம்', 'வானம்', 'பூமி', 'நீதி', 'நன்மை', 'உண்மை', 'பாடல்', 'ஆடல்',
+  'பேச்சு', 'பாட்டு', 'வாழ்க', 'வெற்றி', 'வீரம்', 'காலம்', 'அழகு', 'மனமே', 'உலகம்', 'நிலமே',
+  'கனவு', 'நினைவு', 'பணமே', 'அறமே', 'தவமே', 'குணமே', 'சினமே', 'மரமே', 'வழியே', 'மொழியே',
+  'நெறிதான்', 'உயிரோ', 'கனலோ', 'புயலோ', 'அலையோ', 'மலரோ', 'பேரழகு', 'வான்மழை', 'கார்முகில்', 'செம்மொழி',
+  'தீமை', 'நன்மை', 'உண்மை', 'பொய்மை', 'மெய்மை', 'நேர்மை', 'பண்பு', 'அன்பு', 'அறிவு', 'நெறி',
+  'மலர்', 'மலை', 'கனி', 'நதி', 'வழி', 'மொழி', 'தமிழ்', 'தலை', 'மனை', 'மழை', 'குடை',
+  'நிலா', 'சிலை', 'நடை', 'கிளி', 'குரல்', 'கடல்', 'நகர்', 'கமல்', 'மனம்', 'கிளை', 'காடு'
+]);
 
 @Component({
   selector: 'app-activity-word-builder',
@@ -363,14 +373,24 @@ export class WordBuilderComponent implements OnInit, OnChanges {
       .map(r => r.matchedWord)
       .filter(Boolean) as string[];
 
-    // 1. Exact Match Check against unmatched candidate words
-    const exactMatchWord = candidateWords.find(word => {
+    // 1. Exact Match Check against unmatched candidate words or valid alternative words with matching formula
+    let exactMatchWord = candidateWords.find(word => {
       if (word !== userWord) return false;
       // Check if boundaries are correct
       const targetAsais = this.tamilNLPService.identifyAsai(word);
       const targetSyllables = targetAsais.map(a => a.text);
       return userSyllables.every((syl, i) => syl === targetSyllables[i]);
     });
+
+    if (!exactMatchWord) {
+      // NLP alternate match: check if the user word has correct formula & is a known valid Tamil word
+      const userAsais = this.tamilNLPService.identifyAsai(userWord);
+      const userFormula = userAsais.map(a => a.type).join(' + ');
+      const expectedFormula = row.formula.join(' + ');
+      if (userFormula === expectedFormula && VALID_TAMIL_WORDS.has(userWord)) {
+        exactMatchWord = userWord;
+      }
+    }
 
     if (exactMatchWord) {
       if (alreadyMatchedWords.includes(exactMatchWord)) {

@@ -11,7 +11,10 @@ export interface AlertOptions {
   message: string;
   type?: 'success' | 'error' | 'warning' | 'info';
   confirmText?: string;
+  showCancel?: boolean;
+  cancelText?: string;
   onConfirm?: () => void;
+  onCancel?: () => void;
 }
 
 @Injectable({
@@ -44,7 +47,10 @@ export class NotificationService {
       message: options.message,
       type: options.type || 'info',
       confirmText: options.confirmText || 'சரி (OK)',
-      onConfirm: options.onConfirm
+      showCancel: options.showCancel || false,
+      cancelText: options.cancelText || 'ரத்து (Cancel)',
+      onConfirm: options.onConfirm,
+      onCancel: options.onCancel
     });
   }
 
@@ -53,6 +59,14 @@ export class NotificationService {
     this._alert.set(null);
     if (current && current.onConfirm) {
       current.onConfirm();
+    }
+  }
+
+  cancelAlert() {
+    const current = this._alert();
+    this._alert.set(null);
+    if (current && current.onCancel) {
+      current.onCancel();
     }
   }
 }

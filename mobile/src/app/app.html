@@ -307,13 +307,28 @@
         <h3 class="fw-extrabold text-dark h5 mb-2 font-tamil">{{ alert.title }}</h3>
         <p class="text-secondary small mb-4 font-tamil" style="white-space: pre-line; line-height: 1.5; font-size: 0.9rem;">{{ alert.message }}</p>
 
-        <div class="d-flex align-items-center justify-content-center">
-          <button type="button" 
-                  class="btn btn-teal w-100 py-2.5 rounded-pill fw-bold text-white shadow-sm font-tamil"
-                  style="background-color: #0D9488; border: none; font-size: 0.95rem; transition: background-color 0.2s;"
-                  (click)="notificationService.confirmAlert()">
-            {{ alert.confirmText }}
-          </button>
+        <div class="d-flex align-items-center justify-content-center gap-3">
+          @if (alert.showCancel) {
+            <button type="button" 
+                    class="btn btn-light w-50 py-2.5 rounded-pill fw-bold text-secondary border shadow-xs font-tamil"
+                    style="font-size: 0.95rem;"
+                    (click)="notificationService.cancelAlert()">
+              {{ alert.cancelText }}
+            </button>
+            <button type="button" 
+                    class="btn btn-teal w-50 py-2.5 rounded-pill fw-bold text-white shadow-sm font-tamil"
+                    style="background-color: #0D9488; border: none; font-size: 0.95rem;"
+                    (click)="notificationService.confirmAlert()">
+              {{ alert.confirmText }}
+            </button>
+          } @else {
+            <button type="button" 
+                    class="btn btn-teal w-100 py-2.5 rounded-pill fw-bold text-white shadow-sm font-tamil"
+                    style="background-color: #0D9488; border: none; font-size: 0.95rem; transition: background-color 0.2s;"
+                    (click)="notificationService.confirmAlert()">
+              {{ alert.confirmText }}
+            </button>
+          }
         </div>
       </div>
     </div>

@@ -273,12 +273,12 @@ export class YappuAlahiduTrueFalseComponent implements OnInit {
   selectedDoor = signal<boolean | null>(null);
 
   ngOnInit() {
-    if (!this.activity || !this.activity.statement) {
+    if (!this.activity) {
       this.activity = {
         question: 'சரியா தவறா என கூறுக:',
-        statement: 'ஒரு திருக்குறளின் கடைசி சீர் (ஈற்றுச்சீர்) நாள், மலர், காசு, பிறப்பு ஆகிய ஏதேனும் ஒன்றைக் கொண்டு முடியும்.',
+        statement: '',
         isTrue: true,
-        explanation: 'வெண்பாவின் ஈற்றுச்சீர் நாள், மலர், காசு, பிறப்பு என்னும் வாய்பாடுகளில் ஒன்றைக் கொண்டு முடிவது இலக்கணம்.'
+        explanation: ''
       };
     }
   }

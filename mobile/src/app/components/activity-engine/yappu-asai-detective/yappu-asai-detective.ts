@@ -52,46 +52,6 @@ export class YappuAsaiDetectiveComponent implements OnInit, OnChanges {
   total = signal<number>(0);
   streak = signal<number>(0);
 
-  // Default pre-seeded error detective challenges
-  defaultChallenges = [
-    {
-      word: 'அகரம்',
-      options: [
-        { splits: ['அ', 'கர', 'ம்'], isCorrect: false, label: 'அ / கர / ம்' },
-        { splits: ['அக', 'ரம்'], isCorrect: true, label: 'அக / ரம் (இருக்குறில் + குறில் ஒற்று)' },
-        { splits: ['அகர', 'ம்'], isCorrect: false, label: 'அகர / ம்' }
-      ],
-      explanation: 'விதி: "அக" என்பது இருக்குறில் தனித்து வந்து நிரையசையும், "ரம்" என்பது குறில் ஒற்றுடன் வந்து நேரசையும் ஆகும்.'
-    },
-    {
-      word: 'தாமரை',
-      options: [
-        { splits: ['தா', 'மர', 'ை'], isCorrect: false, label: 'தா / மர / ை (உயிர்மெய் எழுத்தைப் பிரிக்கக் கூடாது)' },
-        { splits: ['தாம', 'ரை'], isCorrect: true, label: 'தாம / ரை (குறில்-நெடில் + நெடில் தனித்து)' },
-        { splits: ['தா', 'ம', 'ரை'], isCorrect: false, label: 'தா / ம / ரை' }
-      ],
-      explanation: 'விதி: "தாம" என்பது குறில்-நெடில் இணைந்து நிரையசையும், "ரை" என்பது நெடில் தனித்து நேரசையும் ஆகும்.'
-    },
-    {
-      word: 'கல்வி',
-      options: [
-        { splits: ['க', 'ல்வி'], isCorrect: false, label: 'க / ல்வி (ஒற்று எழுத்தை அசைக்கு முன்னே தனியாக பிரிக்கக்கூடாது)' },
-        { splits: ['கல்', 'வி'], isCorrect: true, label: 'கல் / வி (குறில் ஒற்று + குறில் தனித்து)' },
-        { splits: ['கல்வ', 'ி'], isCorrect: false, label: 'கல்வ / ி' }
-      ],
-      explanation: 'விதி: "கல்" என்பது குறில் ஒற்றுடன் வந்து நேரசையும், "வி" என்பது குறில் தனித்து நேரசையும் ஆகும்.'
-    },
-    {
-      word: 'கம்பராமாயணம்',
-      options: [
-        { splits: ['கம்', 'ப', 'ரா', 'மா', 'ய', 'ணம்'], isCorrect: false, label: 'கம் / ப / ரா / மா / ய / ணம்' },
-        { splits: ['கம்', 'பரா', 'மாய', 'ணம்'], isCorrect: true, label: 'கம் / பரா / மாய / ணம்' },
-        { splits: ['கம்ப', 'ராம', 'ாயணம்'], isCorrect: false, label: 'கம்ப / ராம / ாயணம்' }
-      ],
-      explanation: 'விதி: கம் (நேர்) / பரா (நிரை) / மாய (நிரை) / ணம் (நேர்).'
-    }
-  ];
-
   ngOnInit(): void {
     this.initGame();
   }
@@ -157,7 +117,7 @@ export class YappuAsaiDetectiveComponent implements OnInit, OnChanges {
 
     let sourceChallenges = (this.activity?.challenges && this.activity.challenges.length > 0)
       ? [...this.activity.challenges]
-      : [...this.defaultChallenges];
+      : [];
 
     sourceChallenges = sourceChallenges.sort(() => Math.random() - 0.5);
     if (sourceChallenges.length > 10) {

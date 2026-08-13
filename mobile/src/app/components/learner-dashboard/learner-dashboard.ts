@@ -122,11 +122,11 @@ export class LearnerDashboard implements OnInit, OnDestroy {
   logout() {
     this.authService.logout().subscribe({
       complete: () => {
-        window.location.href = '/login';
+        window.location.href = '/';
       },
       error: () => {
         this.authService.clearSession();
-        window.location.href = '/login';
+        window.location.href = '/';
       }
     });
   }

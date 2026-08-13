@@ -173,7 +173,7 @@ export class App implements OnInit {
         root.style.removeProperty('--primary-color');
         root.style.removeProperty('--secondary-color');
         this.closeSidebar();
-        window.location.href = '/login';
+        window.location.href = '/';
       },
       error: () => {
         this.authService.clearSession();
@@ -182,7 +182,7 @@ export class App implements OnInit {
         root.style.removeProperty('--primary-color');
         root.style.removeProperty('--secondary-color');
         this.closeSidebar();
-        window.location.href = '/login';
+        window.location.href = '/';
       }
     });
   }

@@ -448,20 +448,109 @@ export class YappuAlahiduFillTableComponent implements OnInit {
   }
 
   verifyAnswer() {
-    let allCorrect = true;
     const rows = this.tableRows();
+    
+    if (rows.length !== 2) {
+      // Fallback if not exactly 2 rows
+      let allCorrect = true;
+      rows.forEach(r => {
+        if (r.word.isMissing) { r.word.isCorrect = (r.word.userAnswer === r.word.value); if (!r.word.isCorrect) allCorrect = false; }
+        if (r.asai.isMissing) { r.asai.isCorrect = (r.asai.userAnswer === r.asai.value); if (!r.asai.isCorrect) allCorrect = false; }
+        if (r.seer.isMissing) { r.seer.isCorrect = (r.seer.userAnswer === r.seer.value); if (!r.seer.isCorrect) allCorrect = false; }
+      });
 
-    rows.forEach(r => {
-      if (r.word.isMissing) { r.word.isCorrect = (r.word.userAnswer === r.word.value); if (!r.word.isCorrect) allCorrect = false; }
-      if (r.asai.isMissing) { r.asai.isCorrect = (r.asai.userAnswer === r.asai.value); if (!r.asai.isCorrect) allCorrect = false; }
-      if (r.seer.isMissing) { r.seer.isCorrect = (r.seer.userAnswer === r.seer.value); if (!r.seer.isCorrect) allCorrect = false; }
-    });
+      this.tableRows.set([...rows]);
+      this.isCorrect.set(allCorrect);
+      this.isVerified.set(true);
+
+      if (allCorrect) {
+        this.audioService.playSuccess();
+        setTimeout(() => {
+          this.answered.emit({ isCorrect: true, score: 1, total: 1 });
+        }, 1000);
+      } else {
+        this.audioService.playError();
+      }
+      return;
+    }
+
+    // We have exactly 2 rows. We test the two possible mappings (0->0, 1->1) and (0->1, 1->0).
+    const checkCell = (userAns: string | undefined, originalVal: string): boolean => {
+      return (userAns || '').trim() === originalVal.trim();
+    };
+
+    // Mapping 1: Row 0 matches Target 0, Row 1 matches Target 1
+    const m1_r0_word_correct = rows[0].word.isMissing ? checkCell(rows[0].word.userAnswer, rows[0].word.value) : true;
+    const m1_r0_asai_correct = rows[0].asai.isMissing ? checkCell(rows[0].asai.userAnswer, rows[0].asai.value) : true;
+    const m1_r0_seer_correct = rows[0].seer.isMissing ? checkCell(rows[0].seer.userAnswer, rows[0].seer.value) : true;
+    const m1_r0_ok = m1_r0_word_correct && m1_r0_asai_correct && m1_r0_seer_correct;
+
+    const m1_r1_word_correct = rows[1].word.isMissing ? checkCell(rows[1].word.userAnswer, rows[1].word.value) : true;
+    const m1_r1_asai_correct = rows[1].asai.isMissing ? checkCell(rows[1].asai.userAnswer, rows[1].asai.value) : true;
+    const m1_r1_seer_correct = rows[1].seer.isMissing ? checkCell(rows[1].seer.userAnswer, rows[1].seer.value) : true;
+    const m1_r1_ok = m1_r1_word_correct && m1_r1_asai_correct && m1_r1_seer_correct;
+
+    const m1_total_correct = m1_r0_ok && m1_r1_ok;
+
+    // Mapping 2: Row 0 matches Target 1, Row 1 matches Target 0
+    const m2_r0_word_correct = rows[0].word.isMissing ? checkCell(rows[0].word.userAnswer, rows[1].word.value) : (rows[0].word.value === rows[1].word.value);
+    const m2_r0_asai_correct = rows[0].asai.isMissing ? checkCell(rows[0].asai.userAnswer, rows[1].asai.value) : (rows[0].asai.value === rows[1].asai.value);
+    const m2_r0_seer_correct = rows[0].seer.isMissing ? checkCell(rows[0].seer.userAnswer, rows[1].seer.value) : (rows[0].seer.value === rows[1].seer.value);
+    const m2_r0_ok = m2_r0_word_correct && m2_r0_asai_correct && m2_r0_seer_correct;
+
+    const m2_r1_word_correct = rows[1].word.isMissing ? checkCell(rows[1].word.userAnswer, rows[0].word.value) : (rows[1].word.value === rows[0].word.value);
+    const m2_r1_asai_correct = rows[1].asai.isMissing ? checkCell(rows[1].asai.userAnswer, rows[0].asai.value) : (rows[1].asai.value === rows[0].asai.value);
+    const m2_r1_seer_correct = rows[1].seer.isMissing ? checkCell(rows[1].seer.userAnswer, rows[0].seer.value) : (rows[1].seer.value === rows[0].seer.value);
+    const m2_r1_ok = m2_r1_word_correct && m2_r1_asai_correct && m2_r1_seer_correct;
+
+    const m2_total_correct = m2_r0_ok && m2_r1_ok;
+
+    // Score both mappings based on correct blanks to choose the student's intended layout
+    const m1_score = (rows[0].word.isMissing && m1_r0_word_correct ? 1 : 0) +
+                     (rows[0].asai.isMissing && m1_r0_asai_correct ? 1 : 0) +
+                     (rows[0].seer.isMissing && m1_r0_seer_correct ? 1 : 0) +
+                     (rows[1].word.isMissing && m1_r1_word_correct ? 1 : 0) +
+                     (rows[1].asai.isMissing && m1_r1_asai_correct ? 1 : 0) +
+                     (rows[1].seer.isMissing && m1_r1_seer_correct ? 1 : 0);
+
+    const m2_score = (rows[0].word.isMissing && m2_r0_word_correct ? 1 : 0) +
+                     (rows[0].asai.isMissing && m2_r0_asai_correct ? 1 : 0) +
+                     (rows[0].seer.isMissing && m2_r0_seer_correct ? 1 : 0) +
+                     (rows[1].word.isMissing && m2_r1_word_correct ? 1 : 0) +
+                     (rows[1].asai.isMissing && m2_r1_asai_correct ? 1 : 0) +
+                     (rows[1].seer.isMissing && m2_r1_seer_correct ? 1 : 0);
+
+    const useMapping2 = m2_total_correct || (m2_score > m1_score && !m1_total_correct);
+
+    let finalCorrect = false;
+
+    if (useMapping2) {
+      rows[0].word.isCorrect = m2_r0_word_correct;
+      rows[0].asai.isCorrect = m2_r0_asai_correct;
+      rows[0].seer.isCorrect = m2_r0_seer_correct;
+
+      rows[1].word.isCorrect = m2_r1_word_correct;
+      rows[1].asai.isCorrect = m2_r1_asai_correct;
+      rows[1].seer.isCorrect = m2_r1_seer_correct;
+
+      finalCorrect = m2_total_correct;
+    } else {
+      rows[0].word.isCorrect = m1_r0_word_correct;
+      rows[0].asai.isCorrect = m1_r0_asai_correct;
+      rows[0].seer.isCorrect = m1_r0_seer_correct;
+
+      rows[1].word.isCorrect = m1_r1_word_correct;
+      rows[1].asai.isCorrect = m1_r1_asai_correct;
+      rows[1].seer.isCorrect = m1_r1_seer_correct;
+
+      finalCorrect = m1_total_correct;
+    }
 
     this.tableRows.set([...rows]);
-    this.isCorrect.set(allCorrect);
+    this.isCorrect.set(finalCorrect);
     this.isVerified.set(true);
 
-    if (allCorrect) {
+    if (finalCorrect) {
       this.audioService.playSuccess();
       setTimeout(() => {
         this.answered.emit({ isCorrect: true, score: 1, total: 1 });

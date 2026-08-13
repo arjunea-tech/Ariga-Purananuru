@@ -1,4 +1,4 @@
-﻿/* ============================================
+/* ============================================
    COURSE DETAILS - MOBILE NATIVE UI
    ============================================ */
 
@@ -486,4 +486,187 @@
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+/* ============================================
+   STORE THEME OVERRIDES (TEAL THEME)
+   ============================================ */
+.cd-page-shell.store-theme {
+  background: linear-gradient(160deg, #F0FDFA 0%, #CCFBF1 40%, #E6FFFA 100%);
+}
+
+.cd-page-shell.store-theme .cd-loading-spinner {
+  border: 4px solid rgba(20, 184, 166, 0.15);
+  border-top-color: #14B8A6;
+}
+
+.cd-page-shell.store-theme .cd-loading-text {
+  color: #0F766E;
+}
+
+.cd-page-shell.store-theme .cd-error-title {
+  color: #042F2E;
+}
+
+.cd-page-shell.store-theme .cd-error-sub {
+  color: #115E59;
+}
+
+.cd-page-shell.store-theme .cd-btn-primary {
+  background: linear-gradient(135deg, #14B8A6, #0D9488);
+}
+
+.cd-page-shell.store-theme .cd-btn-ghost {
+  color: #0F766E;
+  border-color: rgba(20, 184, 166, 0.2);
+}
+
+.cd-page-shell.store-theme .cd-sticky-header {
+  background: rgba(240, 253, 250, 0.92);
+  border-bottom: 1px solid rgba(20, 184, 166, 0.1);
+}
+
+.cd-page-shell.store-theme .cd-back-btn {
+  background: rgba(20, 184, 166, 0.1);
+  color: #0F766E;
+}
+
+.cd-page-shell.store-theme .cd-back-btn:active {
+  background: rgba(20, 184, 166, 0.2);
+}
+
+.cd-page-shell.store-theme .cd-header-title {
+  color: #042F2E;
+}
+
+.cd-page-shell.store-theme .cd-hero-card {
+  box-shadow: 0 4px 24px rgba(13, 148, 136, 0.06);
+  border: 1px solid rgba(20, 184, 166, 0.1);
+}
+
+.cd-page-shell.store-theme .cd-category-badge {
+  background: rgba(20, 184, 166, 0.1);
+  color: #0D9488;
+  border: 1px solid rgba(20, 184, 166, 0.25);
+}
+
+.cd-page-shell.store-theme .cd-course-name {
+  color: #042F2E;
+}
+
+.cd-page-shell.store-theme .cd-course-desc {
+  color: #115E59;
+}
+
+.cd-page-shell.store-theme .cd-stat-chip {
+  background: #F0FDFA;
+  border: 1px solid rgba(20, 184, 166, 0.18);
+  color: #115E59;
+}
+
+.cd-page-shell.store-theme .cd-stat-chip i {
+  color: #14B8A6 !important;
+}
+
+.cd-page-shell.store-theme .cd-section-card {
+  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.04);
+  border: 1px solid rgba(20, 184, 166, 0.08);
+}
+
+.cd-page-shell.store-theme .cd-section-title {
+  color: #042F2E;
+}
+
+.cd-page-shell.store-theme .cd-section-title i {
+  color: #14B8A6 !important;
+}
+
+.cd-page-shell.store-theme .cd-learn-item {
+  color: #115E59;
+}
+
+.cd-page-shell.store-theme .cd-learn-check {
+  color: #14B8A6;
+}
+
+.cd-page-shell.store-theme .cd-syllabus-loading {
+  color: #0F766E;
+}
+
+.cd-page-shell.store-theme .cd-small-spinner {
+  border-top-color: #14B8A6;
+}
+
+.cd-page-shell.store-theme .cd-level-num-badge {
+  background: #14B8A6;
+}
+
+.cd-page-shell.store-theme .cd-level-name {
+  color: #042F2E;
+}
+
+.cd-page-shell.store-theme .cd-level-sub {
+  color: #115E59;
+}
+
+.cd-page-shell.store-theme .cd-lock-icon {
+  color: #0D9488;
+}
+
+.cd-page-shell.store-theme .cd-chapter-dot {
+  background: #14B8A6;
+}
+
+.cd-page-shell.store-theme .cd-chapter-name {
+  color: #115E59;
+}
+
+.cd-page-shell.store-theme .cd-chapter-acts {
+  background: rgba(20, 184, 166, 0.08);
+  color: #0D9488;
+}
+
+.cd-page-shell.store-theme .cd-price-card {
+  background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+}
+
+.cd-page-shell.store-theme .cd-price-label {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.cd-page-shell.store-theme .cd-original-price {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.cd-page-shell.store-theme .cd-price-main {
+  color: white;
+}
+
+.cd-page-shell.store-theme .cd-discount-badge {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+.cd-page-shell.store-theme .cd-benefit-chip {
+  background: white;
+  border: 1px solid rgba(20, 184, 166, 0.15);
+  color: #115E59;
+}
+
+.cd-page-shell.store-theme .cd-benefit-chip i {
+  color: #14B8A6 !important;
+}
+
+.cd-page-shell.store-theme .cd-sticky-enroll-bar {
+  background: rgba(240, 253, 250, 0.95);
+  border-top: 1px solid rgba(20, 184, 166, 0.1);
+}
+
+.cd-page-shell.store-theme .cd-enroll-btn {
+  background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
+  box-shadow: 0 8px 24px rgba(20, 184, 166, 0.35);
+}
+
+.cd-page-shell.store-theme .cd-enroll-btn:active {
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.25);
 }
