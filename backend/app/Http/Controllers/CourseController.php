@@ -95,6 +95,26 @@ class CourseController extends Controller
                 });
             }
 
+            // Filter by practice/activities if requested
+            if ($request->boolean('only_practice')) {
+                $query->where(function($q) {
+                    $q->whereHas('levels.assessments', function($sq) {
+                        $sq->where('assessments.is_active', true);
+                    })
+                    ->orWhereHas('levels.chapters.assessments', function($sq) {
+                        $sq->where('assessments.is_active', true);
+                    })
+                    ->orWhereHas('levels.chapters.contents', function($sq) {
+                        $sq->where('contents.is_active', true)
+                           ->where(function($ssq) {
+                               $ssq->where('contents.text_content', 'like', '%"type":"activity"%')
+                                   ->orWhere('contents.text_content', 'like', '%"type": "activity"%')
+                                   ->orWhere('contents.text_content', 'like', '%activity-block%');
+                           });
+                    });
+                });
+            }
+
             $query->latest();
 
             if ($paginate) {

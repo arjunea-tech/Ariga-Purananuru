@@ -218,7 +218,7 @@ export class GamesHubComponent implements OnInit {
         const courseProgressions = dashboardRes?.course_progressions || [];
         
         const search = this.courseSearchQuery();
-        let url = `${environment.apiUrl}/courses?per_page=${this.coursesPerPage}&page=${page}`;
+        let url = `${environment.apiUrl}/courses?per_page=${this.coursesPerPage}&page=${page}&only_practice=true`;
         if (search) url += `&search=${encodeURIComponent(search)}`;
 
         this.http.get<any>(url).subscribe({
