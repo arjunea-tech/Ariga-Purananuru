@@ -17,18 +17,31 @@ export interface ThalaiOption {
     <div class="fix-thalai-container py-4 text-center overflow-hidden position-relative d-flex flex-column h-100" style="background: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 40%, #3b82f6 100%); flex: 1; min-height: 100%;">
     
       <!-- Header -->
-      <div class="position-relative z-1 mb-4">
+      <div class="position-relative z-1 mb-3">
         <h3 class="mb-2 text-primary fw-bold bg-white d-inline-block px-4 py-2 rounded-pill shadow-sm" style="font-family: 'Nunito', sans-serif;" [innerHTML]="activityData?.question || 'தளை தட்டாமல் சீரமைக்க:'"></h3>
-        <p class="text-white mt-3 fs-6 fw-bold text-shadow">தளை தட்டாமல் இருக்க சரியான மரப்பலகையைத் தேர்ந்தெடுத்து பாலத்தை இணைக்கவும்! 🌉</p>
+        <p class="text-white mt-2 fs-6 fw-bold text-shadow">தளை தட்டாமல் இருக்க சரியான மரப்பலகையைத் தேர்ந்தெடுத்து பாலத்தை இணைக்கவும்! 🌉</p>
       </div>
+
+      <!-- Rule Hint Pill -->
+      @if (getFirstWordSeer()) {
+        <div class="rule-hint-pill bg-white text-dark px-3 py-1.5 rounded-pill shadow-sm mx-auto mb-3 d-inline-flex align-items-center gap-2 border border-2 border-primary animate-pop-in" style="font-size: 0.85rem; max-width: 90%;">
+          <span class="badge bg-primary text-white">💡 குறிப்பு (Rule)</span>
+          <span><strong>{{ activityData?.firstWord }}</strong> ({{ getFirstWordSeer() }}) ➔ <strong>{{ getRequiredRuleText() }}</strong></span>
+        </div>
+      }
     
       <!-- Bridge Display -->
-      <div class="bridge-container position-relative mx-auto mb-5 p-2 px-md-4" style="max-width: 750px;">
+      <div class="bridge-container position-relative mx-auto mb-4 p-2 px-md-4" style="max-width: 750px;">
         <div class="d-flex flex-nowrap justify-content-center align-items-stretch gap-1 gap-md-3 position-relative z-1 w-100">
     
           <!-- Left Cliff (First Word) -->
-          <div class="cliff-block px-0 py-3 shadow-lg d-flex flex-column align-items-center justify-content-center">
+          <div class="cliff-block px-1 py-3 shadow-lg d-flex flex-column align-items-center justify-content-center">
             <span class="fw-bold text-white text-center cliff-text w-100 px-1">{{ activityData?.firstWord }}</span>
+            @if (getFirstWordSeer()) {
+              <span class="badge bg-warning text-dark mt-1 shadow-sm px-2 py-0.5 rounded-pill" style="font-size: 0.7rem;">
+                🏷️ {{ getFirstWordSeer() }}
+              </span>
+            }
           </div>
     
           <!-- Missing Link (Gap) -->
@@ -37,7 +50,7 @@ export interface ThalaiOption {
             <div class="bridge-rope top-rope"></div>
             <div class="bridge-rope bottom-rope"></div>
     
-            <div class="plank-placeholder w-100 h-100 d-flex align-items-center justify-content-center z-1"
+            <div class="plank-placeholder w-100 h-100 d-flex flex-column align-items-center justify-content-center z-1 p-1"
               [ngClass]="selectedOption() !== null ? 'plank active-plank shadow-lg' : 'border-dashed-light'">
               <span class="fw-bold text-center plank-text" [ngClass]="selectedOption() !== null ? 'text-white' : 'text-light'">
                 @if (selectedOption() === null) {
@@ -45,13 +58,23 @@ export interface ThalaiOption {
                 }
                 {{ selectedOption() !== null ? activityData?.options[selectedOption()!].word : 'விடுபட்ட பலகை' }}
               </span>
+              @if (selectedOption() !== null && getOptionSeer(activityData?.options[selectedOption()!])) {
+                <span class="badge bg-light text-dark mt-1 shadow-sm px-2 py-0.5 rounded-pill" style="font-size: 0.7rem;">
+                  🏷️ {{ getOptionSeer(activityData?.options[selectedOption()!]) }}
+                </span>
+              }
             </div>
           </div>
     
           <!-- Right Cliff (Last Word) -->
           @if (activityData?.lastWord) {
-            <div class="cliff-block px-0 py-3 shadow-lg d-flex flex-column align-items-center justify-content-center">
+            <div class="cliff-block px-1 py-3 shadow-lg d-flex flex-column align-items-center justify-content-center position-relative">
               <span class="fw-bold text-white text-center cliff-text w-100 px-1">{{ activityData?.lastWord }}</span>
+              @if (getLastWordSeer()) {
+                <span class="badge bg-warning text-dark mt-1 shadow-sm px-2 py-0.5 rounded-pill" style="font-size: 0.7rem;">
+                  🏷️ {{ getLastWordSeer() }}
+                </span>
+              }
               @if (isVerified() && isCorrect()) {
                 <div class="walker-icon position-absolute"><i class="bi bi-person-walking"></i></div>
               }
@@ -62,13 +85,18 @@ export interface ThalaiOption {
     
       <!-- Options Pool -->
       @if (!isVerified()) {
-        <div class="options-grid d-flex flex-wrap justify-content-center gap-2 gap-md-3 mt-4">
+        <div class="options-grid d-flex flex-wrap justify-content-center gap-2 gap-md-3 mt-3">
           @for (opt of activityData?.options; track opt; let i = $index) {
             <button
-              class="plank option-plank rounded-3 px-3 px-md-4 py-2 py-md-3 fw-bold transition-all shadow-sm d-flex flex-column align-items-center"
+              class="plank option-plank rounded-3 px-3 px-md-4 py-2 py-md-2.5 fw-bold transition-all shadow-sm d-flex flex-column align-items-center"
               [class.selected-plank]="selectedOption() === i"
               (click)="selectOption(i)">
-              <span class="plank-text">{{ opt.word }}</span>
+              <span class="plank-text fs-6">{{ opt.word }}</span>
+              @if (getOptionSeer(opt)) {
+                <span class="badge bg-light text-dark mt-1 opacity-90 px-2 py-0.5 rounded-pill border border-secondary" style="font-size: 0.7rem;">
+                  🏷️ {{ getOptionSeer(opt) }}
+                </span>
+              }
             </button>
           }
         </div>
@@ -311,27 +339,90 @@ export class YappuAlahiduFixThalaiComponent implements OnInit {
     const options = [
       { 
         word: middleWord.word, 
+        seer: middleWord.seer_name,
         isCorrect: true, 
-        explanation: `சரியான விடை! '${firstWord.seer_name}' முன் '${this.getStartingAsai(middleWord.seer_name)}' வந்துள்ளதால் தளை தட்டவில்லை.` 
+        explanation: `சரியான விடை! '${firstWord.word}' (${firstWord.seer_name}) அடுத்து '${this.getStartingAsai(middleWord.seer_name)}' அசை தொடங்கக்கூடிய '${middleWord.word}' (${middleWord.seer_name}) வந்துள்ளதால் தளை தட்டவில்லை.` 
       },
       { 
         word: wrong1.word, 
+        seer: wrong1.seer_name,
         isCorrect: false, 
-        explanation: `தவறான விடை! '${firstWord.seer_name}' முன் '${this.getStartingAsai(wrong1.seer_name)}' வரக்கூடாது. தளை தட்டுகிறது.` 
+        explanation: `தவறான விடை! '${firstWord.word}' (${firstWord.seer_name}) அடுத்து '${this.getStartingAsai(wrong1.seer_name)}' அசை வரக்கூடாது. தளை தட்டுகிறது.` 
       },
       { 
         word: wrong2.word, 
+        seer: wrong2.seer_name,
         isCorrect: false, 
-        explanation: `தவறான விடை! '${firstWord.seer_name}' முன் '${this.getStartingAsai(wrong2.seer_name)}' வரக்கூடாது. தளை தட்டுகிறது.` 
+        explanation: `தவறான விடை! '${firstWord.word}' (${firstWord.seer_name}) அடுத்து '${this.getStartingAsai(wrong2.seer_name)}' அசை வரக்கூடாது. தளை தட்டுகிறது.` 
       }
     ];
 
     this.activityData = {
       question: 'தளை தட்டாமல் இருக்க நடுவில் எந்தச் சீர் வர வேண்டும்?',
       firstWord: firstWord.word,
+      firstWordSeer: firstWord.seer_name,
       lastWord: lastWord.word,
+      lastWordSeer: lastWord.seer_name,
       options: options.sort(() => 0.5 - Math.random()) // Shuffle options
     };
+  }
+
+  getFirstWordSeer(): string {
+    if (this.activityData?.firstWordSeer) return this.activityData.firstWordSeer;
+    return this.getSeerName(this.activityData?.firstWord);
+  }
+
+  getLastWordSeer(): string {
+    if (this.activityData?.lastWordSeer) return this.activityData.lastWordSeer;
+    return this.getSeerName(this.activityData?.lastWord);
+  }
+
+  getOptionSeer(opt: any): string {
+    if (!opt) return '';
+    if (opt.seer) return opt.seer;
+    if (opt.seer_name) return opt.seer_name;
+    return this.getSeerName(opt.word);
+  }
+
+  getRequiredRuleText(): string {
+    const seer = this.getFirstWordSeer();
+    if (!seer) return 'சரியான சீர் பெற வேண்டும்';
+    if (seer.endsWith('மா')) return "'நிரை' அசையில் தொடங்கும் சீர் சேர வேண்டும் (மாமுன் நிரை)";
+    if (seer.endsWith('விளம்')) return "'நேர்' அசையில் தொடங்கும் சீர் சேர வேண்டும் (விளம்முன் நேர்)";
+    if (seer.endsWith('காய்')) return "'நேர்' அசையில் தொடங்கும் சீர் சேர வேண்டும் (காய்முன் நேர்)";
+    return 'சரியான சீர் சேர வேண்டும்';
+  }
+
+  getSeerName(word: string): string {
+    if (!word) return '';
+    const clean = word.trim();
+
+    const knownMap: Record<string, string> = {
+      'மழைத்துளிகள்': 'கருவிளங்காய்',
+      'கார்குழல்': 'கூவிளம்',
+      'தீப்பொறி': 'தேமா',
+      'அலைபாயுது': 'புளிமாங்காய்',
+      'சிறுநகை': 'கருவிளம்',
+      'கற்றதனால்': 'புளிமாங்காய்',
+      'ஆய': 'தேமா',
+      'ஆகிய': 'புளிமா',
+      'ஆன': 'தேமா',
+      'அறவாழி': 'கருவிளம்',
+      'அந்தணன்': 'கூவிளம்',
+      'தாள்சேர்ந்தார்க்கு': 'கருவிளங்காய்',
+      'அல்லால்': 'தேமா',
+      'பிறவாழி': 'கருவிளம்',
+      'நீந்தல்': 'தேமா',
+      'அரிது': 'புளிமா',
+      'துப்பார்க்குத்': 'தேமாங்காய்',
+      'துப்பாய': 'தேமாங்காய்',
+      'துப்பாக்கித்': 'தேமாங்காய்',
+      'துப்பாய தூஉம்': 'கருவிளங்காய்'
+    };
+
+    if (knownMap[clean]) return knownMap[clean];
+    if (clean.endsWith('ங்காய்') || clean.endsWith('க்காய்') || clean.endsWith('ற்காய்')) return 'காய் சீர்';
+    return '';
   }
 
   selectOption(index: number) {

@@ -134,8 +134,8 @@ export class BalloonPopComponent implements OnChanges, OnDestroy {
 
     // Set Level and Target
     if (this.activity) {
-      this.targetType.set(this.activity.target || 'ner');
-      this.targetLevel.set(this.activity.level || 1);
+      if (this.activity.target) this.targetType.set(this.activity.target);
+      if (this.activity.level) this.targetLevel.set(this.activity.level);
     }
 
     // Start Spawning balloons
@@ -192,16 +192,19 @@ export class BalloonPopComponent implements OnChanges, OnDestroy {
    * This matches the Letter Basket hybrid pattern.
    */
   private getRandomText(type: 'ner' | 'nirai', level: number): string {
-    // 1. Check for custom dynamic words provided by the editor/seeder
-    const customPool = type === 'ner'
-      ? (this.activity?.nerWords || [])
-      : (this.activity?.niraiWords || []);
+    const hasCustomNer = (this.activity?.nerWords?.length || 0) > 0;
+    const hasCustomNirai = (this.activity?.niraiWords?.length || 0) > 0;
 
-    if (customPool.length > 0) {
-      return customPool[Math.floor(Math.random() * customPool.length)];
+    if (hasCustomNer || hasCustomNirai) {
+      const customPool = type === 'ner'
+        ? (this.activity?.nerWords || [])
+        : (this.activity?.niraiWords || []);
+
+      if (customPool.length > 0) {
+        return customPool[Math.floor(Math.random() * customPool.length)];
+      }
     }
 
-    // 2. Fall back to hardcoded level-based pools
     let pool: string[] = [];
     if (level === 1) {
       pool = type === 'ner' ? LEVEL1_NER : LEVEL1_NIRAI;
@@ -312,6 +315,11 @@ export class BalloonPopComponent implements OnChanges, OnDestroy {
     this.correctPops.set(0);
     this.incorrectPops.set(0);
     this.missedBalloons.set(0);
+
+    if (this.activity) {
+      if (this.activity.target) this.targetType.set(this.activity.target);
+      if (this.activity.level) this.targetLevel.set(this.activity.level);
+    }
   }
 
   private clearIntervals(): void {
