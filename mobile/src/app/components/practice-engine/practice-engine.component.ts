@@ -588,8 +588,8 @@ export class PracticeEngineComponent implements OnInit {
 
     if (allValid) {
       this.feedbackMessage = null;
-      if (this.practiceType === 'alahidu' || this.practiceType === 'seer') {
-        this.showFeedback(this.practiceType === 'alahidu' ? 'அசை சரியாக பிரிக்கப்பட்டுள்ளது! அடுத்து சீர் கண்டுபிடிப்போம்.' : 'அசை சரி! இப்போது இது என்ன சீர் என்று கண்டுபிடி.', 'success');
+      if (this.practiceType === 'alahidu' || this.practiceType === 'seer' || this.practiceType === 'thalai') {
+        this.showFeedback((this.practiceType === 'alahidu' || this.practiceType === 'thalai') ? 'அசை சரியாக பிரிக்கப்பட்டுள்ளது! அடுத்து சீர் கண்டுபிடிப்போம்.' : 'அசை சரி! இப்போது இது என்ன சீர் என்று கண்டுபிடி.', 'success');
         setTimeout(() => {
           this.feedbackMessage = null;
           this.step = 'identify_seer';
@@ -691,7 +691,7 @@ export class PracticeEngineComponent implements OnInit {
     this.allCorrect = allValid;
 
     if (allValid) {
-      if (this.interactiveAnalysis.thalai_analysis.length > 0) {
+      if (this.interactiveAnalysis.thalai_analysis.length > 0 && (this.practiceType === 'alahidu' || this.practiceType === 'thalai')) {
         this.showFeedback('அற்புதம்! சீர்கள் சரியாக உள்ளன. அடுத்து தளை கண்டுபிடிப்போம்.', 'success');
         setTimeout(() => {
           this.step = 'identify_thalai';
