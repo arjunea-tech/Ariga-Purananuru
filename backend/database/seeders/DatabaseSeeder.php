@@ -67,10 +67,13 @@ class DatabaseSeeder extends Seeder
             TamilYappuSeeder::class,
             PracticeWordSeeder::class,
             EluthuActivitySeeder::class,
+            AsaiActivitySeeder::class,
+            SeerActivitySeeder::class,
+            ThalaiActivitySeeder::class,
+            AlahiduthalActivitySeeder::class,
             YappuSeerActivitySeeder::class,
             YappuSeerWordSeeder::class,
             GlobalTenantSeeder::class,
-            
         ]);
     }
 }
