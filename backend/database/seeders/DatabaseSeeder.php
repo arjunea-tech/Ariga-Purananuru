@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Tenant;
-use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,39 +15,44 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Seed Super Admin (Global Administrator with no tenant_id)
+        // 1. Seed Tenant
+        $tenant = Tenant::firstOrCreate(
+            ['slug' => 'default'],
+            ['name' => 'Default Organization', 'is_active' => true]
+        );
+
+        // 2. Seed Super Admin
         User::updateOrCreate(
-            ['email' => 'admin@ariga.local'],
+            ['username' => 'superadmin'],
             [
-                'username' => 'superadmin',
                 'name' => 'Super Admin',
+                'email' => 'superadmin@example.com',
                 'password' => Hash::make('admin123'),
                 'role' => 'super_admin',
                 'tenant_id' => null,
             ]
         );
 
-        // 2. Seed a default Tenant (strictly required to link tenant-scoped users)
-        $tenant = Tenant::updateOrCreate(
-            ['tenant_code' => 'SCH-001'],
+        // 3. Seed Org Admin
+        User::updateOrCreate(
+            ['username' => 'admin'],
             [
-                'tenant_name' => 'Ariga Public School',
-                'contact_person' => 'Principal Office',
-                'email' => 'contact@ariga.school',
-                'is_active' => true,
-                'primary_color' => '#7c3aed',
-                'secondary_color' => '#db2777',
+                'name' => 'Organization Admin',
+                'email' => 'admin@example.com',
+                'password' => Hash::make('admin123'),
+                'role' => 'org_admin',
+                'tenant_id' => $tenant->id,
             ]
         );
 
-        // 4. Seed Staff (School Coordinator)
+        // 4. Seed Teacher
         User::updateOrCreate(
-            ['email' => 'staff@ariga.school'],
+            ['username' => 'teacher'],
             [
-                'username' => 'staff',
-                'name' => 'Staff',
-                'password' => Hash::make('test123'),
-                'role' => 'staff',
+                'name' => 'Teacher User',
+                'email' => 'teacher@example.com',
+                'password' => Hash::make('teacher123'),
+                'role' => 'teacher',
                 'tenant_id' => $tenant->id,
             ]
         );
@@ -67,10 +72,6 @@ class DatabaseSeeder extends Seeder
             TamilYappuSeeder::class,
             PracticeWordSeeder::class,
             EluthuActivitySeeder::class,
-            AsaiActivitySeeder::class,
-            SeerActivitySeeder::class,
-            ThalaiActivitySeeder::class,
-            AlahiduthalActivitySeeder::class,
             YappuSeerActivitySeeder::class,
             YappuSeerWordSeeder::class,
             GlobalTenantSeeder::class,
